@@ -1,0 +1,21 @@
+#pragma once
+
+#include <memory>
+#include <vector>
+
+namespace mamba{ namespace comet{
+
+struct imodule;
+struct global;
+  
+class comet
+{
+public:
+  comet(std::initializer_list< std::pair< std::string, std::shared_ptr<imodule> > > modules );
+  void run(int argc, char* argv[]);
+private:
+  std::shared_ptr<global> _global;
+  std::vector< std::pair< std::string, std::shared_ptr<imodule> > > _modules;
+};
+
+}}

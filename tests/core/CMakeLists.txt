@@ -1,0 +1,2 @@
+add_executable(registry_test registry_test.cpp)
+add_test(registry_test registry_test)
