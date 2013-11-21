@@ -1,5 +1,6 @@
 #pragma once
 
+#include <comet/inet/imux.hpp>
 #include <comet/core/registry.hpp>
 #include <memory>
 
@@ -12,6 +13,7 @@ struct global
 {
   std::weak_ptr<icore> core;
   registry<imodule> modules;
+  std::weak_ptr< inet::imux<> > mux; 
 };
 
 }}
