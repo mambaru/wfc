@@ -14,10 +14,6 @@ check_include_file("sys/wait.h" HAVE_SYS_WAIT_H)
 check_include_file("fcntl.h" HAVE_FCNTL_H)
 
 
-
-
-
-
 set(
   CMAKE_REQUIRED_INCLUDES
   ${CMAKE_REQUIRED_INCLUDES}
@@ -52,5 +48,5 @@ else(HAVE_RT_LIB)
   SET(FAS_USE_RT_LIB OFF PARENT_SCOPE)
 endif(HAVE_RT_LIB)
 
-configure_file("${CMAKE_SOURCE_DIR}/config/config.h.in"
-               "${CMAKE_SOURCE_DIR}/comet/system/config.h" )
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in"
+               "${CMAKE_CURRENT_SOURCE_DIR}/../comet/system/config.h" )
