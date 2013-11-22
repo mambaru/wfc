@@ -8,9 +8,14 @@ check_include_file("sys/time.h" HAVE_SYS_TIME_H)
 check_include_file("sys/resource.h" HAVE_SYS_RESORCE_H)
 check_include_file("sys/timeb.h" HAVE_SYS_TIMEB_H)
 check_include_file("sys/epoll.h" HAVE_SYS_EPOLL_H)
-
-
 check_include_file("unistd.h" HAVE_UNISTD_H)
+check_include_file("sys/stat.h" HAVE_SYS_STAT_H)
+check_include_file("sys/wait.h" HAVE_SYS_WAIT_H)
+check_include_file("fcntl.h" HAVE_FCNTL_H)
+
+
+
+
 
 
 set(
@@ -19,7 +24,10 @@ set(
   "sys/time.h"
   "sys/resource.h"
   "sys/timeb.h"
+  "sys/stat.h"
+  "sys/wait.h"
   "unistd.h"
+  "fcntl.h"
 )
 
 check_function_exists("gettimeofday" HAVE_GETTIMEOFDAY_FUNC)

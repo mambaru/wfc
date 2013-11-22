@@ -7,9 +7,30 @@
 #pragma once
 
 #include <comet/system/unp.hpp>
+#include <stdexcept>
 
 namespace mamba{ namespace comet{
 
+inline int error_code()
+{
+  return errno;
+}
+
+inline std::string strerror(int lasterror)
+{
+  return ::strerror(lasterror);
+}
+
+struct system_error
+  : public std::runtime_error
+{
+  explicit system_error(const std::string& msg)
+    : std::runtime_error(msg + strerror(error_code()))
+  {
+  }
+};
+
+  
 inline int isatty(int fd)
 {
 #ifdef HAVE_ISATTY_FUNC
@@ -45,6 +66,67 @@ inline void sleep( int millisec )
 #else
   ::sleep(millisec/1000);
 #endif
+}
+
+
+inline void daemonize()
+{
+  int null = ::open("/dev/null", O_RDWR);
+  if(-1 == null)
+  {
+    ::perror("/dev/null");
+    ::exit(EXIT_FAILURE);
+  }
+
+  switch(::fork())
+  {
+  case 0:
+    ::setsid();
+    ::umask(0);
+    ::close(0);
+    ::close(1);
+    ::close(2);
+    ::dup2(null, 0);
+    ::dup2(null, 1);
+    ::dup2(null, 2);
+    break;
+
+  case -1:
+    ::perror("fork()");
+    ::exit(EXIT_FAILURE);
+
+  default:
+    ::exit(EXIT_SUCCESS);
+  }
+}
+
+inline void autoup(time_t timeout, std::function<void(bool, int)> f = nullptr)
+{
+  for (;;)
+  {
+    pid_t pid = ::fork();
+    
+    if (pid==0)
+      break;
+    
+    int status = 0;
+    time_t t = time(0);
+    ::waitpid(pid, &status, 0);
+    bool restart = ( time(0) - t >= timeout );
+    f(restart, status);
+    kill(pid, SIGKILL);
+    if ( !restart )
+      break;
+  }
+}
+
+inline int dumpable()
+{
+#if HAVE_SYS_PRCTL_H
+  rlimit core = { RLIM_INFINITY, RLIM_INFINITY };
+  return ::prctl(PR_SET_DUMPABLE, 1) || ::setrlimit(RLIMIT_CORE, &core) ? -1 : 0;
+#endif
+  return -1;
 }
 
 

@@ -31,3 +31,7 @@
 #define HAVE_USLEEP_FUNC
 #define HAVE_RT_LIB
 
+
+#define HAVE_SYS_STAT_H
+#define HAVE_FCNTL_H
+#define HAVE_SYS_WAIT_H
