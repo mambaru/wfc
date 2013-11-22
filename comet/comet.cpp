@@ -24,7 +24,11 @@ void comet::run(int argc, char* argv[])
   }
 
   if ( auto core = _global->core.lock() )
+  {
+    std::cout << "before run" << std::endl;
     core->run(argc, argv, _global);
+    std::cout << "after run" << std::endl;
+  }
 }
 
 }}
