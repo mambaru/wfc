@@ -9,15 +9,17 @@ namespace mamba{ namespace comet{
 
 comet::comet(std::initializer_list< std::pair< std::string, std::shared_ptr<imodule> > > modules )
   : _global( std::make_shared<global>() )
-  , _modules(modules)
+  , _module_list(modules)
 {
 }
 
 void comet::run(int argc, char* argv[])
 {
-  for (auto m: _modules)
+  _modules = std::make_shared<global::module_registry>();
+  _global->modules = _modules;
+  for (auto m: _module_list)
   {
-    if ( _global->modules.insert(m.first, m.second) )
+    if ( _modules->insert(m.first, m.second) )
       m.second->create(_global);
     else
       std::cerr << "Warning! module name '" << m.first << "' is not unique. Ignored." << std::endl;

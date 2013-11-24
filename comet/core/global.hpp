@@ -2,37 +2,26 @@
 
 #include <comet/inet/imux.hpp>
 #include <comet/core/registry.hpp>
+#include <comet/core/imodule.hpp>
+#include <comet/core/iconfig.hpp>
+#include <comet/core/icore.hpp>
+#include <comet/core/ilogger.hpp>
+
 #include <memory>
 
 namespace mamba{ namespace comet{
 
-class imodule;
-class iconfig;
-class icore;
-
 struct global
-{
-  /*
-  bool   daemonize;
-  bool   coredump;
-  bool   autoup;
-  time_t autoup_timeout;
-  std::string config_path;
-  */
-  
-  std::weak_ptr<icore>   core;
-  std::weak_ptr<iconfig> config;
-  
-  registry<imodule> modules;
+{ 
+  typedef registry<imodule> module_registry;
+  typedef registry<ilogger> logger_registry;
+  std::weak_ptr<icore>           core;
+  std::weak_ptr<iconfig>         config;
+  std::weak_ptr<module_registry> modules;
+  std::weak_ptr<logger_registry> loggers;
   std::weak_ptr< inet::imux<> > mux;
 
   global()
-    /*
-    : daemonize(false)
-    , coredump(false)
-    , autoup(false)
-    , autoup_timeout(0)
-    */
   {}
 };
 

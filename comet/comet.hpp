@@ -1,5 +1,6 @@
 #pragma once
 
+#include <comet/core/global.hpp>
 #include <memory>
 #include <vector>
 
@@ -15,7 +16,8 @@ public:
   void run(int argc, char* argv[]);
 private:
   std::shared_ptr<global> _global;
-  std::vector< std::pair< std::string, std::shared_ptr<imodule> > > _modules;
+  std::shared_ptr<global::module_registry> _modules;
+  std::vector< std::pair< std::string, std::shared_ptr<imodule> > > _module_list;
 };
 
 }}

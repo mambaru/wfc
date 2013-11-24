@@ -21,11 +21,13 @@ public:
   {
     if ( auto gl = g.lock() )
     {
-      //for (auto m : gl->modules)
-      gl->modules.for_each([](const std::string& name, std::weak_ptr<imodule> module ){
-        if ( auto m = module.lock() )
-          m->start();
-      });
+      if ( auto gm = gl->modules.lock() )
+      {
+        gm->for_each([](const std::string& name, std::weak_ptr<imodule> module ){
+          if ( auto m = module.lock() )
+            m->start();
+        });
+      }
     }
   }
 
