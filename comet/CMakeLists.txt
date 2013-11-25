@@ -1,6 +1,7 @@
 SET(
   comet_source_list
   comet.cpp
+  core/global.cpp
 )
 
 add_library(

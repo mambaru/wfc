@@ -8,6 +8,7 @@
 
 namespace mamba{ namespace comet{
 
+  /*
 class global_log
 {
 public:
@@ -37,6 +38,6 @@ public:
 private:
   std::weak_ptr<global::logger_registry> _log_registry;
 };
-
+*/
 
 }}
