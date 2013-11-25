@@ -14,6 +14,9 @@ namespace mamba{ namespace comet{
 struct global
 { 
   typedef registry<imodule> module_registry;
+  std::string program_name;
+  std::string program_version;
+  std::string comet_version;
   std::weak_ptr<icore>           core;
   std::weak_ptr<iconfig>         config;
   std::weak_ptr<ilogger>         logger;

@@ -143,7 +143,7 @@ public:
 
 int main(int argc, char* argv[])
 {
-  comet( {
+  comet( "",  {
     {"core", std::make_shared<core_module_moke>()},
     {"module1", std::make_shared<module_moke>()},
     {"module2", std::make_shared<module_moke>()},

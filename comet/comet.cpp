@@ -3,12 +3,13 @@
 #include <comet/core/icore.hpp>
 #include <comet/core/global.hpp>
 #include <iostream>
-
+#include "build_info.h"
 
 namespace mamba{ namespace comet{
 
-comet::comet(std::initializer_list< std::pair< std::string, std::shared_ptr<imodule> > > modules )
-  : _global( std::make_shared<global>() )
+comet::comet(std::string program_version, std::initializer_list< std::pair< std::string, std::shared_ptr<imodule> > > modules )
+  : _program_version(program_version)
+  , _global( std::make_shared<global>() )
   , _module_list(modules)
 {
 }
@@ -16,6 +17,8 @@ comet::comet(std::initializer_list< std::pair< std::string, std::shared_ptr<imod
 void comet::run(int argc, char* argv[])
 {
   _modules = std::make_shared<global::module_registry>();
+  _global->program_version = _program_version;
+  _global->comet_version = comet_build_info;
   _global->modules = _modules;
   for (auto m: _module_list)
   {
@@ -27,9 +30,9 @@ void comet::run(int argc, char* argv[])
 
   if ( auto core = _global->core.lock() )
   {
-    std::cout << "before run" << std::endl;
+    // std::cout << "before run" << std::endl;
     core->run(argc, argv, _global);
-    std::cout << "after run" << std::endl;
+    //std::cout << "after run" << std::endl;
   }
 }
 

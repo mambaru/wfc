@@ -1,6 +1,6 @@
 #pragma once
 
-#include <unordered_map>
+#include <map>
 #include <memory>
 #include <string>
 
@@ -10,7 +10,7 @@ template<typename I>
 class registry
 {
 public:
-  typedef std::unordered_map< std::string, std::weak_ptr<I> > registry_map;
+  typedef std::map< std::string, std::weak_ptr<I> > registry_map;
 
   std::weak_ptr<I> find(const std::string& name) const
   {
