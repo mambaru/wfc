@@ -5,7 +5,7 @@
 #include <comet/core/imodule.hpp>
 #include <comet/core/iconfig.hpp>
 #include <comet/core/icore.hpp>
-#include <comet/core/ilogger.hpp>
+#include <comet/logger/ilogger.hpp>
 
 #include <memory>
 
@@ -17,15 +17,19 @@ struct global
   std::string program_name;
   std::string program_version;
   std::string comet_version;
+  std::string instance_name;
   std::weak_ptr<icore>           core;
   std::weak_ptr<iconfig>         config;
   std::weak_ptr<ilogger>         logger;
   std::weak_ptr<module_registry> modules;
   std::weak_ptr< inet::imux<> >  mux;
-  global()
-  {}
+  
 
-  static std::weak_ptr<ilogger>  global_logger;
+  static std::weak_ptr<global>   static_global;
+  /*
+    static std::weak_ptr<ilogger>  global_logger;
+    static std::weak_ptr<icore>    global_core;
+  */
 };
 
 }}

@@ -1,12 +1,9 @@
 #pragma once
 
-#include <comet/core/ilogger.hpp>
+#include <comet/logger/ilogger.hpp>
 #include <sstream>
 #include <string>
 #include <memory>
-
-
-
 #include <iostream>
 
 namespace mamba{ namespace comet{

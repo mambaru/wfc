@@ -1,3 +1,4 @@
+#include <comet/core/global.hpp>
 #include <comet/logger/logger.hpp>
 #include <iostream>
 
@@ -27,8 +28,10 @@ public:
 
 int main()
 {
+  /*
   std::shared_ptr<logger1> test_logger = std::make_shared<logger1>();
   global::global_logger = test_logger;
+  */
   /*
   std::shared_ptr<logger1> test_logger = std::make_shared<logger1>();
   

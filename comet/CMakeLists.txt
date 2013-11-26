@@ -3,6 +3,7 @@ SET(
   comet_source_list
   comet.cpp
   core/global.cpp
+  logger/global_log.cpp
 )
 
 add_library(
