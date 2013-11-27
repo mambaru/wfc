@@ -6,7 +6,7 @@
 #include <comet/core/iconfig.hpp>
 #include <comet/core/icore.hpp>
 #include <comet/logger/ilogger.hpp>
-#include <comet/core/callback_registry.hpp>
+#include <comet/callback/callback_list.hpp>
 
 #include <memory>
 
@@ -16,7 +16,7 @@ struct global
 { 
   typedef registry<imodule> module_registry;
   typedef registry<ilogger> logger_registry;
-  callback_list idle;
+  callback_list<> idle;
   std::string program_name;
   std::string program_version;
   std::string comet_version;
