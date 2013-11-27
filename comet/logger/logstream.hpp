@@ -17,7 +17,7 @@ public:
     if (_logger)
       _logger->write(_name, _ident, _ss.str());
     else
-      std::cout << "~logstream() not write" << std::endl;
+      std::cout << "~logstream() not write to " << _name << std::endl;
   }
   
   logstream(const logstream& ll)

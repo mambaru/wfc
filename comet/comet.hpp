@@ -13,7 +13,7 @@ class comet
 {
 public:
   comet(std::string program_version, std::initializer_list< std::pair< std::string, std::shared_ptr<imodule> > > modules );
-  void run(int argc, char* argv[]);
+  int run(int argc, char* argv[]);
 private:
   std::string _program_version;
   std::shared_ptr<global> _global;

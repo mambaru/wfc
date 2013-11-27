@@ -112,7 +112,7 @@ inline void autoup(time_t timeout, std::function<void(bool, int)> f = nullptr)
     int status = 0;
     time_t t = time(0);
     ::waitpid(pid, &status, 0);
-    bool restart = ( time(0) - t >= timeout );
+    bool restart = status!=0 && ( time(0) - t >= timeout );
     f(restart, status);
     kill(pid, SIGKILL);
     if ( !restart )

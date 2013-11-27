@@ -17,7 +17,7 @@ public:
     
   }
   
-  void run( int argc, char* argv[], std::weak_ptr<global> g )
+  int run( int argc, char* argv[], std::weak_ptr<global> g )
   {
     if ( auto gl = g.lock() )
     {
@@ -29,6 +29,7 @@ public:
         });
       }
     }
+    return 0;
   }
 
   void stop()

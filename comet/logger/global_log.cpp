@@ -12,7 +12,7 @@ logstream global_log(const std::string& name, const std::string& ident)
   {
     if (auto lr = g->loggers.lock())
     {
-      logger_ptr = lr->find(name).lock();
+      logger_ptr = lr->get(name).lock();
     }
   }
   

@@ -14,7 +14,7 @@ comet::comet(std::string program_version, std::initializer_list< std::pair< std:
 {
 }
 
-void comet::run(int argc, char* argv[])
+int comet::run(int argc, char* argv[])
 {
   _modules = std::make_shared<global::module_registry>();
   _loggers = std::make_shared<global::logger_registry>();
@@ -24,18 +24,21 @@ void comet::run(int argc, char* argv[])
   _global->loggers = _loggers;
   for (auto m: _module_list)
   {
-    if ( _modules->insert(m.first, m.second) )
-      m.second->create(_global);
-    else
-      std::cerr << "Warning! module name '" << m.first << "' is not unique. Ignored." << std::endl;
+    _modules->set(m.first, m.second);
+    //m.second->create(_global);
+    // else
+      //std::cerr << "Warning! module name '" << m.first << "' is not unique. Ignored." << std::endl;
   }
+  _modules->for_each([this](const std::string& name, std::weak_ptr<imodule> module){
+    if (auto m = module.lock())
+      m->create(_global);
+  });
+
+  
 
   if ( auto core = _global->core.lock() )
-  {
-    // std::cout << "before run" << std::endl;
-    core->run(argc, argv, _global);
-    //std::cout << "after run" << std::endl;
-  }
+    return core->run(argc, argv, _global);
+  return 0;
 }
 
 }}
