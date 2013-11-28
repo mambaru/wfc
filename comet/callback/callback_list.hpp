@@ -13,7 +13,7 @@ template<typename ...Args>
 class callback_list_timed
 {
   // Базовый класс
-}
+};
 
 template<typename ...Args>
 class callback_list_timelife

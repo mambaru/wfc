@@ -7,6 +7,7 @@
 #include <comet/core/icore.hpp>
 #include <comet/logger/ilogger.hpp>
 #include <comet/callback/callback_list.hpp>
+#include <comet/pubsub/ipubsub.hpp>
 
 #include <memory>
 
