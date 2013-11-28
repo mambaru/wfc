@@ -1,5 +1,5 @@
 #include <comet/comet.hpp>
-#include <comet/core/imodule.hpp>
+#include <comet/module/imodule.hpp>
 #include <comet/core/icore.hpp>
 #include <comet/core/global.hpp>
 #include <iostream>
@@ -19,7 +19,7 @@ int comet::run(int argc, char* argv[])
   _modules = std::make_shared<global::module_registry>();
   _loggers = std::make_shared<global::logger_registry>();
   _global->program_version = _program_version;
-  _global->comet_version = comet_build_info;
+  _global->comet_version = comet_build_info_string;
   _global->modules = _modules;
   _global->loggers = _loggers;
   for (auto m: _module_list)
@@ -31,7 +31,7 @@ int comet::run(int argc, char* argv[])
   }
   _modules->for_each([this](const std::string& name, std::weak_ptr<imodule> module){
     if (auto m = module.lock())
-      m->create(_global);
+      m->create(name,  _global);
   });
 
   

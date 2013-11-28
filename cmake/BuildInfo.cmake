@@ -8,5 +8,7 @@ MACRO(build_info target_name prefix)
     VERBATIM
   )
   add_dependencies(${target_name} ${prefix}_build_info)
-  target_link_libraries(${target_name} /tmp/${prefix}_build_info.o)
+#link_directories(/tmp)
+#  target_link_libraries(${target_name} ${prefix}_build_info)
+  target_link_libraries(${target_name} /tmp/${prefix}_build_info.a)
 ENDMACRO(build_info)

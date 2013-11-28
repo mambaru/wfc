@@ -2,7 +2,7 @@
 
 #include <comet/inet/imux.hpp>
 #include <comet/core/registry.hpp>
-#include <comet/core/imodule.hpp>
+#include <comet/module/imodule.hpp>
 #include <comet/core/iconfig.hpp>
 #include <comet/core/icore.hpp>
 #include <comet/logger/ilogger.hpp>

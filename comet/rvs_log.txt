@@ -1,0 +1,1 @@
+r - /tmp/comet_build_info.o

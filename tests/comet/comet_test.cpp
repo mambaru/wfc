@@ -1,6 +1,6 @@
 #include <comet/comet.hpp>
 #include <comet/core/icore.hpp>
-#include <comet/core/imodule.hpp>
+#include <comet/module/imodule.hpp>
 #include <comet/core/global.hpp>
 #include <vector>
 #include <iostream>
@@ -51,7 +51,7 @@ public:
   virtual std::string generate(const std::string& type) const { return std::string();}
   virtual bool parse_config(const std::string& conf) { return true;}
 
-  virtual void create( std::weak_ptr<global> g )
+  virtual void create( const std::string&,  std::weak_ptr<global> g )
   {
     std::cout << "create" << std::endl;
     _global = g;
@@ -111,7 +111,7 @@ public:
   virtual std::string generate(const std::string& type) const { return std::string();}
   virtual bool parse_config(const std::string& conf) { return true;}
 
-  virtual void create( std::weak_ptr<global> g )
+  virtual void create( const std::string&,  std::weak_ptr<global> g )
   {
     std::cout << "create" << std::endl;
   }
