@@ -21,6 +21,9 @@ public:
   {
   }
 
+  callback_owner(const callback_owner& ) = delete;
+  callback_owner& operator = (const callback_owner& )  = delete;
+  /*
   callback_owner(const callback_owner& )
     : _alive( std::make_shared<int>(1) )
   {
@@ -31,6 +34,7 @@ public:
     _alive = std::make_shared<int>(1);
     return *this;
   }
+  */
 
   template<typename ... Args>
   std::function<bool(Args...)> callback(typename identity<std::function<bool(Args...)>>::type f)

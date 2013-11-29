@@ -4,6 +4,8 @@ SET(
   comet.cpp
   core/global.cpp
   logger/global_log.cpp
+  pubsub/message_queue.cpp
+  pubsub/topic_hub.cpp
 )
 
 add_library(
