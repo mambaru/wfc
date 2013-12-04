@@ -17,7 +17,8 @@ struct global
 { 
   typedef registry<imodule> module_registry;
   typedef registry<ilogger> logger_registry;
-  callback_list<> idle;
+  typedef std::function<callback_status()> idle_callback;
+  callback_list<idle_callback> idle;
   std::string program_name;
   std::string program_version;
   std::string comet_version;

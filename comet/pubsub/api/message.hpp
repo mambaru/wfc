@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <comet/pubsub/types.hpp>
+#include <comet/pubsub/api/types.hpp>
 
 namespace mamba{ namespace comet{
 

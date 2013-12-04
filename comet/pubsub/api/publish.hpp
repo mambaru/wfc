@@ -1,7 +1,7 @@
 #pragma once
 
 #include <comet/pubsub/pubsub_status.hpp>
-#include <comet/pubsub/message.hpp>
+#include <comet/pubsub/api/message.hpp>
 
 namespace mamba{ namespace comet{
 

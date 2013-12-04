@@ -9,8 +9,8 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <comet/pubsub/types.hpp>
-#include <comet/pubsub/message.hpp>
+#include <comet/pubsub/api/types.hpp>
+#include <comet/pubsub/api/message.hpp>
 #include <comet/pubsub/message_queue.hpp>
 
 #include <deque>
@@ -165,6 +165,7 @@ message_queue::message_ptr message_queue::push( time_t now, message_ptr m)
   }
 
   size_t limit = m->limit;
+  
   switch( m->action )
   {
     case actions::publish: _publish(now, std::move(m) ); break;
@@ -275,6 +276,7 @@ void message_queue::_publish(time_t now, message_ptr m)
   queue_type::iterator itr = _insert(now, std::move(m) );
   if ( itr==_queue.end() )
     return;
+
   queue_type::iterator mitr = itr;
 
 // Проверяем упороядоченность сообщений по времени жизни

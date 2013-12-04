@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include <comet/pubsub/types.hpp>
-#include <comet/pubsub/topic.hpp>
+#include <comet/pubsub/api/types.hpp>
+#include <comet/pubsub/api/topic.hpp>
 #include <comet/pubsub/topic_holder.hpp>
 #include <comet/pubsub/message_queue.hpp>
 
@@ -38,6 +38,14 @@ public:
   topic_hub(){}
   topic_hub(const topic_hub& ) = delete;
   topic_hub& operator=(const topic_hub& ) = delete;
+
+  size_t topic_size(const std::string& name) const
+  {
+    auto itr = _topics.find( name );
+    if ( itr != _topics.end() )
+      return itr->second->size();
+    return 0;
+  }
 
   message_ptr push( const std::string& name, message_ptr m, time_t now = time(0) )
   {

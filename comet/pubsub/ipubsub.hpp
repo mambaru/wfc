@@ -7,6 +7,7 @@
 #include <comet/pubsub/api/subscribe.hpp>
 #include <comet/pubsub/api/query.hpp>
 #include <comet/pubsub/api/notify.hpp>
+#include <comet/callback/callback_status.hpp>
 
 #include <functional>
 #include <memory>
@@ -45,20 +46,21 @@ struct ipubsub
   /// callback functions
   ///
 
-  typedef std::function< response_publish_ptr ( request_publish_ptr ) > subscriber_function;
-  typedef std::function< bool(response_subscribe_ptr) > subscriber_callback;
-  typedef std::function< void(response_publish_ptr) > publish_callback;
-  typedef std::function< void(response_multi_publish_ptr) > multi_publish_callback;
-  typedef std::function< void(response_load_ptr) > load_callback;
-  typedef std::function< void(request_multi_load_ptr) > multi_load_callback;
-  typedef std::function< void(response_query_ptr) > query_callback;
-  typedef std::function< void(response_notify_ptr) > notify_callback;
+  typedef std::function< callback_status(response_subscribe_ptr) > subscribe_callback;
+  typedef std::function< callback_status(response_publish_ptr) > publish_callback;
+  typedef std::function< callback_status(response_multi_publish_ptr) > multi_publish_callback;
+  typedef std::function< callback_status(response_load_ptr) > load_callback;
+  typedef std::function< callback_status(request_multi_load_ptr) > multi_load_callback;
+  typedef std::function< callback_status(response_query_ptr) > query_callback;
+  typedef std::function< callback_status(response_notify_ptr) > notify_callback;
+  
+  typedef std::function< callback_status(request_publish_ptr, publish_callback) > subscriber_function;
 
   ///
   /// interface
   ///
 
-  virtual void subscribe( request_subscribe_ptr, subscriber_function ) = 0;
+  virtual void subscribe( request_subscribe_ptr, subscriber_function, subscribe_callback ) = 0;
 
   virtual void publish(request_publish_ptr, publish_callback) = 0;
 

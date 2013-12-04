@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <comet/pubsub/types.hpp>
+#include <comet/pubsub/api/types.hpp>
 #include <comet/pubsub/message_queue.hpp>
 #include <stdexcept>
 
