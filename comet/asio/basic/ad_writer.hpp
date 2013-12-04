@@ -3,9 +3,9 @@
 #include <iostream>
 #include <list>
 #include <comet/callback/callback_owner.hpp>
-#include <comet/asio/tags.hpp>
+#include <comet/asio/basic/tags.hpp>
 
-namespace mamba{ namespace comet{ namespace inet{
+namespace mamba{ namespace comet{ namespace inet{ namespace basic{
 
 struct ad_writer
 {
@@ -84,4 +84,4 @@ private:
 };
 
 
-}}}
+}}}}

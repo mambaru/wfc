@@ -86,7 +86,7 @@ public:
 private:
 
   template<typename P, typename C, typename R>
-  P serialize_members( const T& t, P end, type_list<C, R> )
+  P serialize_members( const T& t, P end, fas::type_list<C, R> )
   {
     end = serialize_member(t, end, C());
     *(end++)=',';
@@ -94,13 +94,13 @@ private:
   }
 
   template<typename P, typename C>
-  P serialize_members( const T& t, P end, type_list<C, empty_type> )
+  P serialize_members( const T& t, P end, fas::type_list<C, fas::empty_list> )
   {
     return serialize_member(t, end, C());
   }
 
   template<typename P>
-  P serialize_members( const T& t, P end, empty_type )
+  P serialize_members( const T& t, P end, fas::empty_list )
   {
     return end;
   }
@@ -158,7 +158,7 @@ private:
   }
 
   template<typename P, typename C, typename R>
-  P unserialize_members( T& t, P beg, P end, type_list<C, R>, bool search = false )
+  P unserialize_members( T& t, P beg, P end, fas::type_list<C, R>, bool search = false )
   {
     bool unserialized = false;
     beg = unserialize_member( t, beg, end, C(), unserialized );
@@ -186,7 +186,7 @@ private:
       if ( unserialized )
         beg = unserialize_members( t, beg, end, R(), false );
       else
-        beg = unserialize_members( t, beg, end, type_list<C, R>() , false );
+        beg = unserialize_members( t, beg, end, fas::type_list<C, R>() , false );
     }
 
     if (beg==end) 
@@ -200,7 +200,7 @@ private:
 
 
   template<typename P>
-  P unserialize_members( T& , P beg, P end, empty_type, bool search = false )
+  P unserialize_members( T& , P beg, P end, fas::empty_list, bool search = false )
   {
     if ( !search )
     {

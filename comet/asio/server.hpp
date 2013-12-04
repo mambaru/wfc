@@ -14,10 +14,14 @@ class tcp_server
 public:
   typedef Conn connection_type;
   typedef std::shared_ptr<connection_type> connection_ptr;
-  typedef std::shared_ptr<iconnection> iconnection_ptr;
+  //typedef typename connection_type::origin_connection origin_connection;
+  typedef std::shared_ptr<connection_type> iconnection_ptr;
   typedef boost::asio::ip::tcp::socket socket_type;
   //typedef std::unique_ptr<socket_type> socket_ptr;
   typedef socket_type* socket_ptr;
+  
+  typedef typename connection_type::context_type context_type;
+  
 public:
   tcp_server( ::boost::asio::io_service& io_service)
     : _io_service(io_service)
@@ -28,6 +32,22 @@ public:
   {
     
   }
+  
+  /*
+  connection_type& prototype() { return _prototype; }
+
+  const connection_type& prototype() const { return _prototype; }
+  */
+  context_type& context()
+  {
+    return _context;
+  }
+
+  const context_type& context() const
+  {
+    return _context;
+  }
+
 
   void start( const server_config& conf)
   {
@@ -52,6 +72,7 @@ public:
     //std::vector<connection_ptr> all_conn
     for( auto& c : _connections )
       c->close();
+      
 
     while (!_connections.empty())
     {
@@ -87,10 +108,12 @@ public:
         if (!ec)
         {
           connection_ptr pconn = std::make_shared<connection_type>();
+          pconn->context() = _context;
+          //connection_ptr pconn( _prototype.clone() );
           /*iconnection_ptr iconn;
           iconn = pconn;*/
           this->_connections.insert(pconn);
-          pconn->start( std::move( this->_socket), [this](std::shared_ptr<iconnection> conn)->void{
+          pconn->start( std::move( this->_socket), [this](connection_ptr conn)->void{
             std::cout << "erase connection" << std::endl;
             this->_connections.erase(conn);
             std::cout << "erased!!!" << std::endl;
@@ -113,7 +136,8 @@ private:
   /// The next socket to be accepted.
   //socket_ptr _socket;
   socket_type _socket;
-  std::set<iconnection_ptr> _connections;
+  std::set<connection_ptr> _connections;
+  context_type _context;
 
 };
 

@@ -6,13 +6,10 @@
 #include <list>
 #include <comet/callback/callback_owner.hpp>
 #include <comet/asio/iconnection.hpp>
-#include <comet/asio/tags.hpp>
-#include <comet/asio/adv/ad_writer.hpp>
+#include <comet/asio/basic/tags.hpp>
 
-namespace mamba{ namespace comet{ namespace inet{
+namespace mamba{ namespace comet{ namespace inet{ namespace basic{
 
-struct _read_;
-  
 struct ad_reader
 {
   typedef std::vector<char> data_type;
@@ -42,7 +39,7 @@ struct ad_reader
         if (!ec)
         {
           //std::cout << "REEADED " << bytes_transferred << ": " << std::string(_data.begin(), _data.begin()+bytes_transferred) << std::endl;
-          t.get_aspect().template get<_read_>()(t, data_ptr(new data_type(_data.begin(), _data.begin()+bytes_transferred)));
+          t.get_aspect().template get<_incoming_>()(t, data_ptr(new data_type(_data.begin(), _data.begin()+bytes_transferred)));
           this->do_read(t);
         }
         else
@@ -59,4 +56,4 @@ private:
 };
 
 
-}}}
+}}}}

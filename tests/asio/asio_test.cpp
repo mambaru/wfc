@@ -64,6 +64,7 @@ int main(int argc, char* argv[])
       });
 
   
+  srv.context();
   srv.start(conf);
   io_service.run();
   std::cout << "STOP" << std::endl;

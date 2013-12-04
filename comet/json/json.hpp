@@ -1,6 +1,6 @@
 #pragma once
 
-#include <comet/fas/type_list.hpp>
+#include <fas/type_list.hpp>
 
 #include <stdexcept>
 #include <vector>
@@ -203,7 +203,7 @@ template< typename T, typename L>
 struct enumerator
 {
   typedef T target;
-  typedef typename type_list_traits<L>::type enum_list;
+  typedef typename fas::normalize<L>::type enum_list;
   typedef serializerT< enumerator<T, enum_list> > serializer;
 };
 
@@ -214,7 +214,7 @@ struct object
 {
   typedef T target;
   typedef serializerT< object<T, L> > serializer;
-  typedef typename type_list_traits<L>::type member_list;
+  typedef typename fas::normalize<L>::type member_list;
 };
 
 ///
@@ -392,7 +392,7 @@ struct array_base< std::multimap<JK, JV> >
   typedef std::pair<key, value> pair_type;
   typedef object<
             pair_type,
-            typename type_list_n<
+            typename fas::type_list_n<
               member< n_key, pair_type, key, &pair_type::first, JK >,
               member< n_value, pair_type, value, &pair_type::second, JV >
             >::type

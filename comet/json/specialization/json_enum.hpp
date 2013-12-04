@@ -18,7 +18,7 @@ public:
   }
 
   template<typename LL, typename RR, typename P>
-  P serialize( const T& v, type_list<LL, RR>, P end)
+  P serialize( const T& v, fas::type_list<LL, RR>, P end)
   {
     if (LL::value == v)
     {
@@ -34,7 +34,7 @@ public:
   }
 
   template<typename P>
-  P serialize( const T& , empty_type, P end)
+  P serialize( const T& , fas::empty_list, P end)
   {
     return end;
   }
@@ -58,7 +58,7 @@ public:
   }
 
   template<typename LL, typename RR, typename P>
-  void deserialize( T& v, type_list<LL, RR>, P beg, P end)
+  void deserialize( T& v, fas::type_list<LL, RR>, P beg, P end)
   {
     P first = beg;
     const char *pstr = LL()();
@@ -72,7 +72,7 @@ public:
   }
 
   template<typename P>
-  void deserialize( T& , empty_type,P,P)
+  void deserialize( T& , fas::empty_list,P,P)
   {
   }
 

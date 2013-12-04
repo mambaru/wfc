@@ -1,26 +1,25 @@
-#include <comet/fas/type_list.hpp>
-#include <comet/fas/conversion.hpp>
-#include <comet/fas/linear_hierarchy.hpp>
-#include <comet/fas/scatter_hierarchy.hpp>
+#include <fas/type_list.hpp>
+#include <fas/hierarchy.hpp>
+#include <fas/static_check.hpp>
 
-using namespace ::mamba::comet;
+//using namespace ::mamba::comet;
 
-typedef type_list_n<
+typedef fas::type_list_n<
   int, char, double
 >::type list1;
 
-typedef type_list_n<
+typedef fas::type_list_n<
   int, char, double
 >::type list2;
 
-typedef type_list_n<
+typedef fas::type_list_n<
   list1,
-  type_list_n<char>::type,
+  fas::type_list_n<char>::type,
   list2
 >::type list3;
 
 int main()
 {
-  enum { result = static_check< length<list3>::result == 7 >::result };
+  enum { result = fas::static_check< fas::length<list3>::value == 7 >::value };
   return 0;
 }
