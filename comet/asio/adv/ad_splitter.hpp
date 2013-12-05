@@ -11,7 +11,7 @@ namespace mamba{ namespace comet{ namespace inet{
 //struct rn{ const char* operator()() { return "**"; }};
 
 // + tailor
-template<typename Str /*= rn*/>
+template<typename Tg, typename Str /*= rn*/>
 struct ad_splitter
 {
   typedef std::vector<char> data_type;
@@ -20,6 +20,7 @@ struct ad_splitter
   template<typename T>
   void operator()(T& t, data_ptr d)
   {
+    //std::cout << "ad_splitter" << std::endl;
     auto beg = d->begin();
     auto end = d->end();
 
@@ -45,11 +46,11 @@ struct ad_splitter
       else if ( itr == end )
       {
         if ( _data == nullptr )
-          t.get_aspect().template get<_rn_income_>()(t, std::move(d) );
+          t.get_aspect().template get<Tg>()(t, std::move(d) );
         else if (_data->begin() == beg )
-          t.get_aspect().template get<_rn_income_>()(t, std::move(_data) );
+          t.get_aspect().template get<Tg>()(t, std::move(_data) );
         else
-          t.get_aspect().template get<_rn_income_>()(t, data_ptr( new data_type(beg, itr) ) );
+          t.get_aspect().template get<Tg>()(t, data_ptr( new data_type(beg, itr) ) );
         _data = nullptr;
         return;
       }
@@ -59,13 +60,13 @@ struct ad_splitter
         {
           _data = data_ptr( new data_type(itr, end) );
           d->resize( std::distance(beg, itr) );
-          t.get_aspect().template get<_rn_income_>()(t, std::move(d) );
+          t.get_aspect().template get<Tg>()(t, std::move(d) );
           beg = _data->begin();
           end = _data->end();
         }
         else
         {
-          t.get_aspect().template get<_rn_income_>()(t, data_ptr( new data_type(beg, itr) ) );
+          t.get_aspect().template get<Tg>()(t, data_ptr( new data_type(beg, itr) ) );
           beg = itr;
         }
       }

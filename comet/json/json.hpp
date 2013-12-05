@@ -178,6 +178,21 @@ struct raw_value
   typedef serializerT< raw_value< T > > serializer;
 };
 
+template<typename T>
+struct raw_pair
+{
+  typedef T target;
+  typedef serializerT< raw_pair< T > > serializer;
+};
+
+template<typename T, typename J>
+struct pointer
+{
+  //typedef typename T::target target;
+  typedef T target;
+  typedef serializerT< pointer< T, J > > serializer;
+};
+
 /// /////////////////////////////////////////
 template<typename K, typename V>
 struct pair

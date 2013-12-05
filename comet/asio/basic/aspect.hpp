@@ -13,8 +13,8 @@ struct aspect: fas::aspect< fas::type_list_n<
   fas::value<_context_,   void* >,
   fas::advice<_reader_,    ad_reader>,
   fas::advice<_writer_,    ad_writer>,
-  fas::alias<_outgoing_, _writer_>,
-  fas::stub<_incoming_>
+  fas::alias<_outgoing_, _writer_>/*,
+  fas::stub<_incoming_>*/
 >::type >
 {};
 

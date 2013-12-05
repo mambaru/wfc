@@ -234,11 +234,11 @@ public:
 };
 
 template<typename T>
-class serializerT< raw_value<T/*std::string*/> >
+class serializerT< raw_value<T> >
 {
 public:
   template<typename P>
-  P operator()( const /*std::string*/T& v, P end)
+  P operator()( const T& v, P end)
   {
     if ( v.begin() != v.end() )
       return std::copy(v.begin(), v.end(), end );
@@ -251,7 +251,7 @@ public:
   }
 
   template<typename P>
-  P operator() ( /*std::string*/T& v, P beg, P end )
+  P operator() ( T& v, P beg, P end )
   {
     v.clear();
     P start = beg;
@@ -260,6 +260,77 @@ public:
     return beg;
   }
 };
+
+template<typename T, typename J>
+class serializerT< pointer<T, J> >
+{
+  //typedef typename T target;
+public:
+  template< typename P>
+  P operator()( const T& ptr, P end)
+  {
+#warning TODO: nullptr
+    return typename J::serializer()( *ptr, end);
+    /*
+    if ( v.begin() != v.end() )
+      return std::copy(v.begin(), v.end(), end );
+    else
+    {
+      *(end++)='"';
+      *(end++)='"';
+      return end;
+    }
+    */
+  }
+
+  template< typename P>
+  P operator() ( T& ptr, P beg, P end )
+  {
+    #warning TODO: nullptr
+    return typename J::serializer()( *ptr, beg, end);
+    /*
+    v.clear();
+    P start = beg;
+    beg = parser::parse_value(beg, end);
+    std::copy( start, beg, std::back_inserter(v) );
+    return beg;
+    */
+  }
+};
+
+template<typename T>
+class serializerT< raw_pair<T> >
+{
+public:
+  template<typename P>
+  P operator()( const T& v, P end)
+  {
+    if ( v.first != v.second )
+      return std::copy(v.first, v.second, end );
+    else
+    {
+      *(end++)='"';
+      *(end++)='"';
+      return end;
+    }
+  }
+
+  template<typename P>
+  P operator() ( T& v, P beg, P end )
+  {
+    v.first = beg;
+    beg = parser::parse_value(beg, end);
+    v.second = beg;
+    /*
+    v.clear();
+    P start = beg;
+    beg = parser::parse_value(beg, end);
+    std::copy( start, beg, std::back_inserter(v) );
+    */
+    return beg;
+  }
+};
+
 
 }}}
 

@@ -1,7 +1,60 @@
 #include <comet/asio/server.hpp>
+#include <comet/asio/jsonrpc/aspect.hpp>
+#include <comet/asio/jsonrpc/method.hpp>
+#include <comet/asio/rn/aspect.hpp>
+#include <comet/asio/rn/aspect.hpp>
 #include <boost/asio.hpp>
 #include <signal.h>
 using namespace ::mamba::comet;
+
+struct test_request
+{
+  int a;
+  int b;
+};
+
+struct test_request_json
+{
+  NAME(a)
+  NAME(b)
+  typedef json::object<
+    test_request,
+    fas::type_list_n<
+      json::member<n_a, test_request, int, &test_request::a>,
+      json::member<n_b, test_request, int, &test_request::b>
+    >::type
+  > type;
+  typedef type::serializer serializer;
+};
+
+struct _test_method_;
+
+struct test_method
+{
+  typedef test_request_json::type invoke_request;
+  //typedef test_request_json::type invoke_response;
+  typedef json::value<int> invoke_response;
+  const char *name() {return "test_method";}
+
+  template<typename T>
+  void request(T& t, std::unique_ptr<test_request> req, int id, std::function<void(std::unique_ptr<int>)> callback)
+  {
+    std::cout << "test_method" << std::endl;
+    
+    //callback(std::unique_ptr<test_request>(new test_request()));
+    callback(std::unique_ptr<int>(new int( req->a + req->b )));
+    
+  }
+};
+
+template<typename Tg, typename M>
+struct method:
+  fas::type_list_n<
+    fas::advice< Tg, inet::jsonrpc::method<M> >,
+    fas::group<inet::jsonrpc::_method_, Tg>
+  >::type
+{};
+
 
 
 struct _start_;
@@ -31,7 +84,19 @@ typedef inet::tcp_server<
     inet::echo_connection<
       fas::aspect< fas::type_list_n<
         fas::group<inet::_start_, _start_>,
-        fas::advice<_start_, ad_start>
+        fas::advice<_start_, ad_start>,
+        fas::alias< inet::basic::_incoming_, inet::rn::_input_>,
+        fas::alias< inet::rn::_incoming_,    inet::jsonrpc::_input_>,
+        fas::alias< inet::jsonrpc::_outgoing_, inet::rn::_outgoing_>,
+        fas::alias< inet::jsonrpc::_not_jsonrpc_, inet::rn::_outgoing_>,
+        fas::alias< inet::rn::_outgoing_, inet::basic::_outgoing_>,
+        method<_test_method_, test_method>,
+        inet::jsonrpc::aspect,
+        inet::rn::aspect
+        /*fas::alias< inet::rn::_incomin >
+        
+        */
+        
       >::type>
     >
   > server_type;

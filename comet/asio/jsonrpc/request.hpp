@@ -1,19 +1,27 @@
 #pragma once
 
+#include <comet/asio/types.hpp>
 
 namespace mamba{ namespace comet{ namespace inet{ namespace jsonrpc{
 
-struct request
+struct incoming
 {
+  typedef data_type::iterator iterator;
+  typedef std::pair<iterator, iterator> pair_type;
   int id;
-  std::string method;
+  pair_type method;
+  //std::string params;
+  pair_type params;
+  pair_type result;
+  pair_type error;
   
-  request(): id(-1)
+  incoming()
+    : id(-1)
   {
-    method.reserve(64)  
+    // method.reserve(64) ;
   }
 };
 
 }}}}
 
-#endif
+
