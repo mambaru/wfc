@@ -139,8 +139,8 @@ public:
 };
 
 
-/*!
-template<typename M, bool = has_call_request<M>::result && has_call_response<M>::result>
+
+template<typename M, bool = has_call_request<M>::value && has_call_response<M>::value>
 class caller
 {
   M& _method;
@@ -151,6 +151,19 @@ class caller
 
 public:
 
+  typedef typename M::call_request call_request_json;
+  typedef typename M::call_response call_response_json;
+
+  typedef typename call_request_json::target call_request_type;
+  typedef typename call_response_json::target call_response_type;
+
+  typedef typename call_request_json::serializer call_request_serializer;
+  typedef typename call_response_json::serializer call_response_serializer;
+
+  typedef std::unique_ptr<call_request_type>  call_request_ptr;
+  typedef std::unique_ptr<call_response_type> call_response_ptr;
+
+/*
   typedef typename M::call_request call_request;
   typedef typename M::call_response call_response;
 
@@ -165,6 +178,7 @@ public:
 
   typedef typename call_request_rpc::serializer call_request_serializer;
   typedef typename call_response_rpc::serializer call_response_serializer;
+  */
 
   caller(M& method): _method(method){}
 
@@ -186,8 +200,18 @@ public:
   void clear() { _out_ids.clear(); }
 
   template<typename T>
-  int request ( T& t, const call_request_type& param)
+  int request( T& t, call_request_ptr params)
   {
+    ::mamba::comet::inet::jsonrpc::request<call_request_type> resp;
+    resp.id = t.get_aspect().template get<_invoke_>().create_id();
+    resp.params = std::move(params);
+    resp.method = _method.name();
+    typedef typename ::mamba::comet::inet::jsonrpc::request_json<call_request_json>::serializer serializer;
+    data_ptr data = data_ptr(new data_type() );
+    serializer()(resp,   std::back_inserter(*data));
+    t.get_aspect().template get<_invoke_>().request(t, resp.id, std::move(data) );
+
+    /*
     call_request_rpc_type req(_method.name());
     req.params = param;
     req.id = t.get_aspect().template get<_invoke_>().create_id();
@@ -199,11 +223,22 @@ public:
     if (!v.empty())
       t.get_aspect().template get<_invoke_>().request(t, req.id, &(v[0]), v.size() );
     return req.id;
+    */
   }
 
-  template<typename T>
-  const char* response(T& t, const char* beg, size_t s)
+  template<typename T,  typename Itr >
+  void response(T& t, int id, Itr beg, Itr end)
   {
+    //::mamba::comet::inet::jsonrpc::response<call_response_type> resp;
+
+    if (beg==end)
+      return;
+    
+    call_response_ptr resp = std::unique_ptr<call_response_type>(new call_response_type());
+    call_response_serializer()(*resp, beg, end);
+    _method.response(t, std::move(resp), id);
+    
+    /*
     if ( s == 0 || beg == 0) return 0;
     const char* next = 0;
     call_response_rpc_type res;
@@ -228,13 +263,11 @@ public:
       _method.response(t, res.result, res.id);
       _out_ids.erase(itr);
     }
-    return next;
+    return next;*/
   }
 };
-*/
 
 
-/*
 template<typename M>
 class caller<M, false>
 {
@@ -245,37 +278,60 @@ public:
 
   void clear() {}
 
-  template<typename T>
-  const char* response(T& , const char* beg, size_t )
+  template<typename T,  typename Itr>
+  Itr response(T& , int id,  Itr beg, Itr end )
   {
     return beg;
   }
   
   size_t ids_size() const { return 0;} 
 };
-*/
+
 
 /// //////////////////////////////////////////////////////////////////
 
-/*
-template<typename M, bool = has_invoke_notify<M>::result>
+
+template<typename M, bool = has_invoke_notify<M>::value >
 class notified
 {
   M& _method;
 public:
-
+  /*
   typedef typename M::invoke_notify invoke_notify;
   typedef typename invoke_notify::target invoke_notify_type;
   typedef typename notify_maker<invoke_notify>::type invoke_notify_rpc;
   typedef typename invoke_notify_rpc::target invoke_notify_rpc_type;
   typedef typename invoke_notify_rpc::serializer invoke_notify_serializer;
-  // typedef typename amj::serializer<invoke_notify_rpc> invoke_notify_serializer;
+  */
+ 
+  typedef typename M::invoke_notify invoke_notify_json;
+  typedef typename invoke_notify_json::target invoke_notify_type;
+  typedef typename invoke_notify_json::serializer invoke_notify_serializer;
+  typedef std::unique_ptr<invoke_notify_type>  invoke_notify_ptr;
 
   notified(M& method): _method(method) {}
 
-  template<typename T>
-  const char* notify(T& t, const char* beg, size_t s)
+  template<typename T,  typename Itr>
+  void notify(T& t, Itr beg, Itr end)
   {
+    if ( beg == end) return;
+
+    invoke_notify_ptr req = invoke_notify_ptr(new invoke_notify_type() );
+
+    try
+    {
+      invoke_notify_serializer()(*req, beg, end);
+    }
+    catch(...)
+    {
+      // NOTIFY не отправлять!!!
+      t.get_aspect().template get<_invalid_json_>()(t, beg, end);
+      return;
+    }
+
+    _method.notify(t, std::move(req) );
+
+    /*
     if ( s == 0 || beg == 0) return 0;
     const char* next = 0;
     invoke_notify_rpc_type ntf;
@@ -291,6 +347,7 @@ public:
     }
     _method.notify(t, ntf.params);
     return next;
+    */
   }
 };
 
@@ -302,35 +359,51 @@ public:
   template<typename T>
   const char* notify(T& , const char* beg, size_t ) { return beg;}
 };
-*/
+
+
 /// //////////////////////////////////////////////////////////////////
 
-/*
-template<typename M, bool = has_call_notify<M>::result>
+
+template<typename M, bool = has_call_notify<M>::value>
 class notifier
 {
   M& _method;
 public:
 
+  typedef typename M::call_notify call_notify_json;
+  typedef typename call_notify_json::target call_notify_type;
+  typedef typename call_notify_json::serializer call_notify_serializer;
+  typedef std::unique_ptr<call_notify_type>  call_notify_ptr;
+
+/*
   typedef typename M::call_notify call_notify;
   typedef typename call_notify::target call_notify_type;
   typedef typename notify_maker<call_notify>::type call_notify_rpc;
   typedef typename call_notify_rpc::target call_notify_rpc_type;
   typedef typename call_notify_rpc::serializer call_notify_serializer;
+  */
   // typedef typename amj::serializer<call_notify_rpc> call_notify_serializer;
 
   notifier(M& method): _method(method) {  }
 
   template< typename T >
-  void notify(T& t, const call_notify_type& param)
+  void notify(T& t, call_notify_ptr params)
   {
+    ::mamba::comet::inet::jsonrpc::notify<call_notify_type> resp;
+    resp.result = std::move(params);
+    typedef typename ::mamba::comet::inet::jsonrpc::notify_json<call_notify_json>::serializer serializer;
+    data_ptr data = data_ptr(new data_type() );
+    serializer()(resp,   std::back_inserter(*data));
+    t.get_aspect().template get<_invoke_>().notify(t, std::move(data) );
+
+    /*
     call_notify_rpc_type req(_method.name());
     req.params = param;
     std::vector<char>& v = t.get_aspect().template get<_outgoing_data_>()();
     v.clear();
     call_notify_serializer()(req, std::back_inserter(v));
-    if ( !v.empty() )
-       t.get_aspect().template get<_invoke_>().notify(t, &(v[0]), v.size() );
+    if ( !v.empty() )*/
+    //t.get_aspect().template get<_invoke_>().notify(t, &(v[0]), v.size() );
   }
 };
 
@@ -340,7 +413,6 @@ class notifier<M, false>
 public:
   notifier(M& ){}
 };
-*/
 
 
 /// /////////////////////////////////////
@@ -348,23 +420,23 @@ template<typename M>
 class method
   : public M
   , private invoker< M >
-  //! , private caller< M >
-  //! , private notified< M >
-  //! , private notifier< M >
+  , private caller< M >
+  , private notified< M >
+  , private notifier< M >
 {
 public:
   typedef M method_class;
   typedef invoker< M > invoker_base;
-  //typedef caller< M > caller_base;
-  //typedef notified< M > notified_base;
-  //typedef notifier< M > notifier_base;
+  typedef caller< M > caller_base;
+  typedef notified< M > notified_base;
+  typedef notifier< M > notifier_base;
 
   method()
     : M()
     , invoker_base( static_cast<M&>(*this) )
-    //! , caller_base( static_cast<M&>(*this) )
-    //! , notified_base( static_cast<M&>(*this) )
-    //! , notifier_base( static_cast<M&>(*this) )
+    , caller_base( static_cast<M&>(*this) )
+    , notified_base( static_cast<M&>(*this) )
+    , notifier_base( static_cast<M&>(*this) )
   {
   };
 
@@ -417,35 +489,35 @@ public:
 
   // async response
   template<typename T, typename P>
-  void response(T& t, const P& result, int id)
+  void response(T& t, P result, int id)
   {
-    invoker_base::response(t, result, id);
+    invoker_base::response(t, std::move(result), id);
   }
 
-  template<typename T>
-  const char* invoke_notify(T& t, const char* beg, size_t s)
+  template<typename T, typename Itr>
+  void invoke_notify(T& t, Itr beg, Itr end)
   {
-    //return notified_base::notify(t, beg, s);
+    return notified_base::notify(t, beg, end);
   }
 
   // remote call
   template<typename T, typename P>
-  int request ( T& t, const P& param)
+  int request ( T& t, P param)
   {
-    //return caller_base::request(t, param);
+    return caller_base::request(t, std::move(param) );
   }
 
-  template<typename T>
-  const char* invoke_response(T& t, const char* beg, size_t s)
+  template<typename T, typename Itr>
+  void invoke_response(T& t, int id,  Itr beg, Itr end)
   {
-    //return caller_base::response(t, beg, s);
+    caller_base::response(t, id, beg, end);
   }
 
-  /// remote notify
+  /// remote notify id
   template<typename T, typename P>
-  void notify(T& t, const P& params)
+  void notify(T& t, P params)
   {
-    //notifier_base::notify(t, params);
+    notifier_base::notify(t, std::move(params) );
   }
 
 private:

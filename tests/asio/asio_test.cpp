@@ -32,8 +32,14 @@ struct _test_method_;
 struct test_method
 {
   typedef test_request_json::type invoke_request;
+  typedef test_request_json::type invoke_notify;
   //typedef test_request_json::type invoke_response;
   typedef json::value<int> invoke_response;
+
+  typedef json::value<int> call_notify;
+  typedef test_request_json::type call_request;
+  typedef json::value<int> call_response;
+
   const char *name() {return "test_method";}
 
   template<typename T>
@@ -44,6 +50,20 @@ struct test_method
     //callback(std::unique_ptr<test_request>(new test_request()));
     callback(std::unique_ptr<int>(new int( req->a + req->b )));
     
+  }
+
+  template<typename T>
+  void notify(T& t, std::unique_ptr<test_request> req)
+  {
+    std::cout << "test_notify" << std::endl;
+    t.get_aspect().template get<_test_method_>().notify(t,  std::unique_ptr<int>(new int( req->a + req->b )));
+    t.get_aspect().template get<_test_method_>().request(t, std::unique_ptr<test_request>(new test_request{2, 3}) );
+  }
+
+  template<typename T>
+  void response(T& t, std::unique_ptr<int> resp,  int id)
+  {
+    std::cout << "test_notify response " << *resp <<  "id = " <<  id <<  std::endl;
   }
 };
 
