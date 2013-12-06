@@ -45,11 +45,7 @@ struct test_method
   template<typename T>
   void request(T& t, std::unique_ptr<test_request> req, int id, std::function<void(std::unique_ptr<int>)> callback)
   {
-    std::cout << "test_method" << std::endl;
-    
-    //callback(std::unique_ptr<test_request>(new test_request()));
     callback(std::unique_ptr<int>(new int( req->a + req->b )));
-    
   }
 
   template<typename T>

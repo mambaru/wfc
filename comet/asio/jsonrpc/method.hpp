@@ -2,6 +2,7 @@
 
 #include <set>
 #include <fas/typemanip.hpp>
+#include <fas/algorithm.hpp>
 
 #include <comet/asio/types.hpp>
 #include <comet/asio/jsonrpc/response.hpp>
@@ -49,7 +50,7 @@ public:
   {
     if ( beg == end) return;
 
-    std::cout << "class invoker<M, true>" << std::endl;
+    //std::cout << "class invoker<M, true>" << std::endl;
     /*
     invoke_request_rpc_type req;
     invoke_response_rpc_type res;
@@ -66,9 +67,13 @@ public:
       return;
     }
 
-    _method.request(t, std::move(req), id, [this,&t, id](invoke_response_ptr res)
+    _method.request(t, std::move(req), id, [this, &t, id](invoke_response_ptr res)
     {
+      //this->response(t, std::move(res), id);
+
+      
       this->response(t, std::move(res), id);
+
       /*
       data_type_ptr data = data_type_ptr(new data_type);
       invoke_response_serializer()(res, std::back_inserter(*data));
@@ -98,8 +103,10 @@ public:
     resp.result = std::move(res);
     typedef typename ::mamba::comet::inet::jsonrpc::response_json<invoke_response_json>::serializer serializer;
     data_ptr data = data_ptr(new data_type() );
+    data->reserve(200);
     serializer()(resp,   std::back_inserter(*data));
     t.get_aspect().template get<_invoke_>().response(t, id, std::move(data) );
+
     //t.get_aspect().template get<_invoke_>().response(t, res.id, &(v[0]), v.size() );
     /*
     ::mamba::comet::response<>
@@ -425,6 +432,7 @@ class method
   , private notifier< M >
 {
 public:
+  typedef method<M> self;
   typedef M method_class;
   typedef invoker< M > invoker_base;
   typedef caller< M > caller_base;
@@ -437,6 +445,7 @@ public:
     , caller_base( static_cast<M&>(*this) )
     , notified_base( static_cast<M&>(*this) )
     , notifier_base( static_cast<M&>(*this) )
+    , method_index(-1)
   {
   };
 
@@ -480,10 +489,29 @@ public:
     //return caller_base::has_id(id);
   }
 
+  /*
+  template<typename T>
+  struct test
+  {
+    template<typename Tg>
+    struct apply
+    {
+      typedef typename T::aspect::template advice_cast<Tg>::type current_type;
+      enum
+      {
+        value = fas::super_subclass_strict<current_type, self>::value
+      };
+      typedef fas::int_<value> type;
+    };
+  };*/
+
 
   template<typename T, typename Itr>
   void invoke_request(T& t, int id, Itr beg, Itr end)
   {
+    //typedef typename T::aspect::template select_group<_method_>::type method_tags;
+    //method_index = fas::index_of_if_t<method_tags, test<T>::template apply >::value;
+    //std::cout << "method_index " << method_index << std::endl;
     invoker_base::request(t, id, beg, end);
   }
 
@@ -520,7 +548,7 @@ public:
     notifier_base::notify(t, std::move(params) );
   }
 
-private:
+  int method_index;
 };
 
 

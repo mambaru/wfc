@@ -11,6 +11,15 @@
 
 namespace mamba{ namespace comet{ namespace inet{ namespace basic{
 
+struct f_initialize
+{
+  template<typename T, typename Tg>
+  void operator()(T& t, fas::tag<Tg> )
+  {
+    t.get_aspect().template get<Tg>().initialize(t);
+  }
+};
+
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class tcp_connection_base final
   : public AspectClass<A>
@@ -43,7 +52,7 @@ public:
   tcp_connection_base()
     : _context()
   {
-    
+    fas::for_each_group<_initialize_>(*this, f_initialize());
   }
   
   /*

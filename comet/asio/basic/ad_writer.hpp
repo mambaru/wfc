@@ -4,6 +4,7 @@
 #include <list>
 #include <comet/callback/callback_owner.hpp>
 #include <comet/asio/basic/tags.hpp>
+#include <fas/xtime.hpp>
 
 namespace mamba{ namespace comet{ namespace inet{ namespace basic{
 
@@ -14,13 +15,18 @@ struct ad_writer
   typedef std::list<data_ptr> data_list_type;
   typedef ::boost::asio::const_buffer buffer_type;
 
+  
+
   static constexpr size_t BUFFER_SIZE=8096*2;
 
   template<typename T>
   void operator()(T& t, data_ptr d)
   {
+    
     if ( d==nullptr || d->empty() )
       return;
+
+    
     
     if ( !_data_list.empty() )
     {
@@ -29,7 +35,17 @@ struct ad_writer
     else
     {
       const char *ptr = &((*d)[0]);
-      size_t s = t.socket().write_some( ::boost::asio::buffer(ptr, d->size()) );
+
+      auto buf = ::boost::asio::buffer(d->data(), d->size());
+      //size_t s = t.socket().send( buf );
+      int sock = t.socket().native_handle();
+      fas::nanospan ns = fas::nanotime();
+      //size_t s = t.socket().send( buf );
+      size_t s = ::send( sock, d->data(), d->size(), 0 );
+      fas::nanospan nf = fas::nanotime();
+      std::cout << "method timeout " << nf-ns << std::endl;
+      std::cout << "method rate " << fas::rate(nf-ns) << std::endl;
+      
       if ( s != d->size() )
       {
         d->erase(d->begin(), d->begin()+s);
@@ -39,6 +55,8 @@ struct ad_writer
       else
         ;
     }
+
+
   }
 
   template<typename T>

@@ -7,5 +7,6 @@ struct _incoming_;
 struct _outgoing_;
 struct _writer_;
 struct _context_;
+struct _initialize_;
   
 }}}}
