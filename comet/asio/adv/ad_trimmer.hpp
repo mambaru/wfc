@@ -7,16 +7,21 @@
 #include <comet/callback/callback_owner.hpp>
 #include <comet/asio/iconnection.hpp>
 #include <comet/asio/tags.hpp>
-#include <comet/asio/adv/ad_writer.hpp>
+
 
 namespace mamba{ namespace comet{ namespace inet{
 
-struct ad_startup
+template<typename Tg, typename N>
+struct ad_trimmer
 {
   template<typename T>
-  void operator()(T& t)
+  void operator()(T& t, data_ptr d)
   {
-    this->do_read(t);
+    if ( d->size() >= N::value )
+      d->resize( d->size() - N::value );
+    else
+      d->clear();
+    t.get_aspect().template get<Tg>()(t, std::move(d));
   }
 };
 

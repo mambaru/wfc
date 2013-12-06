@@ -40,8 +40,8 @@ struct ad_writer
       //size_t s = t.socket().send( buf );
       int sock = t.socket().native_handle();
       fas::nanospan ns = fas::nanotime();
-      //size_t s = t.socket().send( buf );
-      size_t s = ::send( sock, d->data(), d->size(), 0 );
+      size_t s = t.socket().send( ::boost::asio::buffer(d->data(), d->size()) );
+      //size_t s = ::send( sock, d->data(), d->size(), 0 );
       fas::nanospan nf = fas::nanotime();
       std::cout << "method timeout " << nf-ns << std::endl;
       std::cout << "method rate " << fas::rate(nf-ns) << std::endl;

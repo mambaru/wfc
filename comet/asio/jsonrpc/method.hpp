@@ -98,10 +98,10 @@ public:
   template<typename T>
   void response(T& t, invoke_response_ptr res, int id)
   {
-    ::mamba::comet::inet::jsonrpc::response<invoke_response_type> resp;
+    outgoing_response<invoke_response_type> resp;
     resp.id = id;
     resp.result = std::move(res);
-    typedef typename ::mamba::comet::inet::jsonrpc::response_json<invoke_response_json>::serializer serializer;
+    typedef typename outgoing_response_json<invoke_response_json>::serializer serializer;
     data_ptr data = data_ptr(new data_type() );
     data->reserve(200);
     serializer()(resp,   std::back_inserter(*data));
@@ -209,11 +209,11 @@ public:
   template<typename T>
   int request( T& t, call_request_ptr params)
   {
-    ::mamba::comet::inet::jsonrpc::request<call_request_type> resp;
+    outgoing_request<call_request_type> resp;
     resp.id = t.get_aspect().template get<_invoke_>().create_id();
     resp.params = std::move(params);
     resp.method = _method.name();
-    typedef typename ::mamba::comet::inet::jsonrpc::request_json<call_request_json>::serializer serializer;
+    typedef typename outgoing_request_json<call_request_json>::serializer serializer;
     data_ptr data = data_ptr(new data_type() );
     serializer()(resp,   std::back_inserter(*data));
     t.get_aspect().template get<_invoke_>().request(t, resp.id, std::move(data) );
@@ -396,9 +396,9 @@ public:
   template< typename T >
   void notify(T& t, call_notify_ptr params)
   {
-    ::mamba::comet::inet::jsonrpc::notify<call_notify_type> resp;
-    resp.result = std::move(params);
-    typedef typename ::mamba::comet::inet::jsonrpc::notify_json<call_notify_json>::serializer serializer;
+    outgoing_notify<call_notify_type> resp;
+    resp.params = std::move(params);
+    typedef typename outgoing_notify_json<call_notify_json>::serializer serializer;
     data_ptr data = data_ptr(new data_type() );
     serializer()(resp,   std::back_inserter(*data));
     t.get_aspect().template get<_invoke_>().notify(t, std::move(data) );

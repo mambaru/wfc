@@ -22,9 +22,15 @@ class ad_invoke
 
 public:
 
-  ad_invoke(): _id_count(0){}
+  ad_invoke()
+    : _id_count(0)
+  {
+  }
   
-  size_t ids_size() const { return _in_ids.size();}
+  size_t ids_size() const
+  {
+    return _in_ids.size();
+  }
 
   template<typename T>
   void clear(T&)
@@ -114,7 +120,6 @@ public:
 
     return next;
   }
-
 
   int create_id() { return ++_id_count; }
 

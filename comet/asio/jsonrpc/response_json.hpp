@@ -6,23 +6,31 @@
 
 namespace mamba{ namespace comet{ namespace inet{ namespace jsonrpc{
 
+
+struct version_member
+{
+  NAME(jsonrpc);
+  typedef json::member<n_jsonrpc, outgoing, outgoing::version_type, &outgoing::version> type;
+};
+
+  
 template<typename T>
-struct response_json
+struct outgoing_response_json
 {
   typedef typename T::target target;
-  typedef response<target> response_type;
+  typedef outgoing_response<target> response_type;
   typedef typename response_type::version_type version_type;
 
   typedef json::pointer<std::unique_ptr<target>, T> result_json;
   
   NAME(id);
   NAME(result);
-  NAME(jsonrpc);
+  
   
   typedef json::object<
     response_type,
     typename fas::type_list_n<
-      json::member<n_jsonrpc, response_type, version_type, &response_type::version>,
+      version_member::type,
       json::member<n_result, response_type, std::unique_ptr<target>, &response_type::result, result_json >,
       json::member<n_id, response_type, int, &response_type::id>
     >::type
@@ -32,10 +40,10 @@ struct response_json
 };
 
 template<typename T>
-struct notify_json
+struct outgoing_notify_json
 {
   typedef typename T::target target;
-  typedef notify<target> notify_type;
+  typedef outgoing_notify<target> notify_type;
   typedef typename notify_type::version_type version_type;
 
   typedef json::pointer<std::unique_ptr<target>, T> params_json;
@@ -46,8 +54,8 @@ struct notify_json
   typedef json::object<
     notify_type,
     typename fas::type_list_n<
-      json::member<n_jsonrpc, notify_type, version_type, &notify_type::version>,
-      json::member<n_params, notify_type, std::unique_ptr<target>, &notify_type::result, params_json >
+      version_member::type,
+      json::member<n_params, notify_type, std::unique_ptr<target>, &notify_type::params, params_json >
     >::type
   > type;
 
@@ -55,10 +63,10 @@ struct notify_json
 };
 
 template<typename T>
-struct request_json
+struct outgoing_request_json
 {
   typedef typename T::target target;
-  typedef request<target> request_type;
+  typedef outgoing_request<target> request_type;
   typedef typename request_type::version_type version_type;
 
   typedef json::pointer<std::unique_ptr<target>, T> params_json;
@@ -71,7 +79,7 @@ struct request_json
   typedef json::object<
     request_type,
     typename fas::type_list_n<
-      json::member<n_jsonrpc, request_type, version_type, &request_type::version>,
+      version_member::type,
       json::member<n_method, request_type, std::string, &request_type::method>,
       json::member<n_params, request_type, std::unique_ptr<target>, &request_type::params, params_json >,
       json::member<n_id, request_type, int, &request_type::id>

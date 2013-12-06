@@ -22,7 +22,7 @@ struct ad_tailor
   {
     d->reserve( d->size() + std::distance(beg, end) );
     std::copy( beg, end, std::inserter(*d, d->end()) );
-    t.get_aspect().template get<Tg>()( std::move(d) );
+    t.get_aspect().template get<Tg>()( t, std::move(d) );
   }
 
 private:
