@@ -1,8 +1,8 @@
 #pragma once
 
 #include <comet/asio/types.hpp>
-#include <comet/asio/jsonrpc/request.hpp>
-#include <comet/asio/jsonrpc/request_json.hpp>
+#include <comet/asio/jsonrpc/objects/incoming.hpp>
+#include <comet/asio/jsonrpc/objects/incoming_json.hpp>
 #include <comet/asio/jsonrpc/tags.hpp>
 #include <fas/xtime.hpp>
 
@@ -39,7 +39,7 @@ struct f_invoke_request
   {
     if (found)
       return;
-      
+    
     auto& handler = t.get_aspect().template get<Tg>();
     // std::cout << "f_invoke_request " << handler.name() << std::endl;
     //if ( std::strncmp(handler.name(), req.method.first, std::distance(req.method.first, req.method.second) ) )
@@ -103,9 +103,10 @@ struct f_invoke_response
       return;
       
     auto& handler = t.get_aspect().template get<Tg>();
+    auto& outgoing_ids = t.get_aspect().template get<_invoke_>().outgoing_ids();
     std::cout << "f_invoke_response " << handler.name() << std::endl;
     //if ( std::strncmp(handler.name(), req.method.first, std::distance(req.method.first, req.method.second) ) )
-    if (handler.has_id(req.id) )
+    if ( outgoing_ids.count(req.id) !=0 )
     {
       handler.invoke_response(t, req.id, req.result.first, req.result.second);
       found = 0;

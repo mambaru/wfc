@@ -40,7 +40,7 @@ struct test_method
   typedef test_request_json::type call_request;
   typedef json::value<int> call_response;
 
-  const char *name() {return "test_method";}
+  const char *name() const {return "test_method";}
 
   template<typename T>
   void request(T& t, std::unique_ptr<test_request> req, int id, std::function<void(std::unique_ptr<int>)> callback)
@@ -63,13 +63,6 @@ struct test_method
   }
 };
 
-template<typename Tg, typename M>
-struct method:
-  fas::type_list_n<
-    fas::advice< Tg, inet::jsonrpc::method<M> >,
-    fas::group<inet::jsonrpc::_method_, Tg>
-  >::type
-{};
 
 
 
@@ -106,7 +99,7 @@ typedef inet::tcp_server<
         fas::alias< inet::jsonrpc::_output_, inet::rn::_outgoing_>,
         fas::alias< inet::jsonrpc::_not_jsonrpc_, inet::rn::_outgoing_>,
         fas::alias< inet::rn::_output_, inet::basic::_outgoing_>,
-        method<_test_method_, test_method>,
+        inet::jsonrpc::method<_test_method_, test_method>,
         inet::jsonrpc::aspect,
         inet::rn::aspect
         /*fas::alias< inet::rn::_incomin >

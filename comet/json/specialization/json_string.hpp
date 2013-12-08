@@ -269,7 +269,7 @@ public:
   template< typename P>
   P operator()( const T& ptr, P end)
   {
-#warning TODO: nullptr
+//#warning TODO: nullptr
     return typename J::serializer()( *ptr, end);
     /*
     if ( v.begin() != v.end() )
@@ -286,7 +286,7 @@ public:
   template< typename P>
   P operator() ( T& ptr, P beg, P end )
   {
-    #warning TODO: nullptr
+//    #warning TODO: nullptr
     return typename J::serializer()( *ptr, beg, end);
     /*
     v.clear();
