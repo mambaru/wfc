@@ -10,6 +10,7 @@ namespace mamba{ namespace comet{ namespace inet{ namespace jsonrpc{
 
 FAS_HAS_TYPENAME(has_invoke_request,  invoke_request)
 FAS_HAS_TYPENAME(has_invoke_response, invoke_response)
+//FAS_HAS_TYPENAME(has_invoke_error, invoke_response)
 
 template<typename M, bool = has_invoke_request<M>::value && has_invoke_response<M>::value>
 class invoke_handler
@@ -32,6 +33,7 @@ public:
   invoke_handler(M& method)
     : _method(method)
   {
+    //TODO: last reserve
   }
 
   template<typename T, typename Itr>
@@ -51,7 +53,8 @@ public:
       return;
     }
 
-    _method.request(t, std::move(req), id, [this, &t, id](invoke_response_ptr res)
+    
+    _method.request(t, std::move(req), id, [this, &t, id](invoke_response_ptr res, //*error!!!**/)
     {
       this->response(t, std::move(res), id);
     });

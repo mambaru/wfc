@@ -53,27 +53,56 @@ struct ad_parse_error
 
 struct ad_invalid_request
 {
-  
+  template<typename T>
+  void operator()(T& t)
+  {
+    t.get_aspect().template get<_error_>()(t, error{-32600,"Invalid Request"});
+  }
 };
 
 struct ad_method_not_found
 {
-  
+  template<typename T>
+  void operator()(T& t)
+  {
+    t.get_aspect().template get<_error_>()(t, error{-32601,"Method not found"});
+  }
 };
 
-struct ad_invalid_param
+struct ad_invalid_params
 {
-  
+  template<typename T>
+  void operator()(T& t)
+  {
+    t.get_aspect().template get<_error_>()(t, error{-32602,"Invalid params"});
+  }
 };
 
 struct ad_internal_error
 {
-  
+  template<typename T>
+  void operator()(T& t)
+  {
+    t.get_aspect().template get<_error_>()(t, error{-32603,"Internal error"});
+  }
 };
 
 struct ad_server_error
 {
+  template<typename T>
+  void operator()(T& t, int code, std::string message)
+  {
+    t.get_aspect().template get<_error_>()(t, error{code,message});
+  }
+};
 
+struct ad_error
+{
+  template<typename T>
+  void operator()(T& t, const error& err)
+  {
+    t.get_aspect().template get<_error_>()(t, error{ err.code, err.message} );
+  }
 };
 
 namespace mamba{ namespace comet{ namespace inet{ namespace jsonrpc{

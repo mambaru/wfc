@@ -10,8 +10,8 @@ template<typename T>
 struct outgoing_response
   : outgoing
 {
-  int id;
   std::unique_ptr<T> result;
+  int id;
   outgoing_response()
     : outgoing()
     , id(0)
