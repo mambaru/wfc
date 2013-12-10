@@ -15,6 +15,7 @@ struct _invalid_params_;
 struct _internal_error_;
 struct _server_error_;
 struct _invalid_id_;
+struct _method_not_impl_;
 
 struct _jsonrpc_error_;
 

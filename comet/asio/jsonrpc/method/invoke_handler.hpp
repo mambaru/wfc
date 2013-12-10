@@ -29,7 +29,6 @@ struct invoke_error<M, false>
 
 template<typename M, bool = has_invoke_request<M>::value && has_invoke_response<M>::value>
 class invoke_handler
-  : public callback_owner
 {
   typedef std::unordered_set<int> request_ids_type;
 public:
@@ -52,8 +51,8 @@ public:
 
   invoke_handler(M& method)
     : _method(method)
+    , _reserve(256)
   {
-    //auto x = callback_owner::callback( [](int x){return callback_status::ready;} );
   }
 
   template<typename T, typename Itr>
@@ -104,22 +103,6 @@ public:
     resp.id = id;
     resp.result = std::move(result);
     this->_send<outgoing_json>(t, resp, id);
-    
-    
-    /*
-    if ( _incoming_ids.count(id) == 0 )
-      throw;
-    
-    outgoing_response<invoke_response_type> resp;
-    resp.id = id;
-    resp.result = std::move(result);
-    typedef typename outgoing_response_json<invoke_response_json>::serializer serializer;
-    data_ptr data = data_ptr(new data_type() );
-    data->reserve(200);
-    serializer()(resp,   std::back_inserter(*data));
-    t.get_aspect().template get<_invoke_>().response(t, id, std::move(data) );
-    */
-    
   }
 
   template<typename T>
@@ -132,30 +115,23 @@ public:
     resp.id = std::make_unique<int>(id);
     resp.error = std::move(error);
     this->_send<outgoing_json>(t, resp, id);
-
-    /*
-    outgoing_error<invoke_error_type> resp;
-    resp.id = std::make_unique<int>(id);
-    resp.error = std::move(err);
-    typedef typename outgoing_error_json<invoke_error_json>::serializer serializer;
-    data_ptr data = data_ptr(new data_type() );
-    data->reserve(200);
-    serializer()(resp,   std::back_inserter(*data));
-    t.get_aspect().template get<_invoke_>().error(t, id, std::move(data) );
-    */
   }
   
   template<typename J, typename T>
   void _send(T& t, const typename J::target& resp, int id)
   {
     if ( _incoming_ids.count(id) == 0 )
-      throw;
+      throw invalid_id(id);
 
     _incoming_ids.erase(id);
     typedef typename J::serializer serializer;
     data_ptr data = std::make_unique<data_type>();
-    data->reserve(200);
+    data->reserve(_reserve);
     serializer()(resp,   std::back_inserter(*data));
+    if ( data->size() > _reserve )
+      _reserve = data->size();
+    if (_reserve > 1024*8 )
+      _reserve = 1024*8;
     t.get_aspect().template get<_output_>()(t, std::move(data) );
   }
 
@@ -163,6 +139,7 @@ private:
   
   M& _method;
   request_ids_type _incoming_ids;
+  size_t _reserve;
 };
 
 template<typename M>
@@ -176,8 +153,7 @@ public:
   template<typename T, typename Itr>
   void request(T& t, time_point ts, int id, Itr beg, Itr end)
   {
-    std::cout << "class invoke_handler<M, false>" << std::endl;
-    
+    t.get_aspect().template get<_method_not_impl_>()(t, id);
   }
 };
 
