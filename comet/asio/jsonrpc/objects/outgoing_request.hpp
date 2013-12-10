@@ -1,24 +1,24 @@
 #pragma once
-#include <comet/asio/types.hpp>
-#include <comet/memory.hpp>
+
+#include <comet/asio/jsonrpc/objects/outgoing.hpp>
 #include <memory>
+#include <string>
 
 namespace mamba{ namespace comet{ namespace inet{ namespace jsonrpc{
 
 template<typename T>
-struct outgoing_request: outgoing
+struct outgoing_request
+  : outgoing
 {
   std::string method;
   std::unique_ptr<T> params;
   int id;
   outgoing_request()
     : outgoing()
-    , id(0)
+    , id(-1)
   {
-    method.reserve(20);
   }
 };
 
 }}}}
-
 

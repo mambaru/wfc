@@ -12,14 +12,13 @@ struct outgoing_request_json
   typedef typename T::target target;
   typedef outgoing_request<target> request_type;
   typedef typename request_type::version_type version_type;
-
   typedef json::pointer<std::unique_ptr<target>, T> params_json;
   
-  NAME(id);
+  NAME(jsonrpc);
   NAME(method);
   NAME(params);
-  NAME(jsonrpc);
-  
+  NAME(id);
+
   typedef json::object<
     request_type,
     typename fas::type_list_n<

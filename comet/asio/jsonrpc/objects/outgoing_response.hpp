@@ -14,7 +14,7 @@ struct outgoing_response
   int id;
   outgoing_response()
     : outgoing()
-    , id(0)
+    , id(-1)
   {
     
   }

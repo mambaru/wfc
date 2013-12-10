@@ -1,4 +1,6 @@
 #pragma once
+
+#include <comet/asio/jsonrpc/objects/outgoing.hpp>
 #include <comet/asio/types.hpp>
 #include <comet/memory.hpp>
 #include <memory>

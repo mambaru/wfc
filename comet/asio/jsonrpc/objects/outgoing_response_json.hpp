@@ -20,7 +20,6 @@ struct outgoing_response_json
   NAME(id);
   NAME(result);
   
-  
   typedef json::object<
     response_type,
     typename fas::type_list_n<

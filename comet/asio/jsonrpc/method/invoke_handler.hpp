@@ -54,7 +54,7 @@ public:
     }
 
     
-    _method.request(t, std::move(req), id, [this, &t, id](invoke_response_ptr res, //*error!!!**/)
+    _method.request(t, std::move(req), id, [this, &t, id](invoke_response_ptr res/*, error!!!**/)
     {
       this->response(t, std::move(res), id);
     });

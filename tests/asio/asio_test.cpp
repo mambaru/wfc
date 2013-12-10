@@ -97,7 +97,7 @@ typedef inet::tcp_server<
         fas::alias< inet::basic::_incoming_, inet::rn::_input_>,
         fas::alias< inet::rn::_incoming_,    inet::jsonrpc::_input_>,
         fas::alias< inet::jsonrpc::_output_, inet::rn::_outgoing_>,
-        fas::alias< inet::jsonrpc::_not_jsonrpc_, inet::rn::_outgoing_>,
+        // fas::alias< inet::jsonrpc::_not_jsonrpc_, inet::rn::_outgoing_>,
         fas::alias< inet::rn::_output_, inet::basic::_outgoing_>,
         inet::jsonrpc::method<_test_method_, test_method>,
         inet::jsonrpc::aspect,

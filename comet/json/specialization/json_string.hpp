@@ -270,7 +270,14 @@ public:
   P operator()( const T& ptr, P end)
   {
 //#warning TODO: nullptr
-    return typename J::serializer()( *ptr, end);
+    if ( ptr!=nullptr)
+    {
+      return typename J::serializer()( *ptr, end);
+    }
+    else
+    {
+      *(++end)='n';*(++end)='u';*(++end)='l';*(++end)='l';
+    }
     /*
     if ( v.begin() != v.end() )
       return std::copy(v.begin(), v.end(), end );
@@ -287,7 +294,16 @@ public:
   P operator() ( T& ptr, P beg, P end )
   {
 //    #warning TODO: nullptr
-    return typename J::serializer()( *ptr, beg, end);
+    if (beg!=end && *beg!='n')
+    {
+      return typename J::serializer()( *ptr, beg, end);
+    }
+    else
+    {
+      ptr=nullptr;
+      for (int i=0; beg!=end && i<4; ++i, ++beg);
+    }
+    return beg;
     /*
     v.clear();
     P start = beg;

@@ -3,6 +3,7 @@
 #include <comet/asio/types.hpp>
 #include <comet/asio/jsonrpc/objects/incoming.hpp>
 #include <comet/asio/jsonrpc/objects/incoming_json.hpp>
+#include <comet/asio/jsonrpc/errors/tags.hpp>
 #include <comet/asio/jsonrpc/tags.hpp>
 #include <fas/xtime.hpp>
 
