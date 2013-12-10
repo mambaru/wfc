@@ -271,13 +271,13 @@ public:
   {
 //#warning TODO: nullptr
     if ( ptr!=nullptr)
-    {
       return typename J::serializer()( *ptr, end);
-    }
-    else
-    {
-      *(++end)='n';*(++end)='u';*(++end)='l';*(++end)='l';
-    }
+    
+    *(++end)='n';
+    *(++end)='u';
+    *(++end)='l';
+    *(++end)='l';
+    return end;
     /*
     if ( v.begin() != v.end() )
       return std::copy(v.begin(), v.end(), end );

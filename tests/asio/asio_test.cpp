@@ -40,13 +40,33 @@ struct test_method
   typedef test_request_json::type call_request;
   typedef json::value<int> call_response;
 
+  std::function<void()> _callback;
+  
+  test_method()
+    : _callback(nullptr)
+  {}
+  
   const char *name() const {return "test_method";}
+  
+  
 
-  template<typename T>
-  void request(T& t, std::unique_ptr<test_request> req, int id, std::function<void(std::unique_ptr<int>)> callback)
+  template<typename T, typename Callback>
+  void request(T& t, std::unique_ptr<test_request> req, int id, Callback callback)
   {
-    callback(std::unique_ptr<int>(new int( req->a + req->b )));
+    if ( _callback != nullptr )
+      _callback();
+    test_request r = *req;
+    _callback=[r, callback](){callback(std::make_unique<int>(r.a + r.b), nullptr);};
   }
+ 
+  /*
+  template<typename T>
+  void request(T& t, std::unique_ptr<test_request> req, int id, std::function<callback_status(std::unique_ptr<int>, std::unique_ptr<inet::jsonrpc::error>)> callback)
+  {
+    callback(std::make_unique<int>(req->a + req->b), nullptr);
+  }
+  */
+  
 
   template<typename T>
   void notify(T& t, std::unique_ptr<test_request> req)
@@ -89,9 +109,8 @@ struct ad_start
   }
 };
 
-typedef inet::tcp_server<
-    inet::echo_connection<
-      fas::aspect< fas::type_list_n<
+struct test_aspect:
+  fas::aspect< fas::type_list_n<
         fas::group<inet::_start_, _start_>,
         fas::advice<_start_, ad_start>,
         fas::alias< inet::basic::_incoming_, inet::rn::_input_>,
@@ -107,6 +126,11 @@ typedef inet::tcp_server<
         */
         
       >::type>
+{};
+
+typedef inet::tcp_server<
+    inet::echo_connection<
+      test_aspect
     >
   > server_type;
 typedef server_type::connection_type connection_type;
@@ -116,6 +140,7 @@ std::shared_ptr<connection_type> conn;
 
 int main(int argc, char* argv[])
 {
+    
   inet::server_config conf;
   conf.enabled = true;
   conf.host = "0.0.0.0";

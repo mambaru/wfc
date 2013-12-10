@@ -24,12 +24,15 @@ public:
     d->reserve(_reserve);
     //typename J::serializer()(v, std::inserter(*d, d->end()) );
     typename J::serializer()(v, std::back_inserter(*d) );
-    t.get_aspect().template get<_output_>()(t, std::move(d));
+    
+    const char *debug = &((*d)[0]);
+    
     if (_reserve < d->size() )
       _reserve = d->size();
     if (_reserve > 8196 )
       _reserve = 8196;
-      
+
+    t.get_aspect().template get<_output_>()(t, std::move(d));
   }
 
 private:

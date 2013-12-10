@@ -53,6 +53,16 @@ struct ad_internal_error
   }
 };
 
+struct ad_invalid_id
+{
+  template<typename T>
+  void operator()(T& t, int id)
+  {
+    t.get_aspect().template get<_jsonrpc_error_>()(t, -32604, "Invalid id", id);
+  }
+};
+
+
 struct ad_server_error
 {
   template<typename T>
@@ -78,7 +88,16 @@ struct ad_not_jsonrpc
   {
     t.get_aspect().template get<_parse_error_>()(t);
   }
-  
+};
+
+struct ad_invalid_json
+{
+  template<typename T, typename Itr>
+  void operator()(T& t, const json::json_error& e, Itr beg, Itr end)
+  {
+    // TODO:
+    //t.get_aspect().template get<_parse_error_>()(t);
+  }
 };
 
 
@@ -88,10 +107,12 @@ struct aspect_error: fas::aspect< fas::type_list_n<
   fas::advice< _invalid_request_,  ad_invalid_request>, 
   fas::advice< _method_not_found_, ad_method_not_found>, 
   fas::advice< _invalid_params_,   ad_invalid_params>, 
-  fas::advice< _internal_error_,   ad_internal_error>, 
+  fas::advice< _internal_error_,   ad_internal_error>,
+  fas::advice< _invalid_id_,       ad_invalid_id>, 
   fas::advice< _server_error_,     ad_server_error>, 
   fas::alias<  _jsonrpc_error_,    _server_error_>, 
-  fas::advice<  _not_jsonrpc_,      ad_not_jsonrpc>
+  fas::advice<  _not_jsonrpc_,     ad_not_jsonrpc>,
+  fas::advice< _invalid_json_,     ad_invalid_json>
 >::type >
 {};
 

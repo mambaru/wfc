@@ -45,7 +45,7 @@ public:
     catch(...)
     {
       // NOTIFY не отправлять!!!
-      t.get_aspect().template get<_invalid_json_>()(t, beg, end);
+      //t.get_aspect().template get<_invalid_json_>()(t, beg, end);
       return;
     }
 

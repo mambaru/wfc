@@ -44,17 +44,22 @@ public:
   */
 
   template<typename ... Args>
-  std::function<callback_status(Args...)> callback(typename identity<std::function<callback_status(Args...)>>::type f)
+  std::function<callback_status(Args&&...)> callback(typename identity<std::function<callback_status(Args&&...)>>::type f)
   {
+    // std::forward<_ArgTypes>(__args)...);
+    
+    
     std::weak_ptr<int> alive = _alive;
-    return [alive,f](Args... args)-> callback_status
+    return [alive,f](Args&&... args)-> callback_status
     {
       if ( auto p = alive.lock() )
       {
-        return f(args...);
+        //return f(args...);
+        return f(std::forward<Args>(args)...);
       }
       return callback_status::died;
     };
+    
   }
  
 private:

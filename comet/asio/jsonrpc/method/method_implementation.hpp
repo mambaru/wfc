@@ -39,9 +39,9 @@ public:
   
 
   template<typename T, typename Itr>
-  void invoke_request(T& t, int id, Itr beg, Itr end)
+  void invoke_request(T& t, time_point ts, int id, Itr beg, Itr end)
   {
-    invoke_handler_base::request(t, id, beg, end);
+    invoke_handler_base::request(t, ts, id, beg, end);
   }
 
   // async response
