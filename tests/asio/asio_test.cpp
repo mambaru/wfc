@@ -53,12 +53,14 @@ struct test_method
   template<typename T, typename Callback>
   void request(T& t, std::unique_ptr<test_request> req, int id, Callback callback)
   {
+    /*
     if ( _callback != nullptr )
       _callback();
     test_request r = *req;
     _callback=[r, callback]()
+    */
     {
-      callback(std::make_unique<int>(r.a + r.b), nullptr);
+      callback(std::make_unique<int>(req->a + req->b), nullptr);
     };
   }
  
@@ -138,6 +140,18 @@ struct ad_start
   }
 };
 
+
+struct ad_stat
+{
+  template<typename T>
+  void operator()(T& t,  inet::jsonrpc::stat_category cat, inet::time_point start, inet::time_point finish, bool succ)
+  {
+    long int ms = std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count();
+    std::cout << "stat ms " << ms << std::endl;
+    std::cout << "stat rate " << ((double(1)/ms)*1000000000) << std::endl;
+  }
+};
+
 struct test_aspect:
   fas::aspect< fas::type_list_n<
         fas::group<inet::_start_, _start_>,
@@ -147,6 +161,7 @@ struct test_aspect:
         fas::alias< inet::jsonrpc::_output_, inet::rn::_outgoing_>,
         // fas::alias< inet::jsonrpc::_not_jsonrpc_, inet::rn::_outgoing_>,
         fas::alias< inet::rn::_output_, inet::basic::_outgoing_>,
+        fas::advice< inet::jsonrpc::_method_stat_, ad_stat>, 
         inet::jsonrpc::method<_test_method_, test_method>,
         inet::jsonrpc::aspect,
         inet::rn::aspect

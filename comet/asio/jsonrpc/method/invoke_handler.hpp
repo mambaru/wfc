@@ -6,6 +6,7 @@
 #include <fas/typemanip.hpp>
 #include <unordered_set>
 #include <memory>
+#include <chrono>
 
 namespace mamba{ namespace comet{ namespace inet{ namespace jsonrpc{
 
@@ -58,13 +59,14 @@ public:
   }
 
   template<typename T, typename Itr>
-  void request(T& t, time_point ts, int id, Itr beg, Itr end)
+  void request(T& t, /*time_point ts,*/ int id, Itr beg, Itr end,  stat_function stat)
   {
     if ( _incoming_ids.count(id) != 0 )
     {
       t.get_aspect().template get<_invalid_id_>()(t, id);
       return;
     }
+    
     
     invoke_request_ptr req = nullptr;
 
@@ -83,12 +85,16 @@ public:
 
     _method.request(t, std::move(req), id, 
                     t.owner().template callback<invoke_response_ptr, invoke_error_ptr>( 
-                    [this, &t, ts, id]( invoke_response_ptr res, invoke_error_ptr err )->callback_status
+                    [this, &t, stat, id]( invoke_response_ptr res, invoke_error_ptr err )->callback_status
     {
       if ( err==nullptr )
         this->response(t, std::move(res), id);
       else
         this->error(t, std::move(err), id);
+      //time_point finish = std::chrono::high_resolution_clock::now();
+      if (stat != nullptr)
+        stat( std::chrono::high_resolution_clock::now(), err==nullptr);
+      //t.get_aspect().template get<_method_stat_>()(t, this->_
       return callback_status::ready;
     }));
   }
@@ -145,9 +151,12 @@ public:
   void clear() {}
 
   template<typename T, typename Itr>
-  void request(T& t, time_point ts, int id, Itr beg, Itr end)
+  void request(T& t, int id, Itr beg, Itr end,  stat_function stat)
   {
     t.get_aspect().template get<_method_not_impl_>()(t, id);
+    if (stat != nullptr)
+      stat( std::chrono::high_resolution_clock::now(), true);
+
   }
 };
 

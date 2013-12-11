@@ -2,12 +2,21 @@
 
 namespace mamba{ namespace comet{ namespace inet{ namespace jsonrpc{
 
+enum class stat_category
+{
+  invoke_request, 
+  invoke_notify,
+  call_request, 
+  call_notify, 
+};
+
 struct _invoke_;
 struct _input_;
 struct _output_;
 //struct _outgoing_;
 struct _method_;
 struct _send_json_;
+struct _method_stat_;
 
 /*
 // ERROs

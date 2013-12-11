@@ -96,7 +96,7 @@ public:
     });
   }
 
-  void set_create_id( std::function<int()> ci)
+  void initialize( std::function<int()> ci)
   {
     _create_id = ci;
   }
@@ -160,6 +160,10 @@ public:
   void error(T& t, int id, Itr beg, Itr end)
   {
     
+  }
+  
+  void initialize( std::function<int()> ci)
+  {
   }
 };
 
