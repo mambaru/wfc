@@ -9,6 +9,7 @@ namespace mamba{ namespace comet{ namespace inet{ namespace jsonrpc{
 template<typename T>
 struct outgoing_notify: outgoing
 {
+  std::string method;
   std::unique_ptr<T> params;
   outgoing_notify()
     : outgoing()

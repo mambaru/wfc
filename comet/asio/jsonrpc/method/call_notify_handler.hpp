@@ -10,7 +10,6 @@ namespace mamba{ namespace comet{ namespace inet{ namespace jsonrpc{
 
 FAS_HAS_TYPENAME(has_call_notify, call_notify)
 
-/// //////////////////////////////////////////////////////////////////
 
 template<typename M, bool = has_call_notify<M>::value>
 class call_notify_handler
@@ -20,24 +19,37 @@ public:
 
   typedef typename M::call_notify call_notify_json;
   typedef typename call_notify_json::target call_notify_type;
-  typedef typename call_notify_json::serializer call_notify_serializer;
   typedef std::unique_ptr<call_notify_type>  call_notify_ptr;
-
+  typedef typename outgoing_notify_json<call_notify_json>::serializer outgoing_serializer;
+  
   call_notify_handler(M& method)
     : _method(method) 
+    , _reserve(256)
   {
   }
 
   template< typename T >
   void notify(T& t, call_notify_ptr params)
   {
-    outgoing_notify<call_notify_type> resp;
-    resp.params = std::move(params);
-    typedef typename outgoing_notify_json<call_notify_json>::serializer serializer;
-    data_ptr data = data_ptr(new data_type() );
-    serializer()(resp,   std::back_inserter(*data));
-    t.get_aspect().template get<_invoke_>().notify(t, std::move(data) );
+    outgoing_notify<call_notify_type> ntf;
+    ntf.params = std::move(params);
+    ntf.method = _method.name();
+    
+    data_ptr data = std::make_unique<data_type>();
+    data->reserve(_reserve);
+    
+    outgoing_serializer()(ntf,   std::back_inserter(*data));
+    
+    if ( data->size() > _reserve )
+      _reserve = data->size();
+    if (_reserve > 1024*8 )
+      _reserve = 1024*8;
+      
+    t.get_aspect().template get<_output_>()(t, std::move(data) );
   }
+  
+private:
+  size_t _reserve;
 };
 
 template<typename M>
@@ -45,10 +57,8 @@ class call_notify_handler<M, false>
 {
 public:
   call_notify_handler(M& )
-  {
-  }
+  {}
 };
-
 
 }}}}
 

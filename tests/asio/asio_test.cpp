@@ -56,7 +56,10 @@ struct test_method
     if ( _callback != nullptr )
       _callback();
     test_request r = *req;
-    _callback=[r, callback](){callback(std::make_unique<int>(r.a + r.b), nullptr);};
+    _callback=[r, callback]()
+    {
+      callback(std::make_unique<int>(r.a + r.b), nullptr);
+    };
   }
  
   /*
@@ -65,7 +68,15 @@ struct test_method
   {
     callback(std::make_unique<int>(req->a + req->b), nullptr);
   }
-  */
+
+  template<typename T, typename Cal>
+  void request(T& t, std::unique_ptr<test_request> req, int id, Callback callback)
+  {
+    callback(std::make_unique<int>(req->a + req->b), nullptr);
+  }
+  
+  std::function<callback_status(std::unique_ptr<test_response>, std::unique_ptr<inet::jsonrpc::error>)> callback
+*/
   
 
   template<typename T>
@@ -73,7 +84,25 @@ struct test_method
   {
     std::cout << "test_notify" << std::endl;
     t.get_aspect().template get<_test_method_>().notify(t,  std::unique_ptr<int>(new int( req->a + req->b )));
-    t.get_aspect().template get<_test_method_>().request(t, std::unique_ptr<test_request>(new test_request{2, 3}) );
+    t.get_aspect().template get<_test_method_>().request(
+      t, 
+      std::unique_ptr<test_request>(new test_request{2, 3}), 
+      [](std::unique_ptr<int> resp, std::unique_ptr<inet::jsonrpc::error> err)
+      {
+        if ( !err )
+        {
+          if ( resp )
+            std::cout << "RESULT " << *resp << std::endl;
+          else
+            std::cout << "RESULT NULL" << std::endl;
+        }
+        else
+        {
+          std::cout << "ERROR " << err->message << std::endl;
+        }
+        return callback_status::ready;
+      }
+    );
   }
 
   template<typename T>

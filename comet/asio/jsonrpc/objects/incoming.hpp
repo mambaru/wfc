@@ -17,7 +17,6 @@ struct incoming
   std::unique_ptr<int> id;
   
   incoming()
-    : id(std::make_unique<int>(-1))
   {
     // method.reserve(64) ;
   }

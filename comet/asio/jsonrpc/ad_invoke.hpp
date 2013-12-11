@@ -13,16 +13,17 @@ namespace mamba{ namespace comet{ namespace inet{ namespace jsonrpc{
 struct f_init_index
 {
   int count;
-  f_init_index()
+  std::function<int()> create_id;
+  f_init_index(std::function<int()> create_id)
     : count(0)
+    , create_id(create_id)
   {}
 
   template<typename T, typename Tg>
   void operator()(T& t, fas::tag<Tg> )
   {
-    t.get_aspect().template get<Tg>().method_index = ++count;
+    t.get_aspect().template get<Tg>().initialize(++count, create_id);
   }
-
 };
   
 struct f_invoke_request
@@ -30,8 +31,6 @@ struct f_invoke_request
   incoming& req;
   time_point ts;
   bool found;
-  
-  
   f_invoke_request(incoming& req, time_point ts)
     : req(req)
     , ts(ts)
@@ -46,8 +45,6 @@ struct f_invoke_request
       return;
     
     auto& handler = t.get_aspect().template get<Tg>();
-    // std::cout << "f_invoke_request " << handler.name() << std::endl;
-    //if ( std::strncmp(handler.name(), req.method.first, std::distance(req.method.first, req.method.second) ) )
     if (std::equal(req.method.first, req.method.second, handler.name()))
     {
       handler.invoke_request(t, ts, *req.id, req.params.first, req.params.second);
@@ -58,10 +55,13 @@ struct f_invoke_request
 
 struct f_invoke_notify
 {
-  bool found;
   incoming& req;
-  f_invoke_notify(incoming& req)
+  time_point ts;
+  bool found;
+  
+  f_invoke_notify(incoming& req, time_point ts)
     : req(req)
+    , ts(ts)
     , found(false)
   {
   }
@@ -73,19 +73,10 @@ struct f_invoke_notify
       return;
       
     auto& handler = t.get_aspect().template get<Tg>();
-    // std::cout << "f_invoke_notify " << handler.name() << std::endl;
-    //if ( std::strncmp(handler.name(), req.method.first, std::distance(req.method.first, req.method.second) ) )
+
     if (std::equal(req.method.first, req.method.second, handler.name()))
     {
-      fas::nanospan ns = fas::nanotime();
-      handler.invoke_notify(t, req.params.first, req.params.second);
-      fas::nanospan nf = fas::nanotime();
-
-
-      std::cout << "method timeout " << nf-ns << std::endl;
-      std::cout << "method rate " << fas::rate(nf-ns) << std::endl;
-
-      
+      handler.invoke_notify(t, ts, req.params.first, req.params.second);
       found = true;
     }
   }
@@ -94,9 +85,11 @@ struct f_invoke_notify
 struct f_invoke_response
 {
   bool found;
+  time_point ts;
   incoming& req;
-  f_invoke_response(incoming& req)
+  f_invoke_response(incoming& req, time_point ts)
     : req(req)
+    , ts(ts)
     , found(false)
   {
   }
@@ -106,46 +99,48 @@ struct f_invoke_response
   {
     if (found)
       return;
-      
-    auto& handler = t.get_aspect().template get<Tg>();
-    auto& outgoing_ids = t.get_aspect().template get<_invoke_>().outgoing_ids();
-    std::cout << "f_invoke_response " << handler.name() << std::endl;
-    //if ( std::strncmp(handler.name(), req.method.first, std::distance(req.method.first, req.method.second) ) )
-    if ( outgoing_ids.count(*req.id) !=0 )
-    {
-      handler.invoke_response(t, *req.id, req.result.first, req.result.second);
-      found = true;
-    }
+    
+    found = t.get_aspect().template get<Tg>().invoke_response(t, ts, *req.id, req.result.first, req.result.second);
+  }
+};
+
+struct f_invoke_error
+{
+  bool found;
+  time_point ts;
+  incoming& req;
+  f_invoke_error(incoming& req, time_point ts)
+    : req(req)
+    , ts(ts)
+    , found(false)
+  {
+  }
+
+  template<typename T, typename Tg>
+  void operator()(T& t, fas::tag<Tg> )
+  {
+    if (found)
+      return;
+    
+    found = t.get_aspect().template get<Tg>().invoke_error(t, ts, *req.id, req.result.first, req.result.second);
   }
 };
 
 
 class ad_invoke
 {
-  
-  typedef std::pair<time_point, int> request_stat;
-  typedef std::unordered_map<int, request_stat> request_ids_type;
-
-  request_ids_type _incoming_ids;
-  request_ids_type _outgoing_ids;
-  int _id_counter;
-
 public:
-
   ad_invoke()
     : _id_counter(0)
   {
-    
+    _create_id = [this](){ return ++_id_counter;};
   }
 
   template<typename T>
   void initialize(T& t)
   {
-    fas::for_each_group<_method_>(t, f_init_index() );
+    fas::for_each_group<_method_>(t, f_init_index(_create_id) );
   }
-
-  const request_ids_type& incoming_ids() const { return _incoming_ids;}
-  const request_ids_type& outgoing_ids() const { return _outgoing_ids;}
 
   int create_id() 
   {
@@ -186,6 +181,8 @@ public:
       }
     }
   }
+  
+private:
 
   template<typename T>
   void _invoke(T& t, incoming& req, time_point start)
@@ -212,7 +209,7 @@ public:
     }
     else if ( req.error.first!=req.error.second )
     {
-      _invoke_result(t, req, start);
+      _invoke_error(t, req, start);
     }
     else
     {
@@ -227,30 +224,12 @@ public:
     {
       t.get_aspect().template get<_method_not_found_>()(t, *req.id);
     }
-
-    /*
-    auto itr = _incoming_ids.find(*req.id);
-    if ( itr==_incoming_ids.end())
-    {
-      _incoming_ids[*req.id]=std::make_pair(start, -1);
-      
-      if ( !fas::for_each_group<_method_>(t, f_invoke_request(req) ).found )
-      {
-        _incoming_ids.erase(*req.id);
-        t.get_aspect().template get<_method_not_found_>()(t);
-      }
-    }
-    else
-    {
-      t.get_aspect().template get<_invalid_id_>()(t, *req.id);
-    }
-    */
   }
   
   template<typename T>
   void _invoke_notify(T& t, incoming& req, time_point start)
   {
-    if ( fas::for_each_group<_method_>(t, f_invoke_notify(req) ).found )
+    if ( fas::for_each_group<_method_>(t, f_invoke_notify(req, start) ).found )
     {
       time_point finish = std::chrono::high_resolution_clock::now();
       long int ns = std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count();
@@ -264,107 +243,21 @@ public:
   template<typename T>
   void _invoke_result(T& t, incoming& req, time_point start)
   {
-    auto itr = _outgoing_ids.find(*req.id);
-    if ( itr == _outgoing_ids.end() )
-    {
-      if ( fas::for_each_group<_method_>(t, f_invoke_response(req) ).found )
-        ; // TODO: notify not found
-    }
+    if ( fas::for_each_group<_method_>(t, f_invoke_response(req, start) ).found )
+      ; // TODO: notify not found
   }
 
   template<typename T>
   void _invoke_error(T& t, incoming& req, time_point start)
   {
-    auto itr = _incoming_ids.find(*req.id);
-    _incoming_ids.erase(itr);
-    // TDDO
+    if ( fas::for_each_group<_method_>(t, f_invoke_error(req, start) ).found )
+      ; // TODO: error not found
   }
+  
+private:
+  int _id_counter;
+  std::function<int()> _create_id;
 
-  template<typename T>
-  void request(T& t, int id, data_ptr req)
-  {
-    auto itr = _outgoing_ids.find(id);
-    if ( itr == _outgoing_ids.end() )
-    {
-      // TODO: method index
-      _outgoing_ids[id]=std::make_pair(std::chrono::high_resolution_clock::now(), -1);
-      t.get_aspect().template get<_output_>()(t, std::move(req) );
-    }
-    
-  }
-
-  template<typename T>
-  void response(T& t, int id, data_ptr resp)
-  {
-    
-    auto itr = _incoming_ids.find(id);
-    if ( itr != _incoming_ids.end() )
-    {
-      t.get_aspect().template get<_output_>()(t, std::move(resp) );
-
-      
-      time_point finish = std::chrono::high_resolution_clock::now();
-      //method_index = -1;
-      long int ts = std::chrono::duration_cast<std::chrono::nanoseconds>(finish - itr->second.first).count();
-      // send stat
-      _incoming_ids.erase(itr);
-      //std::cout << "timeout " << ts << std::endl;
-      //std::cout << "rate " << double(1000000000)/ts << std::endl;
-
-      
-    }
-    else
-    {
-      // invalid id
-    }
-
-
-    /*
-    ::mamba::comet::inet::jsonrpc::response resp;
-    resp.id = id;
-    resp.result = std::move(result);
-    typedef ::mamba::comet::inet::jsonrpc::response_json::serializer serializer;
-    data_ptr json = data_ptr(new data_type());
-    serializer()(resp, std::back_inserter(*json));
-    */
-    
-    
-    // std::cout << std::string(result->begin(), result->end());
-    /*
-    ids_set::iterator itr = _in_ids.lower_bound(id);
-    if ( itr != _in_ids.end() && (*itr) == id )
-      _in_ids.erase(itr);
-    t.get_aspect().template get<_writer_>()(t, d, s );
-    */
-  }
-
-  template<typename T>
-  void notify(T& t, data_ptr resp)
-  {
-    t.get_aspect().template get<_output_>()(t, std::move(resp) );
-    /* t.get_aspect().template get<_writer_>()(t, d, s );*/
-  }
-
-  template<typename T>
-  void error(T& t, int id, data_ptr resp)
-  {
-    auto itr = _incoming_ids.find(id);
-    if ( itr != _incoming_ids.end() )
-    {
-      t.get_aspect().template get<_output_>()(t, std::move(resp) );
-      time_point finish = std::chrono::high_resolution_clock::now();
-      long int ns = std::chrono::duration_cast<std::chrono::nanoseconds>(finish - itr->second.first).count();
-      // send stat
-      _incoming_ids.erase(id);
-    }
-
-    /*
-    ids_set::iterator itr = _in_ids.lower_bound(id);
-    if ( itr != _in_ids.end() && (*itr) == id )
-      _in_ids.erase(itr);
-    t.get_aspect().template get<_writer_>()(t, d, s );
-    */
-  }
 };
 
 }}}}

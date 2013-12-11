@@ -14,7 +14,6 @@ struct outgoing_request_json
   typedef typename request_type::version_type version_type;
   typedef json::pointer<std::unique_ptr<target>, T> params_json;
   
-  NAME(jsonrpc);
   NAME(method);
   NAME(params);
   NAME(id);

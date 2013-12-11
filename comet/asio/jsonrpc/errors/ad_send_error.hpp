@@ -5,18 +5,17 @@
 #include <comet/asio/jsonrpc/objects/outgoing_error.hpp>
 #include <comet/asio/jsonrpc/objects/outgoing_error_json.hpp>
 #include <comet/asio/jsonrpc/tags.hpp>
-#include <comet/memory.hpp>
+#include <memory>
 
 namespace mamba{ namespace comet{ namespace inet{ namespace jsonrpc{
 
 struct ad_send_error
 {
   typedef outgoing_error<error> error_type;
-//  typedef outgoing_error_json<typename error_json::type> error_json_type;
+
   struct error_json_type
     : outgoing_error_json<typename error_json::type >::type
   {};
-  
   
   template<typename T>
   void operator()(T& t, std::unique_ptr<error> err, std::unique_ptr<int> id)

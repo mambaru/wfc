@@ -30,7 +30,7 @@ public:
     , call_handler_base( static_cast<M&>(*this) )
     , invoke_notify_handler_base( static_cast<M&>(*this) )
     , call_notify_handler_base( static_cast<M&>(*this) )
-    , method_index(-1)
+    , _method_index(-1)
   {
   };
 
@@ -44,7 +44,6 @@ public:
     invoke_handler_base::request(t, ts, id, beg, end);
   }
 
-  // async response
   template<typename T, typename P>
   void response(T& t, P result, int id)
   {
@@ -52,32 +51,49 @@ public:
   }
 
   template<typename T, typename Itr>
-  void invoke_notify(T& t, Itr beg, Itr end)
+  void invoke_notify(T& t, time_point ts, Itr beg, Itr end)
   {
-    return invoke_notify_handler_base::notify(t, beg, end);
+    return invoke_notify_handler_base::notify(t, ts, beg, end);
   }
-
-  // remote call
+  
   template<typename T, typename P>
-  int request ( T& t, P param)
+  int request ( T& t, P param, typename call_handler_base::callback_type callback)
   {
-    return call_handler_base::request(t, std::move(param) );
+    return call_handler_base::request(t, std::move(param), callback );
   }
 
   template<typename T, typename Itr>
-  void invoke_response(T& t, int id,  Itr beg, Itr end)
+  bool invoke_response(T& t, time_point ts, int id,  Itr beg, Itr end)
   {
-    call_handler_base::response(t, id, beg, end);
+    return call_handler_base::response(t, ts, id, beg, end);
   }
 
-  /// remote notify id
+  template<typename T, typename Itr>
+  bool invoke_error(T& t, time_point ts, int id,  Itr beg, Itr end)
+  {
+    return call_handler_base::error(t, ts, id, beg, end);
+  }
+
+  
   template<typename T, typename P>
   void notify(T& t, P params)
   {
     call_notify_handler_base::notify(t, std::move(params) );
   }
 
-  int method_index;
+  int method_index() const 
+  {
+    return _method_index;
+  } 
+  
+  void initialize(int method_index, std::function<int()> create_id)
+  {
+    _method_index = method_index;
+    call_handler_base::set_create_id(create_id);
+  }
+  
+private:
+  int _method_index;
 };
 
 

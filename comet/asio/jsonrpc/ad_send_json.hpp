@@ -19,13 +19,12 @@ public:
   template<typename T,  typename J, typename V>
   void operator() (T& t, J,  const V& v)
   {
-    
     data_ptr d = std::make_unique<data_type>();
     d->reserve(_reserve);
-    //typename J::serializer()(v, std::inserter(*d, d->end()) );
+
     typename J::serializer()(v, std::back_inserter(*d) );
     
-    const char *debug = &((*d)[0]);
+    //const char *debug = &((*d)[0]);
     
     if (_reserve < d->size() )
       _reserve = d->size();
@@ -40,5 +39,3 @@ private:
 };
 
 }}}}
-
-

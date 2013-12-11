@@ -1,5 +1,6 @@
 #pragma once
 
+#include <comet/memory.hpp>
 #include <fas/type_list.hpp>
 
 #include <stdexcept>
@@ -9,6 +10,7 @@
 #include <stdint.h>
 #include <unordered_map>
 #include <map>
+#include <memory>
 
 namespace mamba{ namespace comet{ namespace json{
 

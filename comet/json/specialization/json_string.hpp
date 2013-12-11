@@ -269,6 +269,7 @@ public:
   template< typename P>
   P operator()( const T& ptr, P end)
   {
+    // Можно обычный указатель
 //#warning TODO: nullptr
     if ( ptr!=nullptr)
       return typename J::serializer()( *ptr, end);
@@ -293,9 +294,11 @@ public:
   template< typename P>
   P operator() ( T& ptr, P beg, P end )
   {
+    // Только умный
 //    #warning TODO: nullptr
     if (beg!=end && *beg!='n')
     {
+      ptr = std::make_unique<typename T::element_type>();
       return typename J::serializer()( *ptr, beg, end);
     }
     else

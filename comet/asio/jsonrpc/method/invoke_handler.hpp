@@ -1,12 +1,11 @@
 #pragma once
 
-
 #include <comet/asio/jsonrpc/objects/outgoing_response.hpp>
 #include <comet/asio/jsonrpc/objects/outgoing_response_json.hpp>
 #include <comet/memory.hpp>
 #include <fas/typemanip.hpp>
 #include <unordered_set>
-
+#include <memory>
 
 namespace mamba{ namespace comet{ namespace inet{ namespace jsonrpc{
 
@@ -42,8 +41,11 @@ public:
   typedef typename invoke_error_json::target invoke_error_type;
 
   typedef typename invoke_request_json::serializer invoke_request_serializer;
-  typedef typename invoke_response_json::serializer invoke_response_serializer;
-  typedef typename invoke_error_json::serializer invoke_error_serializer;
+  
+  typedef typename outgoing_response_json<invoke_response_json>::type output_response_json;
+  typedef typename output_response_json::target output_response_type;
+  typedef typename outgoing_error_json<invoke_error_json>::type output_error_json;
+  typedef typename output_error_json::target output_error_type;
 
   typedef std::unique_ptr<invoke_request_type>  invoke_request_ptr;
   typedef std::unique_ptr<invoke_response_type> invoke_response_ptr;
@@ -80,7 +82,7 @@ public:
     _incoming_ids.insert(id);
 
     _method.request(t, std::move(req), id, 
-                    t.owner().callback<invoke_response_ptr, invoke_error_ptr>( 
+                    t.owner().template callback<invoke_response_ptr, invoke_error_ptr>( 
                     [this, &t, ts, id]( invoke_response_ptr res, invoke_error_ptr err )->callback_status
     {
       if ( err==nullptr )
@@ -91,30 +93,22 @@ public:
     }));
   }
 
-  // async response
   template<typename T>
   void response(T& t, invoke_response_ptr result, int id)
   {
-    
-    typedef typename outgoing_response_json<invoke_response_json>::type outgoing_json;
-    typedef typename outgoing_json::target outgoing_type;
-    
-    outgoing_type resp;
+    output_response_type resp;
     resp.id = id;
     resp.result = std::move(result);
-    this->_send<outgoing_json>(t, resp, id);
+    this->_send<output_response_json>(t, resp, id);
   }
 
   template<typename T>
   void error(T& t, invoke_error_ptr error, int id)
   {
-    typedef typename outgoing_error_json<invoke_error_json>::type outgoing_json;
-    typedef typename outgoing_json::target outgoing_type;
-    
-    outgoing_type resp;
+    output_error_type resp;
     resp.id = std::make_unique<int>(id);
     resp.error = std::move(error);
-    this->_send<outgoing_json>(t, resp, id);
+    this->_send<output_error_json>(t, resp, id);
   }
   
   template<typename J, typename T>

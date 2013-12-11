@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <comet/asio/jsonrpc/objects/outgoing_request.hpp>
 #include <comet/asio/jsonrpc/objects/outgoing_request_json.hpp>
 
@@ -53,7 +52,6 @@ public:
   
   call_handler(M& method)
     : _method(method)
-    , _id_counter(0)
     , _reserve(256)
   {}
  
@@ -61,7 +59,7 @@ public:
   int request( T& t, call_request_ptr params, callback_type callback)
   {
     outgoing_request<call_request_type> resp;
-    resp.id = ++_id_counter;
+    resp.id = _create_id();
     resp.params = std::move(params);
     resp.method = _method.name();
     typedef typename outgoing_request_json<call_request_json>::serializer serializer;
@@ -79,54 +77,67 @@ public:
 
     t.get_aspect().template get<_output_>()(t, std::move(data) );
 
-    //t.get_aspect().template get<_invoke_>().request(t, resp.id, std::move(data) );
-    
     return resp.id;
   }
 
   template<typename T,  typename Itr >
-  void response(T& t, int id, Itr beg, Itr end)
+  bool response(T& t, time_point ts, int id, Itr beg, Itr end)
   {
-    auto itr = _callback_map.find(id);
-    if ( itr == _callback_map.end() )
-    {
-      // trace invalid id
-      return;
-    }
-
-    call_response_ptr resp;
-    if (beg==end)
-    {
-      call_response_ptr resp = std::make_unique<call_response_type>();
-      // TODO: try catch
-      call_response_serializer()(*resp, beg, end);
-    }
-    
-    itr->second(resp, nullptr);
-    _callback_map.erase(itr);
-    
-    /*
-    if (beg==end)
-      return;
-    
-    call_response_ptr resp = std::unique_ptr<call_response_type>(new call_response_type());
-    call_response_serializer()(*resp, beg, end);
-    _method.response(t, std::move(resp), id);
-    */
+    return _call<call_response_json>(t, id, beg, end,[this](callback_type f, call_response_ptr resp){
+      f( std::move(resp), nullptr);
+    });
   }
 
   template<typename T,  typename Itr >
-  void error(T& t, int id, Itr beg, Itr end)
+  bool error(T& t, time_point ts, int id, Itr beg, Itr end)
   {
+    _call<call_error_json>(t, id, beg, end,[this](callback_type f, call_error_ptr err){
+      f(nullptr, std::move(err) );
+    });
+  }
+
+  void set_create_id( std::function<int()> ci)
+  {
+    _create_id = ci;
+  }
+
+private:
+
+  template<typename J, typename T, typename Itr, typename F>
+  bool _call(T& t, int id, Itr beg, Itr end, F f)
+  {
+    auto itr = _callback_map.find(id);
+    if ( itr == _callback_map.end() )
+      return false;
+
+    typedef J json_type;
+    typedef typename J::target target_type;
+    typedef std::unique_ptr<target_type> target_ptr;
+
+    target_ptr resp;
+    if (beg!=end && *beg!='n')
+    {
+      resp = std::make_unique<target_type>();
+      try
+      {
+        typename json_type::serializer()(*resp, beg, end);
+      }
+      catch(const json::json_error& e)
+      {
+        t.get_aspect().template get<_invalid_json_>()(t, e, beg, end);
+      }
+    }
+    
+    f( itr->second, std::move(resp) );
+    _callback_map.erase(itr);
+    return true;
   }
 
 private:
   M& _method;
-  int _id_counter;
   size_t _reserve;
-
   callback_map _callback_map;
-  
+  std::function<int()> _create_id;
 };
 
 
@@ -134,7 +145,10 @@ template<typename M>
 class call_handler<M, false>
 {  
 public:
-  call_handler(M& ){}
+  call_handler(M&)
+  {
+    
+  }
 
   template<typename T,  typename Itr >
   void response(T& t, int id, Itr beg, Itr end)
