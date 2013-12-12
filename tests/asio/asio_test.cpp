@@ -1,8 +1,8 @@
-#include <wfc/asio/server.hpp>
-#include <wfc/asio/jsonrpc/aspect.hpp>
-#include <wfc/asio/jsonrpc/method.hpp>
-#include <wfc/asio/rn/aspect.hpp>
-#include <wfc/asio/rn/aspect.hpp>
+#include <wfc/inet/server.hpp>
+#include <wfc/inet/jsonrpc/aspect.hpp>
+#include <wfc/inet/jsonrpc/method.hpp>
+#include <wfc/inet/rn/aspect.hpp>
+#include <wfc/inet/rn/aspect.hpp>
 #include <boost/asio.hpp>
 #include <signal.h>
 using namespace ::wfc;
