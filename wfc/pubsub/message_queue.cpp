@@ -328,7 +328,7 @@ void message_queue::_remove( time_t now, message_ptr m)
     _publish( now, std::move(m) );
 }
 
-void message_queue::_remove( time_t now, const message& m)
+void message_queue::_remove( time_t /*now*/, const message& m)
 {
   _queue.erase(
     std::remove_if(

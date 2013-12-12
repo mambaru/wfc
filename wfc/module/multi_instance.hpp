@@ -12,7 +12,13 @@
 
 namespace wfc{
 
-template<typename BuildInfo, typename ConfigJson, typename Inst>
+template<
+  typename BuildInfo,
+  typename ConfigJson,
+  typename Inst, 
+  imodule::priority StartupPriority = imodule::priority::normal,
+  imodule::priority ShutdownPriority = imodule::priority::normal 
+>
 class multi_instance
   : public imodule
 {
@@ -28,12 +34,12 @@ public:
   
   virtual priority startup_priority() const
   {
-    
+    return StartupPriority;
   }
   
   virtual priority shutdown_priority() const
   {
-    
+    return ShutdownPriority;
   }
   
   virtual std::string version() const
@@ -46,7 +52,7 @@ public:
     return std::string();
   }
   
-  virtual std::string generate(const std::string& type) const
+  virtual std::string generate(const std::string& /*type*/) const
   {
     std::string strconf;  
     instance_config conf;
@@ -135,7 +141,7 @@ public:
     std::sort(new_list.begin(), new_list.end());
     std::sort(old_list.begin(), old_list.end());
 
-    auto itr = std::set_difference(
+    std::set_difference(
       old_list.begin(), old_list.end(),
       new_list.begin(), new_list.end(),
       std::back_inserter(stop_list)

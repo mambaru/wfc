@@ -19,22 +19,3 @@ IF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
     SET(CMAKE_C_FLAGS_RELEASE "-O2 -ggdb -march=core2")
 ENDIF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
 
-MACRO(build_info target_name prefix)
-  add_custom_target(
-    ${prefix}_build_info
-    COMMAND
-      /bin/bash ${CMAKE_SOURCE_DIR}/wfc/build_info.sh ${prefix} ${CMAKE_BINARY_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Create build info files"
-    VERBATIM
-  )
-  add_dependencies(${target_name} ${prefix}_build_info)
-  target_link_libraries(${target_name} ${CMAKE_BINARY_DIR}/${prefix}_build_info.a)
-  SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_CURRENT_SOURCE_DIR}/build_info.h")
-ENDMACRO(build_info)
-
-#
-# Boost filesystem
-#
-CONFIGURE_LIBRARY(boost/system/error_code.hpp  "/usr/include /usr/local/include"
-                  boost_system-mt   "/lib /usr/lib /usr/local/lib /usr/lib64")

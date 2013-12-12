@@ -151,9 +151,9 @@ public:
   }
 
   //void takeaway(std::vector<message>& m)
-  void takeaway(std::vector< std::unique_ptr<topic> >& m)
+  void takeaway(std::vector< std::unique_ptr<topic> >& /*m*/)
   {
-#warning TODO
+//! #warning TODO
     /*
     if ( _topics.empty() )
       return;
@@ -185,7 +185,7 @@ public:
 
   void idle()
 	{
-    #warning TODO
+//!    #warning TODO
     /*
 		size_t limit = _topics.size()/100;
 		if (limit==0) limit = 10;

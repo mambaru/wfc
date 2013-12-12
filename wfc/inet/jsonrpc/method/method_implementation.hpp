@@ -31,7 +31,7 @@ public:
     , invoke_notify_handler_base( static_cast<M&>(*this) )
     , call_notify_handler_base( static_cast<M&>(*this) )
     , _method_index(-1)
-#warning
+//#warning
     , _enable_stat(false)
   {
   };
