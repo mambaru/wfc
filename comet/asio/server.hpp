@@ -61,7 +61,6 @@ public:
     this->do_accept();
     if ( !_acceptor.is_open() )
       std::cout << "dont open!" << std::endl;
-
   }
 
   void stop()

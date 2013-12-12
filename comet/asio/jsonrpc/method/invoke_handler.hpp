@@ -70,7 +70,7 @@ public:
     
     invoke_request_ptr req = nullptr;
 
-    if ( beg != end) try
+    if ( beg!=end && *beg!='n') try
     {
       req = std::make_unique<invoke_request_type>();
       invoke_request_serializer()(*req, beg, end);
@@ -98,6 +98,8 @@ public:
       return callback_status::ready;
     }));
   }
+
+private:
 
   template<typename T>
   void response(T& t, invoke_response_ptr result, int id)
@@ -130,7 +132,7 @@ public:
     serializer()(resp,   std::back_inserter(*data));
     if ( data->size() > _reserve )
       _reserve = data->size();
-    if (_reserve > 1024*8 )
+    if ( _reserve > 1024*8 )
       _reserve = 1024*8;
     t.get_aspect().template get<_output_>()(t, std::move(data) );
   }

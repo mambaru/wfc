@@ -25,7 +25,22 @@ struct f_init_index
     t.get_aspect().template get<Tg>().initialize(++count, create_id);
   }
 };
+
+struct f_enable_stat
+{
+  bool enable;
   
+  f_enable_stat(bool enable)
+    : enable(true)
+  {}
+
+  template<typename T, typename Tg>
+  void operator()(T& t, fas::tag<Tg> )
+  {
+    t.get_aspect().template get<Tg>().enable_stat(enable);
+  }
+};
+
 struct f_invoke_request
 {
   incoming& req;
@@ -122,7 +137,8 @@ struct f_invoke_error
     if (found)
       return;
     
-    found = t.get_aspect().template get<Tg>().invoke_error(t, ts, *req.id, req.result.first, req.result.second);
+    found = t.get_aspect().template get<Tg>()
+             .invoke_error(t, ts, *req.id, req.result.first, req.result.second);
   }
 };
 
@@ -142,6 +158,13 @@ public:
     fas::for_each_group<_method_>(t, f_init_index(_create_id) );
   }
 
+  template<typename T>
+  void enable_stat(T& t, bool enable)
+  {
+    fas::for_each_group<_method_>(t, f_enable_stat(enable) );
+  }
+
+  
   int create_id() 
   {
     return ++_id_counter; 

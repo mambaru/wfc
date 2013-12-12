@@ -28,14 +28,13 @@ public:
   }
 
   template<typename T,  typename Itr>
-  void notify(T& t, time_point ts, Itr beg, Itr end)
+  void notify(T& t, Itr beg, Itr end, stat_function stat)
   {
-    if ( beg == end) return;
+    invoke_notify_ptr req = nullptr;
 
-    invoke_notify_ptr req = std::make_unique<invoke_notify_type>();
-
-    try
+    if ( beg!=end && *beg!='n') try
     {
+      req = std::make_unique<invoke_notify_type>();
       invoke_notify_serializer()(*req, beg, end);
     }
     catch(const json::json_error& e)
@@ -45,7 +44,9 @@ public:
     }
 
     _method.notify(t, std::move(req) );
-
+    
+    if (stat != nullptr)
+      stat( std::chrono::high_resolution_clock::now(), true);
   }
 };
 
@@ -55,7 +56,7 @@ class invoke_notify_handler<M, false>
 public:
   invoke_notify_handler(M& ){}
   template<typename T,  typename Itr>
-  void notify(T& t, time_point ts, Itr beg, Itr end)
+  void notify(T& t, Itr beg, Itr end, stat_function stat)
   {
   }
 };

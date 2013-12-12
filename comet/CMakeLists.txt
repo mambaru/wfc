@@ -12,4 +12,7 @@ add_library(
   comet SHARED
   ${comet_source_list}
 )
+
+target_link_libraries(comet boost_system)
+
 build_info(comet comet)

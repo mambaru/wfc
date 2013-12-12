@@ -144,7 +144,7 @@ struct ad_start
 struct ad_stat
 {
   template<typename T>
-  void operator()(T& t,  inet::jsonrpc::stat_category cat, inet::time_point start, inet::time_point finish, bool succ)
+  void operator()(T& t, int method_index, inet::jsonrpc::stat_category cat, inet::time_point start, inet::time_point finish, bool succ)
   {
     long int ms = std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count();
     std::cout << "stat ms " << ms << std::endl;

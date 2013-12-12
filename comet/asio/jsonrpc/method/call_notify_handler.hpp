@@ -29,7 +29,7 @@ public:
   }
 
   template< typename T >
-  void notify(T& t, call_notify_ptr params)
+  void notify(T& t, call_notify_ptr params, stat_function stat)
   {
     outgoing_notify<call_notify_type> ntf;
     ntf.params = std::move(params);
@@ -46,6 +46,8 @@ public:
       _reserve = 1024*8;
       
     t.get_aspect().template get<_output_>()(t, std::move(data) );
+    
+    stat(std::chrono::high_resolution_clock::now(), true);
   }
   
 private:
