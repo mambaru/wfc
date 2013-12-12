@@ -1,8 +1,8 @@
-#include <comet/core/registry.hpp>
+#include <wfc/core/registry.hpp>
 #include <vector>
 #include <algorithm>
 
-using namespace ::mamba::comet;
+using namespace ::wfc;
 
 int main()
 {

@@ -49,4 +49,4 @@ else(HAVE_RT_LIB)
 endif(HAVE_RT_LIB)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/config.h.in"
-               "${CMAKE_CURRENT_SOURCE_DIR}/../comet/system/config.h" )
+               "${CMAKE_CURRENT_SOURCE_DIR}/../wfc/system/config.h" )

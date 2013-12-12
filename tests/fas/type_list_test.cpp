@@ -2,7 +2,7 @@
 #include <fas/hierarchy.hpp>
 #include <fas/static_check.hpp>
 
-//using namespace ::mamba::comet;
+//using namespace ::wfc;
 
 typedef fas::type_list_n<
   int, char, double

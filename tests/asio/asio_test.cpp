@@ -1,11 +1,11 @@
-#include <comet/asio/server.hpp>
-#include <comet/asio/jsonrpc/aspect.hpp>
-#include <comet/asio/jsonrpc/method.hpp>
-#include <comet/asio/rn/aspect.hpp>
-#include <comet/asio/rn/aspect.hpp>
+#include <wfc/asio/server.hpp>
+#include <wfc/asio/jsonrpc/aspect.hpp>
+#include <wfc/asio/jsonrpc/method.hpp>
+#include <wfc/asio/rn/aspect.hpp>
+#include <wfc/asio/rn/aspect.hpp>
 #include <boost/asio.hpp>
 #include <signal.h>
-using namespace ::mamba::comet;
+using namespace ::wfc;
 
 struct test_request
 {

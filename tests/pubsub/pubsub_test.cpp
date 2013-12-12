@@ -1,10 +1,10 @@
-#include <comet/pubsub/topic_hub.hpp>
+#include <wfc/pubsub/topic_hub.hpp>
 
 #include <vector>
 #include <iostream>
 #include <algorithm>
 
-using namespace ::mamba::comet;
+using namespace ::wfc;
 
 int test1()
 {

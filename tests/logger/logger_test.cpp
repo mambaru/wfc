@@ -1,8 +1,8 @@
-#include <comet/core/global.hpp>
-#include <comet/logger/logger.hpp>
+#include <wfc/core/global.hpp>
+#include <wfc/logger/logger.hpp>
 #include <iostream>
 
-using namespace ::mamba::comet;
+using namespace ::wfc;
 
 class logger1:public ilogger
 {

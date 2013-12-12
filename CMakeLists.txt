@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(comet)
+project(wfc)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/cmake")
@@ -8,5 +8,5 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/cmake")
 include_directories(.)
 
 add_subdirectory(config)
-add_subdirectory(comet)
+add_subdirectory(wfc)
 add_subdirectory(tests)

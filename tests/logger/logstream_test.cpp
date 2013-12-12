@@ -1,7 +1,7 @@
-#include <comet/logger/logstream.hpp>
+#include <wfc/logger/logstream.hpp>
 #include <iostream>
 
-using namespace ::mamba::comet;
+using namespace ::wfc;
 
 class logger:public ilogger
 {

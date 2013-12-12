@@ -1,13 +1,13 @@
 
 /*
 
-#include <comet/fas/type_list.hpp>
-#include <comet/fas/aspect.hpp>
-#include <comet/fas/advice.hpp>
-#include <comet/fas/tag.hpp>
+#include <wfc/fas/type_list.hpp>
+#include <wfc/fas/aspect.hpp>
+#include <wfc/fas/advice.hpp>
+#include <wfc/fas/tag.hpp>
 */
 
-//using namespace ::mamba::comet;
+//using namespace ::wfc;
 
 int main()
 {
