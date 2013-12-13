@@ -9,7 +9,7 @@ namespace wfc{ namespace inet{ namespace jsonrpc{
 
 struct version_member
 {
-  NAME(jsonrpc);
+  NAME(jsonrpc)
   typedef json::member<n_jsonrpc, outgoing, outgoing::version_type, &outgoing::version> type;
 };  
 

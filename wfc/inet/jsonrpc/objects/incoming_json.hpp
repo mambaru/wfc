@@ -11,11 +11,11 @@ struct incoming_json
   typedef json::raw_pair<pair_type> pair_json;
   typedef json::pointer< std::unique_ptr<int>, json::value<int> > id_json;
   
-  NAME(id);
-  NAME(method);
-  NAME(params);
-  NAME(result);
-  NAME(error);
+  NAME(id)
+  NAME(method)
+  NAME(params)
+  NAME(result)
+  NAME(error)
   
   typedef json::object<
     incoming, 

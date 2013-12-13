@@ -17,8 +17,8 @@ struct outgoing_response_json
 
   typedef json::pointer<std::unique_ptr<target>, T> result_json;
   
-  NAME(id);
-  NAME(result);
+  NAME(id)
+  NAME(result)
   
   typedef json::object<
     response_type,

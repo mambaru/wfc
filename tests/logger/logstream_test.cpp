@@ -10,8 +10,8 @@ public:
   //virtual void initialize(const std::string& name, std::stringstream& str) = 0;
   //virtual void write(const std::string& name, const std::string& ident,  const std::string& str) = 0;
   
-  virtual void initialize(const std::string& name, std::stringstream& str) {};
-  virtual void write(const std::string& name, const std::string& ident, const std::string& s) { str=s;}
+  virtual void initialize(const std::string& /*name*/, std::stringstream& /*str*/) {};
+  virtual void write(const std::string& /*name*/, const std::string& /*ident*/, const std::string& s) { str=s;}
   std::string str;
 };
 

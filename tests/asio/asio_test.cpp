@@ -51,7 +51,7 @@ struct test_method
   
 
   template<typename T, typename Callback>
-  void request(T& t, std::unique_ptr<test_request> req, int id, Callback callback)
+  void request(T& /*t*/, std::unique_ptr<test_request> req, int /*id*/, Callback callback)
   {
     /*
     if ( _callback != nullptr )
@@ -144,7 +144,7 @@ struct ad_start
 struct ad_stat
 {
   template<typename T>
-  void operator()(T& t, int method_index, inet::jsonrpc::stat_category cat, inet::time_point start, inet::time_point finish, bool succ)
+  void operator()(T& /*t*/, int /*method_index*/, inet::jsonrpc::stat_category /*cat*/, inet::time_point start, inet::time_point finish, bool /*succ*/)
   {
     long int ms = std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count();
     std::cout << "stat ms " << ms << std::endl;
@@ -182,7 +182,7 @@ typedef server_type::connection_type connection_type;
 std::shared_ptr<connection_type> conn;
 
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char* /*argv*/[])
 {
     
   inet::server_config conf;

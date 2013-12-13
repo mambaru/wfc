@@ -17,13 +17,13 @@ public:
     
   }
   
-  int run( int argc, char* argv[], std::weak_ptr<global> g )
+  int run( int /*argc*/, char* /*argv*/[], std::weak_ptr<global> g )
   {
     if ( auto gl = g.lock() )
     {
       if ( auto gm = gl->modules.lock() )
       {
-        gm->for_each([](const std::string& name, std::weak_ptr<imodule> module ){
+        gm->for_each([](const std::string& /*name*/, std::weak_ptr<imodule> module ){
           if ( auto m = module.lock() )
             m->start();
         });
@@ -48,8 +48,8 @@ public:
 
   virtual std::string version() const { return std::string();}
   virtual std::string description() const { return std::string();}
-  virtual std::string generate(const std::string& type) const { return std::string();}
-  virtual bool parse_config(const std::string& conf) { return true;}
+  virtual std::string generate(const std::string& /*type*/) const { return std::string();}
+  virtual bool parse_config(const std::string& /*conf*/) { return true;}
 
   virtual void create( const std::string&,  std::weak_ptr<global> g )
   {
@@ -60,7 +60,7 @@ public:
       gl->core = _core;
   }
   
-  virtual void configure(const std::string& conf)
+  virtual void configure(const std::string& /*conf*/)
   {
     
   }
@@ -98,7 +98,7 @@ public:
 
   }
 
-  void run( int argc, char* argv[], std::weak_ptr<global> g )
+  void run( int /*argc*/, char* /*argv*/[], std::weak_ptr<global> /*g*/ )
   {
 
   }
@@ -108,15 +108,15 @@ public:
 
   virtual std::string version() const { return std::string();}
   virtual std::string description() const { return std::string();}
-  virtual std::string generate(const std::string& type) const { return std::string();}
-  virtual bool parse_config(const std::string& conf) { return true;}
+  virtual std::string generate(const std::string& /*type*/) const { return std::string();}
+  virtual bool parse_config(const std::string& /*conf*/) { return true;}
 
-  virtual void create( const std::string&,  std::weak_ptr<global> g )
+  virtual void create( const std::string&,  std::weak_ptr<global> /*g*/ )
   {
     std::cout << "create" << std::endl;
   }
 
-  virtual void configure(const std::string& conf)
+  virtual void configure(const std::string& /*conf*/)
   {
 
   }

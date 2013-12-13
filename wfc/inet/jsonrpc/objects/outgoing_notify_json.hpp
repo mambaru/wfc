@@ -16,8 +16,8 @@ struct outgoing_notify_json
 
   typedef json::pointer<std::unique_ptr<target>, T> params_json;
   
-  NAME(method);
-  NAME(params);
+  NAME(method)
+  NAME(params)
   
   typedef json::object<
     notify_type,

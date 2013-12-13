@@ -92,13 +92,13 @@ public:
   }
 
   template<typename T, typename Itr>
-  bool invoke_response(T& t, time_point ts, int id,  Itr beg, Itr end)
+  bool invoke_response(T& t, time_point /*ts*/, int id,  Itr beg, Itr end)
   {
     return call_handler_base::response(t, id, beg, end);
   }
 
   template<typename T, typename Itr>
-  bool invoke_error(T& t, time_point ts, int id,  Itr beg, Itr end)
+  bool invoke_error(T& t, time_point /*ts*/, int id,  Itr beg, Itr end)
   {
     return call_handler_base::error(t, id, beg, end);
   }

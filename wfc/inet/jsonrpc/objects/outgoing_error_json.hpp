@@ -16,8 +16,8 @@ struct outgoing_error_json
   typedef json::pointer<std::unique_ptr<target>, T> error_json;
   typedef json::pointer<std::unique_ptr<int>, json::value<int> > id_json;
   
-  NAME(error);
-  NAME(id);
+  NAME(error)
+  NAME(id)
   
   typedef json::object<
     error_type,

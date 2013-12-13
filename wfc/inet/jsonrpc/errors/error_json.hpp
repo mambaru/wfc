@@ -8,8 +8,8 @@ namespace wfc{ namespace inet{ namespace jsonrpc{
 
 struct error_json
 {
-  NAME(code);
-  NAME(message);
+  NAME(code)
+  NAME(message)
   
   typedef json::object<
     error, 

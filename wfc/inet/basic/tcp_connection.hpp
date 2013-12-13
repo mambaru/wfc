@@ -146,7 +146,7 @@ private:
   socket_ptr _socket;
   strand_ptr _strand;
   callback_owner _owner;
-  std::array<char, 8192*2> _buffer;
+  //std::array<char, 8192*2> _buffer;
 };
 
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >

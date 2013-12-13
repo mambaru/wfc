@@ -91,7 +91,7 @@ public:
   template<typename T,  typename Itr >
   bool error(T& t, int id, Itr beg, Itr end)
   {
-    _call<call_error_json>(t, id, beg, end,[this](callback_type f, call_error_ptr err){
+    return _call<call_error_json>(t, id, beg, end,[this](callback_type f, call_error_ptr err){
       f(nullptr, std::move(err) );
     });
   }

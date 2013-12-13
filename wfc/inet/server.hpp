@@ -8,10 +8,24 @@
 
 namespace wfc{ namespace inet{
   
+//template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
+
+template<
+  typename A, 
+  template<typename> class AspectClass, 
+  template<typename, template<typename> class > class Connect, 
+  typename ServerAspect >
+class server
+{
+  //
+};
+  
 template<typename Conn=echo_connection<> >
 class tcp_server
 {
 public:
+  // typedef TODO: Conn::rebind<>::type
+  
   typedef Conn connection_type;
   typedef std::shared_ptr<connection_type> connection_ptr;
   //typedef typename connection_type::origin_connection origin_connection;
@@ -47,7 +61,6 @@ public:
   {
     return _context;
   }
-
 
   void start( const server_config& conf)
   {

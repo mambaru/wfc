@@ -58,7 +58,7 @@ int test2()
 
 
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char* /*argv*/[])
 {
   
   return test1() + test2();

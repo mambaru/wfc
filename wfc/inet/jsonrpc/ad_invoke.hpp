@@ -31,7 +31,7 @@ struct f_enable_stat
   bool enable;
   
   f_enable_stat(bool enable)
-    : enable(true)
+    : enable(enable)
   {}
 
   template<typename T, typename Tg>
@@ -99,9 +99,10 @@ struct f_invoke_notify
 
 struct f_invoke_response
 {
-  bool found;
-  time_point ts;
   incoming& req;
+  time_point ts;
+  bool found;
+  
   f_invoke_response(incoming& req, time_point ts)
     : req(req)
     , ts(ts)
@@ -121,9 +122,10 @@ struct f_invoke_response
 
 struct f_invoke_error
 {
-  bool found;
-  time_point ts;
   incoming& req;
+  time_point ts;
+  bool found;
+  
   f_invoke_error(incoming& req, time_point ts)
     : req(req)
     , ts(ts)
@@ -254,8 +256,6 @@ private:
   {
     if ( fas::for_each_group<_method_>(t, f_invoke_notify(req, start) ).found )
     {
-      time_point finish = std::chrono::high_resolution_clock::now();
-      long int ns = std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count();
     }
     else
     {
@@ -267,14 +267,18 @@ private:
   void _invoke_result(T& t, incoming& req, time_point start)
   {
     if ( fas::for_each_group<_method_>(t, f_invoke_response(req, start) ).found )
-      ; // TODO: notify not found
+    {
+       // TODO: notify not found
+    }
   }
 
   template<typename T>
   void _invoke_error(T& t, incoming& req, time_point start)
   {
     if ( fas::for_each_group<_method_>(t, f_invoke_error(req, start) ).found )
-      ; // TODO: error not found
+    {
+       // TODO: error not found
+    }
   }
   
 private:

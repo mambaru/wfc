@@ -15,37 +15,23 @@ struct ad_writer
   typedef std::list<data_ptr> data_list_type;
   typedef ::boost::asio::const_buffer buffer_type;
 
-  
-
   static constexpr size_t BUFFER_SIZE=8096*2;
 
   template<typename T>
   void operator()(T& t, data_ptr d)
   {
-    
     if ( d==nullptr || d->empty() )
       return;
 
-    
-    
     if ( !_data_list.empty() )
     {
       _data_list.push_back(std::move(d));
     }
     else
     {
-      const char *ptr = &((*d)[0]);
-
-      auto buf = ::boost::asio::buffer(d->data(), d->size());
-      //size_t s = t.socket().send( buf );
-      int sock = t.socket().native_handle();
-      fas::nanospan ns = fas::nanotime();
-      size_t s = t.socket().send( ::boost::asio::buffer(d->data(), d->size()) );
-      //size_t s = ::send( sock, d->data(), d->size(), 0 );
-      fas::nanospan nf = fas::nanotime();
-      std::cout << "method timeout " << nf-ns << std::endl;
-      std::cout << "method rate " << fas::rate(nf-ns) << std::endl;
       
+      size_t s = t.socket().send( ::boost::asio::buffer(d->data(), d->size()) );
+
       if ( s != d->size() )
       {
         d->erase(d->begin(), d->begin()+s);
@@ -53,7 +39,10 @@ struct ad_writer
         do_write(t);
       }
       else
-        ;
+      {
+        
+      }
+        
     }
 
 
@@ -69,7 +58,7 @@ struct ad_writer
     t.socket().async_write_some(
       ::boost::asio::buffer( _data_list.front()->data(),  _data_list.front()->size() ),
       t.strand().wrap(
-      [this, &t, wk](boost::system::error_code ec, std::size_t bytes_transferred)
+      [this, &t, wk](boost::system::error_code /*ec*/, std::size_t bytes_transferred)
       {
         auto alive = wk.lock();
         if (!alive)

@@ -11,7 +11,7 @@ public:
   {
   }
   
-  virtual void initialize(const std::string& name, std::stringstream& str) 
+  virtual void initialize(const std::string& /*name*/, std::stringstream& /*str*/) 
   {
     str.clear();
     std::cout << "initialize" << std::endl; 

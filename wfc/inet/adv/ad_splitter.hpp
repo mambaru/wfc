@@ -71,8 +71,7 @@ struct ad_splitter
         }
       }
     }
-      
-  };
+  }
   
 private:
   

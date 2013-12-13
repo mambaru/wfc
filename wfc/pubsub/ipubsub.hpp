@@ -60,7 +60,7 @@ struct ipubsub
   /// interface
   ///
 
-  virtual void subscribe( request_subscribe_ptr, subscriber_function, subscribe_callback ) = 0;
+  virtual void subscribe(request_subscribe_ptr, subscriber_function, subscribe_callback ) = 0;
 
   virtual void publish(request_publish_ptr, publish_callback) = 0;
 
@@ -77,6 +77,7 @@ struct ipubsub
 
 class pubsub: public ipubsub
 {
+  // TODO:
   // дефолтная имплементация ipubsub status::not_supported
 };
 
