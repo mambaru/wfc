@@ -81,25 +81,36 @@ struct connection_t
   using type = Conn<A, AspectClass>;
 };
 
-template<typename Conn>
-struct connection_manager_impl
+class connection_manager
 {
-  typedef Conn connection_type;
+  typedef std::mutex mutex_type;
 public:
-  void insert(std::shared_ptr<connection_type> conn)
+  void insert(std::shared_ptr<iconnection> conn)
   {
+    std::lock_guard<mutex_type> lk(_mutex);
     _connections.insert(conn);
   }
 
-  void erase(std::shared_ptr<connection_type> conn)
+  void erase(std::shared_ptr<iconnection> conn)
   {
-    _connections.insert(conn);
+    std::lock_guard<mutex_type> lk(_mutex);
+    _connections.erase(conn);
+  }
+  
+  void stop()
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    for (auto& ptr : _connections )
+      ptr->close();
+    _connections.clear();
   }
   
 private:
-  std::set< std::shared_ptr<connection_type> > _connections;
+  std::set< std::shared_ptr<iconnection> > _connections;
+  std::mutex _mutex;
 };
 
+/*
 template<template<typename> class ConnMgr = connection_manager_impl >
 struct connection_manager_t
 {
@@ -111,6 +122,7 @@ template<template<typename> class ConnMgr = connection_manager_impl >
 struct connection_manager
   : fas::type<_connection_manager_, connection_manager_t<ConnMgr> >
 {};
+*/
 
 
 
@@ -165,10 +177,128 @@ struct context_server
 {
   std::string host;
   std::string port;
+  int listen_threads;
+  
+  context_server()
+    : listen_threads(0)
+  {}
 };
+
 struct context_connection
 {
   bool enable_stat;
+};
+
+class work_thread
+{
+  typedef ::boost::asio::ip::tcp::socket socket_type;
+  typedef std::function<void(socket_type)> func_type;
+  std::map<int, socket_type> _sockets;
+
+public:
+  // TODO: stop
+  void start()
+  {
+    _thread = std::thread([this](){
+      std::cout <<  "work_thread start" <<  std::endl;
+      // TODO: как выходить? ? ? 
+      ::boost::asio::io_service::work work(this->_io_service);
+      ///!!! вернуть this->_io_service.run();
+      for (;;)
+      {
+        this->_io_service.run_one();
+        std::cout <<  "work_thread run_one()" <<  std::endl;
+
+      }
+      std::cout <<  "work_thread stop" <<  std::endl;
+    });
+  }
+
+  void post(socket_type sock , func_type fun)
+  {
+    ++_post_counter;
+    std::cout <<  "work_thread post 1" <<  std::endl;
+
+    socket_type::native_handle_type fd = sock.native_handle();
+    auto itr = _sockets.insert( std::make_pair(fd, std::move(sock))).first;
+
+    ::boost::asio::ip::tcp::endpoint::protocol_type protoc = itr->second.local_endpoint().protocol();
+
+    _io_service.post([this, fd, protoc, fun]() 
+    {
+      std::cout <<  "work_thread post 3 exec 1 handle = " << fd <<  std::endl;
+      socket_type sock(this->_io_service, protoc,  fd);
+      std::cout <<  "work_thread post 3 exec 2" <<  std::endl;
+      // TODO: Release from _sockets при закрытии 
+      // Хуй знает как 
+      fun( std::move(sock) );
+      std::cout <<  "work_thread post 3 exec 3" <<  std::endl;
+      --(this->_post_counter);
+
+    });
+
+    
+    /*auto itr = *///_sockets.insert( std::move(sock) ).first;
+    /*
+    ::boost::asio::ip::tcp::endpoint::protocol_type protocol = sock.local_endpoint().protocol();
+    socket_type::native_handle_type native_handle = sock.native_handle();
+    std::unique_ptr<socket_type> sock2 = std::make_unique<socket_type>(_io_service, protocol,  native_handle);
+    */
+   
+   /*!
+   std::pair<
+     ::boost::asio::ip::tcp::endpoint::protocol_type, 
+     socket_type::native_handle_type
+    > pp(
+      itr->local_endpoint().protocol(), 
+      fd
+      );
+
+    std::cout <<  "work_thread post 2" <<  std::endl;
+
+    _io_service.post([this, pp, fun]() 
+    {
+      std::cout <<  "work_thread post 3 exec 1 handle = " << pp.second <<  std::endl;
+      socket_type sock(this->_io_service, pp.first, pp.second);
+      std::cout <<  "work_thread post 3 exec 2" <<  std::endl;      
+      fun( std::move(sock) );
+      std::cout <<  "work_thread post 3 exec 2" <<  std::endl;
+
+    });
+    */
+  }
+private:
+  std::atomic<int> _post_counter;
+  ::boost::asio::io_service _io_service;
+  std::thread _thread;
+};
+
+struct ad_new_connection
+{
+  typedef ::boost::asio::ip::tcp::socket socket_type;
+  typedef std::function<void(socket_type)> func_type;
+  
+  /// initialize
+  template<typename T>
+  void operator()(T& , ::boost::asio::io_service& /*io*/)
+  {
+    std::cout <<  "ad_new_connection initialize" <<  std::endl;
+    _work_thread.start();
+  }
+
+  
+  template<typename T>
+  void operator()(T&, socket_type sock , func_type fun)
+  {
+    //std::shared_ptr<socket_type> tmp(std::move(sock));
+    //std::cout <<  "ad_new_connection" <<  std::endl;
+    //fun( std::move(sock) );
+    _work_thread.post( std::move(sock),  fun);
+  }
+
+private:
+  // TODO: массив (пул воркеров)
+  work_thread _work_thread;
 };
 
 class accept_thread
@@ -183,20 +313,11 @@ public:
     , _socket(io)
     , _acceptor(nullptr)
   {
+    
   }
 
   accept_thread(const accept_thread&) = delete;
   accept_thread& operator=(const accept_thread&) = delete;
-
-  /*
-  std::unique_ptr<acceptor> create()
-  {
-    std::unique_ptr<acceptor> acc = std::make_unique<acceptor>(_io_service);
-    acc->_socket = std::make_unique<socket_type>(_io_service);
-    acc->_acceptor = std::make_unique<acceptor_type>(_io_service);
-    return acc;
-  }
-  */
   
   template<typename T>
   void start(T& t, acceptor_type* acceptor)
@@ -204,9 +325,11 @@ public:
     _acceptor = acceptor;
     typedef typename T::connection_type connection_type;
     _thread = std::thread([this, &t](){
+        std::cout << "thread start " << std::this_thread::get_id() << std::endl;
+      connection_manager mgr;
       for(;;)
       {
-        std::cout << "thread start " << std::this_thread::get_id() << std::endl;
+        std::cout << "thread for(;;) " << std::this_thread::get_id() << std::endl;
         //sleep(10);
         boost::system::error_code ec;
         this->_acceptor->accept( this->_socket, ec);
@@ -218,70 +341,45 @@ public:
         }
         if (!ec)
         {
+          t.get_aspect().template get<_new_connection_>()(t, std::move( this->_socket), [&t, &mgr](socket_type sock) 
+          {
+            std::shared_ptr<connection_type> pconn = std::make_shared<connection_type>();
+            pconn->context() = t.connection_context();
+            mgr.insert(pconn);
+            pconn->start( std::move( sock ), [&mgr](std::shared_ptr<connection_type> pconn)->void
+            {
+              std::cout << "connection close " << std::endl;
+              mgr.erase(pconn);
+            });
+          });
+          /*
           // Connection creator _new_connection_
           std::shared_ptr<connection_type> pconn = std::make_shared<connection_type>();
           pconn->context() = t.connection_context();
           std::shared_ptr<iconnection> iconn = pconn;
-          this->_connections.insert(pconn);
+          mgr.insert(pconn);
           
           std::cout << "connection start " << std::endl;
           // TODO: безопасный callback (aka callback_owner)
-          pconn->start( std::move( this->_socket ), [this](std::shared_ptr<connection_type> pconn)->void{
+          pconn->start( std::move( this->_socket ), [&mgr](std::shared_ptr<connection_type> pconn)->void
+          {
             std::cout << "connection close " << std::endl;
-            this->_connections.erase(pconn);
-          });
+            mgr.erase(pconn);
+          });*/
         }
         else
           std::cout << "thread accept error: " << ec.message() << std::endl;
           
       }
     });
-    sleep(1);
+    //sleep(1);
   }
 
-  /*
-  template<typename T>
-  void do_accept(T& t)
-  {
-    this->_acceptor.async_accept(
-      this->_socket,
-      [this, &t](boost::system::error_code ec)
-      {
-        typedef typename T::connection_type connection_type;
-        
-        if (!_acceptor.is_open())
-        {
-          return;
-        }
-
-        if (!ec)
-        {
-          std::shared_ptr<connection_type> pconn = std::make_shared<connection_type>();
-          pconn->context() = t.connection_context();
-          std::shared_ptr<iconnection> iconn = pconn;
-          this->_connections.insert(pconn);
-          
-          // TODO: безопасный callback (aka callback_owner)
-          pconn->start( std::move( this->_socket ), [this](std::shared_ptr<connection_type> pconn)->void{
-            this->_connections.erase(pconn);
-          });
-        }
-        this->do_accept(t);
-      } // callback
-    ); // async_accept
-  }
-  */
 
 private:  
   ::boost::asio::io_service::work _work;
   socket_type _socket;
   acceptor_type* _acceptor;
-  //::boost::asio::io_service& _io_service;
-  /*
-  std::unique_ptr<socket_type> _socket;
-  std::unique_ptr< acceptor_type > _acceptor;
-  */
-  std::set< std::shared_ptr<iconnection> > _connections;
   std::thread _thread;
 };
 
@@ -297,13 +395,12 @@ struct ad_acceptor
   
   template<typename T>
   void operator()(T& , ::boost::asio::io_service& io)
-    //: _accept_thread(io)
   {
     _io_service = &io;
     _acceptor = std::make_unique<acceptor_type>(io);
+    _socket = std::make_unique<socket_type>(io);
     /* initialize */
     /*
-    _socket = std::make_unique<socket_type>(io);
     _acceptor = std::make_unique<acceptor_type>(io);
     _acceptor2 = std::make_unique<acceptor_type>(io);
     */
@@ -325,50 +422,30 @@ struct ad_acceptor
     _acceptor->bind(endpoint);
     _acceptor->listen();
     
-    _accept_thread = std::make_unique<accept_thread>(*_io_service);
-    _accept_thread2 = std::make_unique<accept_thread>(*_io_service);
-    std::cout << "start..." << std::endl;
-    _accept_thread->start(t, &(*_acceptor) );
-    _accept_thread2->start(t, &(*_acceptor) );
-    std::cout << "start... ok" << std::endl;
+    int threads = t.server_context().listen_threads;
+    for (int i=0; i< threads; ++i)
+    {
+      _accept_threads.push_back( std::make_unique<accept_thread>(*_io_service) );
+      _accept_threads.back()->start(t, &(*_acceptor) );
+    }
     
-
-    /*
-    _acceptor2->assign(endpoint.protocol(), _acceptor->native() );
-    
-    _acceptor2->open(endpoint.protocol());
-    _acceptor2->set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
-    _acceptor2->bind(endpoint);
-    _acceptor2->listen();
-    
-    this->do_accept(t, *_acceptor2, true);
-    this->do_accept(t, *_acceptor, false);
-    */
-    //_acceptor->close();
+    if (threads==0)
+      this->do_accept(t);
   }
   
   template<typename T>
-  void do_accept(T& t, acceptor_type& acceptor, bool flags)
+  void do_accept(T& t)
   {
-    acceptor.async_accept(
+    std::cout <<  "single do accept " <<  std::endl;
+    _acceptor->async_accept(
       *_socket,
-      [this, &t, &acceptor, flags](boost::system::error_code ec)
+      [this, &t](boost::system::error_code ec)
       {
-        std::cout << "accept " << flags << std::endl;
-        /*
-        
-        if ( flags )
-        {
-          std::cout << "sleep " << std::endl;
-          sleep(10000000);
-        }
-        std::cout << "ready " << std::endl;
-        */
         typedef typename T::connection_type connection_type;
         
         // Check whether the server was stopped by a signal before this
         // completion handler had a chance to run.
-        if (!acceptor.is_open())
+        if (!_acceptor->is_open())
         {
           return;
         }
@@ -378,14 +455,17 @@ struct ad_acceptor
           std::shared_ptr<connection_type> pconn = std::make_shared<connection_type>();
           pconn->context() = t.connection_context();
           std::shared_ptr<iconnection> iconn = pconn;
-          this->_connections.insert(pconn);
+          _connection_manager.insert(pconn);
           
           // TODO: безопасный callback (aka callback_owner)
           pconn->start( std::move( *(this->_socket) ), [this](std::shared_ptr<connection_type> pconn)->void{
-            this->_connections.erase(pconn);
+            _connection_manager.erase(pconn);
           });
         }
-        this->do_accept(t, acceptor, flags);
+        else
+          std::cout <<  "single do accept error " <<  ec.message() <<  std::endl;
+
+        this->do_accept(t);
         
       } // callback
     ); // async_accept
@@ -395,23 +475,25 @@ struct ad_acceptor
 private:
   std::unique_ptr<socket_type> _socket;
   ::boost::asio::io_service* _io_service;
-  std::unique_ptr<accept_thread> _accept_thread;
-  std::unique_ptr<accept_thread> _accept_thread2;
+  std::list< std::unique_ptr<accept_thread> > _accept_threads;
+  //std::unique_ptr<accept_thread> _accept_thread2;
   
   std::unique_ptr< acceptor_type > _acceptor;
-  
+  connection_manager _connection_manager;
   /*
   std::unique_ptr< acceptor_type > _acceptor2;
   */
   
-  std::set< std::shared_ptr<iconnection> > _connections;
+  ///std::set< std::shared_ptr<iconnection> > _connections;
 };
 
 
 struct aspect_server: fas::aspect< fas::type_list_n<
   context<context_server>,
+  fas::advice<_new_connection_,  ad_new_connection>, 
   fas::advice<_start_, ad_acceptor>,
-  fas::group<_initialize_,  _start_>
+  fas::group<_initialize_,  _start_>, 
+  fas::group<_initialize_,  _new_connection_>
 >::type>
 {
 };
@@ -426,7 +508,7 @@ struct aspect_connection: fas::aspect< fas::type_list_n<
 struct aspect_default: fas::aspect< fas::type_list_n<
   connection_aspect< aspect_connection >,
   server_aspect< aspect_server >,
-  connection_manager< connection_manager_impl >,
+  // connection_manager< connection_manager_impl >,
   connection_base< fas::aspect_class >,
   connection< basic::tcp_connection >
 >::type> 

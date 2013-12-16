@@ -23,6 +23,7 @@ struct ad_writer
     if ( d==nullptr || d->empty() )
       return;
 
+    std::cout << "ad_writer " << std::string(d->begin(), d->end()) <<  std::endl; 
     if ( !_data_list.empty() )
     {
       _data_list.push_back(std::move(d));

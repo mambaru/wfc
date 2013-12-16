@@ -21,6 +21,7 @@ int main()
   srv.connection_context().enable_stat = true;
   srv.server_context().host = "0.0.0.0";
   srv.server_context().port = "12345";
+  srv.server_context().listen_threads = 10;
   srv.start();
   //for (;;)
     io_service.run();

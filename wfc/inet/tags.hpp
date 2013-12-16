@@ -2,6 +2,8 @@
 
 namespace wfc{ namespace inet{
 
+struct _new_connection_;
+
 struct _connection_aspect_;
 struct _connection_base_;
 struct _connection_manager_;

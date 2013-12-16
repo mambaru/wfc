@@ -7,6 +7,7 @@ CONFIGURE_LIBRARY(boost/system/error_code.hpp  "/usr/include /usr/local/include"
 SET(
   wfc_source_list
   wfc.cpp
+  thread/delayed_queue.cpp
   core/global.cpp
   logger/global_log.cpp
   pubsub/message_queue.cpp
