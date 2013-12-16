@@ -9,7 +9,15 @@
 #include <wfc/inet/basic/tags.hpp>
 #include <wfc/inet/basic/aspect.hpp>
 
-namespace wfc{ namespace inet{ namespace basic{
+namespace wfc{ namespace inet{ 
+
+/*struct iconnection
+{
+  virtual ~iconnection() {}
+  virtual void close() = 0;
+};*/
+
+  namespace basic{
 
 struct f_initialize
 {
@@ -20,14 +28,17 @@ struct f_initialize
   }
 };
 
+
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class tcp_connection_base final
   : public AspectClass<A>
   , public std::enable_shared_from_this< tcp_connection_base<A, AspectClass> >
-  //, public iconnection
+  , public iconnection
 {
 public:
   typedef AspectClass<A> super;
+  typedef typename super::aspect aspect;
+  
   typedef tcp_connection_base<A, AspectClass> self;
   typedef self connection_type;
   //typedef self origin_connection;
