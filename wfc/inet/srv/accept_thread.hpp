@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wfc/inet/connection_manager.hpp>
+#include <wfc/inet/srv/connection_manager.hpp>
 #include <boost/asio.hpp>
 #include <thread>
 #include <memory>
@@ -48,10 +48,10 @@ public:
         
         if (!ec)
         {
-          t.get_aspect().template get<_connection_handle_>()(t, std::move( this->_socket), [&t, &mgr](socket_type sock) 
+          t.get_aspect().template get<_socket_>()(t, this->_socket); 
+          t.get_aspect().template get<_worker_>()(t, std::move( this->_socket), [&t, &mgr](socket_type sock) 
           {
-            std::shared_ptr<connection_type> pconn = std::make_shared<connection_type>();
-            pconn->context() = t.connection_context();
+            std::shared_ptr<connection_type> pconn = t.create_connection();
             mgr.insert(pconn);
             pconn->start( std::move( sock ), [&mgr](std::shared_ptr<connection_type> pconn)->void
             {

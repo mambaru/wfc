@@ -28,11 +28,16 @@ int main()
 {
   ::boost::asio::io_service io_service;
   wfc::inet::server< common_aspect > srv(io_service);
-  srv.connection_context().enable_stat = true;
-  srv.server_context().host = "0.0.0.0";
-  srv.server_context().port = "12345";
-  srv.server_context().listen_threads = 10;
-  srv.server_context().worker_threads = 10;
+  auto conn_conf = srv.connection_context();
+  conn_conf.enable_stat = true;
+  srv.connection_context(conn_conf);
+  
+  auto config = srv.server_context();
+  config.host = "192.168.1.35";
+  config.port = "80";
+  config.listen_threads = 10;
+  config.worker_threads = 10;
+  srv.server_context(config);
   srv.start();
   //for (;;)
     io_service.run();

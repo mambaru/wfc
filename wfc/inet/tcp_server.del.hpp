@@ -13,7 +13,7 @@ namespace wfc{ namespace inet{
 /// Удалить нах  
   
 template<typename Conn=echo_connection<> >
-class tcp_server
+class tcp_server1
 {
 public:
   // typedef TODO: Conn::rebind<>::type
@@ -29,7 +29,7 @@ public:
   typedef typename connection_type::context_type context_type;
   
 public:
-  tcp_server( ::boost::asio::io_service& io_service)
+  tcp_server1( ::boost::asio::io_service& io_service)
     : _io_service(io_service)
     , _acceptor(io_service)
     // , _socket(nullptr)

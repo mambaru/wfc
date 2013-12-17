@@ -1,7 +1,9 @@
 #pragma once
 
-#include <wfc/memory.hpp>
+#include <wfc/inet/srv/connection_manager.hpp>
 #include <wfc/inet/tags.hpp>
+#include <wfc/memory.hpp>
+
 #include <boost/asio.hpp>
 #include <memory>
 
@@ -67,12 +69,16 @@ struct ad_st_acceptor
 
         if (!ec)
         {
-          t.get_aspect().template get<_connection_handle_>()(t, std::move( *(this->_socket) ), [this, &t](socket_type sock) -> void
+          t.get_aspect().template get<_socket_>()(t, *(this->_socket)); 
+          t.get_aspect().template get<_worker_>()(t, std::move( *(this->_socket) ), [this, &t](socket_type sock) -> void
           {
             typedef typename T::connection_type connection_type;
-            
+            std::shared_ptr<connection_type> pconn = t.create_connection();
+
+            /*
             std::shared_ptr<connection_type> pconn = std::make_shared<connection_type>();
             pconn->context() = t.connection_context();
+            */
             this->_connection_manager.insert(pconn);
             pconn->start( std::move( sock ), [this](std::shared_ptr<connection_type> pconn)->void
             {

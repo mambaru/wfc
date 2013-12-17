@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wfc/inet/accept_thread.hpp>
+#include <wfc/inet/srv/accept_thread.hpp>
 #include <wfc/memory.hpp>
 #include <boost/asio.hpp>
 #include <memory>

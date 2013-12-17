@@ -1,5 +1,6 @@
 #pragma once
 
+#include <wfc/inet/srv/work_thread.hpp>
 #include <wfc/thread/rwlock.hpp>
 #include <boost/asio.hpp>
 #include <functional>
@@ -10,7 +11,7 @@
 
 namespace wfc{ namespace inet{
   
-struct ad_connection_handle
+struct ad_worker
 {
   typedef rwlock<std::mutex> mutex_type;
   

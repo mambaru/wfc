@@ -1,106 +1,23 @@
 #pragma once
 
-#include <wfc/inet/echo_connection.hpp>
-#include <wfc/inet/iconnection.hpp>
-#include <wfc/inet/server_config.hpp>
-#include <wfc/memory.hpp>
+#include <wfc/inet/srv/server_helper.hpp>
+#include <fas/aop.hpp>
 #include <boost/asio.hpp>
-#include <set>
-#include <thread>
-
-#include <wfc/inet/context.hpp>
-#include <wfc/inet/connection_base.hpp>
-#include <wfc/inet/connection.hpp>
-#include <wfc/inet/connection_manager.hpp>
-#include <wfc/inet/connection_aspect.hpp>
-#include <wfc/inet/server_aspect.hpp>
-#include <wfc/inet/server_context.hpp>
-#include <wfc/inet/connection_context.hpp>
-#include <wfc/inet/work_thread.hpp>
-#include <wfc/inet/ad_connection_handle.hpp>
-#include <wfc/inet/accept_thread.hpp>
-#include <wfc/inet/ad_acceptor.hpp>
-#include <wfc/inet/ad_st_acceptor.hpp>
-#include <wfc/inet/ad_mt_acceptor.hpp>
 
 namespace wfc{ namespace inet{
-
-
-
-struct aspect_server: fas::aspect< fas::type_list_n<
-  context<server_context>,
-  fas::advice<_connection_handle_,  ad_connection_handle>, 
-  fas::advice<_acceptor_, ad_acceptor>,
-  fas::advice<_st_acceptor_, ad_st_acceptor>,
-  fas::advice<_mt_acceptor_, ad_mt_acceptor>,
-  fas::alias<_start_, _acceptor_>,
-  fas::alias<_stop_, _acceptor_>,
-  //fas::group<_startup_,  _start_>, 
-  fas::group<_startup_,  _connection_handle_>
->::type>
-{
-};
-
-struct aspect_connection: fas::aspect< fas::type_list_n<
-  context<connection_context>
->::type>
-{
-};
-
-
-struct aspect_traits: fas::aspect< fas::type_list_n<
-  connection_aspect< aspect_connection >,
-  server_aspect< aspect_server >,
-  connection_base< fas::aspect_class >,
-  connection< basic_connection >
->::type> 
-{
-};
-
-
-template<typename A>
-struct server_traits
-{
-  typedef typename fas::merge_aspect< A, aspect_traits>::type aspect_type;
-  typedef typename fas::aspect_class<aspect_type>::aspect aspect;
-  
-  ///
-  /// connection
-  ///
-  typedef typename aspect::template advice_cast<_connection_aspect_>::type connection_aspect_type;
-  
-  template<typename ConnAspect>
-  using connection_base_t = typename aspect::template advice_cast<_connection_base_>::type::template type<ConnAspect>;
-  
-  template<typename ConnAspect, template<typename> class ConnBase >
-  using connection_t = typename aspect::template advice_cast<_connection_>::type::template type<ConnAspect, ConnBase>;
-  
-  typedef connection_t<connection_aspect_type, connection_base_t> connection_type;
-  typedef typename connection_type::aspect::template advice_cast<_context_>::type connection_context_type;
-  
-  ///
-  /// server
-  ///
-  typedef typename aspect::template advice_cast<_server_aspect_>::type server_aspect_type;
-
-  typedef fas::aspect_class<server_aspect_type> server_base;
-  typedef typename server_base::aspect::template advice_cast<_context_>::type server_context_type;
-
-};
-
   
 template<typename A = fas::aspect<> >
 class server:
-  public server_traits<A>::server_base
+  public server_helper<A>::server_base
 {
-  typedef server_traits<A> traits;
+  typedef server_helper<A> helper;
   
 public:
-  typedef typename traits::server_base super;
-  typedef typename traits::server_context_type server_context_type;
+  typedef typename helper::server_base super;
+  typedef typename helper::server_context_type server_context_type;
   
-  typedef typename traits::connection_type connection_type;
-  typedef typename traits::connection_context_type connection_context_type;
+  typedef typename helper::connection_type connection_type;
+  typedef typename helper::connection_context_type connection_context_type;
   
 public:
   
@@ -122,12 +39,27 @@ public:
     this->get_aspect().template get<_stop_>()(*this, fas::tag<_stop_>() );
   }
   
-  server_context_type& server_context() { return this->get_aspect().template get<_context_>();}
-  const server_context_type& server_context() const { return this->get_aspect().template get<_context_>();}
+  // TODO: reconfigure
+  server_context_type server_context() const
+  {
+    return this->get_aspect().template get<_context_>();
+  }
+  
+  void server_context(const server_context_type& value) 
+  {
+    this->get_aspect().template get<_context_>() = value;
+  }
 
   // TODO: сделать mutex и реконфиг
-  connection_context_type& connection_context() { return _connection_context;}
-  const connection_context_type& connection_context() const { return _connection_context;}
+  connection_context_type connection_context() const
+  {
+    return _connection_context;
+  }
+  
+  void connection_context(const connection_context_type& value)
+  {
+    _connection_context = value;
+  }
   
   boost::asio::io_service& get_io_service()
   {

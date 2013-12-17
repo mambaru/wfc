@@ -4,7 +4,7 @@
 #include <wfc/inet/conn/ad_stream_reader.hpp>
 #include <wfc/inet/conn/ad_stream_writer.hpp>
 #include <wfc/inet/stream/tags.hpp>
-#include <wfc/inet/tags.hpp>
+#include <wfc/inet/conn/tags.hpp>
 #include <fas/aop.hpp>
 
 namespace wfc{ namespace inet{ namespace stream{

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wfc/inet/iconnection.hpp>
+#include <wfc/inet/conn/iconnection.hpp>
 
 #include <set>
 #include <mutex>

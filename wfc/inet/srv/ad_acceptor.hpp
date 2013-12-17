@@ -1,5 +1,7 @@
 #pragma once
 
+#include <wfc/inet/tags.hpp>
+#include <wfc/inet/srv/tags.hpp>
 #include <wfc/memory.hpp>
 #include <fas/aop/tag.hpp>
 #include <boost/asio.hpp>

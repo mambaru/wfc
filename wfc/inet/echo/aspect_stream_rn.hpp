@@ -2,7 +2,7 @@
 #include <wfc/inet/stream/aspect.hpp>
 #include <wfc/inet/rn/aspect.hpp>
 #include <wfc/inet/context.hpp>
-#include <wfc/inet/connection_context.hpp>
+#include <wfc/inet/conn/connection_context.hpp>
 
 namespace wfc{ namespace inet{ namespace echo{
 

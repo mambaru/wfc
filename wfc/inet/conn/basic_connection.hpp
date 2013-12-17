@@ -5,7 +5,7 @@
 #include <iostream>
 #include <list>
 #include <wfc/callback/callback_owner.hpp>
-#include <wfc/inet/iconnection.hpp>
+#include <wfc/inet/conn/iconnection.hpp>
 #include <wfc/inet/types.hpp>
 
 namespace wfc{ namespace inet{ 
@@ -95,14 +95,14 @@ public:
     this->get_aspect().template getg<_startup_>()( *this, fas::tag<_startup_>() );
     
     _release = release;
-    _socket = socket_ptr( new socket_type(std::move(socket)));
-    _strand = strand_ptr( new strand_type(_socket->get_io_service()));
+    _socket = std::make_unique<socket_type>(std::move(socket));
+    _strand = std::make_unique<strand_type>(_socket->get_io_service());
     // TODO: перенести в server
-    boost::asio::socket_base::non_blocking_io non_blocking_io(true);
-    _socket->io_control(non_blocking_io);
-    std::cout << "start..." << std::endl;
+    //boost::asio::socket_base::non_blocking_io non_blocking_io(true);
+    //_socket->io_control(non_blocking_io);
+    //std::cout << "start..." << std::endl;
     this->get_aspect().template get<_start_>()(*this, fas::tag<_start_>() );
-    std::cout << "...start" << std::endl;
+    //std::cout << "...start" << std::endl;
   }
   
   void close()
@@ -120,17 +120,20 @@ public:
       _release( super_shared::shared_from_this() );
   }
 
-  void do_read()
-  {
-  }
-
   void write(const char* data, size_t size)
   {
-    /*
-    typedef typename super::aspect::template advice_cast<_outgoing_>::type::data_type data_type;
-    typedef typename super::aspect::template advice_cast<_outgoing_>::type::data_ptr data_ptr;
-    */
-    this->get_aspect().template get<_write_>()(*this, data_ptr( new data_type(data, data+size)));
+    this->get_aspect().template get<_write_>()(*this, std::make_unique<data_type>(data, data+size));
+  }
+
+  template<typename T>
+  void write(const T& data)
+  {
+    this->get_aspect().template get<_write_>()(*this, std::make_unique<data_type>(data.begin(), data.end()));
+  }
+
+  void write(const char* data)
+  {
+    this->get_aspect().template get<_write_>()(*this, std::make_unique<data_type>(data, data + std::strlen(data) ) );
   }
 
 private:

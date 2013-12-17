@@ -1,12 +1,5 @@
 #pragma once
-#include <fas/aop.hpp>
-#include <fas/type_list.hpp>
-#include <boost/asio.hpp>
-#include <iostream>
-#include <list>
-#include <wfc/callback/callback_owner.hpp>
-#include <wfc/inet/iconnection.hpp>
-#include <wfc/inet/tags.hpp>
+#include <wfc/inet/types.hpp>
 
 
 namespace wfc{ namespace inet{
