@@ -8,6 +8,7 @@
 
 namespace wfc{ namespace inet{ namespace rn{
 
+  /*
 
 struct ad_trimmer:
   ::wfc::inet::ad_trimmer<_incoming_, fas::int_<2> > {};
@@ -18,5 +19,6 @@ struct ad_splitter:
 
 struct ad_tailor:
   ::wfc::inet::ad_tailor<_output_, rn> {};
+  */
 
 }}}

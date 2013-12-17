@@ -3,12 +3,11 @@
 #include <iostream>
 #include <list>
 #include <wfc/callback/callback_owner.hpp>
-#include <wfc/inet/basic/tags.hpp>
 #include <fas/xtime.hpp>
 
-namespace wfc{ namespace inet{ namespace basic{
+namespace wfc{ namespace inet{
 
-struct ad_writer
+struct ad_stream_writer
 {
   typedef std::vector<char> data_type;
   typedef std::unique_ptr<data_type> data_ptr;
@@ -41,12 +40,8 @@ struct ad_writer
       }
       else
       {
-        
       }
-        
     }
-
-
   }
 
   template<typename T>
@@ -55,7 +50,8 @@ struct ad_writer
     if ( _data_list.empty() )
       return;
 
-    callback_owner::weak_type wk = t.owner().alive();
+    // TODO T::owner_type
+    typename T::owner_type::weak_type wk = t.owner().alive();
     t.socket().async_write_some(
       ::boost::asio::buffer( _data_list.front()->data(),  _data_list.front()->size() ),
       t.strand().wrap(
@@ -92,4 +88,4 @@ private:
 };
 
 
-}}}
+}}

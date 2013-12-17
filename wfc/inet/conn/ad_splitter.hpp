@@ -1,17 +1,11 @@
 #pragma once
 
-#include <boost/asio.hpp>
-#include <iostream>
-#include <list>
-#include <wfc/callback/callback_owner.hpp>
-#include <wfc/inet/iconnection.hpp>
+#include <vector>
+#include <memory>
 
 namespace wfc{ namespace inet{
 
-//struct rn{ const char* operator()() { return "**"; }};
-
-// + tailor
-template<typename Tg, typename Str /*= rn*/>
+template<typename Tg, typename Str>
 struct ad_splitter
 {
   typedef std::vector<char> data_type;

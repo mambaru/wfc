@@ -1,5 +1,5 @@
 #pragma once
 
-namespace wfc{ namespace inet{ namespace basic{
+namespace wfc{ namespace inet{ namespace echo{
 
 }}}

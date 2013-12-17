@@ -10,6 +10,9 @@
 
 namespace wfc{
 
+// TODO: spinlock
+// а лучше callback_owner<mutex_type>
+template<typename M = std::mutex >
 class callback_owner
 {
   template <typename T>
@@ -17,6 +20,8 @@ class callback_owner
 
 public:
 
+  typedef M mutex_type;
+  
   typedef std::shared_ptr<int> alive_type;
   typedef std::weak_ptr<int>   weak_type;
   
@@ -30,40 +35,37 @@ public:
 
   alive_type& alive() {return _alive;}
   const alive_type& alive() const {return _alive;}
-  /*
-  callback_owner(const callback_owner& )
-    : _alive( std::make_shared<int>(1) )
-  {
-  }
 
-  callback_owner& operator = (const callback_owner& ) 
+  mutex_type& mutex() {return _mutex;}
+  
+  void reset()
   {
+    std::lock_guard<mutex_type> lk(_mutex);
     _alive = std::make_shared<int>(1);
-    return *this;
   }
-  */
-
+  
   template<typename ... Args>
   std::function<callback_status(Args&&...)> callback(typename identity<std::function<callback_status(Args&&...)>>::type f)
   {
-    // std::forward<_ArgTypes>(__args)...);
-    
-    
+    std::lock_guard<mutex_type> lk(_mutex);
     std::weak_ptr<int> alive = _alive;
+    _mutex.unlock();
+    
     return [alive,f](Args&&... args)-> callback_status
     {
       if ( auto p = alive.lock() )
       {
-        //return f(args...);
         return f(std::forward<Args>(args)...);
       }
       return callback_status::died;
     };
-    
   }
  
 private:
+  
   alive_type _alive;
+  mutex_type _mutex;
+  
 };
 
 
