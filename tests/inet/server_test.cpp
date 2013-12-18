@@ -33,10 +33,10 @@ int main()
   srv.connection_context(conn_conf);
   
   auto config = srv.server_context();
-  config.host = "192.168.1.35";
-  config.port = "80";
-  config.listen_threads = 10;
-  config.worker_threads = 10;
+  config.host = "127.0.0.1";
+  config.port = "12345";
+  config.listen_threads = 0;
+  config.worker_threads = 0;
   srv.server_context(config);
   srv.start();
   //for (;;)

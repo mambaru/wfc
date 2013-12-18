@@ -24,11 +24,14 @@ struct call_error<M, false>
   typedef error_json::type type;
 };
 
+struct call_request_required;
+struct call_response_required;
 
-template<typename M, bool = has_call_request<M>::value && has_call_response<M>::value>
+template<typename M, bool B = has_call_request<M>::value && has_call_response<M>::value>
 class call_handler
 {
 public:
+  
 
   typedef typename M::call_request     call_request_json;
   typedef typename M::call_response    call_response_json;
@@ -49,6 +52,13 @@ public:
   typedef std::function<callback_status(call_response_ptr, call_error_ptr)> callback_type;
   
   typedef std::unordered_map<int, callback_type> callback_map;
+
+  template<bool BB = false>
+  struct checker
+  {
+    typedef callback_type callback;
+  };
+
   
   call_handler(M& method)
     : _method(method)
@@ -145,24 +155,32 @@ template<typename M>
 class call_handler<M, false>
 {  
 public:
+  
+  template<bool BB = false>
+  struct checker
+    : fas::static_error< call_request_required,  has_call_request<M>::value  || BB >::type
+    , fas::static_error< call_response_required, has_call_response<M>::value || BB >::type
+  {
+  };
+
   call_handler(M&)
   {
     
   }
 
   template<typename T,  typename Itr >
-  void response(T& t, int id, Itr beg, Itr end)
+  bool response(T& , int , Itr , Itr )
   {
-    
+    return false;
   }
 
   template<typename T,  typename Itr >
-  void error(T& t, int id, Itr beg, Itr end)
+  bool error(T& , int , Itr , Itr )
   {
-    
+    return false;
   }
   
-  void initialize( std::function<int()> ci)
+  void initialize( std::function<int()> )
   {
   }
 };

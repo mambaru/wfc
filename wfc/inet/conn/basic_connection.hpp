@@ -40,7 +40,8 @@ public:
 
   ~basic_connection()
   {
-    std::cout << "~tcp_connection_base()" << std::endl;
+    _socket->close();
+    //std::cout << "~tcp_connection_base()" << std::endl;
   }
   
   basic_connection()

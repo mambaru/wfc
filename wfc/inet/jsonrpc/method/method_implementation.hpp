@@ -71,10 +71,15 @@ public:
     return invoke_notify_handler_base::notify(t, beg, end, stat);
   }
   
+  /*
   template<typename T, typename P>
   int request ( T& t, P param, typename call_handler_base::callback_type callback)
+  */
+  template<typename T, typename P, typename Callback>
+  int request ( T& t, P param, Callback callback)
   {
-    typename call_handler_base::callback_type callback_wrap = callback;
+    typedef typename call_handler_base::template checker<>::callback callback_type;
+    callback_type callback_wrap = callback;
     if (_enable_stat)
     {
       time_point start = std::chrono::high_resolution_clock::now();
@@ -107,6 +112,7 @@ public:
   template<typename T, typename P>
   void notify(T& t, P params)
   {
+    
     stat_function stat = nullptr;
     if (_enable_stat )
     {

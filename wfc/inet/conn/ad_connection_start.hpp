@@ -1,5 +1,6 @@
 #pragma once
 #include <wfc/inet/tags.hpp>
+#include <fas/aop/tag.hpp>
 
 
 namespace wfc{ namespace inet{

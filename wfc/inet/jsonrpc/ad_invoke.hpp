@@ -154,8 +154,16 @@ public:
     _create_id = [this](){ return ++_id_counter;};
   }
 
+  /*
   template<typename T>
   void initialize(T& t)
+  {
+    fas::for_each_group<_method_>(t, f_init_index(_create_id) );
+  }
+  */
+  
+  template<typename T>
+  void operator()(T& t, fas::tag<_startup_> )
   {
     fas::for_each_group<_method_>(t, f_init_index(_create_id) );
   }

@@ -19,10 +19,11 @@ struct ad_stream_writer
   template<typename T>
   void operator()(T& t, data_ptr d)
   {
+    //static int count = 0;
     if ( d==nullptr || d->empty() )
       return;
 
-    std::cout << "ad_writer " << std::string(d->begin(), d->end()) <<  std::endl; 
+    //std::cout << "ad_writer " << count++ << ": " << std::string(d->begin(), d->end()) <<  std::endl; 
     if ( !_data_list.empty() )
     {
       _data_list.push_back(std::move(d));

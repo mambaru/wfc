@@ -24,7 +24,9 @@ struct ad_send_error
     errmsg.error = std::move(err);
     errmsg.id = std::move(id);
   
+    //sleep(1);
     t.get_aspect().template get<_send_json_>()(t, error_json_type(), errmsg);
+    t.close();
   }
 };
 

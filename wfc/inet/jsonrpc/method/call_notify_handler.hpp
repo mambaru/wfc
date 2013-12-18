@@ -10,8 +10,7 @@ namespace wfc{ namespace inet{ namespace jsonrpc{
 
 FAS_HAS_TYPENAME(has_call_notify, call_notify)
 
-
-template<typename M, bool = has_call_notify<M>::value>
+template<typename M, bool B= has_call_notify<M>::value>
 class call_notify_handler
 {
   M& _method;
@@ -27,7 +26,7 @@ public:
     , _reserve(256)
   {
   }
-
+  
   template< typename T >
   void notify(T& t, call_notify_ptr params, stat_function stat)
   {
@@ -47,7 +46,8 @@ public:
       
     t.get_aspect().template get<_output_>()(t, std::move(data) );
     
-    stat(std::chrono::high_resolution_clock::now(), true);
+    if ( stat )
+      stat(std::chrono::high_resolution_clock::now(), true);
   }
   
 private:
@@ -58,6 +58,8 @@ template<typename M>
 class call_notify_handler<M, false>
 {
 public:
+
+  
   call_notify_handler(M& )
   {}
 };

@@ -37,13 +37,13 @@ struct ad_stream_reader
         }
         if (!ec)
         {
-          //std::cout << "REEADED " << bytes_transferred << ": " << std::string(_data.begin(), _data.begin()+bytes_transferred) << std::endl;
+          // std::cout << "REEADED " << bytes_transferred << ": [[" << std::string(_data.begin(), _data.begin()+bytes_transferred) << "]]" << std::endl;
           t.get_aspect().template get<Tg>()(t, data_ptr(new data_type(_data.begin(), _data.begin()+bytes_transferred)));
           this->do_read(t);
         }
         else
         {
-          std::cout << "closed??" << std::endl;
+          // std::cout << "closed??" << std::endl;
           t.release();
         }
       }

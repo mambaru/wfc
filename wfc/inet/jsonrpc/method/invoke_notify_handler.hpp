@@ -56,7 +56,7 @@ class invoke_notify_handler<M, false>
 public:
   invoke_notify_handler(M& ){}
   template<typename T,  typename Itr>
-  void notify(T& t, Itr beg, Itr end, stat_function stat)
+  void notify(T& , Itr , Itr , stat_function )
   {
   }
 };

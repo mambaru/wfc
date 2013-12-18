@@ -18,20 +18,16 @@ struct ad_st_acceptor
   template<typename T>
   void operator()(T& t, std::weak_ptr<acceptor_type> acceptor)
   {
-    std::cout << "--->1" << std::endl;
     int threads = t.server_context().listen_threads;
     if ( threads == 0 )
     {
-      std::cout << "--->2" << std::endl;
       //bool empty = !_acceptor.lock();
       bool equal = !_acceptor.owner_before(acceptor) && !acceptor.owner_before(_acceptor);
       if ( /*empty ||*/ !equal )
       {
-        std::cout << "--->3" << std::endl;
         if ( auto acc = _acceptor.lock() )
             acc->close();
         _acceptor = acceptor;
-        std::cout << "--->4" << std::endl;
         _socket = std::make_unique<socket_type>(t.get_io_service());
         this->do_accept(t);
       }
@@ -48,18 +44,14 @@ struct ad_st_acceptor
   template<typename T>
   void do_accept(T& t)
   {
-    std::cout << "--->5" << std::endl;
     std::weak_ptr<acceptor_type> acceptor_weak = _acceptor;
-    std::cout << "--->6" << std::endl;
     auto acceptor = acceptor_weak.lock();
     if ( !acceptor )
       return;
-    std::cout << "--->7" << std::endl;
     acceptor->async_accept(
       *_socket,
       [this, &t, acceptor_weak](boost::system::error_code ec)
       {
-        std::cout << "--->8" << std::endl;
         auto acceptor = acceptor_weak.lock();
         if ( !acceptor )
           return;
