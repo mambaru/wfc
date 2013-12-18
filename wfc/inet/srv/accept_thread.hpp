@@ -135,7 +135,7 @@ public:
     if (!acc)
       return;
     
-    typedef typename T::connection_type connection_type;
+    // typedef typename T::connection_type connection_type;
     
     acceptor_type::endpoint_type endpoint = acc->local_endpoint();
     acceptor_type::native_type fd = ::dup( acc->native() );

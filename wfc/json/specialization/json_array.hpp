@@ -55,6 +55,8 @@ public:
       return parser::parse_null(beg, end);
     }
 
+    array_type().reserve(t);
+    
     typename array_type::inserter_iterator bitr = array_type::inserter(t);
 
     if (beg==end) throw unexpected_end_fragment();
@@ -96,17 +98,17 @@ public:
   }
 };
 
-template< typename T >
-class serializerT< array<T> >
-  : public serializerA< array<T>, '[', ']'>
+template< typename T, typename RR >
+class serializerT< array<T, RR> >
+  : public serializerA< array<T, RR>, '[', ']'>
 {
 };
 
 
-template< typename J, int N, char L, char R >
-class serializerA< array< J[N] >, L, R >
+template< typename J, int N, typename RR, char L, char R >
+class serializerA< array< J[N], RR>, L, R >
 {
-  typedef array< J[N] > array_type;
+  typedef array< J[N], RR> array_type;
   typedef typename array_type::target_container target_container;
   typedef typename array_type::json_value json_value;
   typedef typename json_value::serializer serializer;
