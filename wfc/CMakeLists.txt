@@ -19,6 +19,6 @@ add_library(
   ${wfc_source_list}
 )
 
-target_link_libraries(wfc ${HAVE_boost_system-mt})
+target_link_libraries(wfc ${HAVE_boost_system-mt} ${CMAKE_THREAD_LIBS_INIT} )
 
 build_info(wfc wfc)

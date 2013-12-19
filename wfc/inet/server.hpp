@@ -1,16 +1,19 @@
 #pragma once
 
 #include <wfc/inet/srv/server_helper.hpp>
+#include <wfc/inet/server_config.hpp>
+#include <wfc/core/global.hpp>
+#include <wfc/io_service.hpp>
 #include <fas/aop.hpp>
 #include <boost/asio.hpp>
 
 namespace wfc{ namespace inet{
   
-template<typename A = fas::aspect<> >
+template<typename... Args>
 class server:
-  public server_helper<A>::server_base
+  public server_helper<Args...>::server_base
 {
-  typedef server_helper<A> helper;
+  typedef server_helper<Args...> helper;
   
 public:
   typedef typename helper::server_base super;
@@ -23,9 +26,61 @@ public:
   
   typedef typename super::aspect aspect;
   
-  server( ::boost::asio::io_service& io_service)
+  server( ::wfc::io_service& io_service, const server_config& conf )
     : _io_service(io_service)
   {
+    this->configure(conf);
+  }
+  
+  server( std::weak_ptr< wfc::global > g, const server_config& conf )
+    // : _io_service(g.lock()->io_service.lock())
+    : server( *(g.lock()->io_service.lock()), conf)
+  {
+    /*
+    //if ( auto gl = g.lock() )
+    {
+      //if ( auto io = g.lock() )
+      if ( g )
+      {
+        _io_service = g->io_service.lock();
+      }
+    }
+    
+    if ( !_io_service )
+    {
+      _io_service = std::make_shared< wfc::io_service > ();
+    }*/
+    /*
+    if ( g && g->io_service )
+    {
+      _io_service = g->io_service;
+    }
+    else
+    {
+      _io_service = std::make_shared< wfc::io_service > ();
+    }*/
+    
+    //this->configure(conf);
+  }
+  
+  void configure(const server_config& conf)
+  {
+    server_context_type cntx = this->server_context();
+    cntx.enable_stat = conf.enable_stat;
+    cntx.host = conf.host;
+    cntx.port = conf.port;
+    this->server_context(cntx);
+  }
+  
+  void reconfigure(const server_config& conf)
+  {
+    this->configure(conf);
+    // TODO: _reconfigure_
+  }
+  
+  void initialize()
+  {
+    // TODO: stat
   }
   
   void start()
@@ -74,7 +129,9 @@ public:
   }
   
 private:
-  ::boost::asio::io_service& _io_service;
+  //server_config _config;
+  //std::shared_ptr< ::wfc::io_service > _io_service;
+  ::wfc::io_service& _io_service;
   connection_context_type _connection_context;
 };
 

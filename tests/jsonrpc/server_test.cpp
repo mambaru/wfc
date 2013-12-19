@@ -55,6 +55,7 @@ struct aspect_methods: wfc::jsonrpc::jsonrpc<
 
 int main()
 {
+  /*
   ::boost::asio::io_service io_service;
   wfc::jsonrpc::server_tcp< aspect_methods > srv(io_service);
   
@@ -70,6 +71,7 @@ int main()
   std::cout << "FINAL" << std::endl;
   std::cin.get();
   srv.stop();
+  **/
 
   /*
   auto conn_conf = srv.connection_context();

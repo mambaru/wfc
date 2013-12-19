@@ -1,22 +1,22 @@
-#pragma once 
+#pragma once
 
-#include <wfc/inet/stream/aspect.hpp>
-#include <wfc/inet/rn/aspect.hpp>
-#include <wfc/inet/jsonrpc/aspect.hpp>
-#include <wfc/inet/context.hpp>
-#include <wfc/inet/conn/connection_context.hpp>
+#include <wfc/jsonrpc/ad_invoke.hpp>
+#include <wfc/jsonrpc/ad_send_json.hpp>
+#include <wfc/jsonrpc/errors/aspect_error.hpp>
+#include <wfc/jsonrpc/tags.hpp>
+#include <fas/aop.hpp>
+
 
 namespace wfc{ namespace jsonrpc{
 
-struct aspect: fas::aspect<
-  inet::context< inet::connection_context>, 
-  inet::stream::aspect,
-  inet::rn::aspect,
-  inet::jsonrpc::aspect,
-  fas::alias< inet::stream::_incoming_, inet::rn::_input_        >,
-  fas::alias< inet::rn::_output_,       inet::stream::_outgoing_ >,
-  fas::alias< inet::rn::_incoming_,     inet::jsonrpc::_input_   >,
-  fas::alias< inet::jsonrpc::_output_,  inet::rn::_outgoing_     >
->{};
+struct aspect: fas::aspect< fas::type_list_n<
+  aspect_error, 
+  fas::advice<_send_json_, ad_send_json>,
+  fas::advice<_invoke_, ad_invoke>,
+  fas::alias<_input_, _invoke_>,
+  fas::group<inet::_startup_, _invoke_>, 
+  fas::stub<_method_stat_>
+>::type >
+{};
 
 }}

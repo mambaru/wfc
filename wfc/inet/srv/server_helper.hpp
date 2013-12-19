@@ -6,10 +6,10 @@
 
 namespace wfc{ namespace inet{
 
-template<typename A>
+template<typename... Args>
 struct server_helper
 {
-  typedef typename fas::merge_aspect< A, aspect_default>::type aspect_type;
+  typedef typename fas::merge_aspect< fas::aspect<Args...>, aspect_default>::type aspect_type;
   typedef typename fas::aspect_class<aspect_type>::aspect aspect;
   
   ///

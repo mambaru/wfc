@@ -9,7 +9,7 @@
 #include <wfc/callback/callback_list.hpp>
 #include <wfc/pubsub/ipubsub.hpp>
 
-#include <boost/asio/io_service.hpp>
+#include <wfc/io_service.hpp>
 #include <memory>
 #include <chrono>
 #include <functional>
@@ -35,7 +35,7 @@ struct global
   std::weak_ptr<logger_registry> loggers;
   std::weak_ptr<module_registry> modules;
   
-  std::weak_ptr<boost::asio::io_service> io_service;
+  std::weak_ptr< wfc::io_service> io_service;
   //std::weak_ptr<inet::imux<>>  mux;
   
   //std::chrono::milliseconds
