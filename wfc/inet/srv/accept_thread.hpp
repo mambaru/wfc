@@ -55,6 +55,8 @@ public:
     );
   }
   
+  // TODO: stop чере post io_service
+  
 private:
   boost::asio::io_service& _io_service;
   acceptor_type& _acceptor;
