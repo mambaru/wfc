@@ -134,7 +134,7 @@ private:
       _reserve = data->size();
     if ( _reserve > 1024*8 )
       _reserve = 1024*8;
-    t.get_aspect().template get<_output_>()(t, std::move(data) );
+    t.get_aspect().template get<_write_>()(t, std::move(data) );
   }
 
 private:

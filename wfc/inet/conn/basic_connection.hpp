@@ -7,17 +7,33 @@
 #include <wfc/callback/callback_owner.hpp>
 #include <wfc/inet/conn/iconnection.hpp>
 #include <wfc/inet/types.hpp>
+#include <wfc/io_service.hpp>
 
 namespace wfc{ namespace inet{ 
+  
+template<typename A, template<typename> class AspectClass >
+struct basic_connection_helper
+{
+  typedef typename fas::aspect_class< A >::aspect original_aspect;
+  typedef typename original_aspect::template advice_cast<_context_>::type original_context;
+  typedef typename original_aspect::template advice_cast<_basic_context_>::type::template apply<original_context>::type context_type;
+  typedef typename fas::merge_aspect<
+    context<context_type>,
+    A
+  >::type new_aspect;
+  typedef AspectClass<new_aspect> base_class;
+};
 
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class basic_connection final
-  : public AspectClass<A>
+  : //public AspectClass<A>
+  public basic_connection_helper<A, AspectClass>::base_class
   , public std::enable_shared_from_this< basic_connection<A, AspectClass> >
   , public iconnection
 {
 public:
-  typedef AspectClass<A> super;
+  //typedef AspectClass<A> super;
+  typedef typename basic_connection_helper<A, AspectClass>::base_class super;
   typedef std::enable_shared_from_this< basic_connection<A, AspectClass> > super_shared;
   //typedef typename super::aspect aspect;
   
@@ -51,6 +67,9 @@ public:
     //fas::for_each_group<_startup_>(*this, f_initialize());
   }
   
+  basic_connection(const basic_connection&) = delete;
+  basic_connection& operator=(const basic_connection&) = delete;
+  
   context_type& context()
   {
     return _context;
@@ -69,6 +88,11 @@ public:
   const socket_type& socket() const
   {
     return *_socket;
+  }
+  
+  io_service& get_io_service()
+  {
+    return _socket->get_io_service();
   }
   
   strand_type& strand()
@@ -109,16 +133,22 @@ public:
   void close()
   {
     _socket->close();
+    // Только post!!! т.к. происходит удаление this
+    _socket->get_io_service().post([this]{ this->__release(); });
   }
   
   void shutdown()
   {
+    // std::cout << "basic_connection shutdown()" << std::endl;
+    this->get_aspect().template get<_shutdown_>()(*this);
   }
 
-  void release()
+  void __release()
   {
     if ( this->_release!=nullptr)
+    {
       _release( super_shared::shared_from_this() );
+    }
   }
 
   void write(const char* data, size_t size)

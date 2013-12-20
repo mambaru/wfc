@@ -85,7 +85,7 @@ public:
       
     _callback_map[resp.id] = callback;
 
-    t.get_aspect().template get<_output_>()(t, std::move(data) );
+    t.get_aspect().template get<_write_>()(t, std::move(data) );
 
     return resp.id;
   }

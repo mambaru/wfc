@@ -8,6 +8,7 @@ struct _start_;
 struct _stop_;
 struct _reconfigure_;
 struct _context_;
+struct _basic_context_;
 struct _socket_type_;
 
 // 

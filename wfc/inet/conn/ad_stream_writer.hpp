@@ -22,6 +22,7 @@ struct ad_stream_writer
     , _outgoing_size(0)
   {}
   
+  /*
   template<typename T>
   struct unique_capture
   {
@@ -30,22 +31,26 @@ struct ad_stream_writer
     std::unique_ptr<T> get() { return std::move(capt);};
     std::unique_ptr<T> capt;
   };
+  */
   
   template<typename T>
   void operator()(T& t, data_ptr d)
   {
     //TODO: dispatch counter для shutdown чтобы не лочить
-    std::cout<< "dispatch{" << std::endl;
+    // std::cout<< "dispatch{" << std::endl;
+    _outgoing_size += d->size();
     ++_dispatch_count;
-    unique_capture<data_type> capt( std::move(d) );
+    //unique_capture<data_type> capt( std::move(d) );
+    auto capt = unique_wrap( std::move(d) );
     t.socket().get_io_service().dispatch([this, &t, capt]() {
-      unique_capture<data_type> cc(capt);
-      this->dispatch(t, std::move(cc.get()));
+      //unique_capture<data_type> cc(capt);
+      //this->dispatch(t, std::move(cc.get()));
+      this->dispatch(t, unique_unwrap(capt) );
     });
-    std::cout<< "}dispatch" << std::endl;
+    //std::cout<< "}dispatch" << std::endl;
   }
   
-  size_t size() const
+  size_t outgoing_size() const
   {
     return _outgoing_size;
   }
@@ -57,7 +62,7 @@ private:
   {
     --_dispatch_count;
 
-    std::cout<< "dispatch" << std::endl;
+    // std::cout<< "dispatch" << std::endl;
     //static int count = 0;
     if ( d==nullptr || d->empty() )
       return;
@@ -65,30 +70,53 @@ private:
     //std::cout << "ad_writer " << count++ << ": " << std::string(d->begin(), d->end()) <<  std::endl; 
     if ( !_data_list.empty() )
     {
-      _outgoing_size+=d->size();
+      // _outgoing_size+=d->size();
       _data_list.push_back(std::move(d));
     }
     else
     {
       boost::system::error_code ec;
-      size_t s = t.socket().send( ::boost::asio::buffer(d->data(), d->size()), 0, ec);
+      size_t bytes_transferred = t.socket().send( ::boost::asio::buffer(d->data(), d->size()), 0, ec);
       
       if (ec)
       {
-        s = 0;
+        bytes_transferred = 0;
         t.get_aspect().template get<_write_error_>()(t,  ec);
       }
 
-      if ( s != d->size() )
+      _outgoing_size -= bytes_transferred;
+
+      if ( bytes_transferred != d->size() )
       {
+        /*
         d->erase(d->begin(), d->begin()+s);
         _outgoing_size+=d->size();
         _data_list.push_back(std::move(d));
+        */
+        
+        auto beg = d->begin() + bytes_transferred;
+        auto end = d->end();
+        for(;beg != end; )
+        {
+          if ( std::distance(beg, end) > static_cast<ptrdiff_t>(BufferSize*2) ) // Последний блок может быть [BufferSize..BufferSize*2]
+          {
+            this->_data_list.push_back( std::make_unique<data_type>(beg, beg + BufferSize));
+            beg+=BufferSize;
+          }
+          else
+          {
+            this->_data_list.push_back( std::make_unique<data_type>(beg, end));
+            beg = end;
+          }
+        }
+
         do_write(t);
       }
       
       if (!ec)
+      {
         t.get_aspect().template get<_on_write_>()(t);
+      }
     }
   }
 
@@ -111,33 +139,36 @@ private:
           t.get_aspect().template get<_alive_error_>()(t);
           return;
         }
-        else if (ec)
+        
+        this->_outgoing_size-=bytes_transferred;
+        
+        if (ec)
         {
           t.get_aspect().template get<_write_error_>()(t, ec);
         }
         else if ( bytes_transferred == this->_data_list.front()->size() )
         {
           this->_data_list.pop_front();
-          _outgoing_size-=bytes_transferred;
+          //_outgoing_size-=bytes_transferred;
         }
         else
         {
-          size_t tail_size = this->_data_list.front()->size() - bytes_transferred;
+          //size_t tail_size = this->_data_list.front()->size() - bytes_transferred;
           
-          if ( /*true ||*/ /*tail_size < bytes_transferred ||*/ tail_size < BUFFER_SIZE)
+          if ( true  /*tail_size < bytes_transferred ||*/ /*tail_size < BUFFER_SIZE*/)
           {
             // std::cout << "==================== truncate =================" <<  std::endl;
             this->_data_list.front()->erase(
               this->_data_list.front()->begin(),
               this->_data_list.front()->begin()+bytes_transferred
             );
-            _outgoing_size-=bytes_transferred;
+            
           }
           else
           {
             // std::cout << "---------------------- separate ------------" <<  std::endl;
             // std::cout << "bytes_transferred " << bytes_transferred <<  std::endl;
-            size_t buff_size = bytes_transferred;
+            ptrdiff_t buff_size = bytes_transferred;
             // if ( buff_size < BUFFER_SIZE )
               buff_size = BUFFER_SIZE;
 

@@ -16,6 +16,13 @@ struct server_helper
   /// connection
   ///
   typedef typename aspect::template advice_cast<_connection_aspect_>::type connection_aspect_type;
+  //typedef typename aspect::template advice_cast<_context_>::type user_context_type;
+  //typedef typename aspect::template advice_cast<_basic_context_>::type::template apply<user_context_type>::type context_type;
+  /*typedef typename fas::merge_aspect<
+    connection_aspect_type1,
+    context<context_type> 
+  >::type connection_aspect_type;
+  */
   
   template<typename ConnAspect>
   using connection_base_t = typename aspect::template advice_cast<_connection_base_>::type::template type<ConnAspect>;

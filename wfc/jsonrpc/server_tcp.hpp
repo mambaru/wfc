@@ -14,7 +14,7 @@ namespace wfc{ namespace jsonrpc{
 
 template<typename ...Args>
 struct jsonrpc
-  : inet::connection_aspect< typename fas::merge_aspect< fas::aspect<Args...>, aspect_tcp>::type >
+  : inet::connection_aspect< typename fas::merge_aspect< fas::aspect<Args...>, aspect_stream>::type >
 {
   
 };
@@ -58,6 +58,10 @@ public:
     cntx.worker_threads = conf.worker_threads;
     cntx.port = conf.port;
     this->server_context(cntx);
+    
+    auto cntx_conn = this->connection_context();
+    cntx_conn.close_after_response = conf.close_after_response;
+    this->connection_context(cntx_conn);
   }
   
   void reconfigure(const server_tcp_config& conf)

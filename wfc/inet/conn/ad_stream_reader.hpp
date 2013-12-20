@@ -46,9 +46,10 @@ struct ad_stream_reader
             
           this->do_read(t);
         }
-        else
+        else if (ec != boost::asio::error::operation_aborted)
         {
           t.get_aspect().template get<_read_error_>()(t, ec);
+          t.close();
         }
       }
     );

@@ -8,6 +8,7 @@
 
 
 namespace wfc{ namespace jsonrpc{
+  
 
 struct aspect: fas::aspect< fas::type_list_n<
   aspect_error, 

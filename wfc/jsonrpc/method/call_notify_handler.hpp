@@ -44,7 +44,7 @@ public:
     if (_reserve > 1024*8 )
       _reserve = 1024*8;
       
-    t.get_aspect().template get<_output_>()(t, std::move(data) );
+    t.get_aspect().template get<_write_>()(t, std::move(data) );
     
     if ( stat )
       stat(std::chrono::high_resolution_clock::now(), true);

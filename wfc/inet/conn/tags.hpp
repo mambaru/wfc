@@ -13,5 +13,6 @@ struct _on_write_;
 struct _write_error_;
 
 struct _alive_error_;
+struct _shutdown_;
 
 }}

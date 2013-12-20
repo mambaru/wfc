@@ -1,12 +1,18 @@
 #pragma once
 
 namespace wfc{ namespace inet{
-  
-struct connection_context
+
+struct empty_context
+{
+};
+
+template<typename Base = empty_context>
+struct connection_context: Base
 {
   bool enable_stat;
   connection_context()
-    : enable_stat(false)
+    : Base()
+    , enable_stat(false)
   {}
 };
 
