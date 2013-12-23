@@ -17,7 +17,7 @@ public:
     
   }
   
-  int run( int /*argc*/, char* /*argv*/[], std::weak_ptr<global> g )
+  int run( /*int argc, char* argv[],*/ std::weak_ptr<global> g )
   {
     if ( auto gl = g.lock() )
     {

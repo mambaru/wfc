@@ -44,6 +44,7 @@ public:
     _alive = std::make_shared<int>(1);
   }
   
+  /*
   template<typename ... Args>
   std::function<callback_status(Args&&...)> callback(typename identity<std::function<callback_status(Args&&...)>>::type f)
   {
@@ -60,7 +61,25 @@ public:
       return callback_status::died;
     };
   }
- 
+  */
+
+  template<typename R, typename ... Args>
+  std::function<R(Args&&...)> callback(typename identity<std::function<R(Args&&...)>>::type f)
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    std::weak_ptr<int> alive = _alive;
+    _mutex.unlock();
+    
+    return [alive,f](Args&&... args) -> R
+    {
+      if ( auto p = alive.lock() )
+      {
+        return f(std::forward<Args>(args)...);
+      }
+      return R();
+    };
+  }
+
 private:
   
   alive_type _alive;
