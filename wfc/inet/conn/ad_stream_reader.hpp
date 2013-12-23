@@ -49,7 +49,7 @@ struct ad_stream_reader
         else if (ec != boost::asio::error::operation_aborted)
         {
           t.get_aspect().template get<_read_error_>()(t, ec);
-          t.close();
+          t.close(); /*перенести в _read_error_*/
         }
       }
     );
