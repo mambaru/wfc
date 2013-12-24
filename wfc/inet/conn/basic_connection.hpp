@@ -57,7 +57,7 @@ public:
   ~basic_connection()
   {
     _socket->close();
-    //std::cout << "~tcp_connection_base()" << std::endl;
+    std::cout << "~tcp_connection_base()" << std::endl;
   }
   
   basic_connection()
