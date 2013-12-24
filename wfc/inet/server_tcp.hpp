@@ -27,6 +27,7 @@ public:
   
   void configure(const server_tcp_config& conf)
   {
+    std::cout << "server_tcp configure" << std::endl;
     auto cntx = this->server_context();
     cntx.listen_threads = conf.listen_threads;
     cntx.worker_threads = conf.worker_threads;

@@ -16,4 +16,6 @@ struct _connection_aspect_;
 struct _connection_base_;
 struct _connection_;
 struct _server_aspect_;
+
+struct _configuration_;
 }}

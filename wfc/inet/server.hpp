@@ -22,59 +22,41 @@ public:
   typedef typename helper::connection_type connection_type;
   typedef typename helper::connection_context_type connection_context_type;
   
+  typedef typename helper::config_type config_type;
 public:
   
   typedef typename super::aspect aspect;
   
-  server( ::wfc::io_service& io_service, const server_config& conf )
+  server( ::wfc::io_service& io_service, const config_type& conf )
     : _io_service(io_service)
   {
-    this->configure(conf);
+    this->get_aspect().template get<_configuration_>()(*this, conf);
   }
   
-  server( std::weak_ptr< wfc::global > g, const server_config& conf )
-    // : _io_service(g.lock()->io_service.lock())
+  server( std::weak_ptr< wfc::global > g, const config_type& conf )
     : server( *(g.lock()->io_service.lock()), conf)
   {
-    /*
-    //if ( auto gl = g.lock() )
-    {
-      //if ( auto io = g.lock() )
-      if ( g )
-      {
-        _io_service = g->io_service.lock();
-      }
-    }
-    
-    if ( !_io_service )
-    {
-      _io_service = std::make_shared< wfc::io_service > ();
-    }*/
-    /*
-    if ( g && g->io_service )
-    {
-      _io_service = g->io_service;
-    }
-    else
-    {
-      _io_service = std::make_shared< wfc::io_service > ();
-    }*/
-    
-    //this->configure(conf);
+    this->get_aspect().template get<_configuration_>()(*this, conf);
   }
   
-  void configure(const server_config& conf)
+  /*
+  void configure(const config_type& conf)
   {
+    //this->get_aspect().template get<_configuration_>()(*this, conf);
+    
+    std::cout << "server configure" << std::endl;
     server_context_type cntx = this->server_context();
     cntx.enable_stat = conf.enable_stat;
     cntx.host = conf.host;
     cntx.port = conf.port;
     this->server_context(cntx);
-  }
+    
+  }*/
   
-  void reconfigure(const server_config& conf)
+  void reconfigure(const config_type& conf)
   {
-    this->configure(conf);
+    this->get_aspect().template get<_configuration_>()(*this, conf);
+    //this->configure(conf);
     // TODO: _reconfigure_
   }
   

@@ -31,17 +31,20 @@ struct ad_stream_write
   }
 };
 
-  
-struct aspect_stream: fas::aspect<
-  inet::basic_context_t< context_stream >, 
-  inet::stream::aspect,
-  inet::rn::aspect,
-  aspect,
-  fas::alias< inet::stream::_incoming_, inet::rn::_input_        >,
-  fas::alias< inet::rn::_output_,       inet::stream::_outgoing_ >,
-  fas::alias< inet::rn::_incoming_,     jsonrpc::_input_   >,
-  fas::advice< _write_ , ad_stream_write>,
-   fas::alias< _output_, inet::rn::_outgoing_ >
->{};
+template<typename ...Args>
+struct aspect_stream
+  : fas::aspect<
+      typename fas::type_list_n<Args...>::type,
+      inet::basic_context_t< context_stream >, 
+      inet::stream::aspect,
+      inet::rn::aspect,
+      aspect,
+      fas::alias< inet::stream::_incoming_, inet::rn::_input_        >,
+      fas::alias< inet::rn::_output_,       inet::stream::_outgoing_ >,
+      fas::alias< inet::rn::_incoming_,     jsonrpc::_input_   >,
+      fas::advice< _write_ , ad_stream_write>,
+      fas::alias< _output_, inet::rn::_outgoing_ >
+  >
+{};
 
 }}

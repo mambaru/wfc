@@ -7,6 +7,7 @@
 #include <thread>
 
 #include <wfc/inet/context.hpp>
+#include <wfc/inet/server_tcp_config.hpp>
 #include <wfc/inet/srv/server_tcp_context.hpp>
 #include <wfc/inet/srv/ad_worker.hpp>
 #include <wfc/inet/srv/ad_acceptor.hpp>
@@ -20,6 +21,7 @@ namespace wfc{ namespace inet{
 
 struct aspect_server_tcp: fas::aspect< fas::type_list_n<
   context<server_tcp_context>,
+  fas::advice<_configuration_, server_tcp_configurator>,
   fas::advice<_socket_,  ad_tcp_socket>, 
   fas::advice<_worker_,  ad_worker>, 
   fas::advice<_acceptor_, ad_acceptor>,
