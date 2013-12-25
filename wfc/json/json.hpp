@@ -235,6 +235,16 @@ struct enumerator
 
 /// //////////////////////////////////////////////////////////////////////////////
 
+template< typename T, typename L>
+struct set_enumerator
+{
+  typedef T target;
+  typedef typename fas::normalize<L>::type enum_list;
+  typedef serializerT< set_enumerator<T, enum_list> > serializer;
+};
+
+/// /////////////////////////////////////////////////////////////////
+
 template<typename T, typename L>
 struct object
 {
@@ -484,5 +494,6 @@ struct array< object<T, L>, R>
 #include "specialization/json_object.hpp"
 #include "specialization/json_array.hpp"
 #include "specialization/json_enum.hpp"
+#include "specialization/json_set_enum.hpp"
 
 
