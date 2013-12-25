@@ -24,12 +24,12 @@
 #define HAVE_SOCKET_FUNC
 
 /* Define to 1 if you have the `clock_gettime' function. */
-/* #undef HAVE_CLOCK_GETTIME_FUNC */
+#define HAVE_CLOCK_GETTIME_FUNC
 #define HAVE_FTIME_FUNC
 #define HAVE_ISATTY_FUNC
 #define HAVE_GETRUSAGE_FUNC
 #define HAVE_USLEEP_FUNC
-/* #undef HAVE_RT_LIB */
+#define HAVE_RT_LIB
 
 
 #define HAVE_SYS_STAT_H
