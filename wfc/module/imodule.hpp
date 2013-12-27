@@ -11,6 +11,7 @@ struct imodule
 {
   enum class priority
   {
+    none = -1,
     core,
     config,
     logger,

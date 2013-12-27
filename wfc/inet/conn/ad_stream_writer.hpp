@@ -7,6 +7,7 @@
 
 namespace wfc{ namespace inet{
 
+template<size_t BufferSize = 8096*2 >
 struct ad_stream_writer
 {
   typedef std::vector<char> data_type;
@@ -14,33 +15,76 @@ struct ad_stream_writer
   typedef std::list<data_ptr> data_list_type;
   typedef ::boost::asio::const_buffer buffer_type;
 
-  static constexpr size_t BUFFER_SIZE=8096*2;
+  static constexpr size_t BUFFER_SIZE=BufferSize;
 
+  ad_stream_writer()
+    : _outgoing_size(0)
+  {}
+  
   template<typename T>
   void operator()(T& t, data_ptr d)
   {
-    //static int count = 0;
+    _outgoing_size += d->size();
+    auto capt = unique_wrap( std::move(d) );
+    t.socket().get_io_service().dispatch([this, &t, capt]() {
+      this->dispatch(t, unique_unwrap(capt) );
+    });
+  }
+  
+  size_t outgoing_size() const
+  {
+    return _outgoing_size;
+  }
+  
+private:
+  
+  template<typename T>
+  void dispatch(T& t, data_ptr d)
+  {
     if ( d==nullptr || d->empty() )
       return;
 
-    //std::cout << "ad_writer " << count++ << ": " << std::string(d->begin(), d->end()) <<  std::endl; 
     if ( !_data_list.empty() )
     {
       _data_list.push_back(std::move(d));
     }
     else
     {
+      boost::system::error_code ec;
+      size_t bytes_transferred = t.socket().send( ::boost::asio::buffer(d->data(), d->size()), 0, ec);
       
-      size_t s = t.socket().send( ::boost::asio::buffer(d->data(), d->size()) );
-
-      if ( s != d->size() )
+      if (ec)
       {
-        d->erase(d->begin(), d->begin()+s);
-        _data_list.push_back(std::move(d));
+        bytes_transferred = 0;
+        t.get_aspect().template get<_write_error_>()(t,  ec);
+      }
+
+      _outgoing_size -= bytes_transferred;
+
+      if ( bytes_transferred != d->size() )
+      {
+        auto beg = d->begin() + bytes_transferred;
+        auto end = d->end();
+        for(;beg != end; )
+        {
+          if ( std::distance(beg, end) > static_cast<ptrdiff_t>(BufferSize*2) ) // Последний блок может быть [BufferSize..BufferSize*2]
+          {
+            this->_data_list.push_back( std::make_unique<data_type>(beg, beg + BufferSize));
+            std::advance(beg, BufferSize);
+          }
+          else
+          {
+            this->_data_list.push_back( std::make_unique<data_type>(beg, end));
+            beg = end;
+          }
+        }
+
         do_write(t);
       }
-      else
+      
+      if (!ec)
       {
+        t.get_aspect().template get<_on_write_>()(t);
       }
     }
   }
@@ -56,19 +100,25 @@ struct ad_stream_writer
     t.socket().async_write_some(
       ::boost::asio::buffer( _data_list.front()->data(),  _data_list.front()->size() ),
       t.strand().wrap(
-      [this, &t, wk](boost::system::error_code /*ec*/, std::size_t bytes_transferred)
+      [this, &t, wk](boost::system::error_code ec, std::size_t bytes_transferred)
       {
         auto alive = wk.lock();
         if (!alive)
         {
-          std::cout << "NOT ALIVE!!!" << std::endl;
+          t.get_aspect().template get<_alive_error_>()(t);
           return;
         }
         
+        this->_outgoing_size-=bytes_transferred;
         
-        if ( bytes_transferred == this->_data_list.front()->size() )
+        if (ec)
+        {
+          t.get_aspect().template get<_write_error_>()(t, ec);
+        }
+        else if ( bytes_transferred == this->_data_list.front()->size() )
         {
           this->_data_list.pop_front();
+          //_outgoing_size-=bytes_transferred;
         }
         else
         {
@@ -77,14 +127,19 @@ struct ad_stream_writer
             this->_data_list.front()->begin()+bytes_transferred
           );
         }
+        
+        if (!ec)
+          t.get_aspect().template get<_on_write_>()(t);
+
         this->do_write(t);
       }
       ) // t.strand().wrap(
     );
   }
-  
+    
 private:
-
+  std::atomic<int> _outgoing_size;
+  // Блокировка не требуется - всегда вызываеться из потока io_service
   data_list_type _data_list;
 };
 

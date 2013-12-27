@@ -84,7 +84,7 @@ public:
     _incoming_ids.insert(id);
 
     _method.request(t, std::move(req), id, 
-                    t.owner().template callback<invoke_response_ptr, invoke_error_ptr>( 
+                    t.owner().template callback<callback_status, invoke_response_ptr, invoke_error_ptr>( 
                     [this, &t, stat, id]( invoke_response_ptr res, invoke_error_ptr err )->callback_status
     {
       if ( err==nullptr )
@@ -134,7 +134,7 @@ private:
       _reserve = data->size();
     if ( _reserve > 1024*8 )
       _reserve = 1024*8;
-    t.get_aspect().template get<_output_>()(t, std::move(data) );
+    t.get_aspect().template get<_write_>()(t, std::move(data) );
   }
 
 private:

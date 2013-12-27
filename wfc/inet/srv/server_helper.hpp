@@ -33,6 +33,8 @@ struct server_helper
 
   typedef fas::aspect_class<server_aspect_type> server_base;
   typedef typename server_base::aspect::template advice_cast<_context_>::type server_context_type;
+  typedef typename server_base::aspect::template advice_cast<_configuration_>::type::config_type config_type;
+  
 
 };
 

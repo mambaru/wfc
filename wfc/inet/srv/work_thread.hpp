@@ -43,7 +43,7 @@ public:
     ::boost::asio::ip::tcp::endpoint::protocol_type protoc = sock.local_endpoint().protocol();
     sock.close();
 
-    _io_service.post( callback_owner::callback( [this, fd, protoc, fun]() 
+    _io_service.post( callback_owner::callback<callback_status>( [this, fd, protoc, fun]() 
     {
       socket_type sock( this->_io_service, protoc, fd );
       fun( std::move(sock) );

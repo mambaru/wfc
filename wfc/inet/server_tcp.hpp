@@ -27,11 +27,17 @@ public:
   
   void configure(const server_tcp_config& conf)
   {
-    server_context_type cntx = this->server_context();
+    std::cout << "server_tcp configure" << std::endl;
+    auto cntx = this->server_context();
     cntx.listen_threads = conf.listen_threads;
     cntx.worker_threads = conf.worker_threads;
     cntx.port = conf.port;
     this->server_context(cntx);
+
+    auto cntx_conn = this->server_context();
+    cntx.outgoing_warning = conf.outgoing_warning;
+    cntx.outgoing_limit = conf.outgoing_limit;
+    this->connection_context(cntx_conn);
   }
   
   void reconfigure(const server_config& conf)

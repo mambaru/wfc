@@ -10,9 +10,12 @@ enum class stat_category
   call_notify, 
 };
 
+struct _write_;
+
 struct _invoke_;
 struct _input_;
 struct _output_;
+
 //struct _outgoing_;
 struct _method_;
 struct _send_json_;

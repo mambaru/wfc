@@ -5,16 +5,20 @@
 #include <iostream>
 #include <list>
 
+#include <wfc/inet/conn/tags.hpp>
+#include <wfc/memory.hpp>
+
 
 namespace wfc{ namespace inet{
 
-template<typename Tg>
+
+template<size_t BufferSize = 8096*2 >
 struct ad_stream_reader
 {
   typedef std::vector<char> data_type;
   typedef std::unique_ptr<data_type> data_ptr;
 
-  static constexpr size_t BUFFER_SIZE=8096*2;
+  static constexpr size_t BUFFER_SIZE = BufferSize;
 
   template<typename T>
   void operator()(T& t)
@@ -31,20 +35,21 @@ struct ad_stream_reader
       [this, &t, wk](boost::system::error_code ec, std::size_t bytes_transferred)
       {
         auto alive = wk.lock();
-        if (!alive) {
-          std::cout << "READER NOT ALIVE!!!" << std::endl;
-          return;
-        }
-        if (!ec)
+        if (!alive) 
         {
-          // std::cout << "REEADED " << bytes_transferred << ": [[" << std::string(_data.begin(), _data.begin()+bytes_transferred) << "]]" << std::endl;
-          t.get_aspect().template get<Tg>()(t, data_ptr(new data_type(_data.begin(), _data.begin()+bytes_transferred)));
+          t.get_aspect().template get<_alive_error_>()(t);
+        }
+        else if (!ec)
+        {
+          t.get_aspect().template get<_on_read_>()
+            (t, std::make_unique<data_type>(_data.begin(), _data.begin() + bytes_transferred) );
+            
           this->do_read(t);
         }
-        else
+        else if (ec != boost::asio::error::operation_aborted)
         {
-          // std::cout << "closed??" << std::endl;
-          t.release();
+          t.get_aspect().template get<_read_error_>()(t, ec);
+          t.close(); /*перенести в _read_error_*/
         }
       }
     );

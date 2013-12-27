@@ -4,7 +4,7 @@ namespace wfc{
 
 enum class callback_status
 {
-  died = -1,
+  died = 0,
   ready = 1,
   completed = 2
 };

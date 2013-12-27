@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include <wfc/memory.hpp>
 
 namespace wfc{ namespace inet{
 
@@ -14,7 +15,7 @@ struct ad_splitter
   template<typename T>
   void operator()(T& t, data_ptr d)
   {
-    //std::cout << "ad_splitter" << std::endl;
+    
     auto beg = d->begin();
     auto end = d->end();
 
@@ -49,7 +50,7 @@ struct ad_splitter
         return;
       }
       else
-      {
+      { 
         if ( _data == nullptr )
         {
           _data = data_ptr( new data_type(itr, end) );
@@ -65,6 +66,7 @@ struct ad_splitter
         }
       }
     }
+    
   }
   
 private:

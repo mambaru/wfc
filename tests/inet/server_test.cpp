@@ -27,7 +27,7 @@ struct common_aspect:
 int main()
 {
   ::boost::asio::io_service io_service;
-  wfc::inet::server< common_aspect > srv(io_service, wfc::inet::server_config() );
+  wfc::inet::server< common_aspect > srv(io_service, wfc::inet::server_tcp_config() );
   auto conn_conf = srv.connection_context();
   conn_conf.enable_stat = true;
   srv.connection_context(conn_conf);

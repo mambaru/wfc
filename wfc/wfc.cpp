@@ -22,22 +22,29 @@ int wfc::run(int argc, char* argv[])
   _global->wfc_version = wfc_build_info_string;
   _global->modules = _modules;
   _global->loggers = _loggers;
+  
   for (auto m: _module_list)
   {
     _modules->set(m.first, m.second);
-    //m.second->create(_global);
-    // else
-      //std::cerr << "Warning! module name '" << m.first << "' is not unique. Ignored." << std::endl;
   }
-  _modules->for_each([this](const std::string& name, std::weak_ptr<imodule> module){
+   
+  _modules->for_each([this](const std::string& name, std::weak_ptr<imodule> module)
+  {
     if (auto m = module.lock())
       m->create(name,  _global);
   });
 
   
+  if ( auto startup = _global->startup.lock() )
+  {
+    if ( !startup->startup(argc, argv) )
+      return 0;
+  }
+  else
+    std::cout << "no startup module" << std::endl;
 
   if ( auto core = _global->core.lock() )
-    return core->run(argc, argv, _global);
+    return core->run(/*argc, argv, */_global);
   return 0;
 }
 

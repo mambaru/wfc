@@ -31,7 +31,7 @@ public:
     if (_reserve > 8196 )
       _reserve = 8196;
 
-    t.get_aspect().template get<_output_>()(t, std::move(d));
+    t.get_aspect().template get<_write_>()(t, std::move(d));
   }
 
 private:
