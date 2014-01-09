@@ -2,6 +2,7 @@
 
 #include <wfc/jsonrpc/objects/outgoing_response.hpp>
 #include <wfc/jsonrpc/objects/outgoing_response_json.hpp>
+#include <wfc/jsonrpc/errors/error_json.hpp>
 #include <wfc/memory.hpp>
 #include <fas/typemanip.hpp>
 #include <unordered_set>
