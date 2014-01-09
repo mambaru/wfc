@@ -1,8 +1,12 @@
 #pragma once
 
+#include <wfc/jsonrpc/tags.hpp>
 #include <wfc/jsonrpc/objects/outgoing_response.hpp>
 #include <wfc/jsonrpc/objects/outgoing_response_json.hpp>
+#include <wfc/jsonrpc/errors/tags.hpp>
 #include <wfc/jsonrpc/errors/error_json.hpp>
+#include <wfc/jsonrpc/objects/outgoing_error_json.hpp>
+#include <wfc/jsonrpc/types.hpp>
 #include <wfc/memory.hpp>
 #include <fas/typemanip.hpp>
 #include <unordered_set>

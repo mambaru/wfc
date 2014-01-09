@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wfc/jsonrpc/method/method_implementation.hpp>
-
+#include <fas/aop.hpp>
 
 namespace wfc{ namespace jsonrpc{
 
