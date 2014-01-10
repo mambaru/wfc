@@ -85,7 +85,7 @@ public:
   }
 
   template<typename P>
-  P deserialize_one( T& , fas::empty_list, P beg, P end)
+  P deserialize_one( T& , fas::empty_list, P beg, P /*end*/)
   {
     return beg;
   }
@@ -107,7 +107,7 @@ public:
   * для десериализации массива вида ["One","Two","Three"]
   */
   template<typename LL, typename RR, typename P>
-  P deserialize_arr( T& v, fas::type_list<LL, RR> tl, P beg, P end) {
+  P deserialize_arr( T& v, fas::type_list<LL, RR> /*tl*/, P beg, P end) {
     v = T();
     char lastChar = ' ';
     while (*beg=='"') {
