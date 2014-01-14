@@ -12,14 +12,15 @@ namespace wfc{ namespace inet{
 class connection_manager
 {
   typedef std::mutex mutex_type;
+  typedef std::shared_ptr<iconnection> connection_ptr;
 public:
-  void insert(std::shared_ptr<iconnection> conn)
+  void insert(connection_ptr conn)
   {
     std::lock_guard<mutex_type> lk(_mutex);
     _connections.insert(conn);
   }
 
-  void erase(std::shared_ptr<iconnection> conn)
+  void erase(connection_ptr conn)
   {
     std::lock_guard<mutex_type> lk(_mutex);
     _connections.erase(conn);
@@ -34,7 +35,7 @@ public:
   }
   
 private:
-  std::set< std::shared_ptr<iconnection> > _connections;
+  std::set< connection_ptr > _connections;
   std::mutex _mutex;
 };
 

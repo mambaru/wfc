@@ -95,7 +95,6 @@ struct aspect: fas::aspect
   context<empty_context>,
   basic_context_t<stream_context>, 
   fas::advice<_start_,    ad_connection_start<_reader_> >,
-  //fas::advice<_reader_,   ad_stream_reader<_incoming_> >,
   fas::advice<_reader_,   ad_stream_reader<> >,
   fas::advice<_writer_,   ad_stream_writer<> >,
   fas::alias<_on_read_,   _incoming_ >,
@@ -103,7 +102,6 @@ struct aspect: fas::aspect
   fas::advice<_outgoing_, ad_outgoing >,
   fas::alias<_write_,     _writer_ >,  
   fas::type< _socket_type_, boost::asio::ip::tcp::socket >,
-
   fas::advice<_on_write_, ad_on_write>, 
   fas::advice<_shutdown_, ad_shutdown>,
   fas::stub<_write_error_>, 

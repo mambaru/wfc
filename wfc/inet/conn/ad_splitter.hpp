@@ -15,9 +15,11 @@ struct ad_splitter
   template<typename T>
   void operator()(T& t, data_ptr d)
   {
-    
     auto beg = d->begin();
     auto end = d->end();
+    
+    // если _data != nullptr, то beg и end итераторы _data
+    // если _data == nullptr, то beg и end итераторы d
 
     if ( _data != nullptr )
     {
@@ -30,30 +32,55 @@ struct ad_splitter
     while ( beg!=end )
     {
       auto itr = _parse(beg, end);
-      if (itr == beg)
+      
+      // Если ничего не нашли
+      if ( itr == beg )
       {
+        // Если это первый "кусок"
         if ( _data == nullptr )
+        {
           _data = std::move(d);
+        }
+        // Если часть буфера отправленно 
         else if (_data->begin()!=beg)
+        {
           _data->erase(_data->begin(), beg);
+        }
         return;
       }
+      
+      // Дошли до конца
       else if ( itr == end )
       {
+        // _data пустой, отправляем что пришло как есть
         if ( _data == nullptr )
+        {
           t.get_aspect().template get<Tg>()(t, std::move(d) );
+        }
+        // _data собрался один пакет целиком, отправляем его
         else if (_data->begin() == beg )
+        {
           t.get_aspect().template get<Tg>()(t, std::move(_data) );
+          if ( _data!=nullptr )
+            abort();
+        }
+        // Отправляем что осталось
         else
-          t.get_aspect().template get<Tg>()(t, data_ptr( new data_type(beg, itr) ) );
+        {
+          t.get_aspect().template get<Tg>()(t, std::make_unique<data_type>(beg, end) );
+        }
         _data = nullptr;
         return;
       }
+      // Очередной пакет
       else
       { 
+        // Первый блок
         if ( _data == nullptr )
         {
-          _data = data_ptr( new data_type(itr, end) );
+          // запоминаем хвост
+          _data = std::make_unique<data_type>(itr, end);
+          // отправляем голову
           d->resize( std::distance(beg, itr) );
           t.get_aspect().template get<Tg>()(t, std::move(d) );
           beg = _data->begin();
@@ -61,7 +88,7 @@ struct ad_splitter
         }
         else
         {
-          t.get_aspect().template get<Tg>()(t, data_ptr( new data_type(beg, itr) ) );
+          t.get_aspect().template get<Tg>()(t, std::make_unique<data_type>(beg, itr) );
           beg = itr;
         }
       }

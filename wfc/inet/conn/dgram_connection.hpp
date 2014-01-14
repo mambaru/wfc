@@ -6,69 +6,50 @@
 #include <list>
 #include <wfc/callback/callback_owner.hpp>
 #include <wfc/inet/conn/iconnection.hpp>
+#include <wfc/inet/conn/connection_helper.hpp>
 #include <wfc/inet/types.hpp>
 #include <wfc/io_service.hpp>
 
 namespace wfc{ namespace inet{ 
   
-template<typename A, template<typename> class AspectClass >
-struct basic_connection_helper
-{
-  typedef typename fas::aspect_class< A >::aspect original_aspect;
-  typedef typename original_aspect::template advice_cast<_context_>::type original_context;
-  typedef typename original_aspect::template advice_cast<_basic_context_>::type::template apply<original_context>::type context_type;
-  typedef typename fas::merge_aspect<
-    context<context_type>,
-    A
-  >::type new_aspect;
-  typedef AspectClass<new_aspect> base_class;
-};
 
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
-class basic_connection final
-  : //public AspectClass<A>
-  public basic_connection_helper<A, AspectClass>::base_class
-  , public std::enable_shared_from_this< basic_connection<A, AspectClass> >
+class dgram_connection final
+  : public connection_helper<A, AspectClass>::base_class
+  , public std::enable_shared_from_this< stream_connection<A, AspectClass> >
   , public iconnection
 {
 public:
-  //typedef AspectClass<A> super;
-  typedef typename basic_connection_helper<A, AspectClass>::base_class super;
-  typedef std::enable_shared_from_this< basic_connection<A, AspectClass> > super_shared;
-  //typedef typename super::aspect aspect;
+  typedef typename connection_helper<A, AspectClass>::base_class super;
+  typedef std::enable_shared_from_this< stream_connection<A, AspectClass> > super_shared;
   
-  typedef basic_connection<A, AspectClass> self;
+  typedef dgram_connection<A, AspectClass> self;
   typedef self connection_type;
   typedef std::shared_ptr<connection_type> connection_ptr;
-  typedef std::function<void( connection_ptr )> release_function;
-
-  typedef typename super::aspect::template advice_cast<_socket_type_>::type socket_type;
-  //typedef boost::asio::ip::tcp::socket socket_type;
+  typedef typename super::aspect::template advice_cast<_socket_type_>::type   socket_type;
+  typedef typename super::aspect::template advice_cast<_endpoint_type_>::type endpoint_type;
   typedef std::unique_ptr<socket_type> socket_ptr;
-
-  typedef boost::asio::strand strand_type;
+  
   typedef std::unique_ptr<strand_type> strand_ptr;
+  
+  typedef boost::asio::strand strand_type;
 
 public:
   
   typedef typename super::aspect::template advice_cast<_context_>::type context_type;
   typedef callback_owner<> owner_type;
 
-  ~basic_connection()
+  ~dgram_connection()
   {
-    _socket->close();
-    std::cout << "~tcp_connection_base()" << std::endl;
   }
   
-  basic_connection()
+  dgram_connection()
     : _context()
   {
-    //
-    //fas::for_each_group<_startup_>(*this, f_initialize());
   }
   
-  basic_connection(const basic_connection&) = delete;
-  basic_connection& operator=(const basic_connection&) = delete;
+  stream_connection(const stream_connection&) = delete;
+  stream_connection& operator=(const stream_connection&) = delete;
   
   context_type& context()
   {
@@ -113,6 +94,11 @@ public:
   const owner_type& owner() const
   {
     return _owner;
+  }
+  
+  const endpoint_type& sender_endpoint() const
+  {
+    return _sender_endpoint;
   }
 
   void start(socket_type socket, release_function release)
@@ -169,7 +155,7 @@ public:
 
 private:
   context_type _context;
-  release_function _release;
+  endpoint_type _sender_endpoint;
   socket_ptr _socket;
   strand_ptr _strand;
   owner_type _owner;

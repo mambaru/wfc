@@ -22,6 +22,7 @@ struct connection_aspect: fas::aspect<
 struct common_aspect: 
   fas::aspect< wfc::inet::connection_aspect< wfc::inet::echo::aspect_stream_rn > > 
 {
+  
 };
 
 int main()

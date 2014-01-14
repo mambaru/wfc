@@ -188,6 +188,7 @@ public:
   {
     auto beg = data->begin();
     auto end = data->end();
+    beg = json::parser::parse_space(beg, end);
 
     for (;beg!=end;)
     {
