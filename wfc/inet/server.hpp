@@ -105,9 +105,18 @@ public:
     return _io_service;
   }
   
-  std::shared_ptr<connection_type> create_connection()
+  /*
+  emplate<typename T, typename ...Args>
+std::unique_ptr<T> make_unique( Args&& ...args )
+{
+  return std::unique_ptr<T>( new T( std::forward<Args>(args)... ) );
+}
+*/
+  
+  template< typename ...ConnArgs>
+  std::shared_ptr<connection_type> create_connection( ConnArgs&& ...args )
   {
-    std::shared_ptr<connection_type> pconn = std::make_shared<connection_type>();
+    std::shared_ptr<connection_type> pconn = std::make_shared<connection_type>( std::forward<ConnArgs>(args)... );
     pconn->context() = _connection_context;
     return pconn;
   }

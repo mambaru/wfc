@@ -46,9 +46,12 @@ public:
     std::cout << "~tcp_connection_base()" << std::endl;
   }
   
-  stream_connection()
+  stream_connection(socket_type socket)
     : _context()
+    , _socket( std::make_unique<socket_type>(std::move(socket)))
   {
+    _strand = std::make_unique<strand_type>(_socket->get_io_service());
+  
     //
     //fas::for_each_group<_startup_>(*this, f_initialize());
   }
@@ -101,13 +104,13 @@ public:
     return _owner;
   }
 
-  void start(socket_type socket, release_function release)
+  void start(release_function release)
   {
     this->get_aspect().template getg<_startup_>()( *this, fas::tag<_startup_>() );
     
     _release = release;
-    _socket = std::make_unique<socket_type>(std::move(socket));
-    _strand = std::make_unique<strand_type>(_socket->get_io_service());
+    // _socket = std::make_unique<socket_type>(std::move(socket));
+    //_strand = std::make_unique<strand_type>(_socket->get_io_service());
     // TODO: перенести в server
     //boost::asio::socket_base::non_blocking_io non_blocking_io(true);
     //_socket->io_control(non_blocking_io);

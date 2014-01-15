@@ -38,7 +38,7 @@ void client_test()
     std::cout << "1 client " << std::endl;
     ::boost::asio::ip::tcp::socket s(io_service);
     ::boost::asio::ip::tcp::resolver resolver(io_service);
-    boost::asio::connect(s, resolver.resolve({"192.168.2.166", "12345"}));
+    boost::asio::connect(s, resolver.resolve({"0.0.0.0", "12345"}));
     std::cout << "2 client " << std::endl;
     
     std::string str1 = "1234567890\r\nqwertyuiop\r\n1234567890XYZ\r\nйцукен\r\n";
@@ -84,7 +84,7 @@ int main(int argc, char */*argv*/[])
   srv.connection_context(conn_conf);
   
   auto config = srv.server_context();
-  config.host = "192.168.2.166";
+  config.host = "0.0.0.0";
   config.port = "12345";
   config.listen_threads = 3;
   config.worker_threads = 3;
