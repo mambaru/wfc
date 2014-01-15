@@ -41,6 +41,10 @@ struct ad_stream_reader
         }
         else if (!ec)
         {
+          if ( auto a = t.context().activity.lock() )
+            a->update(t.shared_from_this());
+          else
+            std::cout << "no update" << std::endl;
           std::cout << "[[" << std::string(_data.begin(), _data.begin() + bytes_transferred) << "]" << std::endl;
           t.get_aspect().template get<_on_read_>()
             (t, std::make_unique<data_type>(_data.begin(), _data.begin() + bytes_transferred) );

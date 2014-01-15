@@ -13,7 +13,18 @@ struct ad_st_acceptor
 {
   typedef ::boost::asio::ip::tcp::socket socket_type;
   typedef ::boost::asio::ip::tcp::acceptor acceptor_type;
-
+  
+  ad_st_acceptor()
+    //: _connection_manager( std::make_shared<connection_manager>() )
+  {}
+  template<typename T>
+  void operator()(T& /*t*/)
+  {
+    auto acceptor = _acceptor.lock();
+    if ( !acceptor )
+      return;
+    acceptor->close();
+  }
   
   template<typename T>
   void operator()(T& t, std::weak_ptr<acceptor_type> acceptor)
@@ -65,16 +76,19 @@ struct ad_st_acceptor
           t.get_aspect().template get<_worker_>()(t, std::move( *(this->_socket) ), [this, &t](socket_type sock) -> void
           {
             typedef typename T::connection_type connection_type;
+            std::shared_ptr<connection_manager> manager = t.get_aspect().template get<_connection_manager_>();
             std::shared_ptr<connection_type> pconn = t.create_connection();
+            pconn->context().activity = manager;
 
             /*
             std::shared_ptr<connection_type> pconn = std::make_shared<connection_type>();
             pconn->context() = t.connection_context();
             */
-            this->_connection_manager.insert(pconn);
-            pconn->start( std::move( sock ), [this](std::shared_ptr<connection_type> pconn)->void
+            manager->insert(pconn);
+            pconn->start( std::move( sock ), [&t](std::shared_ptr<connection_type> pconn)->void
             {
-              this->_connection_manager.erase(pconn);
+              t.get_aspect().template get<_connection_manager_>()->erase(pconn);
+              //this->_connection_manager->erase(pconn);
             });
           });
         }
@@ -90,7 +104,7 @@ struct ad_st_acceptor
 private:
   std::unique_ptr<socket_type> _socket;
   std::weak_ptr<acceptor_type> _acceptor;
-  connection_manager _connection_manager;
+  //std::shared_ptr<connection_manager> _connection_manager;
 };
 
 

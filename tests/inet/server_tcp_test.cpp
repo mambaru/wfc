@@ -59,10 +59,12 @@ void client_test()
       //break;
       beg = cur;
     }
+    
 
     char reply[1024];
     std::cout << "4 client " << std::endl;
     size_t reply_length = boost::asio::read(s, boost::asio::buffer(reply, str1.size()) );
+    s.close();
     std::cout << "5 client " << std::endl;
     std::string str2( reply, reply + reply_length);
     std::cout << str1 << std::endl;

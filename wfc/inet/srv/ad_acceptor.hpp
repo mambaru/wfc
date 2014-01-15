@@ -48,8 +48,10 @@ struct ad_acceptor
   }
   
   template<typename T>
-  void operator()(T& /*t*/, fas::tag<_stop_>)
+  void operator()(T& t, fas::tag<_stop_>)
   {
+    t.get_aspect().template get<_st_acceptor_>()(t);
+    t.get_aspect().template get<_mt_acceptor_>()(t);
   }
 
   template<typename T>

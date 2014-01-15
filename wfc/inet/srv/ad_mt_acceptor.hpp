@@ -12,6 +12,17 @@ struct ad_mt_acceptor
   typedef ::boost::asio::ip::tcp::acceptor acceptor_type;
   
   template<typename T>
+  void operator()(T& /*t**/)
+  {
+    std::cout << "ad_mt_acceptor stop" << std::endl;
+    for (auto& thr : _accept_threads)
+    {
+      thr->stop();
+    }
+    _accept_threads.clear();
+  }
+
+  template<typename T>
   void operator()(T& t, std::weak_ptr<acceptor_type> acceptor)
   {
     int current = _accept_threads.size();

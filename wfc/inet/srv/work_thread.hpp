@@ -32,6 +32,7 @@ public:
   
   void stop()
   {
+    std::cout << "work_thread()::stop" << std::endl;
      this->_io_service.stop();
     callback_owner::reset();
     _thread.join();

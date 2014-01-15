@@ -20,6 +20,19 @@ struct ad_worker
   typedef std::vector< std::unique_ptr<work_thread> > work_thread_vector;
   
   /// initialize
+  
+  template<typename T>
+  void operator()(T& , fas::tag<_stop_> )
+  {
+    std::cout << "ad_worker::stop" << std::endl;
+    for(auto& thr : _work_threads )
+    {
+      thr->stop();
+    }
+    _work_threads.clear();
+  }
+
+    
   template<typename T>
   void operator()(T& t, fas::tag<_startup_> )
   {

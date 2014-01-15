@@ -45,6 +45,9 @@ struct ad_shutdown
     // std::cout << "ad_shutdown" << std::endl;
     t.get_io_service().dispatch([&t]()
     {
+      if ( t.context().shutdown )
+        return;
+      t.socket().shutdown( boost::asio::socket_base::shutdown_receive);
       // std::cout << "ad_shutdown dispatch" << std::endl;
       size_t size  = t.get_aspect().template get<_writer_>().outgoing_size();
       if ( size == 0)

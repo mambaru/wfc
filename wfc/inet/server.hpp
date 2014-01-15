@@ -68,12 +68,14 @@ public:
   void start()
   {
     this->get_aspect().template getg<_startup_>()(*this, fas::tag<_startup_>() );
-    this->get_aspect().template get<_start_>()(*this, fas::tag<_start_>() );
+    this->get_aspect().template getg<_start_>()(*this, fas::tag<_start_>() );
   }
   
   void stop()
   {
-    this->get_aspect().template get<_stop_>()(*this, fas::tag<_stop_>() );
+    std::cout << "server::stop" << std::endl;
+    this->get_aspect().template getg<_stop_>()(*this, fas::tag<_stop_>() );
+    std::cout << "server::stoped!!!" << std::endl;
   }
   
   // TODO: reconfigure

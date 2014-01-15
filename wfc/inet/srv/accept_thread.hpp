@@ -17,10 +17,12 @@ public:
   accept_one(
     boost::asio::io_service& io_service,
     acceptor_type& acceptor,
-    socket_type& socket
+    socket_type& socket,
+    std::weak_ptr<connection_manager> manager
   ) : _io_service(io_service)
     , _acceptor(acceptor)
     , _socket(socket)
+    , _manager( manager )
   {}
   
   template<typename T>
@@ -41,12 +43,17 @@ public:
           {
             //std::cout << "accept_thread accepted create connection " << sock.native() << std::endl;
             std::shared_ptr<connection_type> pconn = t.create_connection();
-            this->_manager.insert(pconn);
+            pconn->context().activity = this->_manager;
             pconn->start( std::move( sock ), [this](std::shared_ptr<connection_type> pconn)->void
             {
               //std::cout << "accept_thread accepted closed" << std::endl;
-              this->_manager.erase(pconn);
+              if ( auto m = this->_manager.lock() )
+                m->erase(pconn);
             });
+            
+            if ( auto m = this->_manager.lock() )
+              m->insert(pconn);
+            
           });
         }
         
@@ -61,7 +68,7 @@ private:
   boost::asio::io_service& _io_service;
   acceptor_type& _acceptor;
   socket_type& _socket;
-  connection_manager _manager;
+  std::weak_ptr<connection_manager> _manager;
 };
 
 /*
@@ -122,13 +129,27 @@ public:
   accept_thread(const accept_thread&) = delete;
   accept_thread& operator=(const accept_thread&) = delete;
   
+  ~accept_thread()
+  {
+    //this->stop();
+  }
+  
   accept_thread(::boost::asio::io_service& io)
     : _work(io)
+    , _thread_io(nullptr)
     , _socket(io)
     , _acceptor()
   {
   }
   
+  
+  
+  void stop()
+  {
+    if ( _thread_io!=nullptr) 
+      this->_thread_io->stop();
+    _thread.join();
+  }
   
   template<typename T>
   void start(T& t, std::weak_ptr<acceptor_type> acceptor)
@@ -145,13 +166,15 @@ public:
     _thread = std::thread([this, &t, endpoint, fd]()
     {
       ::boost::asio::io_service io_service;
+      this->_thread_io = &io_service;
       acceptor_type acceptor(io_service);
       socket_type socket( io_service );
       acceptor.assign(endpoint.protocol(), fd);
       
-      accept_one one(io_service, acceptor, socket);
+      accept_one one(io_service, acceptor, socket, t.get_aspect().template get<_connection_manager_>() );
       one.do_accept(t);
       io_service.run();
+      this->_thread_io = nullptr;
     }); // thread
   }
 
@@ -204,6 +227,7 @@ public:
 
 private:  
   ::boost::asio::io_service::work _work;
+  ::boost::asio::io_service* _thread_io;
   socket_type _socket;
   std::weak_ptr<acceptor_type> _acceptor;
   //std::shared_ptr<acceptor_type> _acceptor;

@@ -13,9 +13,9 @@ struct iconnection
   virtual boost::asio::ip::address remote_address() = 0;
   
   virtual unsigned short remote_port() = 0;
-  /*
+  
   virtual void shutdown() = 0;
-  */
+  
 };
 
 }}
