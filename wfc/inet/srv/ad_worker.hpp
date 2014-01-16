@@ -10,14 +10,16 @@
 
 
 namespace wfc{ namespace inet{
-  
+
+template<typename SockType>  
 struct ad_worker
 {
   typedef rwlock<std::mutex> mutex_type;
   
-  typedef ::boost::asio::ip::tcp::socket socket_type;
+  //typedef ::boost::asio::ip::tcp::socket socket_type;
+  typedef SockType socket_type;
   typedef std::function<void(socket_type)> func_type;
-  typedef std::vector< std::unique_ptr<work_thread> > work_thread_vector;
+  typedef std::vector< std::unique_ptr<work_thread<SockType> > > work_thread_vector;
   
   /// initialize
   
@@ -43,7 +45,7 @@ struct ad_worker
     _work_threads.resize(worker_threads);
     for (int i=0; i < worker_threads; ++i)
     {
-      _work_threads[i] = std::make_unique<work_thread>();
+      _work_threads[i] = std::make_unique<work_thread<SockType> >();
       _work_threads[i]->start();
     }
   }

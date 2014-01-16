@@ -39,30 +39,13 @@ public:
     this->get_aspect().template get<_configuration_>()(*this, conf);
   }
   
-  /*
-  void configure(const config_type& conf)
-  {
-    //this->get_aspect().template get<_configuration_>()(*this, conf);
-    
-    std::cout << "server configure" << std::endl;
-    server_context_type cntx = this->server_context();
-    cntx.enable_stat = conf.enable_stat;
-    cntx.host = conf.host;
-    cntx.port = conf.port;
-    this->server_context(cntx);
-    
-  }*/
-  
   void reconfigure(const config_type& conf)
   {
     this->get_aspect().template get<_configuration_>()(*this, conf);
-    //this->configure(conf);
-    // TODO: _reconfigure_
   }
   
   void initialize()
   {
-    // TODO: stat
   }
   
   void start()
@@ -73,12 +56,9 @@ public:
   
   void stop()
   {
-    std::cout << "server::stop" << std::endl;
     this->get_aspect().template getg<_stop_>()(*this, fas::tag<_stop_>() );
-    std::cout << "server::stoped!!!" << std::endl;
   }
   
-  // TODO: reconfigure
   server_context_type server_context() const
   {
     return this->get_aspect().template get<_context_>();
@@ -89,7 +69,6 @@ public:
     this->get_aspect().template get<_context_>() = value;
   }
 
-  // TODO: сделать mutex и реконфиг
   connection_context_type connection_context() const
   {
     return _connection_context;
@@ -105,14 +84,6 @@ public:
     return _io_service;
   }
   
-  /*
-  emplate<typename T, typename ...Args>
-std::unique_ptr<T> make_unique( Args&& ...args )
-{
-  return std::unique_ptr<T>( new T( std::forward<Args>(args)... ) );
-}
-*/
-  
   template< typename ...ConnArgs>
   std::shared_ptr<connection_type> create_connection( ConnArgs&& ...args )
   {
@@ -122,8 +93,6 @@ std::unique_ptr<T> make_unique( Args&& ...args )
   }
   
 private:
-  //server_config _config;
-  //std::shared_ptr< ::wfc::io_service > _io_service;
   ::wfc::io_service& _io_service;
   connection_context_type _connection_context;
 };

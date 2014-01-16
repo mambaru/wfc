@@ -46,14 +46,12 @@ public:
     std::cout << "~tcp_connection_base()" << std::endl;
   }
   
-  stream_connection(socket_type socket)
+  stream_connection(socket_type socket, release_function release)
     : _context()
     , _socket( std::make_unique<socket_type>(std::move(socket)))
+    , _release(release)
   {
     _strand = std::make_unique<strand_type>(_socket->get_io_service());
-  
-    //
-    //fas::for_each_group<_startup_>(*this, f_initialize());
   }
   
   stream_connection(const stream_connection&) = delete;
@@ -104,25 +102,15 @@ public:
     return _owner;
   }
 
-  void start(release_function release)
+  void start()
   {
     this->get_aspect().template getg<_startup_>()( *this, fas::tag<_startup_>() );
-    
-    _release = release;
-    // _socket = std::make_unique<socket_type>(std::move(socket));
-    //_strand = std::make_unique<strand_type>(_socket->get_io_service());
-    // TODO: перенести в server
-    //boost::asio::socket_base::non_blocking_io non_blocking_io(true);
-    //_socket->io_control(non_blocking_io);
-    //std::cout << "start..." << std::endl;
     this->get_aspect().template get<_start_>()(*this, fas::tag<_start_>() );
-    //std::cout << "...start" << std::endl;
   }
   
   virtual void close()
   {
     _socket->close();
-    // Только post!!! т.к. происходит удаление this
     _socket->get_io_service().post([this]{ this->__release(); });
   }
   
@@ -134,6 +122,12 @@ public:
   virtual unsigned short remote_port()
   {
     return _socket->remote_endpoint().port();
+  }
+  
+  virtual void on_read(data_ptr /*d*/)
+  {
+    std::cout << "on_read abort" << std::endl;
+    abort();
   }
 
   
@@ -169,11 +163,10 @@ public:
 
 private:
   context_type _context;
-  release_function _release;
   socket_ptr _socket;
   strand_ptr _strand;
+  release_function _release;
   owner_type _owner;
 };
-
 
 }}

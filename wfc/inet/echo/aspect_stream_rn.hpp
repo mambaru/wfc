@@ -7,12 +7,19 @@
 namespace wfc{ namespace inet{ namespace echo{
 
 struct aspect_stream_rn: fas::aspect<
-  //context<connection_context>, 
   stream::aspect,
   rn::aspect,
   fas::alias<stream::_incoming_, rn::_input_>,
   fas::alias<rn::_output_, stream::_outgoing_>,
   fas::alias<rn::_incoming_, rn::_outgoing_>
 >{};
-  
+
+struct aspect_dgram_rn: fas::aspect<
+  stream::aspect_dgram,
+  rn::aspect,
+  fas::alias<stream::_incoming_, rn::_input_>,
+  fas::alias<rn::_output_, stream::_outgoing_>,
+  fas::alias<rn::_incoming_, rn::_outgoing_>
+>{};
+
 }}}

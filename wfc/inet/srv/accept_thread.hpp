@@ -42,14 +42,17 @@ public:
           t.get_aspect().template get<_worker_>()(t, std::move(this->_socket), [this, &t](socket_type sock) 
           {
             //std::cout << "accept_thread accepted create connection " << sock.native() << std::endl;
-            std::shared_ptr<connection_type> pconn = t.create_connection(std::move( sock ));
+            std::shared_ptr<connection_type> pconn = t.create_connection(
+              std::move( sock ), 
+              [this](std::shared_ptr<connection_type> pconn)->void
+              {
+                //std::cout << "accept_thread accepted closed" << std::endl;
+                if ( auto m = this->_manager.lock() )
+                  m->erase(pconn);
+              }
+            );
             pconn->context().activity = this->_manager;
-            pconn->start([this](std::shared_ptr<connection_type> pconn)->void
-            {
-              //std::cout << "accept_thread accepted closed" << std::endl;
-              if ( auto m = this->_manager.lock() )
-                m->erase(pconn);
-            });
+            pconn->start();
             
             if ( auto m = this->_manager.lock() )
               m->insert(pconn);

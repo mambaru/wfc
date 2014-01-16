@@ -30,7 +30,7 @@ struct ad_stream_reader
   void do_read(T& t)
   {
     typename T::owner_type::weak_type wk = t.owner().alive();
-    t.socket().async_read_some(
+    t.socket().async_receive(
       ::boost::asio::buffer(_data),
       [this, &t, wk](boost::system::error_code ec, std::size_t bytes_transferred)
       {

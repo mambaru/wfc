@@ -4,6 +4,8 @@ namespace wfc{ namespace inet{
 
 // connection
 struct _write_;
+struct _send_;
+struct _async_send_;
 
 // reading
 struct _on_read_;

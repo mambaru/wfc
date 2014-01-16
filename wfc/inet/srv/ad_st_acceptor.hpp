@@ -77,7 +77,16 @@ struct ad_st_acceptor
           {
             typedef typename T::connection_type connection_type;
             std::shared_ptr<connection_manager> manager = t.get_aspect().template get<_connection_manager_>();
-            std::shared_ptr<connection_type> pconn = t.create_connection(std::move( sock ));
+            
+            std::shared_ptr<connection_type> pconn = t.create_connection( 
+              std::move( sock ), 
+              [&t](std::shared_ptr<connection_type> pconn)->void
+              {
+                t.get_aspect().template get<_connection_manager_>()->erase(pconn);
+                //this->_connection_manager->erase(pconn);
+              }
+            );
+            
             pconn->context().activity = manager;
 
             /*
@@ -85,11 +94,7 @@ struct ad_st_acceptor
             pconn->context() = t.connection_context();
             */
             manager->insert(pconn);
-            pconn->start([&t](std::shared_ptr<connection_type> pconn)->void
-            {
-              t.get_aspect().template get<_connection_manager_>()->erase(pconn);
-              //this->_connection_manager->erase(pconn);
-            });
+            pconn->start();
           });
         }
         else

@@ -99,12 +99,38 @@ struct aspect: fas::aspect
   basic_context_t<stream_context>, 
   fas::advice<_start_,    ad_connection_start<_reader_> >,
   fas::advice<_reader_,   ad_stream_reader<> >,
+  fas::advice<_send_, ad_send >,
+  fas::advice<_async_send_, ad_async_send >,
   fas::advice<_writer_,   ad_stream_writer<> >,
   fas::alias<_on_read_,   _incoming_ >,
   fas::alias<_input_,     _reader_ >,
   fas::advice<_outgoing_, ad_outgoing >,
   fas::alias<_write_,     _writer_ >,  
   fas::type< _socket_type_, boost::asio::ip::tcp::socket >,
+  fas::advice<_on_write_, ad_on_write>, 
+  fas::advice<_shutdown_, ad_shutdown>,
+  fas::stub<_write_error_>, 
+  fas::stub<_read_error_>, 
+  fas::stub<_alive_error_>
+>
+{};
+
+struct aspect_dgram: fas::aspect
+< 
+  context<empty_context>,
+  basic_context_t<stream_context>, 
+  fas::advice<_start_,    ad_connection_start<_reader_> >,
+  fas::stub<_reader_>,
+  //fas::advice<_reader_,   ad_stream_reader<> >, // Удалить 
+  fas::advice<_send_, ad_send_to >,
+  fas::advice<_async_send_, ad_async_send_to >,
+  fas::advice<_writer_,   ad_stream_writer<> >,
+  //fas::advice<_writer_,   ad_dgram_writer<> >,
+  fas::alias<_on_read_,   _incoming_ >,
+  //fas::alias<_input_,     _reader_ >,
+  fas::advice<_outgoing_, ad_outgoing >,
+  fas::alias<_write_,     _writer_ >,  
+  fas::type< _socket_type_, boost::asio::ip::udp::socket >,
   fas::advice<_on_write_, ad_on_write>, 
   fas::advice<_shutdown_, ad_shutdown>,
   fas::stub<_write_error_>, 

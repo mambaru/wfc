@@ -86,7 +86,10 @@ public:
       _by_ts.erase(inf);
       inf->ts = time(0);
       if ( !_by_ts.insert(inf).second )
+      {
+        std::cout << "update abort" << std::endl;
         abort();
+      }
     }
   }
   
@@ -99,20 +102,58 @@ public:
     std::cout << "shutdown_inactive " << ts << " " << (beg!=end) << std::endl;
     while (beg!=end)
     {
-      (*beg)->conn->shutdown();
-      _by_conn.erase(*beg);
-      _by_endpoint.erase(*beg);
-      _by_ts.erase(beg++);
+      (*(beg++))->conn->shutdown();
     }
-    
+  }
+  
+  connection_ptr find(address_type addr, port_type port)
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    if ( info* inf = this->find_by_endpoint(addr, port) )
+    {
+      return inf->conn;
+    }
+    return nullptr;
+  }
+  
+  bool insert(connection_ptr conn, address_type addr, port_type port)
+  {
+    info* inf = new info{conn, addr, port, time(0) };
+    std::lock_guard<mutex_type> lk(_mutex);
+    return this->insert(inf);    
   }
   
   bool insert(connection_ptr conn)
   {
     info* inf = new info{conn, conn->remote_address(), conn->remote_port(), time(0) };
-    
     std::lock_guard<mutex_type> lk(_mutex);
- 
+    return this->insert(inf);
+  }
+
+  void erase(connection_ptr conn)
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    std::cout << "erase[[" << _by_conn.size() << std::endl;
+    this->erase( this->find_by_conn(conn) );
+    std::cout << "]]erase" << std::endl;
+  }
+  
+  void stop()
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    std::cout << "stop[[" << std::endl;
+    for (info* inf : _by_conn )
+      inf->conn->close();
+    this->clear();
+    std::cout << "]]stop" << std::endl;
+  }
+  
+  
+  
+private:
+  
+  bool insert(info* inf)
+  {
     bool flag = _by_conn.insert(inf).second;
     if ( flag )
     {
@@ -135,33 +176,18 @@ public:
     if (!flag)
       delete inf;
     
+    std::cout << "insert " << _by_conn.size() << std::endl;
+    
     return flag;
-  }
 
-  void erase(connection_ptr conn)
-  {
-    std::lock_guard<mutex_type> lk(_mutex);
-    std::cout << "erase[[" << std::endl;
-    this->erase( this->find_by_conn(conn) );
-    std::cout << "]]erase" << std::endl;
+    
   }
-  
-  void stop()
-  {
-    std::lock_guard<mutex_type> lk(_mutex);
-    std::cout << "stop[[" << std::endl;
-    for (info* inf : _by_conn )
-      inf->conn->close();
-    this->clear();
-    std::cout << "]]stop" << std::endl;
-  }
-  
-private:
   
   void clear()
   {
     if ( _by_conn.size() != _by_endpoint.size() || _by_conn.size() != _by_ts.size())
     {
+      std::cout << "clear() abort" << std::endl;
       abort();
     }
     
@@ -180,16 +206,38 @@ private:
     
     auto itr = _by_conn.find( &inf );
     if ( itr == _by_conn.end() )
+    {
+      std::cout << "find_by_conn not found " << size_t(conn.get()) << std::endl;
+      for ( info* p: _by_conn)
+      {
+        std::cout << size_t(p->conn.get()) << std::endl;
+      }
       return nullptr;
+    }
     std::cout << "]]find_by_conn" << std::endl;
     return *itr;
   }
-  
+
+  info* find_by_endpoint(address_type addr, port_type port)
+  {
+    std::cout << "find_by_endpoint[[" << port << std::endl;
+    info inf = info{ nullptr , addr, port, 0 };
+    
+    auto itr = _by_endpoint.find( &inf );
+    if ( itr == _by_endpoint.end() )
+      return nullptr;
+    std::cout << (*itr)->port <<  "]]find_by_endpoint" << std::endl;
+    return *itr;
+  }
+
   void erase(info* inf)
   {
     std::cout << "erase ptr[[" << std::endl;
     if ( inf == nullptr )
+    {
+      std::cout << "erase ptr not found" << std::endl;
       return;
+    }
     
     std::cout << "erase ptr 1" << std::endl;
     _by_conn.erase(inf);

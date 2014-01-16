@@ -18,6 +18,8 @@ struct ad_splitter
     auto beg = d->begin();
     auto end = d->end();
     
+    std::cout << "DGRAM SPLIT " << std::string( beg, end ) << std::endl;
+    
     // если _data != nullptr, то beg и end итераторы _data
     // если _data == nullptr, то beg и end итераторы d
 
@@ -62,7 +64,10 @@ struct ad_splitter
         {
           t.get_aspect().template get<Tg>()(t, std::move(_data) );
           if ( _data!=nullptr )
+          {
+            std::cout << "ad_splitter abort" << std::endl;
             abort();
+          }
         }
         // Отправляем что осталось
         else

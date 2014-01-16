@@ -12,27 +12,28 @@
 
 namespace wfc{ namespace inet{ 
   
-
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class dgram_connection final
   : public connection_helper<A, AspectClass>::base_class
-  , public std::enable_shared_from_this< stream_connection<A, AspectClass> >
+  , public std::enable_shared_from_this< dgram_connection<A, AspectClass> >
   , public iconnection
 {
 public:
   typedef typename connection_helper<A, AspectClass>::base_class super;
-  typedef std::enable_shared_from_this< stream_connection<A, AspectClass> > super_shared;
+  typedef std::enable_shared_from_this< dgram_connection<A, AspectClass> > super_shared;
   
   typedef dgram_connection<A, AspectClass> self;
   typedef self connection_type;
   typedef std::shared_ptr<connection_type> connection_ptr;
-  typedef typename super::aspect::template advice_cast<_socket_type_>::type   socket_type;
-  typedef typename super::aspect::template advice_cast<_endpoint_type_>::type endpoint_type;
-  typedef std::unique_ptr<socket_type> socket_ptr;
-  
-  typedef std::unique_ptr<strand_type> strand_ptr;
-  
+  typedef std::function<void( connection_ptr )> release_function;
+
+  typedef typename super::aspect::template advice_cast<_socket_type_>::type socket_type;
+  typedef typename socket_type::endpoint_type endpoint_type;
+  //typedef boost::asio::ip::tcp::socket socket_type;
+  typedef socket_type* socket_ptr;
+
   typedef boost::asio::strand strand_type;
+  typedef std::unique_ptr<strand_type> strand_ptr;
 
 public:
   
@@ -41,15 +42,27 @@ public:
 
   ~dgram_connection()
   {
+    //_socket->close();
+    std::cout << "~udp_connection_base()" << std::endl;
   }
   
-  dgram_connection()
+  dgram_connection(socket_type* socket, endpoint_type remote_endpoint, release_function release)
     : _context()
+    , _socket( socket )
+    , _remote_endpoint(remote_endpoint)
+    , _release(release)
+    , _closed(true)
   {
+    _strand = std::make_unique<strand_type>(_socket->get_io_service());
   }
   
-  stream_connection(const stream_connection&) = delete;
-  stream_connection& operator=(const stream_connection&) = delete;
+  dgram_connection(const dgram_connection&) = delete;
+  dgram_connection& operator=(const dgram_connection&) = delete;
+  
+  const endpoint_type& remote_endpoint() const
+  {
+    return _remote_endpoint;
+  }
   
   context_type& context()
   {
@@ -95,38 +108,49 @@ public:
   {
     return _owner;
   }
-  
-  const endpoint_type& sender_endpoint() const
-  {
-    return _sender_endpoint;
-  }
 
-  void start(socket_type socket, release_function release)
+  void start()
   {
+    if ( !_closed )
+      return;
+    _closed = false;
     this->get_aspect().template getg<_startup_>()( *this, fas::tag<_startup_>() );
-    
-    _release = release;
-    _socket = std::make_unique<socket_type>(std::move(socket));
-    _strand = std::make_unique<strand_type>(_socket->get_io_service());
-    // TODO: перенести в server
-    //boost::asio::socket_base::non_blocking_io non_blocking_io(true);
-    //_socket->io_control(non_blocking_io);
-    //std::cout << "start..." << std::endl;
     this->get_aspect().template get<_start_>()(*this, fas::tag<_start_>() );
-    //std::cout << "...start" << std::endl;
   }
   
-  void close()
+  virtual void close()
   {
-    _socket->close();
-    // Только post!!! т.к. происходит удаление this
-    _socket->get_io_service().post([this]{ this->__release(); });
+    if ( _closed )
+      return;
+    _closed = true;
+    _socket->get_io_service().post([this]{ 
+      if ( _closed )
+        this->__release(); 
+    });
+  }
+  
+  virtual boost::asio::ip::address remote_address()
+  {
+    return _remote_endpoint.address();
+  }
+  
+  virtual unsigned short remote_port()
+  {
+    return _remote_endpoint.port();
+  }
+  
+  virtual void on_read(data_ptr d)
+  {
+    this->get_aspect().template get<_on_read_>()(*this, std::move(d) );
+    if ( auto a = this->context().activity.lock() )
+      a->update(this->shared_from_this());
   }
   
   void shutdown()
   {
     // std::cout << "basic_connection shutdown()" << std::endl;
-    this->get_aspect().template get<_shutdown_>()(*this);
+    //this->get_aspect().template get<_shutdown_>()(*this);
+    this->close();
   }
 
   void __release()
@@ -155,11 +179,12 @@ public:
 
 private:
   context_type _context;
-  endpoint_type _sender_endpoint;
   socket_ptr _socket;
+  endpoint_type _remote_endpoint;
   strand_ptr _strand;
+  release_function _release;
   owner_type _owner;
+  std::atomic<bool> _closed;
 };
-
 
 }}
