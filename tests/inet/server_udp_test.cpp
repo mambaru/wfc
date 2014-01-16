@@ -25,8 +25,8 @@ struct connection_aspect: fas::aspect<
 struct common_aspect: 
   fas::aspect< 
     wfc::inet::connection_aspect< wfc::inet::echo::aspect_dgram_rn >,
-    wfc::inet::server_aspect< wfc::inet::aspect_server_udp >,
-    wfc::inet::connection< wfc::inet::dgram_connection >
+    wfc::inet::server_aspect< wfc::inet::aspect_server_udp >/*,
+    wfc::inet::connection< wfc::inet::dgram_connection >*/
   > 
 {
 };

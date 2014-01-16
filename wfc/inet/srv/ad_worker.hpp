@@ -11,15 +11,15 @@
 
 namespace wfc{ namespace inet{
 
-template<typename SockType>  
+//template<typename SockType>  
 struct ad_worker
 {
   typedef rwlock<std::mutex> mutex_type;
   
   //typedef ::boost::asio::ip::tcp::socket socket_type;
-  typedef SockType socket_type;
-  typedef std::function<void(socket_type)> func_type;
-  typedef std::vector< std::unique_ptr<work_thread<SockType> > > work_thread_vector;
+  //typedef SockType socket_type;
+  //typedef std::function<void(socket_type)> func_type;
+  typedef std::vector< std::unique_ptr<work_thread/*<SockType>*/ > > work_thread_vector;
   
   /// initialize
   
@@ -45,19 +45,19 @@ struct ad_worker
     _work_threads.resize(worker_threads);
     for (int i=0; i < worker_threads; ++i)
     {
-      _work_threads[i] = std::make_unique<work_thread<SockType> >();
+      _work_threads[i] = std::make_unique<work_thread >();
       _work_threads[i]->start();
     }
   }
   
-  template<typename T>
-  void operator()(T&, socket_type sock , func_type fun)
+  template<typename T,  typename F>
+  void operator()(T&, std::shared_ptr<typename T::socket_type> sock , F fun)
   {
     read_lock<mutex_type> lk(_mutex);
     
     if ( _max_index == 0 )
     {
-      fun( std::move(sock) );
+      fun( sock );
     }
     else
     {
@@ -70,7 +70,7 @@ struct ad_worker
       if (_index>=_max_index)
         _index = 0;
 
-      _work_threads[current]->post(std::move(sock),  fun);
+      _work_threads[current]->post(sock,  fun);
     }
   }
 

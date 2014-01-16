@@ -102,7 +102,7 @@ void client_test()
         cur = end;
       else
         cur += 1;
-      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      std::this_thread::sleep_for(std::chrono::milliseconds(0));
       std::vector<char> arr(  beg, cur );
       std::cout << "SEND [[" << std::string(arr.begin(), arr.end() ) << std::endl;
       size_t sended = s.send(boost::asio::buffer(arr, arr.size()));
@@ -116,6 +116,12 @@ void client_test()
       //break;
       beg = cur;
     }
+    
+    while(receiver_count)
+    {
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
     
 
     /*
@@ -145,8 +151,8 @@ int main(int argc, char */*argv*/[])
   auto config = srv.server_context();
   config.host = "0.0.0.0";
   config.port = "12345";
-  config.listen_threads = 0;
-  config.worker_threads = 0;
+  config.listen_threads = 3;
+  config.worker_threads = 3;
   srv.server_context(config);
   srv.start();
   if ( argc==1)

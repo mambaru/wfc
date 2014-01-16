@@ -23,6 +23,7 @@ public:
   typedef typename helper::connection_context_type connection_context_type;
   
   typedef typename helper::config_type config_type;
+  typedef typename helper::socket_type socket_type;
 public:
   
   typedef typename super::aspect aspect;

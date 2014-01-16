@@ -63,6 +63,32 @@ struct ad_shutdown
   }
 };
 
+struct ad_fake_shutdown
+{
+  template<typename T>
+  void operator()(T& t)
+  {
+    // std::cout << "ad_shutdown" << std::endl;
+    t.get_io_service().dispatch([&t]()
+    {
+      if ( t.context().shutdown )
+        return;
+      //t.socket().shutdown( boost::asio::socket_base::shutdown_receive);
+      // std::cout << "ad_shutdown dispatch" << std::endl;
+      size_t size  = t.get_aspect().template get<_writer_>().outgoing_size();
+      if ( size == 0)
+      {
+        t.close();
+      }
+      else
+      {
+        // std::cout << "t.context().shutdown == true" << std::endl;
+        t.context().shutdown = true;
+      }
+    });
+  }
+};
+
 struct ad_on_write
 {
   template<typename T>
@@ -132,7 +158,7 @@ struct aspect_dgram: fas::aspect
   fas::alias<_write_,     _writer_ >,  
   fas::type< _socket_type_, boost::asio::ip::udp::socket >,
   fas::advice<_on_write_, ad_on_write>, 
-  fas::advice<_shutdown_, ad_shutdown>,
+  fas::advice<_shutdown_, ad_fake_shutdown>,
   fas::stub<_write_error_>, 
   fas::stub<_read_error_>, 
   fas::stub<_alive_error_>

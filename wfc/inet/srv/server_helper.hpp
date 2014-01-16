@@ -25,6 +25,7 @@ struct server_helper
   
   typedef connection_t<connection_aspect_type, connection_base_t> connection_type;
   typedef typename connection_type::aspect::template advice_cast<_context_>::type connection_context_type;
+  typedef typename connection_type::aspect::template advice_cast<_socket_type_>::type socket_type;
   
   ///
   /// server

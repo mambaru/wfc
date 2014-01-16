@@ -241,8 +241,11 @@ private:
     
     std::cout << "erase ptr 1" << std::endl;
     _by_conn.erase(inf);
+    std::cout << "erase ptr 1.1" << std::endl;
     _by_endpoint.erase(inf);
+    std::cout << "erase ptr 1.2" << std::endl;
     _by_ts.erase(inf);
+    std::cout << "erase ptr 1.3" << std::endl;
     delete inf;
     std::cout << "]]erase ptr" << std::endl;
   }

@@ -11,42 +11,44 @@ class accept_one
 {
 public:
   
-  typedef ::boost::asio::ip::tcp::socket socket_type;
+  /*typedef ::boost::asio::ip::tcp::socket socket_type;*/
   typedef ::boost::asio::ip::tcp::acceptor acceptor_type;
   
   accept_one(
     boost::asio::io_service& io_service,
     acceptor_type& acceptor,
-    socket_type& socket,
+    //socket_type& socket,
     std::weak_ptr<connection_manager> manager
   ) : _io_service(io_service)
     , _acceptor(acceptor)
-    , _socket(socket)
+    //, _socket(socket)
     , _manager( manager )
   {}
   
   template<typename T>
   void do_accept(T& t)
   {
+    typedef typename T::socket_type socket_type;
     typedef typename T::connection_type connection_type;
+    typedef std::shared_ptr<socket_type> socket_ptr;
+    socket_ptr sock = std::make_shared< socket_type >( _io_service );
     _acceptor.async_accept(
-      _socket,
-      [this, &t](boost::system::error_code ec)
+      *sock,
+      [this, &t, sock](boost::system::error_code ec)
       {
         if (!this->_acceptor.is_open())
           return;
 
         if (!ec)
         {
-          t.get_aspect().template get<_socket_>()(t, this->_socket); 
-          t.get_aspect().template get<_worker_>()(t, std::move(this->_socket), [this, &t](socket_type sock) 
+          t.get_aspect().template get<_socket_>()(t, *sock); 
+          t.get_aspect().template get<_worker_>()(t, sock, [this, &t](socket_ptr sock) 
           {
-            //std::cout << "accept_thread accepted create connection " << sock.native() << std::endl;
+            
             std::shared_ptr<connection_type> pconn = t.create_connection(
-              std::move( sock ), 
+              sock, 
               [this](std::shared_ptr<connection_type> pconn)->void
               {
-                //std::cout << "accept_thread accepted closed" << std::endl;
                 if ( auto m = this->_manager.lock() )
                   m->erase(pconn);
               }
@@ -70,7 +72,7 @@ public:
 private:
   boost::asio::io_service& _io_service;
   acceptor_type& _acceptor;
-  socket_type& _socket;
+  //socket_type& _socket;
   std::weak_ptr<connection_manager> _manager;
 };
 
@@ -124,7 +126,8 @@ private:
  * */
 class accept_thread
 {
-  typedef ::boost::asio::ip::tcp::socket socket_type;
+  /*
+  typedef ::boost::asio::ip::tcp::socket socket_type;*/
   typedef ::boost::asio::ip::tcp::acceptor acceptor_type;
 
 public:
@@ -140,7 +143,7 @@ public:
   accept_thread(::boost::asio::io_service& io)
     : _work(io)
     , _thread_io(nullptr)
-    , _socket(io)
+    //, _socket(io)
     , _acceptor()
   {
   }
@@ -171,17 +174,17 @@ public:
       ::boost::asio::io_service io_service;
       this->_thread_io = &io_service;
       acceptor_type acceptor(io_service);
-      socket_type socket( io_service );
+      // socket_type socket( io_service );
       acceptor.assign(endpoint.protocol(), fd);
       
-      accept_one one(io_service, acceptor, socket, t.get_aspect().template get<_connection_manager_>() );
+      accept_one one(io_service, acceptor, /*socket,*/ t.get_aspect().template get<_connection_manager_>() );
       one.do_accept(t);
       io_service.run();
       this->_thread_io = nullptr;
     }); // thread
   }
 
-  
+  /*
   
   template<typename T>
   void start1(T& t, std::weak_ptr<acceptor_type> acceptor)
@@ -226,12 +229,12 @@ public:
     });
     //sleep(1);
   }
-  
+  */
 
 private:  
   ::boost::asio::io_service::work _work;
   ::boost::asio::io_service* _thread_io;
-  socket_type _socket;
+  //socket_type _socket;
   std::weak_ptr<acceptor_type> _acceptor;
   //std::shared_ptr<acceptor_type> _acceptor;
   std::thread _thread;

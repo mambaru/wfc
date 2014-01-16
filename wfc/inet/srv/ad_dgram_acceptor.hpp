@@ -34,7 +34,7 @@ struct ad_dgram_acceptor
     );
 
     std::cout << "dgram do_accept" << std::endl;
-    _acceptor = std::make_unique<acceptor_type>(t.get_io_service(), _endpoint );
+    _acceptor = std::make_shared<acceptor_type>(t.get_io_service(), _endpoint );
 
     /*
     boost::asio::socket_base::non_blocking_io non_blocking_io(true);
@@ -87,7 +87,7 @@ struct ad_dgram_acceptor
             {
               std::cout << "NEW CONNECTION" << std::endl;
               std::shared_ptr<connection_type> pconn = t.create_connection( 
-                this->_acceptor.get(),
+                this->_acceptor,
                 this->_sender_endpoint,
                 [&t](std::shared_ptr<connection_type> pconn)->void
                 {
@@ -138,7 +138,7 @@ struct ad_dgram_acceptor
   }
 
 private:
-  std::unique_ptr< acceptor_type > _acceptor;
+  std::shared_ptr< acceptor_type > _acceptor;
   boost::asio::ip::udp::endpoint _endpoint;
   boost::asio::ip::udp::endpoint _sender_endpoint;
   

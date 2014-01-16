@@ -30,7 +30,7 @@ public:
   typedef typename super::aspect::template advice_cast<_socket_type_>::type socket_type;
   typedef typename socket_type::endpoint_type endpoint_type;
   //typedef boost::asio::ip::tcp::socket socket_type;
-  typedef socket_type* socket_ptr;
+  typedef std::shared_ptr<socket_type> socket_ptr;
 
   typedef boost::asio::strand strand_type;
   typedef std::unique_ptr<strand_type> strand_ptr;
@@ -42,11 +42,21 @@ public:
 
   ~dgram_connection()
   {
-    //_socket->close();
+    _socket->close();
     std::cout << "~udp_connection_base()" << std::endl;
   }
-  
-  dgram_connection(socket_type* socket, endpoint_type remote_endpoint, release_function release)
+ 
+  dgram_connection(socket_ptr socket, release_function release)
+    : _context()
+    , _socket( socket )
+    , _remote_endpoint(socket->remote_endpoint() )
+    , _release(release)
+    , _closed(true)
+  {
+    _strand = std::make_unique<strand_type>(_socket->get_io_service());
+  }
+ 
+  dgram_connection(socket_ptr socket, endpoint_type remote_endpoint, release_function release)
     : _context()
     , _socket( socket )
     , _remote_endpoint(remote_endpoint)
@@ -118,16 +128,6 @@ public:
     this->get_aspect().template get<_start_>()(*this, fas::tag<_start_>() );
   }
   
-  virtual void close()
-  {
-    if ( _closed )
-      return;
-    _closed = true;
-    _socket->get_io_service().post([this]{ 
-      if ( _closed )
-        this->__release(); 
-    });
-  }
   
   virtual boost::asio::ip::address remote_address()
   {
@@ -145,12 +145,24 @@ public:
     if ( auto a = this->context().activity.lock() )
       a->update(this->shared_from_this());
   }
-  
+
+  virtual void close()
+  {
+    if ( _closed )
+      return;
+    _closed = true;
+    _socket->get_io_service().post([this]{ 
+      if ( _closed )
+        this->__release(); 
+      this->_socket = nullptr;
+    });
+  }
+
   void shutdown()
   {
-    // std::cout << "basic_connection shutdown()" << std::endl;
-    //this->get_aspect().template get<_shutdown_>()(*this);
-    this->close();
+    std::cout << "basic_connection shutdown()" << std::endl;
+    this->get_aspect().template get<_shutdown_>()(*this);
+    //this->close();
   }
 
   void __release()

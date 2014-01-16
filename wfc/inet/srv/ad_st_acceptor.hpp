@@ -11,7 +11,7 @@ namespace wfc{ namespace inet{
 
 struct ad_st_acceptor
 {
-  typedef ::boost::asio::ip::tcp::socket socket_type;
+  //typedef ::boost::asio::ip::tcp::socket socket_type;
   typedef ::boost::asio::ip::tcp::acceptor acceptor_type;
   
   ad_st_acceptor()
@@ -39,7 +39,7 @@ struct ad_st_acceptor
         if ( auto acc = _acceptor.lock() )
             acc->close();
         _acceptor = acceptor;
-        _socket = std::make_unique<socket_type>(t.get_io_service());
+        // _socket = std::make_unique<socket_type>(t.get_io_service());
         this->do_accept(t);
       }
     }
@@ -55,13 +55,16 @@ struct ad_st_acceptor
   template<typename T>
   void do_accept(T& t)
   {
+    typedef typename T::socket_type socket_type;
+    typedef std::shared_ptr<socket_type> socket_ptr;
+    socket_ptr sock = std::make_shared<socket_type>(t.get_io_service());
     std::weak_ptr<acceptor_type> acceptor_weak = _acceptor;
     auto acceptor = acceptor_weak.lock();
     if ( !acceptor )
       return;
     acceptor->async_accept(
-      *_socket,
-      [this, &t, acceptor_weak](boost::system::error_code ec)
+      *sock,
+      [this, &t, acceptor_weak, sock](boost::system::error_code ec)
       {
         auto acceptor = acceptor_weak.lock();
         if ( !acceptor )
@@ -72,14 +75,14 @@ struct ad_st_acceptor
 
         if (!ec)
         {
-          t.get_aspect().template get<_socket_>()(t, *(this->_socket)); 
-          t.get_aspect().template get<_worker_>()(t, std::move( *(this->_socket) ), [this, &t](socket_type sock) -> void
+          t.get_aspect().template get<_socket_>()(t, *sock); 
+          t.get_aspect().template get<_worker_>()(t, sock, [this, &t](socket_ptr sock) -> void
           {
             typedef typename T::connection_type connection_type;
             std::shared_ptr<connection_manager> manager = t.get_aspect().template get<_connection_manager_>();
             
             std::shared_ptr<connection_type> pconn = t.create_connection( 
-              std::move( sock ), 
+              sock, 
               [&t](std::shared_ptr<connection_type> pconn)->void
               {
                 t.get_aspect().template get<_connection_manager_>()->erase(pconn);
@@ -107,7 +110,7 @@ struct ad_st_acceptor
 
 
 private:
-  std::unique_ptr<socket_type> _socket;
+  //std::shared_ptr<socket_type> _socket;
   std::weak_ptr<acceptor_type> _acceptor;
   //std::shared_ptr<connection_manager> _connection_manager;
 };

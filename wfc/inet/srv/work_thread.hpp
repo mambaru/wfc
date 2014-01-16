@@ -7,12 +7,12 @@
 
 namespace wfc{ namespace inet{
   
-template<typename SockType>
+//template<typename SockType>
 class work_thread
  : callback_owner<>
 {
-  typedef SockType socket_type;
-  typedef std::function<void(socket_type)> func_type;
+  //typedef SockType socket_type;
+  //typedef std::function<void(socket_type)> func_type;
 
 public:
   work_thread()
@@ -39,16 +39,17 @@ public:
     _thread.join();
   }
 
-  void post(socket_type sock , func_type fun)
+  template<typename SockType,  typename F>
+  void post( std::shared_ptr<SockType> sock , F fun)
   {
-    typename socket_type::native_handle_type fd = ::dup(sock.native_handle());
-    typename socket_type::endpoint_type::protocol_type protoc = sock.local_endpoint().protocol();
-    sock.close();
+    typename SockType::native_handle_type fd = ::dup(sock->native_handle());
+    typename SockType::endpoint_type::protocol_type protoc = sock->local_endpoint().protocol();
+    sock->close();
 
     _io_service.post( callback_owner::callback<callback_status>( [this, fd, protoc, fun]() 
     {
-      socket_type sock( this->_io_service, protoc, fd );
-      fun( std::move(sock) );
+      std::shared_ptr<SockType> sock=std::make_shared<SockType>( this->_io_service, protoc, fd );
+      fun( sock );
       return callback_status::ready;
     }));
   }
