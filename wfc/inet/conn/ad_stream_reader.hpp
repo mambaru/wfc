@@ -11,6 +11,15 @@
 
 namespace wfc{ namespace inet{
 
+struct ad_async_receive
+{
+  template<typename T, typename DataType, typename F>
+  void operator()(T& t, DataType& d, F callback)
+  {
+    t.socket().async_receive( ::boost::asio::buffer( d ), callback);
+  }
+};
+
 
 template<size_t BufferSize = 8096*2 >
 struct ad_stream_reader
@@ -30,8 +39,11 @@ struct ad_stream_reader
   void do_read(T& t)
   {
     typename T::owner_type::weak_type wk = t.owner().alive();
-    t.socket().async_receive(
+    /*t.socket().async_receive(
       ::boost::asio::buffer(_data),
+      */
+    t.get_aspect().template get<_async_receive_>()(t, _data, 
+      t.strand().wrap(
       [this, &t, wk](boost::system::error_code ec, std::size_t bytes_transferred)
       {
         auto alive = wk.lock();
@@ -57,10 +69,12 @@ struct ad_stream_reader
           t.close(); /*перенести в _read_error_*/
         }
       }
+      ) // t.strand().wrap(
     );
   }
   
 private:
+  
   std::array<char, 8192*2> _data;
 };
 

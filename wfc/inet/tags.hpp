@@ -13,8 +13,9 @@ struct _socket_type_;
 
 // 
 struct _connection_aspect_;
-struct _connection_base_;
-struct _connection_;
+struct _connection_base_class_;
+struct _connection_class_;
+
 struct _server_aspect_;
 
 struct _configuration_;

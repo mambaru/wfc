@@ -13,7 +13,7 @@
 namespace wfc{ namespace inet{ 
   
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
-class dgram_connection final
+class dgram_connection 
   : public connection_helper<A, AspectClass>::base_class
   , public std::enable_shared_from_this< dgram_connection<A, AspectClass> >
   , public iconnection
@@ -39,6 +39,7 @@ public:
   
   typedef typename super::aspect::template advice_cast<_context_>::type context_type;
   typedef callback_owner<> owner_type;
+  typedef owner_type::mutex_type  mutex_type;
 
   ~dgram_connection()
   {
@@ -84,6 +85,13 @@ public:
     return _context;
   }
 
+  /*
+  socket_ptr socket() const
+  {
+    return _socket;
+  }
+  */
+  
   socket_type& socket()
   {
     return *_socket;
@@ -93,6 +101,7 @@ public:
   {
     return *_socket;
   }
+  
   
   io_service& get_io_service()
   {
@@ -109,6 +118,11 @@ public:
     return *_strand;
   }
   
+  mutex_type& mutex() 
+  {
+    return _owner.mutex();
+  }
+  
   owner_type& owner()
   {
     return _owner;
@@ -121,9 +135,13 @@ public:
 
   void start()
   {
-    if ( !_closed )
-      return;
-    _closed = false;
+    {
+      std::lock_guard<mutex_type> lk( this->mutex() );
+      if ( !_closed )
+        return;
+      _closed = false;
+    }
+    
     this->get_aspect().template getg<_startup_>()( *this, fas::tag<_startup_>() );
     this->get_aspect().template get<_start_>()(*this, fas::tag<_start_>() );
   }
@@ -148,10 +166,18 @@ public:
 
   virtual void close()
   {
-    if ( _closed )
-      return;
-    _closed = true;
-    _socket->get_io_service().post([this]{ 
+    /*
+    {
+      std::lock_guard<mutex_type> lk( this->mutex() );
+      if ( _closed )
+        return;
+      _closed = true;
+    }*/
+    
+    _socket->get_io_service().post([this]
+    { 
+      std::lock_guard<mutex_type> lk( this->mutex() );
+      std::cout << "POST CLOSE " << ( this->_socket == nullptr ) << std::endl;
       if ( _closed )
         this->__release(); 
       this->_socket = nullptr;
@@ -172,21 +198,10 @@ public:
       _release( super_shared::shared_from_this() );
     }
   }
-
-  void write(const char* data, size_t size)
+  
+  void send(data_ptr d)
   {
-    this->get_aspect().template get<_write_>()(*this, std::make_unique<data_type>(data, data+size));
-  }
-
-  template<typename T>
-  void write(const T& data)
-  {
-    this->get_aspect().template get<_write_>()(*this, std::make_unique<data_type>(data.begin(), data.end()));
-  }
-
-  void write(const char* data)
-  {
-    this->get_aspect().template get<_write_>()(*this, std::make_unique<data_type>(data, data + std::strlen(data) ) );
+    this->get_aspect().template get<_write_>()(*this, std::move(d) );
   }
 
 private:

@@ -25,8 +25,9 @@ struct ad_server_start
   }
   
   template<typename T>
-  void operator()(T& /*t*/, fas::tag<_stop_>)
+  void operator()(T& t, fas::tag<_stop_>)
   {
+    t.get_aspect().template get<_connection_manager_>()->stop();
   }
 
   template<typename T>

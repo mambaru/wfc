@@ -6,15 +6,15 @@
 namespace wfc{ namespace inet{
   
 template<template<typename, template<typename> class> class Conn>
-struct connection_t
+struct connection_class_t
 {
   template<typename A, template<typename> class AspectClass >
   using type = Conn<A, AspectClass>;
 };
 
 template< template<typename, template<typename> class> class Conn>
-struct connection  
-  : fas::type<_connection_, connection_t<Conn> >
+struct connection_class
+  : fas::type<_connection_class_, connection_class_t<Conn> >
 {};
 
 }}

@@ -31,7 +31,8 @@ struct aspect: fas::aspect< fas::type_list_n<
   fas::advice<_trimmer_,  ad_trimmer<_incoming_, fas::int_<2> > >,
   fas::advice<_tailor_,   ad_tailor<_output_, rn> >,
   fas::alias<_input_,     _splitter_>,
-  fas::alias<_outgoing_,  _tailor_>
+  fas::alias<_outgoing_,  _tailor_>,
+  fas::alias<_write_,     _outgoing_>
 >::type >
 {};
 

@@ -5,6 +5,8 @@
 
 namespace wfc{ namespace jsonrpc{
   
+// Можно удалить 
+/*
 template<typename ...Args>
 class server_tcp
   : public server<Args...>
@@ -60,7 +62,7 @@ public:
   {
     super::stop();
   }
-
 };
+*/
 
 }}

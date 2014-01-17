@@ -18,7 +18,8 @@ struct iconnection
   virtual void shutdown() = 0;
   
   virtual void on_read(data_ptr d) = 0;
-  
+
+  virtual void send(data_ptr d) = 0;  
 };
 
 }}

@@ -80,17 +80,19 @@ public:
   virtual void update(connection_ptr conn) 
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    if ( info* inf = this->find_by_conn(conn) )
-    {
-      std::cout << "update" << std::endl;
-      _by_ts.erase(inf);
-      inf->ts = time(0);
-      if ( !_by_ts.insert(inf).second )
-      {
-        std::cout << "update abort" << std::endl;
-        abort();
-      }
-    }
+    this->update_connection(conn);
+  }
+  
+  connection_ptr least()
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    if ( _by_ts.empty() )
+      return nullptr;
+    
+    info *inf = *(_by_ts.begin());
+    connection_ptr conn = inf->conn;
+    this->update_connection(conn);
+    return conn;
   }
   
   void shutdown_inactive(time_t ts)
@@ -151,6 +153,22 @@ public:
   
   
 private:
+  
+  void update_connection(connection_ptr conn) 
+  {
+    if ( info* inf = this->find_by_conn(conn) )
+    {
+      std::cout << "update" << std::endl;
+      _by_ts.erase(inf);
+      inf->ts = time(0);
+      if ( !_by_ts.insert(inf).second )
+      {
+        std::cout << "update abort" << std::endl;
+        abort();
+      }
+    }
+  }
+
   
   bool insert(info* inf)
   {

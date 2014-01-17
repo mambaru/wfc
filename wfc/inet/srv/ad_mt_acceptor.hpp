@@ -14,12 +14,14 @@ struct ad_mt_acceptor
   template<typename T>
   void operator()(T& /*t**/)
   {
-    std::cout << "ad_mt_acceptor stop" << std::endl;
+    std::cout << "ad_mt_acceptor stop [[[" << std::endl;
     for (auto& thr : _accept_threads)
     {
+      std::cout << "ad_mt_acceptor stop thr->stop()" << std::endl;
       thr->stop();
     }
     _accept_threads.clear();
+    std::cout << "]]] ad_mt_acceptor stop" << std::endl;
   }
 
   template<typename T>
@@ -38,6 +40,7 @@ struct ad_mt_acceptor
     }
   }
 private:
+  /// TODO: mutex
   std::vector< std::unique_ptr<accept_thread> > _accept_threads;
 };
 

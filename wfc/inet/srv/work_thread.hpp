@@ -7,16 +7,22 @@
 
 namespace wfc{ namespace inet{
   
-//template<typename SockType>
 class work_thread
- : callback_owner<>
+ : callback_owner<std::mutex>
 {
-  //typedef SockType socket_type;
-  //typedef std::function<void(socket_type)> func_type;
+  typedef callback_owner<> super;
+  typedef super::mutex_type mutex_type;
 
 public:
+  
   work_thread()
   {
+    
+  }
+  
+  ~work_thread()
+  {
+    std::cout << "~~~work_thread()" << std::endl;
   }
   
   work_thread(const work_thread&) = delete;
@@ -33,10 +39,13 @@ public:
   
   void stop()
   {
-    std::cout << "work_thread()::stop" << std::endl;
-     this->_io_service.stop();
+    std::cout << "work_thread()::stop [[[" << std::endl;
     callback_owner::reset();
+    std::cout << "work_thread()::stop 1" << std::endl;
+    this->_io_service.stop();
+    std::cout << "work_thread()::stop 2" << std::endl;
     _thread.join();
+    std::cout << "]]] work_thread()::stop" << std::endl;
   }
 
   template<typename SockType,  typename F>

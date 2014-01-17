@@ -34,9 +34,9 @@ struct aspect_server_tcp: fas::aspect< fas::type_list_n<
   fas::value< _connection_manager_, std::shared_ptr<connection_manager> >,
   fas::group<_start_, _acceptor_>,
   fas::group<_start_, _server_start_>,
+  fas::group<_stop_, _server_start_>,
   fas::group<_stop_, _acceptor_>,
   fas::group<_stop_, _worker_>,
-  fas::group<_stop_, _server_start_>,
   fas::group<_startup_,  _worker_>,
   fas::group<_startup_,  _server_start_>/*, 
   fas::type< _socket_type_, boost::asio::ip::tcp::socket >*/

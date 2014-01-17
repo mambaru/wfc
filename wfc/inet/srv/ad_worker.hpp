@@ -26,12 +26,16 @@ struct ad_worker
   template<typename T>
   void operator()(T& , fas::tag<_stop_> )
   {
-    std::cout << "ad_worker::stop" << std::endl;
+    std::lock_guard<mutex_type> lk(_mutex);
+    std::cout << "ad_worker::stop[[[" << std::endl;
     for(auto& thr : _work_threads )
     {
+      std::cout << "ad_worker::stop thr->stop()" << std::endl;
       thr->stop();
     }
+    std::cout << "ad_worker::stop clear" << std::endl;
     _work_threads.clear();
+    std::cout << "]]] ad_worker::stop" << std::endl;
   }
 
     

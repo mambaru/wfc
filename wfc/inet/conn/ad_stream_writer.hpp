@@ -118,18 +118,6 @@ private:
     else
     {
       size_t bytes_transferred = t.get_aspect().template get<_send_>()( t, *d );
-      /*
-      boost::system::error_code ec;
-      size_t bytes_transferred = t.socket().send( ::boost::asio::buffer(d->data(), d->size()), 0, ec);
-      if (ec)
-      {
-        bytes_transferred = 0;
-        t.get_aspect().template get<_write_error_>()(t,  ec);
-        t.close();
-      }
-      else
-      {
-      }*/
 
       _outgoing_size -= bytes_transferred;
 
@@ -167,13 +155,8 @@ private:
     if ( _data_list.empty() )
       return;
 
-    // TODO T::owner_type
-    
     typename T::owner_type::weak_type wk = t.owner().alive();
     
-    /*t.socket().async_send(
-      ::boost::asio::buffer( _data_list.front()->data(),  _data_list.front()->size() ),
-    */
     t.get_aspect().template get<_async_send_>()(t,
       *(_data_list.front()),
       t.strand().wrap(

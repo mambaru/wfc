@@ -7,7 +7,7 @@
 namespace wfc{ namespace inet{
   
 template<template<typename> class ConnBase= ::fas::aspect_class >
-struct connection_base_t
+struct connection_base_class_t
 {
   template<typename A>
   using type = ConnBase<A>;
@@ -15,8 +15,8 @@ struct connection_base_t
 
 
 template<template<typename> class ConnBase= ::fas::aspect_class >
-struct connection_base
-  : fas::type<_connection_base_, connection_base_t<ConnBase> >
+struct connection_base_class
+  : fas::type<_connection_base_class_, connection_base_class_t<ConnBase> >
 {};
 
 }}

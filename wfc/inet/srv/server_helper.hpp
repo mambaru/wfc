@@ -18,10 +18,10 @@ struct server_helper
   typedef typename aspect::template advice_cast<_connection_aspect_>::type connection_aspect_type;
   
   template<typename ConnAspect>
-  using connection_base_t = typename aspect::template advice_cast<_connection_base_>::type::template type<ConnAspect>;
+  using connection_base_t = typename aspect::template advice_cast<_connection_base_class_>::type::template type<ConnAspect>;
   
   template<typename ConnAspect, template<typename> class ConnBase >
-  using connection_t = typename aspect::template advice_cast<_connection_>::type::template type<ConnAspect, ConnBase>;
+  using connection_t = typename aspect::template advice_cast<_connection_class_>::type::template type<ConnAspect, ConnBase>;
   
   typedef connection_t<connection_aspect_type, connection_base_t> connection_type;
   typedef typename connection_type::aspect::template advice_cast<_context_>::type connection_context_type;
