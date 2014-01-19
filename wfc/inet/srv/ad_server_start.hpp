@@ -27,13 +27,14 @@ struct ad_server_start
   template<typename T>
   void operator()(T& t, fas::tag<_stop_>)
   {
-    t.get_aspect().template get<_connection_manager_>()->stop();
+    //t.get_aspect().template get<_connection_manager_>()->stop();
+    t.connection_manager()->stop();
   }
 
   template<typename T>
-  void operator()(T& t, fas::tag<_startup_>)
+  void operator()(T& /*t*/, fas::tag<_startup_>)
   {
-    t.get_aspect().template get<_connection_manager_>() = std::make_shared<connection_manager>();
+    //t.get_aspect().template get<_connection_manager_>() = std::make_shared<connection_manager<> >();
   }
   
   template<typename T>
@@ -42,7 +43,8 @@ struct ad_server_start
     
     _timer->async_wait([this, &t](const ::boost::system::error_code&)
     {
-      t.get_aspect().template get<_connection_manager_>()->shutdown_inactive(10);
+      //t.get_aspect().template get<_connection_manager_>()->shutdown_inactive(10);
+      t.connection_manager()->shutdown_inactive(10);
       this->_timer->expires_at(_timer->expires_at() + boost::posix_time::seconds(1));
       this->do_shutdown_inactive(t);
     });

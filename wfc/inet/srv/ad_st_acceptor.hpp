@@ -56,6 +56,8 @@ struct ad_st_acceptor
   void do_accept(T& t)
   {
     typedef typename T::socket_type socket_type;
+    typedef typename T::connection_manager_type connection_manager_type;
+    
     typedef std::shared_ptr<socket_type> socket_ptr;
     socket_ptr sock = std::make_shared<socket_type>(t.get_io_service());
     std::weak_ptr<acceptor_type> acceptor_weak = _acceptor;
@@ -79,13 +81,15 @@ struct ad_st_acceptor
           t.get_aspect().template get<_worker_>()(t, sock, [this, &t](socket_ptr sock) -> void
           {
             typedef typename T::connection_type connection_type;
-            std::shared_ptr<connection_manager> manager = t.get_aspect().template get<_connection_manager_>();
+            //std::shared_ptr<connection_manager> manager = t.get_aspect().template get<_connection_manager_>();
+            std::shared_ptr<connection_manager_type> manager = t.connection_manager();
             
             std::shared_ptr<connection_type> pconn = t.create_connection( 
               sock, 
               [&t](std::shared_ptr<connection_type> pconn)->void
               {
-                t.get_aspect().template get<_connection_manager_>()->erase(pconn);
+                t.connection_manager()->erase(pconn);
+                //t.get_aspect().template get<_connection_manager_>()->erase(pconn);
                 //this->_connection_manager->erase(pconn);
               }
             );

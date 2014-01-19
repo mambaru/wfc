@@ -12,7 +12,8 @@
 
 namespace wfc{ namespace inet{ 
   
-
+/*
+ 
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class stream_connection final
   : public connection_helper<A, AspectClass>::base_class
@@ -124,7 +125,7 @@ public:
     return _socket->remote_endpoint().port();
   }
   
-  virtual void on_read(data_ptr /*d*/)
+  virtual void on_read(data_ptr )
   {
     std::cout << "on_read abort" << std::endl;
     abort();
@@ -168,5 +169,6 @@ private:
   release_function _release;
   owner_type _owner;
 };
+*/
 
 }}

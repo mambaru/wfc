@@ -59,6 +59,8 @@ struct ad_dgram_acceptor
   template<typename T>
   void do_accept(T& t)
   {
+    typedef typename T::connection_manager_type connection_manager_type;
+    
     _acceptor->async_receive_from(
       boost::asio::buffer(_data, max_length), 
       _sender_endpoint,
@@ -80,7 +82,8 @@ struct ad_dgram_acceptor
           //t.get_aspect().template get<_worker_>()(t, std::move( *(this->_acceptor) ), [this, &t, wdata](socket_type sock) -> void
           {
             typedef typename T::connection_type connection_type;
-            std::shared_ptr<connection_manager> manager = t.get_aspect().template get<_connection_manager_>();
+            //std::shared_ptr<connection_manager> manager = t.get_aspect().template get<_connection_manager_>();
+            std::shared_ptr<connection_manager_type> manager = t.connection_manager();
             std::shared_ptr<iconnection> iconn = manager->find( _sender_endpoint.address(), _sender_endpoint.port() );
             
             if ( iconn == nullptr )

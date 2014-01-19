@@ -16,13 +16,13 @@ public:
   
   accept_one(
     boost::asio::io_service& io_service,
-    acceptor_type& acceptor,
+    acceptor_type& acceptor//,
     //socket_type& socket,
-    std::weak_ptr<connection_manager> manager
+    //std::weak_ptr<connection_manager> manager
   ) : _io_service(io_service)
     , _acceptor(acceptor)
     //, _socket(socket)
-    , _manager( manager )
+    //, _manager( manager )
   {}
   
   template<typename T>
@@ -47,17 +47,26 @@ public:
             
             std::shared_ptr<connection_type> pconn = t.create_connection(
               sock, 
-              [this](std::shared_ptr<connection_type> pconn)->void
+              [this, &t](std::shared_ptr<connection_type> pconn)->void
               {
+                t.connection_manager()->erase(pconn);
+                //t.get_aspect().template get<_connection_manager_>()->erase(pconn);
+                /*
                 if ( auto m = this->_manager.lock() )
                   m->erase(pconn);
+                */
               }
             );
-            pconn->context().activity = this->_manager;
+            //pconn->context().activity = t.get_aspect().template get<_connection_manager_>();
+            pconn->context().activity = t.connection_manager();
             pconn->start();
             
+            //t.get_aspect().template get<_connection_manager_>()->insert(pconn);
+            t.connection_manager()->insert(pconn);
+            /*
             if ( auto m = this->_manager.lock() )
               m->insert(pconn);
+              */
             
           });
         }
@@ -73,7 +82,7 @@ private:
   boost::asio::io_service& _io_service;
   acceptor_type& _acceptor;
   //socket_type& _socket;
-  std::weak_ptr<connection_manager> _manager;
+  //std::weak_ptr<connection_manager> _manager;
 };
 
 /*
@@ -177,7 +186,7 @@ public:
       // socket_type socket( io_service );
       acceptor.assign(endpoint.protocol(), fd);
       
-      accept_one one(io_service, acceptor, /*socket,*/ t.get_aspect().template get<_connection_manager_>() );
+      accept_one one(io_service, acceptor/*,*/ /*socket,*/ /*t.get_aspect().template get<_connection_manager_>()*/ );
       one.do_accept(t);
       io_service.run();
       this->_thread_io = nullptr;

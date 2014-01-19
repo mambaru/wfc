@@ -43,7 +43,7 @@ struct ad_stream_reader
       ::boost::asio::buffer(_data),
       */
     t.get_aspect().template get<_async_receive_>()(t, _data, 
-      t.strand().wrap(
+      // t.strand().wrap(
       [this, &t, wk](boost::system::error_code ec, std::size_t bytes_transferred)
       {
         auto alive = wk.lock();
@@ -54,9 +54,15 @@ struct ad_stream_reader
         else if (!ec)
         {
           if ( auto a = t.context().activity.lock() )
+          {
+            std::cout << "stream reader update..." << std::endl;
             a->update(t.shared_from_this());
+            std::cout << "...stream reader updateed" << std::endl;
+          }
           else
-            std::cout << "no update" << std::endl;
+          {
+            std::cout << "stream reader no update" << std::endl;
+          }
           std::cout << "[[" << std::string(_data.begin(), _data.begin() + bytes_transferred) << "]" << std::endl;
           t.get_aspect().template get<_on_read_>()
             (t, std::make_unique<data_type>(_data.begin(), _data.begin() + bytes_transferred) );
@@ -69,7 +75,7 @@ struct ad_stream_reader
           t.close(); /*перенести в _read_error_*/
         }
       }
-      ) // t.strand().wrap(
+     // ) // t.strand().wrap(
     );
   }
   

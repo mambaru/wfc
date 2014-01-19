@@ -24,6 +24,8 @@ public:
   
   typedef typename helper::config_type config_type;
   typedef typename helper::socket_type socket_type;
+  
+  typedef typename helper::connection_manager_type connection_manager_type;
 public:
   
   typedef typename super::aspect aspect;
@@ -51,6 +53,7 @@ public:
   
   void start()
   {
+    _connection_manager = std::make_shared<connection_manager_type>(); // TODO: перенести в адвайс
     this->get_aspect().template getg<_startup_>()(*this, fas::tag<_startup_>() );
     this->get_aspect().template getg<_start_>()(*this, fas::tag<_start_>() );
   }
@@ -93,9 +96,15 @@ public:
     return pconn;
   }
   
+  std::shared_ptr<connection_manager_type> connection_manager()
+  {
+    return _connection_manager;
+  }
+  
 private:
   ::wfc::io_service& _io_service;
   connection_context_type _connection_context;
+  std::shared_ptr<connection_manager_type> _connection_manager;
 };
 
 }}

@@ -43,7 +43,9 @@ public:
 
   ~dgram_connection()
   {
-    _socket->close();
+    std::cout << "~udp_connection_base() " << (_socket == nullptr) << std::endl;
+    if ( _socket->is_open() )
+      _socket->close();
     std::cout << "~udp_connection_base()" << std::endl;
   }
  

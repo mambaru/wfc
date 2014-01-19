@@ -10,12 +10,35 @@
 
 namespace wfc{ namespace inet{
   
+template< template<typename> class Manager>
+struct connection_manager_type
+{
+  typedef connection_manager_type<Manager> self;
+  typedef fas::metalist::advice metatype;
+  typedef _connection_manager_type_ tag;
+  typedef self advice_class;
   
+  
+  template<typename Conn>
+  struct apply
+  {
+    typedef Manager<Conn> type;
+  };
+  
+  template<typename Conn, typename T>
+  std::shared_ptr< Manager<Conn> > create(T& t)
+  {
+    return std::make_shared< Manager<Conn> >();
+  }
+};
+
+template<typename Conn = fas::empty_type >
 class connection_manager
-  : public std::enable_shared_from_this<connection_manager>
+  : public std::enable_shared_from_this<connection_manager<Conn> >
   , public iactivity
 {
-  typedef std::shared_ptr<iconnection> connection_ptr;
+  typedef iconnection connection_type;
+  typedef std::shared_ptr<connection_type> connection_ptr;
   typedef boost::asio::ip::address     address_type;
   typedef unsigned short               port_type;
   
@@ -79,8 +102,11 @@ public:
   
   virtual void update(connection_ptr conn) 
   {
+    std::cout << "connection_manager::update[[" << std::endl;
     std::lock_guard<mutex_type> lk(_mutex);
+    std::cout << "connection_manager::update locked" << std::endl;
     this->update_connection(conn);
+    std::cout << "]]connection_manager::update" << std::endl;
   }
   
   connection_ptr least()
@@ -97,15 +123,24 @@ public:
   
   void shutdown_inactive(time_t ts)
   {
-    std::lock_guard<mutex_type> lk(_mutex);
+    //std::lock_guard<mutex_type> lk(_mutex);
+    std::cout << "shutdown_inactive ... X"<< std::endl;    
+    // std::cout << "shutdown_inactive ... " <<  _mutex.try_lock() << std::endl;    
+    _mutex.lock();
+    std::cout << "shutdown_inactive ... " <<  "locked" << std::endl;    
     info inf = info{ nullptr , boost::asio::ip::address(), 0, time(0) - ts };
     auto end = _by_ts.lower_bound( &inf );
     auto beg = _by_ts.begin();
     std::cout << "shutdown_inactive " << ts << " " << (beg!=end) << std::endl;
     while (beg!=end)
     {
-      (*(beg++))->conn->shutdown();
+      connection_ptr conn = (*(beg++))->conn;
+      _mutex.unlock();
+      conn->shutdown();
+      _mutex.lock();
     }
+    std::cout << "shutdown_inactive end" << std::endl;
+    _mutex.unlock();
   }
   
   connection_ptr find(address_type addr, port_type port)
@@ -134,20 +169,30 @@ public:
 
   void erase(connection_ptr conn)
   {
-    std::lock_guard<mutex_type> lk(_mutex);
     std::cout << "erase[[" << _by_conn.size() << std::endl;
+    std::lock_guard<mutex_type> lk(_mutex);
     this->erase( this->find_by_conn(conn) );
     std::cout << "]]erase" << std::endl;
   }
   
   void stop()
   {
-    std::lock_guard<mutex_type> lk(_mutex);
-    std::cout << "stop[[" << std::endl;
+    //std::lock_guard<mutex_type> lk(_mutex);
+    std::cout << "connection_manager stop[[" << std::endl;
+    _mutex.lock();
+    std::cout << "connection_manager stop A" << std::endl;
     for (info* inf : _by_conn )
-      inf->conn->close();
+    {
+      connection_ptr conn = inf->conn;
+      std::cout << "connection_manager stop " << (inf==nullptr) << (inf->conn==nullptr)  << std::endl;
+      _mutex.unlock();
+      conn->close();
+      _mutex.lock();
+    }
     this->clear();
-    std::cout << "]]stop" << std::endl;
+    _mutex.unlock();
+
+    std::cout << "]]stop connection_manager" << std::endl;
   }
   
   
@@ -273,7 +318,7 @@ private:
   by_connection_set  _by_conn;
   by_endpoint_set    _by_endpoint;
   by_ts_set          _by_ts;
-  std::mutex         _mutex;
+  mutex_type         _mutex;
 };
 
 }}

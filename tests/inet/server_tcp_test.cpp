@@ -1,191 +1,14 @@
 #include <wfc/inet/server.hpp>
 #include <wfc/inet/echo/aspect_stream_rn.hpp>
+#include <wfc/inet/client/aspect_client_tcp.hpp>
+
+#include <wfc/inet/client/client_aspect.hpp>
+
 #include <boost/asio.hpp>
 #include <thread>
 #include <chrono>
 
-/*
-struct connection_aspect: wfc::inet::connection_aspect< fas::aspect<
-  wfc::inet::context< wfc::inet::connection_context >,
-  fas::alias<wfc::inet::basic::_incoming_, ::wfc::inet::basic::_outgoing_>
->
->
-{};
-*/
-
-/*
-struct connection_aspect: fas::aspect<
-  wfc::inet::context< wfc::inet::connection_context >,
-  fas::alias< wfc::inet::stream::_incoming_, ::wfc::inet::stream::_outgoing_>,
-  wfc::inet::stream::aspect
->{};
-*/
-
 namespace wfc{ namespace inet{
-  
-struct client_config
-{
-  bool enabled;
-  bool enable_stat;
-  std::string host;
-  std::string port;
-  int worker_threads;
-  size_t outgoing_warning;
-  size_t outgoing_limit;
-
-
-  client_config()
-    : enabled(true)
-    , enable_stat(false)
-    , worker_threads(0)
-    , outgoing_warning(0)
-    , outgoing_limit(0)
-
-  {
-  }
-};
-
-struct client_configurator
-{
-  typedef client_config config_type;
-
-  template<typename T>
-  void operator()(T& t, const client_config& conf)
-  {
-    auto cntx = t.client_context();
-    cntx.enable_stat = conf.enable_stat;
-    cntx.host = conf.host;
-    cntx.port = conf.port;
-    cntx.worker_threads   = conf.worker_threads;
-    t.client_context(cntx);
-
-    auto cntx_conn = t.connection_context();
-    cntx_conn.outgoing_warning = conf.outgoing_warning;
-    cntx_conn.outgoing_limit = conf.outgoing_limit;
-    t.connection_context(cntx_conn);
-  }
-};
-
-struct client_tcp_config: client_config
-{
-  bool async_connect;
-  client_tcp_config()
-    : client_config()
-    , async_connect(false)
-  {
-  }
-};
-
-struct client_tcp_configurator: client_configurator
-{
-  typedef client_tcp_config config_type;
-
-  template<typename T>
-  void operator()(T& t, const client_tcp_config& conf)
-  {
-    client_configurator::operator()(t, conf);
-    auto cntx = t.client_context();
-    cntx.async_connect = conf.async_connect;
-    t.client_context(cntx);
-  }
-  
-  /*
-  template<typename T>
-  void configure(T& t, typename T::server_context_type& cntx, const server_tcp_config& conf)
-  {
-    server_configurator::configure(t, cntx, conf);
-    cntx.listen_threads   = conf.listen_threads;
-    cntx.worker_threads   = conf.worker_threads;
-    cntx.outgoing_warning = conf.outgoing_warning;
-    cntx.outgoing_limit   = conf.outgoing_limit;
-  }*/
-};
-
-
-struct client_context
-{
-  bool enable_stat;
-  std::string host;
-  std::string port;
- 
-  client_context()
-    : enable_stat(false)
-  {}
-};
-
-struct client_tcp_context: client_context
-{
-  int worker_threads;
-  bool async_connect;
-  client_tcp_context()
-    : client_context()
-    , worker_threads(0)
-    , async_connect(false)
-  {}
-};
-
-struct _connect_;
-struct ad_connect
-{
-  template<typename T>
-  void operator()(T& t, fas::tag<_start_> )
-  {
-    t.get_aspect().template get<_connection_manager_>() = std::make_shared<connection_manager>();
-    
-    typedef typename T::connection_type connection_type;
-    typedef typename T::socket_type socket_type;
-    std::shared_ptr<socket_type> sock = std::make_shared<socket_type>( t.get_io_service() );
-    
-    boost::asio::ip::tcp::resolver resolver( t.get_io_service() );
-    boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve({
-      t.client_context().host, 
-      t.client_context().port
-    });
-    
-    sock->connect( endpoint );
-    std::shared_ptr<connection_type> conn = t.create_connection(sock, [&t](std::shared_ptr<connection_type> conn){
-        std::cout << "closed" << std::endl;
-        t.get_aspect().template get<_connection_manager_>()->erase(conn);
-    });
-    std::cout << "connected" << std::endl;
-    t.get_aspect().template get<_connection_manager_>()->insert(conn);
-    conn->start();
-    
-  }
-};
-
-
-struct aspect_client_tcp: fas::aspect< fas::type_list_n<
-  context<client_tcp_context>,
-  fas::advice<_configuration_, client_tcp_configurator>,
-  fas::advice<_socket_,  ad_tcp_socket>, 
-  fas::advice<_connect_, ad_connect>,
-  fas::group<_start_, _connect_>,
-  //fas::advice<_server_start_, ad_server_start>,
-  fas::value< _connection_manager_, std::shared_ptr<connection_manager> >//,
-  //fas::group<_start_, _acceptor_>,
-  //fas::group<_start_, _server_start_>//,
-  //fas::group<_stop_, _acceptor_>,
-  //fas::group<_stop_, _worker_>,
-  //fas::group<_stop_, _server_start_>,
-  //fas::group<_startup_,  _worker_>,
-  //fas::group<_startup_,  _server_start_>
-  /*, 
-  fas::type< _socket_type_, boost::asio::ip::tcp::socket >*/
-
->::type>
-{
-};
-
-struct _client_aspect_;
-
-template<typename A>
-struct client_aspect
-{
-  typedef fas::metalist::advice metatype;
-  typedef _client_aspect_ tag;
-  typedef A advice_class;
-};
 
 struct aspect_client_default
 : fas::aspect< 
@@ -248,7 +71,8 @@ public:
   typedef typename helper::connection_context_type connection_context_type;
   typedef typename helper::client_context_type client_context_type;
   typedef typename helper::config_type config_type;
-  
+  typedef connection_manager<> connection_manager_type;
+
   /*
   client(::boost::asio::io_service& io)
     : _socket( std::make_shared<socket_type>(io) )
