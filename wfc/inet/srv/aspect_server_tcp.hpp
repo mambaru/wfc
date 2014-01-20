@@ -55,7 +55,7 @@ struct aspect_server_udp: fas::aspect< fas::type_list_n<
   fas::advice<_acceptor_, ad_dgram_acceptor >,
   fas::advice<_server_start_, ad_server_start>,
   connection_manager_type<connection_manager>, 
-  fas::value< _connection_manager_, std::shared_ptr<connection_manager<>> >,
+  //fas::value< _connection_manager_, std::shared_ptr<connection_manager<>> >,
   fas::group<_start_, _acceptor_>,
   fas::group<_start_, _server_start_>,
   fas::group<_stop_, _acceptor_>,

@@ -11,7 +11,7 @@ struct ad_connect
   template<typename T>
   void operator()(T& t, fas::tag<_start_> )
   {
-    t.get_aspect().template get<_connection_manager_>() = std::make_shared<connection_manager<>>();
+    //t.get_aspect().template get<_connection_manager_>() = std::make_shared<connection_manager<>>();
     
     typedef typename T::connection_type connection_type;
     typedef typename T::socket_type socket_type;
@@ -26,10 +26,12 @@ struct ad_connect
     sock->connect( endpoint );
     std::shared_ptr<connection_type> conn = t.create_connection(sock, [&t](std::shared_ptr<connection_type> conn){
         std::cout << "closed" << std::endl;
-        t.get_aspect().template get<_connection_manager_>()->erase(conn);
+        t.connection_manager()->erase(conn);
+        //t.get_aspect().template get<_connection_manager_>()->erase(conn);
     });
     std::cout << "connected" << std::endl;
-    t.get_aspect().template get<_connection_manager_>()->insert(conn);
+    //t.get_aspect().template get<_connection_manager_>()->insert(conn);
+    t.connection_manager()->insert(conn);
     conn->start();
     
   }

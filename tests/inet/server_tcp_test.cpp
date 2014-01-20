@@ -1,8 +1,10 @@
 #include <wfc/inet/server.hpp>
 #include <wfc/inet/echo/aspect_stream_rn.hpp>
 #include <wfc/inet/client/aspect_client_tcp.hpp>
-
+#include <wfc/inet/client/aspect_client_default.hpp>
 #include <wfc/inet/client/client_aspect.hpp>
+#include <wfc/inet/client/client_helper.hpp>
+#include <wfc/inet/client/client.hpp>
 
 #include <boost/asio.hpp>
 #include <thread>
@@ -10,153 +12,14 @@
 
 namespace wfc{ namespace inet{
 
-struct aspect_client_default
-: fas::aspect< 
-    connection_aspect< echo::aspect_stream_rn >,
-    client_aspect< aspect_client_tcp >,
-    connection_base_class< fas::aspect_class >,
-    connection_class< dgram_connection >
-  > 
-{
-};
 
 
-template<typename... Args>
-struct client_helper
-{
-  typedef typename fas::merge_aspect< fas::aspect<Args...>, aspect_client_default>::type aspect_type;
-  typedef typename fas::aspect_class<aspect_type>::aspect aspect;
-  
-  ///
-  /// connection
-  ///
-  typedef typename aspect::template advice_cast<_connection_aspect_>::type connection_aspect_type;
-  
-  template<typename ConnAspect>
-  using connection_base_t = typename aspect::template advice_cast<_connection_base_class_>::type::template type<ConnAspect>;
-  
-  template<typename ConnAspect, template<typename> class ConnBase >
-  using connection_t = typename aspect::template advice_cast<_connection_class_>::type::template type<ConnAspect, ConnBase>;
-  
-  typedef connection_t<connection_aspect_type, connection_base_t> connection_type;
-  typedef typename connection_type::aspect::template advice_cast<_context_>::type connection_context_type;
-  typedef typename connection_type::aspect::template advice_cast<_socket_type_>::type socket_type;
-  
-  ///
-  /// client
-  ///
-  typedef typename aspect::template advice_cast<_client_aspect_>::type client_aspect_type;
-
-  typedef fas::aspect_class<client_aspect_type> client_base;
-  typedef typename client_base::aspect::template advice_cast<_context_>::type client_context_type;
-  typedef typename client_base::aspect::template advice_cast<_configuration_>::type::config_type config_type;
-  
-
-};
 
 
 
   
 //template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 
-template<typename... Args>
-class client
-  : public client_helper<Args...>::client_base
-{
-  typedef client_helper<Args...> helper;
-public:
-  typedef typename helper::client_base super;
-  typedef typename helper::connection_type connection_type;
-  typedef typename helper::socket_type  socket_type;
-  typedef typename helper::connection_context_type connection_context_type;
-  typedef typename helper::client_context_type client_context_type;
-  typedef typename helper::config_type config_type;
-  typedef connection_manager<> connection_manager_type;
-
-  /*
-  client(::boost::asio::io_service& io)
-    : _socket( std::make_shared<socket_type>(io) )
-  {
-  }
-  */
-  
-  client( ::wfc::io_service& io_service, const config_type& conf )
-    : _io_service(io_service)
-  {
-    this->get_aspect().template get<_configuration_>()(*this, conf);
-  }
-  
-  client( std::weak_ptr< wfc::global > g, const config_type& conf )
-    : client( *(g.lock()->io_service.lock()), conf)
-  {
-    this->get_aspect().template get<_configuration_>()(*this, conf);
-  }
-  
-  void reconfigure(const config_type& conf)
-  {
-    this->get_aspect().template get<_configuration_>()(*this, conf);
-  }
-  
-  void initialize()
-  {
-  }
-  
-  void start()
-  {
-    this->get_aspect().template getg<_startup_>()(*this, fas::tag<_startup_>() );
-    this->get_aspect().template getg<_start_>()(*this, fas::tag<_start_>() );
-  }
-  
-  void stop()
-  {
-    this->get_aspect().template getg<_stop_>()(*this, fas::tag<_stop_>() );
-  }
-  
-  client_context_type client_context() const
-  {
-    return this->get_aspect().template get<_context_>();
-  }
-  
-  void client_context(const client_context_type& value) 
-  {
-    this->get_aspect().template get<_context_>() = value;
-  }
-
-  connection_context_type connection_context() const
-  {
-    return _connection_context;
-  }
-  
-  void connection_context(const connection_context_type& value)
-  {
-    _connection_context = value;
-  }
-  
-  boost::asio::io_service& get_io_service()
-  {
-    return _io_service;
-  }
-  
-  virtual void send(data_ptr d) 
-  {
-    this->get_aspect().template get<_connection_manager_>()->least()->send( std::move(d) );
-  }
-  
-  template< typename ...ConnArgs>
-  std::shared_ptr<connection_type> create_connection( ConnArgs&& ...args )
-  {
-    std::shared_ptr<connection_type> pconn = std::make_shared<connection_type>( std::forward<ConnArgs>(args)... );
-    pconn->context() = _connection_context;
-    return pconn;
-  }
-  
-private:
-  ::wfc::io_service& _io_service;
-  connection_context_type _connection_context;
-
-  
-  //std::unique_ptr<connection_type> _connection;
-};
 
 }}
 

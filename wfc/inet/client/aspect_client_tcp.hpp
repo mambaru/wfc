@@ -17,8 +17,9 @@ struct aspect_client_tcp: fas::aspect< fas::type_list_n<
   fas::advice<_socket_,  ad_tcp_socket>, 
   fas::advice<_connect_, ad_connect>,
   fas::group<_start_, _connect_>,
+  connection_manager_type<connection_manager>
   //fas::advice<_server_start_, ad_server_start>,
-  fas::value< _connection_manager_, std::shared_ptr<connection_manager<>> >//,
+  //fas::value< _connection_manager_, std::shared_ptr<connection_manager<>> >//,
   //fas::group<_start_, _acceptor_>,
   //fas::group<_start_, _server_start_>//,
   //fas::group<_stop_, _acceptor_>,

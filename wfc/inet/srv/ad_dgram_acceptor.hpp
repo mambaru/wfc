@@ -94,7 +94,8 @@ struct ad_dgram_acceptor
                 this->_sender_endpoint,
                 [&t](std::shared_ptr<connection_type> pconn)->void
                 {
-                  t.get_aspect().template get<_connection_manager_>()->erase(pconn);
+                  //t.get_aspect().template get<_connection_manager_>()->erase(pconn);
+                  t.connection_manager()->erase(pconn);
                 }
               );
               pconn->context().activity = manager;

@@ -1,15 +1,17 @@
-#pragma once
+#pragma once 
 
+#include <wfc/inet/client/tags.hpp>
+#include <wfc/inet/client/aspect_client_default.hpp>
 #include <wfc/inet/tags.hpp>
-#include <wfc/inet/srv/aspect_default.hpp>
 #include <fas/aop.hpp>
 
-namespace wfc{ namespace inet{
 
+namespace wfc{ namespace inet{
+  
 template<typename... Args>
-struct server_helper
+struct client_helper
 {
-  typedef typename fas::merge_aspect< fas::aspect<Args...>, aspect_default>::type aspect_type;
+  typedef typename fas::merge_aspect< fas::aspect<Args...>, aspect_client_default>::type aspect_type;
   typedef typename fas::aspect_class<aspect_type>::aspect aspect;
   
   ///
@@ -28,18 +30,20 @@ struct server_helper
   typedef typename connection_type::aspect::template advice_cast<_socket_type_>::type socket_type;
   
   ///
-  /// server
+  /// client
   ///
-  typedef typename aspect::template advice_cast<_server_aspect_>::type server_aspect_type;
-
-  typedef fas::aspect_class<server_aspect_type> server_base;
-
-  typedef typename server_base::aspect
+  typedef typename aspect::template advice_cast<_client_aspect_>::type client_aspect_type;
+  typedef fas::aspect_class<client_aspect_type> client_base;
+  
+  typedef typename client_base::aspect
     ::template advice_cast<_connection_manager_type_>::type
     ::template apply<connection_type>::type connection_manager_type;
+
   
-  typedef typename server_base::aspect::template advice_cast<_context_>::type server_context_type;
-  typedef typename server_base::aspect::template advice_cast<_configuration_>::type::config_type config_type;
+  typedef typename client_base::aspect::template advice_cast<_context_>::type client_context_type;
+  typedef typename client_base::aspect::template advice_cast<_configuration_>::type::config_type config_type;
+  
+  
   
 
 };

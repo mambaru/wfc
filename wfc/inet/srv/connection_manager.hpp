@@ -18,6 +18,11 @@ struct connection_manager_type
   typedef _connection_manager_type_ tag;
   typedef self advice_class;
   
+  connection_manager_type()
+  {
+    // TODO: operator()(tag<_startup_>)
+    //_manager = std::make_shared< Manager<Conn> >();
+  }
   
   template<typename Conn>
   struct apply
@@ -25,29 +30,37 @@ struct connection_manager_type
     typedef Manager<Conn> type;
   };
   
+  
   template<typename Conn, typename T>
   std::shared_ptr< Manager<Conn> > create(T& t)
   {
     return std::make_shared< Manager<Conn> >();
   }
+  
+private:
+  // std::shared_ptr< Manager<Conn> > _manager;
 };
 
-template<typename Conn = fas::empty_type >
+template<typename Conn /*= fas::empty_type*/ >
 class connection_manager
   : public std::enable_shared_from_this<connection_manager<Conn> >
   , public iactivity
 {
-  typedef iconnection connection_type;
+  //typedef iconnection connection_type;
+  
+  typedef Conn connection_type;
   typedef std::shared_ptr<connection_type> connection_ptr;
+  typedef std::shared_ptr<iconnection> iconnection_ptr;
   typedef boost::asio::ip::address     address_type;
   typedef unsigned short               port_type;
   
   struct info
   {
-    connection_ptr conn;
-    address_type   addr;
-    port_type      port;
-    time_t         ts;
+    connection_ptr  conn;
+    iconnection_ptr iconn;
+    address_type    addr;
+    port_type       port;
+    time_t          ts;
   };
   
   struct by_conn
@@ -55,6 +68,14 @@ class connection_manager
     bool operator() (const info* left, const info* right) const
     {
       return left->conn < right->conn;
+    }
+  };
+
+  struct by_iconn
+  {
+    bool operator() (const info* left, const info* right) const
+    {
+      return left->iconn < right->iconn;
     }
   };
   
@@ -80,6 +101,7 @@ class connection_manager
   typedef std::set<info*, by_endpoint> by_endpoint_set;
   typedef std::set<info*, by_ts>       by_ts_set;
   typedef std::set<info*, by_conn >    by_connection_set;
+  typedef std::set<info*, by_iconn >   by_iconnection_set;
   
   //virtual boost::asio::ip::address remote_address() = 0;
   //virtual unsigned short remote_port() = 0;
@@ -100,7 +122,9 @@ public:
     std::cout << "]]~connection_manager()" << std::endl;
   }
   
-  virtual void update(connection_ptr conn) 
+#warning как получить доступ из connection без полиморфизма или сделать индекс по интерфейсу? 
+
+  virtual void update( iconnection_ptr conn) 
   {
     std::cout << "connection_manager::update[[" << std::endl;
     std::lock_guard<mutex_type> lk(_mutex);
@@ -128,7 +152,7 @@ public:
     // std::cout << "shutdown_inactive ... " <<  _mutex.try_lock() << std::endl;    
     _mutex.lock();
     std::cout << "shutdown_inactive ... " <<  "locked" << std::endl;    
-    info inf = info{ nullptr , boost::asio::ip::address(), 0, time(0) - ts };
+    info inf = info{ nullptr , nullptr, boost::asio::ip::address(), 0, time(0) - ts };
     auto end = _by_ts.lower_bound( &inf );
     auto beg = _by_ts.begin();
     std::cout << "shutdown_inactive " << ts << " " << (beg!=end) << std::endl;
@@ -155,14 +179,14 @@ public:
   
   bool insert(connection_ptr conn, address_type addr, port_type port)
   {
-    info* inf = new info{conn, addr, port, time(0) };
+    info* inf = new info{conn, conn, addr, port, time(0) };
     std::lock_guard<mutex_type> lk(_mutex);
     return this->insert(inf);    
   }
   
   bool insert(connection_ptr conn)
   {
-    info* inf = new info{conn, conn->remote_address(), conn->remote_port(), time(0) };
+    info* inf = new info{conn, conn, conn->remote_address(), conn->remote_port(), time(0) };
     std::lock_guard<mutex_type> lk(_mutex);
     return this->insert(inf);
   }
@@ -199,9 +223,9 @@ public:
   
 private:
   
-  void update_connection(connection_ptr conn) 
+  void update_connection(iconnection_ptr conn) 
   {
-    if ( info* inf = this->find_by_conn(conn) )
+    if ( info* inf = this->find_by_iconn(conn) )
     {
       std::cout << "update" << std::endl;
       _by_ts.erase(inf);
@@ -220,6 +244,9 @@ private:
     bool flag = _by_conn.insert(inf).second;
     if ( flag )
     {
+      if ( !_by_iconn.insert(inf).second )
+        abort();
+      
       flag = _by_endpoint.insert(inf).second;
       if ( flag )
       {
@@ -265,7 +292,7 @@ private:
   info* find_by_conn(connection_ptr conn)
   {
     std::cout << "find_by_conn[[" << std::endl;
-    info inf = info{ conn , boost::asio::ip::address(), 0, 0 };
+    info inf = info{ conn, nullptr, boost::asio::ip::address(), 0, 0 };
     
     auto itr = _by_conn.find( &inf );
     if ( itr == _by_conn.end() )
@@ -281,10 +308,30 @@ private:
     return *itr;
   }
 
+  info* find_by_iconn(iconnection_ptr conn)
+  {
+    std::cout << "find_by_conn[[" << std::endl;
+    info inf = info{ nullptr, conn, boost::asio::ip::address(), 0, 0 };
+    
+    auto itr = _by_iconn.find( &inf );
+    if ( itr == _by_iconn.end() )
+    {
+      std::cout << "find_by_conn not found " << size_t(conn.get()) << std::endl;
+#warning УДАЛИТЬ
+      for ( info* p: _by_iconn)
+      {
+        std::cout << size_t(p->conn.get()) << std::endl;
+      }
+      return nullptr;
+    }
+    std::cout << "]]find_by_conn" << std::endl;
+    return *itr;
+  }
+
   info* find_by_endpoint(address_type addr, port_type port)
   {
     std::cout << "find_by_endpoint[[" << port << std::endl;
-    info inf = info{ nullptr , addr, port, 0 };
+    info inf = info{ nullptr , nullptr, addr, port, 0 };
     
     auto itr = _by_endpoint.find( &inf );
     if ( itr == _by_endpoint.end() )
@@ -304,6 +351,7 @@ private:
     
     std::cout << "erase ptr 1" << std::endl;
     _by_conn.erase(inf);
+    _by_iconn.erase(inf);
     std::cout << "erase ptr 1.1" << std::endl;
     _by_endpoint.erase(inf);
     std::cout << "erase ptr 1.2" << std::endl;
@@ -316,6 +364,7 @@ private:
 private:
   
   by_connection_set  _by_conn;
+  by_iconnection_set _by_iconn;
   by_endpoint_set    _by_endpoint;
   by_ts_set          _by_ts;
   mutex_type         _mutex;
