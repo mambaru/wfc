@@ -39,7 +39,7 @@ struct server_helper
     ::template apply<connection_type>::type connection_manager_type;
   
   typedef typename server_base::aspect::template advice_cast<_context_>::type server_context_type;
-  typedef typename server_base::aspect::template advice_cast<_configuration_>::type::config_type config_type;
+  typedef typename server_base::aspect::template advice_cast<_configurator_>::type::config_type config_type;
   
 
 };

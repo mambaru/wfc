@@ -18,5 +18,5 @@ struct _connection_class_;
 
 struct _server_aspect_;
 
-struct _configuration_;
+struct _configurator_;
 }}

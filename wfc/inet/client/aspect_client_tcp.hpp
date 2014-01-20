@@ -13,7 +13,7 @@ namespace wfc{ namespace inet{
   
 struct aspect_client_tcp: fas::aspect< fas::type_list_n<
   context<client_tcp_context>,
-  fas::advice<_configuration_, client_tcp_configurator>,
+  fas::advice<_configurator_, client_tcp_configurator>,
   fas::advice<_socket_,  ad_tcp_socket>, 
   fas::advice<_connect_, ad_connect>,
   fas::group<_start_, _connect_>,

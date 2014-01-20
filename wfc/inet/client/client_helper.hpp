@@ -41,7 +41,7 @@ struct client_helper
 
   
   typedef typename client_base::aspect::template advice_cast<_context_>::type client_context_type;
-  typedef typename client_base::aspect::template advice_cast<_configuration_>::type::config_type config_type;
+  typedef typename client_base::aspect::template advice_cast<_configurator_>::type::config_type config_type;
   
   
   

@@ -24,7 +24,7 @@ namespace wfc{ namespace inet{
 
 struct aspect_server_tcp: fas::aspect< fas::type_list_n<
   context<server_tcp_context>,
-  fas::advice<_configuration_, server_tcp_configurator>,
+  fas::advice<_configurator_, server_tcp_configurator>,
   fas::advice<_socket_,  ad_tcp_socket>, 
   fas::advice<_worker_,  ad_worker/*< ::boost::asio::ip::tcp::socket >*/ >, 
   fas::advice<_acceptor_, ad_acceptor>,
@@ -49,7 +49,7 @@ struct aspect_server_tcp: fas::aspect< fas::type_list_n<
 
 struct aspect_server_udp: fas::aspect< fas::type_list_n<
   context<server_tcp_context>,
-  fas::advice<_configuration_, server_tcp_configurator>,
+  fas::advice<_configurator_, server_tcp_configurator>,
   fas::advice<_socket_, ad_udp_socket >, 
   fas::advice<_worker_,  ad_worker/*< ::boost::asio::ip::udp::socket >*/ >, 
   fas::advice<_acceptor_, ad_dgram_acceptor >,

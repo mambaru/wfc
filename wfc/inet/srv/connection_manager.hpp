@@ -116,21 +116,14 @@ public:
   
   ~connection_manager()
   {
-    std::cout << "~connection_manager()[[" << std::endl;
     std::lock_guard<mutex_type> lk(_mutex);
     this->clear();
-    std::cout << "]]~connection_manager()" << std::endl;
   }
   
-#warning как получить доступ из connection без полиморфизма или сделать индекс по интерфейсу? 
-
   virtual void update( iconnection_ptr conn) 
   {
-    std::cout << "connection_manager::update[[" << std::endl;
     std::lock_guard<mutex_type> lk(_mutex);
-    std::cout << "connection_manager::update locked" << std::endl;
     this->update_connection(conn);
-    std::cout << "]]connection_manager::update" << std::endl;
   }
   
   connection_ptr least()
@@ -147,15 +140,10 @@ public:
   
   void shutdown_inactive(time_t ts)
   {
-    //std::lock_guard<mutex_type> lk(_mutex);
-    std::cout << "shutdown_inactive ... X"<< std::endl;    
-    // std::cout << "shutdown_inactive ... " <<  _mutex.try_lock() << std::endl;    
     _mutex.lock();
-    std::cout << "shutdown_inactive ... " <<  "locked" << std::endl;    
     info inf = info{ nullptr , nullptr, boost::asio::ip::address(), 0, time(0) - ts };
     auto end = _by_ts.lower_bound( &inf );
     auto beg = _by_ts.begin();
-    std::cout << "shutdown_inactive " << ts << " " << (beg!=end) << std::endl;
     while (beg!=end)
     {
       connection_ptr conn = (*(beg++))->conn;
@@ -163,7 +151,6 @@ public:
       conn->shutdown();
       _mutex.lock();
     }
-    std::cout << "shutdown_inactive end" << std::endl;
     _mutex.unlock();
   }
   
@@ -193,30 +180,22 @@ public:
 
   void erase(connection_ptr conn)
   {
-    std::cout << "erase[[" << _by_conn.size() << std::endl;
     std::lock_guard<mutex_type> lk(_mutex);
     this->erase( this->find_by_conn(conn) );
-    std::cout << "]]erase" << std::endl;
   }
   
   void stop()
   {
-    //std::lock_guard<mutex_type> lk(_mutex);
-    std::cout << "connection_manager stop[[" << std::endl;
     _mutex.lock();
-    std::cout << "connection_manager stop A" << std::endl;
     for (info* inf : _by_conn )
     {
       connection_ptr conn = inf->conn;
-      std::cout << "connection_manager stop " << (inf==nullptr) << (inf->conn==nullptr)  << std::endl;
       _mutex.unlock();
       conn->close();
       _mutex.lock();
     }
     this->clear();
     _mutex.unlock();
-
-    std::cout << "]]stop connection_manager" << std::endl;
   }
   
   
@@ -227,12 +206,10 @@ private:
   {
     if ( info* inf = this->find_by_iconn(conn) )
     {
-      std::cout << "update" << std::endl;
       _by_ts.erase(inf);
       inf->ts = time(0);
       if ( !_by_ts.insert(inf).second )
       {
-        std::cout << "update abort" << std::endl;
         abort();
       }
     }
@@ -266,99 +243,68 @@ private:
     if (!flag)
       delete inf;
     
-    std::cout << "insert " << _by_conn.size() << std::endl;
-    
     return flag;
-
-    
   }
   
   void clear()
   {
     if ( _by_conn.size() != _by_endpoint.size() || _by_conn.size() != _by_ts.size())
     {
-      std::cout << "clear() abort" << std::endl;
       abort();
     }
     
-    std::cout << "clear[[" << std::endl;
     while ( !_by_conn.empty() )
     {
       this->erase( *(_by_conn.begin()) );
     }
-    std::cout << "]]clear" << std::endl;
   }
   
   info* find_by_conn(connection_ptr conn)
   {
-    std::cout << "find_by_conn[[" << std::endl;
     info inf = info{ conn, nullptr, boost::asio::ip::address(), 0, 0 };
     
     auto itr = _by_conn.find( &inf );
     if ( itr == _by_conn.end() )
     {
-      std::cout << "find_by_conn not found " << size_t(conn.get()) << std::endl;
-      for ( info* p: _by_conn)
-      {
-        std::cout << size_t(p->conn.get()) << std::endl;
-      }
-      return nullptr;
+      abort();
     }
-    std::cout << "]]find_by_conn" << std::endl;
     return *itr;
   }
 
   info* find_by_iconn(iconnection_ptr conn)
   {
-    std::cout << "find_by_conn[[" << std::endl;
     info inf = info{ nullptr, conn, boost::asio::ip::address(), 0, 0 };
     
     auto itr = _by_iconn.find( &inf );
     if ( itr == _by_iconn.end() )
     {
-      std::cout << "find_by_conn not found " << size_t(conn.get()) << std::endl;
-#warning УДАЛИТЬ
-      for ( info* p: _by_iconn)
-      {
-        std::cout << size_t(p->conn.get()) << std::endl;
-      }
       return nullptr;
     }
-    std::cout << "]]find_by_conn" << std::endl;
     return *itr;
   }
 
   info* find_by_endpoint(address_type addr, port_type port)
   {
-    std::cout << "find_by_endpoint[[" << port << std::endl;
     info inf = info{ nullptr , nullptr, addr, port, 0 };
     
     auto itr = _by_endpoint.find( &inf );
     if ( itr == _by_endpoint.end() )
       return nullptr;
-    std::cout << (*itr)->port <<  "]]find_by_endpoint" << std::endl;
     return *itr;
   }
 
   void erase(info* inf)
   {
-    std::cout << "erase ptr[[" << std::endl;
     if ( inf == nullptr )
     {
-      std::cout << "erase ptr not found" << std::endl;
       return;
     }
     
-    std::cout << "erase ptr 1" << std::endl;
     _by_conn.erase(inf);
     _by_iconn.erase(inf);
-    std::cout << "erase ptr 1.1" << std::endl;
     _by_endpoint.erase(inf);
-    std::cout << "erase ptr 1.2" << std::endl;
     _by_ts.erase(inf);
-    std::cout << "erase ptr 1.3" << std::endl;
     delete inf;
-    std::cout << "]]erase ptr" << std::endl;
   }
   
 private:
