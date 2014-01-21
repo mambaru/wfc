@@ -75,10 +75,12 @@ struct ipubsub
   virtual void notify(request_notify_ptr, notify_callback ) = 0;
 };
 
+/*
 class pubsub: public ipubsub
 {
   // TODO:
   // дефолтная имплементация ipubsub status::not_supported
 };
+*/
 
 }

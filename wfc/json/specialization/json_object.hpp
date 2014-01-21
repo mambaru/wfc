@@ -100,7 +100,7 @@ private:
   }
 
   template<typename P>
-  P serialize_members( const T& t, P end, fas::empty_list )
+  P serialize_members( const T& /*t*/, P end, fas::empty_list )
   {
     return end;
   }

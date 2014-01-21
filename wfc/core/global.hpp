@@ -21,6 +21,7 @@ struct global
 { 
   typedef registry<imodule> module_registry;
   typedef registry<ilogger> logger_registry;
+  typedef registry<ipubsub> pubsub_registry;
   
   typedef std::function<callback_status()> idle_callback;
   callback_list<idle_callback> idle;
@@ -36,6 +37,8 @@ struct global
   std::weak_ptr< logger_registry > loggers;
   std::weak_ptr< module_registry > modules;
   std::weak_ptr< wfc::io_service > io_service;
+  
+  std::weak_ptr< pubsub_registry > pubsubs;
 
   static std::weak_ptr<global>   static_global;
 };
