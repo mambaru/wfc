@@ -44,7 +44,7 @@ struct ad_server_start
     _timer->async_wait([this, &t](const ::boost::system::error_code&)
     {
       //t.get_aspect().template get<_connection_manager_>()->shutdown_inactive(10);
-      t.connection_manager()->shutdown_inactive(10);
+      t.connection_manager()->shutdown_inactive(60);
       this->_timer->expires_at(_timer->expires_at() + boost::posix_time::seconds(1));
       this->do_shutdown_inactive(t);
     });
