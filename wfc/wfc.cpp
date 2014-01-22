@@ -18,10 +18,12 @@ int wfc::run(int argc, char* argv[])
 {
   _modules = std::make_shared<global::module_registry>();
   _loggers = std::make_shared<global::logger_registry>();
+  _pubsubs = std::make_shared<global::pubsub_registry>();
   _global->program_version = _program_version;
   _global->wfc_version = wfc_build_info_string;
   _global->modules = _modules;
   _global->loggers = _loggers;
+  _global->pubsubs = _pubsubs;
   
   for (auto m: _module_list)
   {

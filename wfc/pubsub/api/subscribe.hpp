@@ -10,7 +10,6 @@ namespace request
   struct subscribe
   {
     std::string channel;
-    
   };
 }
 
