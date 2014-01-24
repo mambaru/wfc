@@ -3,7 +3,7 @@
 #include <wfc/pubsub/pubsub_status.hpp>
 #include <wfc/pubsub/api/message.hpp>
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 namespace request
 {
@@ -18,8 +18,8 @@ namespace response
 {
   struct publish
   {
-    pubsub_status status;
+    pubsub::status status;
   };
 }
 
-}
+}}

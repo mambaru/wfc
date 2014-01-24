@@ -1,8 +1,8 @@
 #pragma once
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
-enum class  pubsub_status
+enum class status
 {
   /// Модуль отключен
   disabled = - 7,
@@ -38,4 +38,4 @@ enum class  pubsub_status
 
 };
 
-}
+}}

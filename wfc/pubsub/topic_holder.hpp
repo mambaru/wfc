@@ -11,7 +11,7 @@
 #include <stdexcept>
 
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 /** @brief По сути обертка для message_queue */
 class topic_holder
@@ -83,5 +83,5 @@ inline bool operator < (const topic_holder& first, const topic_holder& second)
   return first._name < second._name;
 }
 
-}
+}}
 

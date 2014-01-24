@@ -11,7 +11,7 @@
 #include <memory>
 
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 /** @brief По сути обертка для message_queue */
 struct topic
@@ -21,6 +21,5 @@ struct topic
   std::vector< message_ptr > messages;
 };
 
-
-}
+}}
 

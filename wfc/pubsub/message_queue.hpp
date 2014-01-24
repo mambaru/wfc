@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <memory>
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 
 /**
@@ -200,6 +200,6 @@ private:
 
 };
 
-}
+}}
 
 

@@ -6,6 +6,8 @@
 
 namespace wfc{ namespace jsonrpc{
 
+// TODO: убрать и сделать функциями, см. error.hpp bad_gateway
+  
 struct ad_parse_error
 {
   template<typename T>

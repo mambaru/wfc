@@ -4,7 +4,7 @@
 #include <wfc/pubsub/api/subscribe.hpp>
 #include <wfc/pubsub/api/pubsub_status_json.hpp>
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 namespace request
 {
@@ -41,7 +41,7 @@ namespace response
     typedef json::member_value<
       subscribe,
       subscribe, 
-      pubsub_status, 
+      pubsub::status, 
       &subscribe::status, 
       pubsub_status_json::type
     > type;
@@ -50,4 +50,4 @@ namespace response
   };
 }
 
-}
+}}

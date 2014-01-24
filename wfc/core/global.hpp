@@ -21,7 +21,7 @@ struct global
 { 
   typedef registry<imodule> module_registry;
   typedef registry<ilogger> logger_registry;
-  typedef registry<ipubsub> pubsub_registry;
+  typedef registry<pubsub::ipubsub> pubsub_registry;
   
   typedef std::function<callback_status()> idle_callback;
   callback_list<idle_callback> idle;

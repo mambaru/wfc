@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <wfc/memory.hpp>
 
 namespace wfc{ namespace jsonrpc{
 
@@ -40,5 +41,11 @@ struct invalid_params: error
   {};
   
 };
+
+inline std::unique_ptr<error> server_configuration_error()
+{
+  return std::make_unique<error>( -32606, "Server configuration error");
+}
+
 
 }}

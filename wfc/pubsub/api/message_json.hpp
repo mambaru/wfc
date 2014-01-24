@@ -11,7 +11,7 @@
 #include <wfc/json/json.hpp>
 #include <wfc/json/name.hpp>
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 struct message_json
 {
@@ -56,7 +56,4 @@ struct message_json
   typedef type::serializer serializer;
 };
 
-}
-
-
-
+}}

@@ -5,7 +5,7 @@
 #include <wfc/pubsub/api/message_json.hpp>
 #include <wfc/pubsub/api/pubsub_status_json.hpp>
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 namespace request
 {
@@ -32,7 +32,7 @@ namespace response
     typedef json::member_value<
       publish,
       publish, 
-      pubsub_status, 
+      pubsub::status, 
       &publish::status, 
       pubsub_status_json::type
     > type;
@@ -41,4 +41,4 @@ namespace response
   };
 }
 
-}
+}}

@@ -7,7 +7,7 @@
 #include <wfc/json/json.hpp>
 #include <wfc/json/name.hpp>
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 struct pubsub_status_json
 {
@@ -21,18 +21,18 @@ struct pubsub_status_json
 
   
   typedef fas::type_list_n<
-    json::enum_value<n_ready,          pubsub_status, pubsub_status::ready>,
-    json::enum_value<n_forbidden,      pubsub_status, pubsub_status::forbidden>,
-    json::enum_value<n_bad_gateway,    pubsub_status, pubsub_status::bad_gateway>,
-    json::enum_value<n_not_found,      pubsub_status, pubsub_status::not_found>,
-    json::enum_value<n_internal_error, pubsub_status, pubsub_status::internal_error>,
-    json::enum_value<n_not_support,    pubsub_status, pubsub_status::not_support>,
-    json::enum_value<n_wait,           pubsub_status, pubsub_status::wait>
+    json::enum_value<n_ready,          pubsub::status, pubsub::status::ready>,
+    json::enum_value<n_forbidden,      pubsub::status, pubsub::status::forbidden>,
+    json::enum_value<n_bad_gateway,    pubsub::status, pubsub::status::bad_gateway>,
+    json::enum_value<n_not_found,      pubsub::status, pubsub::status::not_found>,
+    json::enum_value<n_internal_error, pubsub::status, pubsub::status::internal_error>,
+    json::enum_value<n_not_support,    pubsub::status, pubsub::status::not_support>,
+    json::enum_value<n_wait,           pubsub::status, pubsub::status::wait>
   >::type status_enum_list;
 
-  typedef json::enumerator< pubsub_status, status_enum_list > type;
+  typedef json::enumerator< pubsub::status, status_enum_list > type;
   
   typedef type::serializer serializer;
 };
 
-}
+}}

@@ -12,7 +12,7 @@
 #include <functional>
 #include <memory>
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 struct ipubsub
 {
@@ -83,4 +83,4 @@ class pubsub: public ipubsub
 };
 */
 
-}
+}}

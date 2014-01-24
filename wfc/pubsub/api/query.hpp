@@ -2,7 +2,7 @@
 
 #include <wfc/pubsub/pubsub_status.hpp>
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 namespace request
 {
@@ -20,4 +20,4 @@ namespace response
   };
 }
 
-}
+}}

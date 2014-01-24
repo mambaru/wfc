@@ -3,7 +3,7 @@
 #include <wfc/pubsub/pubsub_status.hpp>
 #include <string>
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 namespace request
 {
@@ -17,8 +17,8 @@ namespace response
 {
   struct subscribe
   {
-    pubsub_status status;
+    pubsub::status status;
   };
 }
 
-}
+}}

@@ -8,7 +8,7 @@
 
 #include <wfc/pubsub/api/types.hpp>
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 enum class actions
 {
@@ -157,7 +157,7 @@ struct message
 
 };
 
-}
+}}
 
 
 

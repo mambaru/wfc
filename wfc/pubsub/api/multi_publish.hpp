@@ -4,7 +4,7 @@
 #include <wfc/pubsub/api/publish.hpp>
 #include <vector>
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 namespace request
 {
@@ -20,7 +20,7 @@ namespace request
 
 namespace response
 {
-  typedef std::vector<pubsub_status> multi_publish;
+  typedef std::vector<pubsub::status> multi_publish;
   /*struct multi_publish
   {
 
@@ -28,4 +28,4 @@ namespace response
   */
 }
 
-}
+}}

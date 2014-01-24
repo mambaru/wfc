@@ -17,7 +17,7 @@
 #include <iostream>
 
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 /** @brief Канал */
 class topic_hub
@@ -219,7 +219,7 @@ private:
 	std::string _idle_channel;
 };
 
-}
+}}
 
 
 

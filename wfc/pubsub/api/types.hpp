@@ -10,13 +10,13 @@
 #include <vector>
 #include <ctime>
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 typedef std::string identity_t;
 typedef std::vector<char> data_t;
 typedef size_t cursor_t;
 typedef std::string key_t;
 
-}
+}}
 
 
