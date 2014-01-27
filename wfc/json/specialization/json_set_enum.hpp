@@ -36,7 +36,7 @@ public:
   }
 
   template<typename P>
-  P serialize( const T& v, fas::empty_list, P end, bool isFirst)
+  P serialize( const T&, fas::empty_list, P end, bool)
   {
     return end;
   }
