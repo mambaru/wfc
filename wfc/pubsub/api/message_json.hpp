@@ -54,6 +54,13 @@ struct message_json
     > type;
 
   typedef type::serializer serializer;
+  
+  typedef std::unique_ptr<message> message_ptr;
+  
+  typedef wfc::json::pointer<message_ptr, type> pointer;
+  
 };
+
+
 
 }}
