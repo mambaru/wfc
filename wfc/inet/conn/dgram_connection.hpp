@@ -107,7 +107,11 @@ public:
   
   io_service& get_io_service()
   {
-    return _socket->get_io_service();
+    
+    std::cout << "get_io_service() { " << std::endl;
+    io_service& io =  _socket->get_io_service();
+    std::cout << "} get_io_service() " << std::endl;
+    return io;
   }
   
   strand_type& strand()
@@ -180,23 +184,29 @@ public:
     { 
       std::lock_guard<mutex_type> lk( this->mutex() );
       std::cout << "POST CLOSE " << ( this->_socket == nullptr ) << std::endl;
-      if ( _closed )
+      if ( !_closed )
+      {
+        _closed = true;
         this->__release(); 
+      }
       this->_socket = nullptr;
     });
   }
 
   void shutdown()
   {
-    std::cout << "basic_connection shutdown()" << std::endl;
+    std::cout << "basic_connection::shutdown() {" << std::endl;
     this->get_aspect().template get<_shutdown_>()(*this);
+    std::cout << "} basic_connection::shutdown()" << std::endl;
     //this->close();
   }
 
   void __release()
   {
+    std::cout << " void __release() 1" << std::endl;
     if ( this->_release!=nullptr)
     {
+      std::cout << " void __release() 2" << std::endl;
       _release( super_shared::shared_from_this() );
     }
   }

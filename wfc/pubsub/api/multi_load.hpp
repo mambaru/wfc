@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wfc/pubsub/pubsub_status.hpp>
+#include <wfc/pubsub/status.hpp>
 
 namespace wfc{ namespace pubsub{
 

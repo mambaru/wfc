@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wfc/pubsub/pubsub_status.hpp>
+#include <wfc/pubsub/status.hpp>
 #include <wfc/pubsub/api/topic.hpp>
 #include <wfc/pubsub/api/types.hpp>
 

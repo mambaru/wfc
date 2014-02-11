@@ -141,16 +141,26 @@ public:
   void shutdown_inactive(time_t ts)
   {
     _mutex.lock();
+    std::cout << "void shutdown_inactive(time_t ts) {" << std::endl;
     info inf = info{ nullptr , nullptr, boost::asio::ip::address(), 0, time(0) - ts };
     auto end = _by_ts.lower_bound( &inf );
     auto beg = _by_ts.begin();
     while (beg!=end)
     {
-      connection_ptr conn = (*(beg++))->conn;
+      std::cout << "shutdown_inactive 1" << std::endl;
+      info *inf = *(beg++);
+      connection_ptr conn = inf->conn;
+      this->on_wait( inf );
+      std::cout << "shutdown_inactive 2" << std::endl;
       _mutex.unlock();
+      std::cout << "shutdown_inactive 3" << std::endl;
       conn->shutdown();
+      std::cout << "shutdown_inactive 4" << std::endl;
       _mutex.lock();
+      std::cout << "shutdown_inactive 5" << std::endl;
     }
+    
+    std::cout << "} void shutdown_inactive(time_t ts)" << std::endl;
     _mutex.unlock();
   }
   
@@ -180,8 +190,10 @@ public:
 
   void erase(connection_ptr conn)
   {
+    std::cout << "void erase(connection_ptr conn){" << std::endl;
     std::lock_guard<mutex_type> lk(_mutex);
     this->erase( this->find_by_conn(conn) );
+    std::cout << "} void erase(connection_ptr conn)" << std::endl;
   }
   
   void stop()
@@ -292,6 +304,15 @@ private:
       return nullptr;
     return *itr;
   }
+  
+  void on_wait(info* inf)
+  {
+    _wait_list.insert(inf);
+    _by_conn.erase(inf);
+    _by_iconn.erase(inf);
+    _by_endpoint.erase(inf);
+    _by_ts.erase(inf);
+  }
 
   void erase(info* inf)
   {
@@ -304,6 +325,7 @@ private:
     _by_iconn.erase(inf);
     _by_endpoint.erase(inf);
     _by_ts.erase(inf);
+    _wait_list.erase(inf);
     delete inf;
   }
   
@@ -313,6 +335,7 @@ private:
   by_iconnection_set _by_iconn;
   by_endpoint_set    _by_endpoint;
   by_ts_set          _by_ts;
+  by_connection_set  _wait_list;
   mutex_type         _mutex;
 };
 

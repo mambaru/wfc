@@ -4,6 +4,8 @@ namespace wfc{ namespace pubsub{
 
 enum class status
 {
+  not_impl = -8,
+  
   /// Модуль отключен
   disabled = - 7,
   

@@ -88,7 +88,9 @@ struct ad_st_acceptor
               sock, 
               [&t](std::shared_ptr<connection_type> pconn)->void
               {
+                std::cout << "lamda release { " << std::endl;
                 t.connection_manager()->erase(pconn);
+                std::cout << "} lamda release " << std::endl;
                 //t.get_aspect().template get<_connection_manager_>()->erase(pconn);
                 //this->_connection_manager->erase(pconn);
               }

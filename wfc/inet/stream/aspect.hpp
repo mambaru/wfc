@@ -42,23 +42,30 @@ struct ad_shutdown
   template<typename T>
   void operator()(T& t)
   {
-    // std::cout << "ad_shutdown" << std::endl;
+    std::cout << "ad_shutdown" << std::endl;
     t.get_io_service().dispatch([&t]()
     {
+      std::cout << "ad_shutdown dispatch 1" << std::endl;
+      
       if ( t.context().shutdown )
         return;
+      
+      std::cout << "ad_shutdown dispatch 2" << std::endl;
       t.socket().shutdown( boost::asio::socket_base::shutdown_receive);
-      // std::cout << "ad_shutdown dispatch" << std::endl;
+      std::cout << "ad_shutdown dispatch 3" << std::endl;
       size_t size  = t.get_aspect().template get<_writer_>().outgoing_size();
+      std::cout << "ad_shutdown dispatch 4" << std::endl;
       if ( size == 0)
       {
+        std::cout << "ad_shutdown dispatch 4.1" << std::endl;
         t.close();
       }
       else
       {
-        // std::cout << "t.context().shutdown == true" << std::endl;
+        std::cout << "ad_shutdown dispatch 4.2" << std::endl;
         t.context().shutdown = true;
       }
+      std::cout << "ad_shutdown dispatch 5" << std::endl;
     });
   }
 };
