@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wfc/inet/tags.hpp>
-#include <fas/aop/value.hpp>
+#include <fas/aop.hpp>
 
 namespace wfc{ namespace inet{
   

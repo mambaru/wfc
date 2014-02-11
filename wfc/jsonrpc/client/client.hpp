@@ -46,11 +46,11 @@ struct aspect: fas::aspect< fas::type_list_n<
 {};
 
 template<typename BaseContext = inet::empty_context>
-struct context_stream: inet::stream::stream_context<BaseContext>
+struct context_stream: inet::stream::context<BaseContext>
 {
   bool close_after_response;
   context_stream()
-    : inet::stream::stream_context<BaseContext>()
+    : inet::stream::context<BaseContext>()
     , close_after_response(false)
   {};
 };
@@ -60,7 +60,7 @@ struct aspect_stream_rn
   : fas::aspect<
       fas::advice< inet::_configurator_, client_tcp_configurator>, 
       inet::basic_context_t< context_stream >, 
-      inet::stream::aspect,
+      inet::stream::tcp::aspect,
       inet::rn::aspect,
       aspect,
       fas::alias< inet::stream::_incoming_, inet::rn::_input_        >,

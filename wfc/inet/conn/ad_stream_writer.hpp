@@ -5,54 +5,13 @@
 #include <wfc/callback/callback_owner.hpp>
 #include <fas/xtime.hpp>
 #include <wfc/inet/types.hpp>
+#include <wfc/memory.hpp>
+#include <wfc/inet/conn/tags.hpp>
+
 
 namespace wfc{ namespace inet{
   
-struct ad_send
-{
-  template<typename T>
-  size_t operator()(T& t, const data_type& d)
-  {
-    boost::system::error_code ec;
-    size_t bytes_transferred = t.socket().send( ::boost::asio::buffer(d.data(), d.size()), 0, ec);
-    // TODO: проверка на cancel
-    if (ec)
-    {
-      bytes_transferred = 0;
-      t.get_aspect().template get<_write_error_>()(t,  ec);
-      t.close();
-    }
-    else
-    {
-    }
-    
-    return bytes_transferred;
-  }
-};
-
-struct ad_send_to
-{
-  template<typename T>
-  size_t operator()(T& t, const data_type& d)
-  {
-    return 0;
-    boost::system::error_code ec;
-    size_t bytes_transferred = t.socket().send_to( ::boost::asio::buffer(d.data(), d.size()), t.remote_endpoint(), 0, ec);
-    // TODO: проверка на cancel
-    if (ec)
-    {
-      bytes_transferred = 0;
-      t.get_aspect().template get<_write_error_>()(t,  ec);
-      t.close();
-    }
-    else
-    {
-    }
-    
-    return bytes_transferred;
-  }
-};
-
+/*
 struct ad_async_send
 {
   template<typename T, typename F>
@@ -60,8 +19,9 @@ struct ad_async_send
   {
     t.socket().async_send( ::boost::asio::buffer( d.data(),  d.size() ), callback);
   }
-};
+};*/
 
+/*
 struct ad_async_send_to
 {
   template<typename T, typename F>
@@ -70,6 +30,7 @@ struct ad_async_send_to
     t.socket().async_send_to( ::boost::asio::buffer( d.data(), d.size() ), t.remote_endpoint(), callback);
   }
 };
+*/
 
 
 template<size_t BufferSize = 8096*2 >

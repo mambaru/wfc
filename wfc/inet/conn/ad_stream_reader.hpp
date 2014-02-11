@@ -11,6 +11,7 @@
 
 namespace wfc{ namespace inet{
 
+/*
 struct ad_async_receive
 {
   template<typename T, typename DataType, typename F>
@@ -22,7 +23,7 @@ struct ad_async_receive
     );
   }
 };
-
+*/
 
 template<size_t BufferSize = 8096*2 >
 struct ad_stream_reader
