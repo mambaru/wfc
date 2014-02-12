@@ -76,9 +76,11 @@ struct member_if;
 
 template<
   typename T, //target
-  typename M //member_type
+  typename M, //member_type
+  typename JT, //JSON type
+  typename VT //value type
 >
-struct member_custom;
+struct member_proxy;
 
 template<typename J>
 class serializerT;
@@ -327,11 +329,13 @@ struct member_if
 
 template<
   typename T, //target
-  typename M //member_type
+  typename M, //member_type
+  typename JT, //JSON type
+  typename VT //value type
 >
-struct member_custom
+struct member_proxy
 {
-  const char* operator()() const { return M().name(); }
+  const char* operator()() const { return M()(); }
 };
 
 
