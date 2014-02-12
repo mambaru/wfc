@@ -74,6 +74,12 @@ struct member_p;
 template<typename L, typename R, bool RU = true >
 struct member_if;
 
+template<
+  typename T, //target
+  typename M //member_type
+>
+struct member_custom;
+
 template<typename J>
 class serializerT;
 
@@ -317,6 +323,15 @@ public:
 template<typename L, typename R, bool RU >
 struct member_if
 {
+};
+
+template<
+  typename T, //target
+  typename M //member_type
+>
+struct member_custom
+{
+  const char* operator()() const { return M().name(); }
 };
 
 

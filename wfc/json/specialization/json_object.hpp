@@ -1,4 +1,6 @@
 
+#include <iostream>
+
 namespace wfc{ namespace json{
 
 /// ////////////////////////////////////////////////////////////
@@ -100,7 +102,7 @@ private:
   }
 
   template<typename P>
-  P serialize_members( const T& t, P end, fas::empty_list )
+  P serialize_members( const T&, P end, fas::empty_list )
   {
     return end;
   }
@@ -109,6 +111,16 @@ private:
   P serialize_member_name( const T& , P end, M memb )
   {
     const char* name = memb();
+    *(end++)='"';
+    for (;*name!='\0'; ++name) *(end++) = *name;
+    *(end++)='"';
+    *(end++) = ':';
+    return end;
+  }
+
+  template<typename P >
+  P serialize_member_name( const T& , P end, const char *name )
+  {
     *(end++)='"';
     for (;*name!='\0'; ++name) *(end++) = *name;
     *(end++)='"';
@@ -141,6 +153,14 @@ private:
     if ( !( _get_value(t, ML()) == typeL() ) )
       return serialize_member( t, end, ML() );
     return serialize_member( t, end, MR() );
+  }
+
+  template<typename P, typename M >
+  P serialize_member( const T& t, P end, const member_custom<T, M>& memb )
+  {
+    end = serialize_member_name(t, end, memb);
+    typedef typename M::json_type::serializer serializer;
+    return serializer()( t.get(M()), end );
   }
 
 private:
@@ -280,6 +300,20 @@ private:
       return beg;
     typedef typename member<N, G, M, m, W>::serializer serializer;
     return serializer()( memb.ref(t), beg, end);
+  }
+
+  template<typename P, typename M >
+  P unserialize_member( T& t, P beg, P end, member_custom<T, M> memb, bool& unserialized )
+  {
+    beg = unserialize_member_name(t, beg, end, memb, unserialized);
+    if ( !unserialized )
+      return beg;
+    typedef typename M::json_type::serializer serializer;
+    typedef typename M::value_type value_type;
+    value_type value = value_type();
+    beg = serializer()( value, beg, end);
+    t.set(M(), value);
+    return beg;
   }
 
   template<typename P, typename N, typename G, typename M, typename GT, typename W >
