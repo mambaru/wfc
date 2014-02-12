@@ -13,16 +13,16 @@
 namespace wfc{ namespace inet{ 
   
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
-class dgram_connection 
+class connection 
   : public connection_helper<A, AspectClass>::base_class
-  , public std::enable_shared_from_this< dgram_connection<A, AspectClass> >
-  , public iconnection
+  , public std::enable_shared_from_this< connection <A, AspectClass> >
+  //, public iconnection
 {
 public:
   typedef typename connection_helper<A, AspectClass>::base_class super;
-  typedef std::enable_shared_from_this< dgram_connection<A, AspectClass> > super_shared;
+  typedef std::enable_shared_from_this< connection <A, AspectClass> > super_shared;
   
-  typedef dgram_connection<A, AspectClass> self;
+  typedef connection <A, AspectClass> self;
   typedef self connection_type;
   typedef std::shared_ptr<connection_type> connection_ptr;
   typedef std::function<void( connection_ptr )> release_function;
@@ -41,15 +41,13 @@ public:
   typedef callback_owner<> owner_type;
   typedef owner_type::mutex_type  mutex_type;
 
-  ~dgram_connection()
+  ~connection ()
   {
-    std::cout << "~udp_connection_base() " << (_socket == nullptr) << std::endl;
     if ( _socket->is_open() )
       _socket->close();
-    std::cout << "~udp_connection_base()" << std::endl;
   }
  
-  dgram_connection(socket_ptr socket, release_function release)
+  connection (socket_ptr socket, release_function release)
     : _context()
     , _socket( socket )
     , _remote_endpoint(socket->remote_endpoint() )
@@ -59,7 +57,7 @@ public:
     _strand = std::make_unique<strand_type>(_socket->get_io_service());
   }
  
-  dgram_connection(socket_ptr socket, endpoint_type remote_endpoint, release_function release)
+  connection (socket_ptr socket, endpoint_type remote_endpoint, release_function release)
     : _context()
     , _socket( socket )
     , _remote_endpoint(remote_endpoint)
@@ -69,8 +67,8 @@ public:
     _strand = std::make_unique<strand_type>(_socket->get_io_service());
   }
   
-  dgram_connection(const dgram_connection&) = delete;
-  dgram_connection& operator=(const dgram_connection&) = delete;
+  connection(const connection&) = delete;
+  connection & operator=(const connection&) = delete;
   
   const endpoint_type& remote_endpoint() const
   {
@@ -87,13 +85,6 @@ public:
     return _context;
   }
 
-  /*
-  socket_ptr socket() const
-  {
-    return _socket;
-  }
-  */
-  
   socket_type& socket()
   {
     return *_socket;
@@ -104,13 +95,9 @@ public:
     return *_socket;
   }
   
-  
   io_service& get_io_service()
   {
-    
-    std::cout << "get_io_service() { " << std::endl;
     io_service& io =  _socket->get_io_service();
-    std::cout << "} get_io_service() " << std::endl;
     return io;
   }
   
@@ -141,6 +128,7 @@ public:
 
   void start()
   {
+    // TODO: dispatch
     {
       std::lock_guard<mutex_type> lk( this->mutex() );
       if ( !_closed )
@@ -165,25 +153,22 @@ public:
   
   virtual void on_read(data_ptr d)
   {
-    this->get_aspect().template get<_on_read_>()(*this, std::move(d) );
+    this->get_aspect().template getg<_on_read_>()(*this, d->begin(), d->end() );
+    this->get_aspect().template get<_incoming_>()(*this, std::move(d) );
+    /*
+     *
+    Отработка будет в одном из _on_read_
     if ( auto a = this->context().activity.lock() )
       a->update(this->shared_from_this());
+    */
   }
 
   virtual void close()
   {
-    /*
-    {
-      std::lock_guard<mutex_type> lk( this->mutex() );
-      if ( _closed )
-        return;
-      _closed = true;
-    }*/
-    
+    // TODOD: strand
     _socket->get_io_service().post([this]
     { 
       std::lock_guard<mutex_type> lk( this->mutex() );
-      std::cout << "POST CLOSE " << ( this->_socket == nullptr ) << std::endl;
       if ( !_closed )
       {
         _closed = true;
@@ -195,18 +180,13 @@ public:
 
   void shutdown()
   {
-    std::cout << "basic_connection::shutdown() {" << std::endl;
     this->get_aspect().template get<_shutdown_>()(*this);
-    std::cout << "} basic_connection::shutdown()" << std::endl;
-    //this->close();
   }
 
   void __release()
   {
-    std::cout << " void __release() 1" << std::endl;
     if ( this->_release!=nullptr)
     {
-      std::cout << " void __release() 2" << std::endl;
       _release( super_shared::shared_from_this() );
     }
   }

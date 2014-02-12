@@ -17,6 +17,7 @@ struct ad_on_write
     size_t size  = t.get_aspect().template get<_writer_>().outgoing_size();
     if ( limit!=0 && size>=limit)
     {
+      // TODO: перенести в адвайсы
       COMMON_LOG_WARNING(" Outgoing data size=" << size << "(outgoing_limit==" << limit << "). Сonnection will be closed!" )
       t.close();
     }

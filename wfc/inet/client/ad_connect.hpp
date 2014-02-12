@@ -33,7 +33,6 @@ struct ad_connect
     //t.get_aspect().template get<_connection_manager_>()->insert(conn);
     t.connection_manager()->insert(conn);
     conn->start();
-    
   }
 };
 

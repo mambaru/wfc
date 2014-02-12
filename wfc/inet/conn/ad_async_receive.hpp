@@ -16,6 +16,4 @@ struct ad_async_receive
   }
 };
 
-
-
 }}

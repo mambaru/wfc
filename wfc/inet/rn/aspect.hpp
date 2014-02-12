@@ -1,8 +1,8 @@
 #pragma once
 
-#include <wfc/inet/conn/ad_splitter.hpp>
-#include <wfc/inet/conn/ad_tailor.hpp>
-#include <wfc/inet/conn/ad_trimmer.hpp>
+#include <wfc/inet/rn/ad_splitter.hpp>
+#include <wfc/inet/rn/ad_tailor.hpp>
+#include <wfc/inet/rn/ad_trimmer.hpp>
 
 #include <wfc/inet/rn/rn.hpp>
 #include <wfc/inet/rn/tags.hpp>

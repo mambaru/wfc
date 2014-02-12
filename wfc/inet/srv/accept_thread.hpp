@@ -58,7 +58,7 @@ public:
               }
             );
             //pconn->context().activity = t.get_aspect().template get<_connection_manager_>();
-            pconn->context().activity = t.connection_manager();
+            //pconn->context().activity = t.connection_manager();
             pconn->start();
             
             //t.get_aspect().template get<_connection_manager_>()->insert(pconn);

@@ -96,7 +96,7 @@ struct ad_st_acceptor
               }
             );
             
-            pconn->context().activity = manager;
+            //pconn->context().activity = manager;
 
             /*
             std::shared_ptr<connection_type> pconn = std::make_shared<connection_type>();

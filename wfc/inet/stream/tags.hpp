@@ -5,7 +5,6 @@
 namespace wfc{ namespace inet{ namespace stream{
 
 struct _reader_;
-struct _incoming_;
 struct _outgoing_;
 struct _input_;
 struct _writer_;

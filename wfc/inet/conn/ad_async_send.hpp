@@ -12,7 +12,7 @@ struct ad_async_send
   void operator()(T& t, const data_type& d, F callback)
   {
     t.socket().async_send( 
-      ::boost::asio::buffer( d.data(),  d.size() ), 
+      ::boost::asio::buffer( d.data(), d.size() ), 
       t.strand().wrap(callback)
     );
   }

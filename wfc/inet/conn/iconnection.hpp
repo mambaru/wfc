@@ -5,6 +5,7 @@
 
 namespace wfc{ namespace inet{
   
+/*
 struct iconnection
 {
   virtual ~iconnection() {}
@@ -21,5 +22,6 @@ struct iconnection
 
   virtual void send(data_ptr d) = 0;  
 };
+*/
 
 }}

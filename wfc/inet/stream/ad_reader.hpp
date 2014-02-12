@@ -9,24 +9,10 @@
 #include <wfc/memory.hpp>
 
 
-namespace wfc{ namespace inet{
-
-/*
-struct ad_async_receive
-{
-  template<typename T, typename DataType, typename F>
-  void operator()(T& t, DataType& d, F callback)
-  {
-    t.socket().async_receive( 
-      ::boost::asio::buffer( d ), 
-      t.strand().wrap( callback )
-    );
-  }
-};
-*/
+namespace wfc{ namespace inet{ namespace stream{
 
 template<size_t BufferSize = 8096*2 >
-struct ad_stream_reader
+struct ad_reader
 {
   typedef std::vector<char> data_type;
   typedef std::unique_ptr<data_type> data_ptr;
@@ -57,19 +43,24 @@ struct ad_stream_reader
         }
         else if (!ec)
         {
+          /*
           if ( auto a = t.context().activity.lock() )
           {
-            std::cout << "stream reader update..." << std::endl;
             a->update(t.shared_from_this());
-            std::cout << "...stream reader updateed" << std::endl;
           }
           else
           {
-            std::cout << "stream reader no update" << std::endl;
           }
-          std::cout << "[[" << std::string(_data.begin(), _data.begin() + bytes_transferred) << "]" << std::endl;
-          t.get_aspect().template get<_on_read_>()
-            (t, std::make_unique<data_type>(_data.begin(), _data.begin() + bytes_transferred) );
+          */
+          /*
+          if ( auto activity = t.get_aspect().template get<_activity_>() )
+            activity();
+          */
+          
+          data_ptr data = std::make_unique<data_type>(_data.begin(), _data.begin() + bytes_transferred);
+          t.get_aspect().template getg<_on_read_>()(t, data->begin(), data->end() );
+          t.get_aspect().template get<_incoming_>()
+            (t,  std::move(data) );
             
           this->do_read(t);
         }
@@ -88,4 +79,4 @@ private:
   std::array<char, 8192*2> _data;
 };
 
-}}
+}}}

@@ -7,7 +7,7 @@
 
 #include <wfc/inet/echo/aspect_stream_rn.hpp>
 #include <wfc/inet/client/aspect_client_tcp.hpp>
-#include <wfc/inet/conn/dgram_connection.hpp>
+#include <wfc/inet/conn/connection.hpp>
 #include <fas/aop.hpp>
 
 
@@ -18,7 +18,7 @@ struct aspect_client_default
     connection_aspect< echo::aspect_stream_rn >,
     client_aspect< aspect_client_tcp >,
     connection_base_class< fas::aspect_class >,
-    connection_class< dgram_connection >
+    connection_class< connection >
   > 
 {
 };

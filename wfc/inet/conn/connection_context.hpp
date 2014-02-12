@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wfc/inet/srv/iactivity.hpp>
+//#include <wfc/inet/srv/iactivity.hpp>
 
 namespace wfc{ namespace inet{
 
@@ -12,7 +12,7 @@ template<typename Base = empty_context>
 struct connection_context: Base
 {
   bool enable_stat;
-  std::weak_ptr<iactivity> activity;
+  //std::weak_ptr<iactivity> activity;
   
   connection_context()
     : Base()

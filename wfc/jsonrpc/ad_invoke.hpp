@@ -63,6 +63,9 @@ struct f_invoke_request
       return;
     
     auto& handler = t.get_aspect().template get<Tg>();
+    
+    std::cout << "--->name=" << handler.name() << std::endl;
+    
     if (std::equal(req.method.first, req.method.second, handler.name()))
     {
       handler.invoke_request(t, ts, *req.id, req.params.first, req.params.second);
@@ -186,6 +189,7 @@ public:
   template<typename T>
   void operator() (T& t, data_ptr data)
   {
+    std::cout << std::string( data->begin(), data->end() ) << std::endl;
     auto beg = data->begin();
     auto end = data->end();
     beg = json::parser::parse_space(beg, end);

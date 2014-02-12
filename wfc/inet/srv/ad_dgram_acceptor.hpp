@@ -59,6 +59,7 @@ struct ad_dgram_acceptor
   template<typename T>
   void do_accept(T& t)
   {
+    //typedef typename T::connection_type connection_type;
     typedef typename T::connection_manager_type connection_manager_type;
     
     _acceptor->async_receive_from(
@@ -84,9 +85,9 @@ struct ad_dgram_acceptor
             typedef typename T::connection_type connection_type;
             //std::shared_ptr<connection_manager> manager = t.get_aspect().template get<_connection_manager_>();
             std::shared_ptr<connection_manager_type> manager = t.connection_manager();
-            std::shared_ptr<iconnection> iconn = manager->find( _sender_endpoint.address(), _sender_endpoint.port() );
+            std::shared_ptr<connection_type> conn = manager->find( _sender_endpoint.address(), _sender_endpoint.port() );
             
-            if ( iconn == nullptr )
+            if ( conn == nullptr )
             {
               std::cout << "NEW CONNECTION" << std::endl;
               std::shared_ptr<connection_type> pconn = t.create_connection( 
@@ -98,19 +99,19 @@ struct ad_dgram_acceptor
                   t.connection_manager()->erase(pconn);
                 }
               );
-              pconn->context().activity = manager;
+              //pconn->context().activity = manager;
               manager->insert(pconn, this->_sender_endpoint.address(), this->_sender_endpoint.port());
               pconn->start();
-              iconn = pconn;
+              conn = pconn;
             }
             else
               std::cout << "EXIST CONNECTION" << std::endl;
             
             
-            std::cout << "FOUNDED " << iconn->remote_port() << "(" << size_t( iconn.get() ) << ")"<< ": " << std::string(data->begin(), data->end()) << std::endl;
+            std::cout << "FOUNDED " << conn->remote_port() << "(" << size_t( conn.get() ) << ")"<< ": " << std::string(data->begin(), data->end()) << std::endl;
             
             //auto d = unique_unwrap(wdata);
-            iconn->on_read(std::move(data) );
+            conn->on_read(std::move(data) );
             std::cout << "}}} DGRAM RECV " << std::endl;
             
             

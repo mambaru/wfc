@@ -2,7 +2,7 @@
 
 #include <wfc/inet/types.hpp>
 
-namespace wfc{ namespace inet{
+namespace wfc{ namespace inet{ namespace rn{
 
 template<typename Tg, typename Str /*= rn*/>
 struct ad_tailor
@@ -28,4 +28,4 @@ private:
   data_ptr _data;
 };
 
-}}
+}}}

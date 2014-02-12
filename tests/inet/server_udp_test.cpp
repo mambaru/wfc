@@ -1,6 +1,6 @@
 #include <wfc/inet/server.hpp>
 #include <wfc/inet/echo/aspect_stream_rn.hpp>
-#include <wfc/inet/conn/dgram_connection.hpp>
+#include <wfc/inet/conn/connection.hpp>
 #include <boost/asio.hpp>
 #include <thread>
 #include <chrono>

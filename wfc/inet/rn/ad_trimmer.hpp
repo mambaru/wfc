@@ -2,7 +2,7 @@
 #include <wfc/inet/types.hpp>
 
 
-namespace wfc{ namespace inet{
+namespace wfc{ namespace inet{ namespace rn{
 
 template<typename Tg, typename N>
 struct ad_trimmer
@@ -18,4 +18,4 @@ struct ad_trimmer
   }
 };
 
-}}
+}}}

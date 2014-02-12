@@ -12,7 +12,11 @@ struct ad_send
   size_t operator()(T& t, const data_type& d)
   {
     boost::system::error_code ec;
-    size_t bytes_transferred = t.socket().send( ::boost::asio::buffer(d.data(), d.size()), 0, ec);
+    size_t bytes_transferred = t.socket().send( 
+      ::boost::asio::buffer(d.data(), d.size()), 
+      0, ec
+    );
+    
     // TODO: проверка на cancel
     if (ec)
     {

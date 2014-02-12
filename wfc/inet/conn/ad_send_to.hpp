@@ -13,7 +13,12 @@ struct ad_send_to
   {
     //return 0;
     boost::system::error_code ec;
-    size_t bytes_transferred = t.socket().send_to( ::boost::asio::buffer(d.data(), d.size()), t.remote_endpoint(), 0, ec);
+    size_t bytes_transferred = t.socket().send_to( 
+      ::boost::asio::buffer(d.data(), d.size()), 
+      t.remote_endpoint(), 
+      0, ec
+    );
+    
     // TODO: проверка на cancel
     if (ec)
     {
