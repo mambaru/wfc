@@ -5,7 +5,7 @@
 namespace wfc{ namespace inet{ namespace conn{
   
 template<typename A, template<typename> class AspectClass >
-struct connection_helper
+struct helper
 {
   typedef typename fas::aspect_class< A >::aspect original_aspect;
   typedef typename original_aspect::template advice_cast<_context_>::type original_context;

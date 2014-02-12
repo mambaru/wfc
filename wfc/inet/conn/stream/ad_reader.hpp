@@ -28,6 +28,9 @@ struct ad_reader
   template<typename T>
   void do_read(T& t)
   {
+    // а нужно ли если все через strand
+    // надо, в очереди после close может быть еще 
+    // вынести wk в _async_receive_ или strand_dispatch
     typename T::owner_type::weak_type wk = t.owner().alive();
     /*t.socket().async_receive(
       ::boost::asio::buffer(_data),

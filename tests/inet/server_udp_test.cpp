@@ -1,5 +1,5 @@
 #include <wfc/inet/server.hpp>
-#include <wfc/inet/conn/echo/aspect_stream_rn.hpp>
+#include <wfc/inet/conn/echo/rn/stream/udp/aspect.hpp>
 #include <wfc/inet/connection.hpp>
 #include <boost/asio.hpp>
 #include <thread>
@@ -24,7 +24,7 @@ struct connection_aspect: fas::aspect<
 
 struct common_aspect: 
   fas::aspect< 
-    wfc::inet::connection_aspect< wfc::inet::conn::echo::aspect_dgram_rn >,
+    wfc::inet::connection_aspect< wfc::inet::conn::echo::rn::stream::udp::aspect/*wfc::inet::conn::echo::aspect_dgram_rn*/ >,
     wfc::inet::server_aspect< wfc::inet::aspect_server_udp >/*,
     wfc::inet::connection< wfc::inet::dgram_connection >*/
   > 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <wfc/inet/conn/iconnection.hpp>
 #include <wfc/memory.hpp>
 #include <boost/asio.hpp>
 #include <set>

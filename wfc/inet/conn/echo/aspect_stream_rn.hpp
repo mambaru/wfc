@@ -6,7 +6,7 @@
 #include <wfc/inet/conn/connection_context.hpp>
 
 namespace wfc{ namespace inet{ namespace conn{ namespace echo{
-
+/*
 struct aspect_stream_rn: fas::aspect<
   stream::tcp::aspect,
   rn::aspect,
@@ -22,5 +22,5 @@ struct aspect_dgram_rn: fas::aspect<
   fas::alias<rn::_output_, stream::_outgoing_>,
   fas::alias<rn::_incoming_, rn::_outgoing_>
 >{};
-
+*/
 }}}}

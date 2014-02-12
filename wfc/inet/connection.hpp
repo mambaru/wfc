@@ -5,8 +5,7 @@
 #include <iostream>
 #include <list>
 #include <wfc/callback/callback_owner.hpp>
-#include <wfc/inet/conn/iconnection.hpp>
-#include <wfc/inet/conn/connection_helper.hpp>
+#include <wfc/inet/conn/helper.hpp>
 #include <wfc/inet/types.hpp>
 #include <wfc/io_service.hpp>
 
@@ -14,12 +13,12 @@ namespace wfc{ namespace inet{
   
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class connection 
-  : public conn::connection_helper<A, AspectClass>::base_class
+  : public conn::helper<A, AspectClass>::base_class
   , public std::enable_shared_from_this< connection <A, AspectClass> >
   //, public iconnection
 {
 public:
-  typedef typename conn::connection_helper<A, AspectClass>::base_class super;
+  typedef typename conn::helper<A, AspectClass>::base_class super;
   typedef std::enable_shared_from_this< connection <A, AspectClass> > super_shared;
   
   typedef connection <A, AspectClass> self;
@@ -126,8 +125,31 @@ public:
     return _owner;
   }
 
+  template<typename F>
+  void strand_dispatch(F f)
+  {
+    this->_socket->get_io_service().dispatch(this->_strand->wrap( f ));
+  }
+
+  template<typename F>
+  void strand_post(F f)
+  {
+    this->_socket->get_io_service().post(this->_strand->wrap( f ));
+  }
+
   void start()
   {
+    //this->get_io_service().dispatch( this->strand().wrap([this]
+    this->strand_dispatch([this]()
+    {
+      if ( !_closed )
+        return;
+      _closed = false;
+      this->get_aspect().template getg<_startup_>()( *this, fas::tag<_startup_>() );
+      this->get_aspect().template get<_start_>()(*this, fas::tag<_start_>() );
+      
+    });
+    /*
     // TODO: dispatch
     {
       std::lock_guard<mutex_type> lk( this->mutex() );
@@ -138,23 +160,35 @@ public:
     
     this->get_aspect().template getg<_startup_>()( *this, fas::tag<_startup_>() );
     this->get_aspect().template get<_start_>()(*this, fas::tag<_start_>() );
+    */
   }
   
   
-  virtual boost::asio::ip::address remote_address()
+  boost::asio::ip::address remote_address()
   {
     return _remote_endpoint.address();
   }
   
-  virtual unsigned short remote_port()
+  unsigned short remote_port()
   {
     return _remote_endpoint.port();
   }
   
-  virtual void on_read(data_ptr d)
+  void on_read(data_ptr d)
   {
-    this->get_aspect().template getg<conn::_on_read_>()(*this, d->begin(), d->end() );
-    this->get_aspect().template get<conn::_incoming_>()(*this, std::move(d) );
+    //this->get_io_service().dispatch( this->strand().wrap([this]
+    std::cout << "1-------------> " << (d == nullptr) <<  std::endl;
+    //auto wd = wfc::unique_wrap(std::move(d), "on_read");
+    auto pd = std::make_shared<data_ptr>( std::move(d));
+    std::cout << "2-------------> " << std::endl;
+    this->strand_dispatch([this, pd]()
+    {
+      std::cout << "3-------------> " << std::endl;
+      data_ptr d = std::move(*pd);
+      std::cout << "4-------------> " << (d == nullptr) <<  std::endl;
+      this->get_aspect().template getg<conn::_on_read_>()(*this, d->begin(), d->end() );
+      this->get_aspect().template get<conn::_incoming_>()(*this, std::move(d) );
+    });
     /*
      *
     Отработка будет в одном из _on_read_
@@ -163,12 +197,14 @@ public:
     */
   }
 
-  virtual void close()
+  void close()
   {
     // TODOD: strand
-    _socket->get_io_service().post([this]
-    { 
-      std::lock_guard<mutex_type> lk( this->mutex() );
+    // _socket->get_io_service().post([this]
+    //this->get_io_service().post( this->strand().wrap([this]
+    this->strand_post([this]()
+    {
+      //std::lock_guard<mutex_type> lk( this->mutex() );
       if ( !_closed )
       {
         _closed = true;
@@ -180,7 +216,11 @@ public:
 
   void shutdown()
   {
-    this->get_aspect().template get<conn::_shutdown_>()(*this);
+    //this->get_io_service().dispatch( this->strand().wrap([this]
+    this->strand_dispatch([this]()
+    {
+      this->get_aspect().template get<conn::_shutdown_>()(*this);
+    });
   }
 
   void __release()
@@ -193,7 +233,14 @@ public:
   
   void send(data_ptr d)
   {
-    this->get_aspect().template get<conn::_write_>()(*this, std::move(d) );
+    //auto wd = wfc::unique_wrap(std::move(d));
+    auto pd = std::make_shared<data_ptr>(std::move(d));
+    //this->get_io_service().dispatch( this->strand().wrap([this]
+    this->strand_dispatch([this, pd]()
+    {
+      // this->get_aspect().template get<conn::_write_>()(*this, wfc::unique_unwrap(wd));
+      this->get_aspect().template get<conn::_write_>()(*this, std::move(*pd));
+    });
   }
 
 private:
@@ -203,7 +250,8 @@ private:
   strand_ptr _strand;
   release_function _release;
   owner_type _owner;
-  std::atomic<bool> _closed;
+  //std::atomic<bool> _closed;
+  bool _closed;
 };
 
 }}

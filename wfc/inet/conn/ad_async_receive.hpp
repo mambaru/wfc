@@ -11,7 +11,7 @@ struct ad_async_receive
   {
     t.socket().async_receive( 
       ::boost::asio::buffer( d ), 
-      t.strand().wrap( callback )
+      /*t.strand().wrap(*/ callback /*)*/
     );
   }
 };

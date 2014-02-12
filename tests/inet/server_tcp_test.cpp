@@ -185,7 +185,8 @@ struct client_common_aspect:
     wfc::inet::connection_aspect< 
       fas::merge_aspect<
         test_aspect,
-        wfc::inet::conn::echo::aspect_stream_rn 
+        wfc::inet::conn::echo::rn::stream::tcp::aspect
+        /*wfc::inet::conn::echo::aspect_stream_rn */
       >::type
     >
   > 

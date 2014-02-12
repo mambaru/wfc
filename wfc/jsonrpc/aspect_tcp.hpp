@@ -5,16 +5,16 @@
 #include <wfc/inet/conn/stream/tcp/aspect.hpp>
 #include <wfc/inet/conn/rn/aspect.hpp>
 #include <wfc/inet/context.hpp>
-#include <wfc/inet/conn/connection_context.hpp>
+#include <wfc/inet/conn/stream/basic_context.hpp>
 
 namespace wfc{ namespace jsonrpc{
   
 template<typename BaseContext = inet::conn::empty_context>
-struct context_stream: inet::conn::stream::context<BaseContext>
+struct context_stream: inet::conn::stream::basic_context<BaseContext>
 {
   bool close_after_response;
   context_stream()
-    : inet::conn::stream::context<BaseContext>()
+    : inet::conn::stream::basic_context<BaseContext>()
     , close_after_response(false)
   {};
 };
@@ -35,7 +35,7 @@ template<typename ...Args>
 struct aspect_stream
   : fas::aspect<
       typename fas::type_list_n<Args...>::type,
-      inet::basic_context_t< context_stream >, 
+      inet::basic_context_class< context_stream >, 
       inet::conn::stream::tcp::aspect,
       inet::conn::rn::aspect,
       aspect,

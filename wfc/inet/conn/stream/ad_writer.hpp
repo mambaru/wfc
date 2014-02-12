@@ -29,10 +29,15 @@ struct ad_writer
   void operator()(T& t, data_ptr d)
   {
     _outgoing_size += d->size();
-    auto capt = unique_wrap( std::move(d) );
-    t.socket().get_io_service().dispatch([this, &t, capt]() {
-      this->dispatch(t, unique_unwrap(capt) );
+    this->dispatch(t, std::move(d) );
+    /*
+    //auto capt = unique_wrap( std::move(d), "ad_writer" );
+    auto pd = std::make_shared<data_ptr>( std::move(d) );
+    t.socket().get_io_service().dispatch([this, &t, pd]() {
+      //this->dispatch(t, unique_unwrap(capt) );
+      this->dispatch(t, std::move(*pd) );
     });
+    */
   }
   
   size_t outgoing_size() const

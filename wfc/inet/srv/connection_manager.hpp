@@ -1,7 +1,5 @@
 #pragma once
 
-#include <wfc/inet/conn/iconnection.hpp>
-#include <wfc/inet/srv/iactivity.hpp>
 
 #include <set>
 #include <mutex>

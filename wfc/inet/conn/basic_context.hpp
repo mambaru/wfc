@@ -9,12 +9,12 @@ struct empty_context
 };
 
 template<typename Base = empty_context>
-struct connection_context: Base
+struct basic_context: Base
 {
   bool enable_stat;
   //std::weak_ptr<iactivity> activity;
   
-  connection_context()
+  basic_context()
     : Base()
     , enable_stat(false)
   {}

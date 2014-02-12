@@ -8,8 +8,8 @@
 #include <wfc/inet/conn/stream/ad_writer.hpp>
 #include <wfc/inet/conn/stream/ad_on_write.hpp>
 #include <wfc/inet/conn/stream/ad_shutdown.hpp>
-#include <wfc/inet/conn/connection_context.hpp>
-#include <wfc/inet/conn/stream/context.hpp>
+#include <wfc/inet/conn/basic_context.hpp>
+#include <wfc/inet/conn/stream/basic_context.hpp>
 
 #include <functional>
 
@@ -20,7 +20,7 @@ namespace wfc{ namespace inet{ namespace conn{ namespace stream{
 struct aspect: fas::aspect
 < 
   ::wfc::inet::context<empty_context>,
-  basic_context_t<context>, 
+  basic_context_class<basic_context>, 
   fas::advice<_start_,    ad_connection_start<_reader_> >,
   fas::advice<_do_active_, ad_do_active>,
   fas::group<_on_read_,   _do_active_ >,
