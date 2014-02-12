@@ -145,8 +145,8 @@ private:
     return serialize_member( t, end, MR() );
   }
 
-  template<typename P, typename M, typename JT, typename VT >
-  P serialize_member( const T& t, P end, const member_proxy<T, M, JT, VT>& memb )
+  template<typename P, typename N, typename M, typename JT, typename VT >
+  P serialize_member( const T& t, P end, const member_proxy<N, T, M, JT, VT>& memb )
   {
     end = serialize_member_name(t, end, memb);
     typedef typename JT::serializer serializer;
@@ -292,8 +292,8 @@ private:
     return serializer()( memb.ref(t), beg, end);
   }
 
-  template<typename P, typename M, typename JT, typename VT >
-  P unserialize_member( T& t, P beg, P end, member_proxy<T, M, JT, VT> memb, bool& unserialized )
+  template<typename P, typename N, typename M, typename JT, typename VT >
+  P unserialize_member( T& t, P beg, P end, member_proxy<N, T, M, JT, VT> memb, bool& unserialized )
   {
     beg = unserialize_member_name(t, beg, end, memb, unserialized);
     if ( !unserialized )
