@@ -9,7 +9,7 @@
 #include <wfc/memory.hpp>
 
 
-namespace wfc{ namespace inet{ namespace stream{
+namespace wfc{ namespace inet{ namespace conn{ namespace stream{
 
 template<size_t BufferSize = 8096*2 >
 struct ad_reader
@@ -79,4 +79,4 @@ private:
   std::array<char, 8192*2> _data;
 };
 
-}}}
+}}}}

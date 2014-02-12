@@ -1,10 +1,10 @@
 #pragma once
 
-#include <wfc/inet/stream/tags.hpp>
+#include <wfc/inet/conn/stream/tags.hpp>
 #include <wfc/logger.hpp>
 
 
-namespace wfc{ namespace inet{ namespace stream{
+namespace wfc{ namespace inet{ namespace conn{ namespace stream{
 
 struct ad_on_write
 {
@@ -35,5 +35,4 @@ struct ad_on_write
   }
 };
 
-
-}}}
+}}}}

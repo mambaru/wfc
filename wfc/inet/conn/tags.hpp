@@ -1,6 +1,6 @@
 #pragma once
 
-namespace wfc{ namespace inet{
+namespace wfc{ namespace inet{ namespace conn{
 
 // connection
 struct _write_;
@@ -22,4 +22,4 @@ struct _shutdown_;
 struct _activity_;
 struct _do_active_;
 
-}}
+}}}

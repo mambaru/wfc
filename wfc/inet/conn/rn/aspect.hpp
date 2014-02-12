@@ -1,14 +1,14 @@
 #pragma once
 
-#include <wfc/inet/rn/ad_splitter.hpp>
-#include <wfc/inet/rn/ad_tailor.hpp>
-#include <wfc/inet/rn/ad_trimmer.hpp>
+#include <wfc/inet/conn/rn/ad_splitter.hpp>
+#include <wfc/inet/conn/rn/ad_tailor.hpp>
+#include <wfc/inet/conn/rn/ad_trimmer.hpp>
 
-#include <wfc/inet/rn/rn.hpp>
-#include <wfc/inet/rn/tags.hpp>
+#include <wfc/inet/conn/rn/rn.hpp>
+#include <wfc/inet/conn/rn/tags.hpp>
 #include <fas/aop.hpp>
 
-namespace wfc{ namespace inet{ namespace rn{
+namespace wfc{ namespace inet{ namespace conn{ namespace rn{
 
     /*
 
@@ -36,4 +36,4 @@ struct aspect: fas::aspect< fas::type_list_n<
 >::type >
 {};
 
-}}}
+}}}}

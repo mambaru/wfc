@@ -4,16 +4,16 @@
 #include <wfc/inet/conn/ad_connection_start.hpp>
 #include <wfc/inet/conn/ad_do_active.hpp>
 #include <wfc/inet/conn/tags.hpp>
-#include <wfc/inet/stream/ad_outgoing.hpp>
-#include <wfc/inet/stream/ad_writer.hpp>
-#include <wfc/inet/stream/ad_on_write.hpp>
-#include <wfc/inet/stream/ad_shutdown.hpp>
+#include <wfc/inet/conn/stream/ad_outgoing.hpp>
+#include <wfc/inet/conn/stream/ad_writer.hpp>
+#include <wfc/inet/conn/stream/ad_on_write.hpp>
+#include <wfc/inet/conn/stream/ad_shutdown.hpp>
 #include <wfc/inet/conn/connection_context.hpp>
-#include <wfc/inet/stream/context.hpp>
+#include <wfc/inet/conn/stream/context.hpp>
 
 #include <functional>
 
-namespace wfc{ namespace inet{ namespace stream{
+namespace wfc{ namespace inet{ namespace conn{ namespace stream{
 
 
 // Перенести часть в connection
@@ -38,4 +38,4 @@ struct aspect: fas::aspect
 >
 {};
 
-}}}
+}}}}

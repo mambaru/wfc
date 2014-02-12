@@ -3,7 +3,7 @@
 #include <fas/aop/tag.hpp>
 
 
-namespace wfc{ namespace inet{
+namespace wfc{ namespace inet{ namespace conn{
 
 template<typename Tg>
 struct ad_connection_start
@@ -15,4 +15,4 @@ struct ad_connection_start
   }
 };
 
-}}
+}}}

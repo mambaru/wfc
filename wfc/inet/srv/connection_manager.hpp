@@ -197,7 +197,7 @@ public:
   bool insert(connection_ptr conn, address_type addr, port_type port)
   {
     std::cout << "void insert(connection_ptr conn) " << size_t(conn.get()) << std::endl;
-    conn->get_aspect().template get<_activity_>()=[this, conn]()
+    conn->get_aspect().template get< conn::_activity_>()=[this, conn]()
     {
       this->update2(conn); 
     };
@@ -210,7 +210,7 @@ public:
   bool insert(connection_ptr conn)
   {
     std::cout << "void insert(connection_ptr conn)" << size_t(conn.get()) << std::endl;
-    conn->get_aspect().template get<_activity_>()=[this, conn]()
+    conn->get_aspect().template get<conn::_activity_>()=[this, conn]()
     {
       this->update2(conn); 
     };

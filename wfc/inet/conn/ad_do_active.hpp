@@ -2,7 +2,7 @@
 
 #include <wfc/inet/conn/tags.hpp>
 
-namespace wfc{ namespace inet{
+namespace wfc{ namespace inet{ namespace conn{
 
 struct ad_do_active
 {
@@ -14,4 +14,4 @@ struct ad_do_active
   }
 };
 
-}}
+}}}

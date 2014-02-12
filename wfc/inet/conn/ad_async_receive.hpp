@@ -2,7 +2,7 @@
 #include <boost/asio.hpp>
 
 
-namespace wfc{ namespace inet{
+namespace wfc{ namespace inet{ namespace conn{
 
 struct ad_async_receive
 {
@@ -16,4 +16,4 @@ struct ad_async_receive
   }
 };
 
-}}
+}}}

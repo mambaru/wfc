@@ -2,7 +2,7 @@
 
 //#include <wfc/inet/srv/iactivity.hpp>
 
-namespace wfc{ namespace inet{
+namespace wfc{ namespace inet{ namespace conn{
 
 struct empty_context
 {
@@ -20,4 +20,4 @@ struct connection_context: Base
   {}
 };
 
-}}
+}}}

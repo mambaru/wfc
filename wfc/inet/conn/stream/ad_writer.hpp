@@ -9,7 +9,7 @@
 #include <wfc/inet/conn/tags.hpp>
 
 
-namespace wfc{ namespace inet{ namespace stream{
+namespace wfc{ namespace inet{ namespace conn{ namespace stream{
   
 template<size_t BufferSize = 8096*2 >
 struct ad_writer
@@ -141,4 +141,4 @@ private:
   data_list_type _data_list;
 };
 
-}}}
+}}}}

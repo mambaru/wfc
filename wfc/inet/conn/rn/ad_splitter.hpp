@@ -4,7 +4,7 @@
 #include <memory>
 #include <wfc/memory.hpp>
 
-namespace wfc{ namespace inet{ namespace rn{
+namespace wfc{ namespace inet{ namespace conn{ namespace rn{
 
 template<typename Tg, typename Str>
 struct ad_splitter
@@ -125,4 +125,4 @@ private:
   data_ptr _data;
 };
 
-}}}
+}}}}

@@ -4,7 +4,7 @@
 #include <wfc/inet/conn/tags.hpp>
 #include <boost/asio.hpp>
 
-namespace wfc{ namespace inet{
+namespace wfc{ namespace inet{ namespace conn{
   
 struct ad_async_send
 {
@@ -18,5 +18,4 @@ struct ad_async_send
   }
 };
 
-
-}}
+}}}

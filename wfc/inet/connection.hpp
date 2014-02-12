@@ -14,12 +14,12 @@ namespace wfc{ namespace inet{
   
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class connection 
-  : public connection_helper<A, AspectClass>::base_class
+  : public conn::connection_helper<A, AspectClass>::base_class
   , public std::enable_shared_from_this< connection <A, AspectClass> >
   //, public iconnection
 {
 public:
-  typedef typename connection_helper<A, AspectClass>::base_class super;
+  typedef typename conn::connection_helper<A, AspectClass>::base_class super;
   typedef std::enable_shared_from_this< connection <A, AspectClass> > super_shared;
   
   typedef connection <A, AspectClass> self;
@@ -153,8 +153,8 @@ public:
   
   virtual void on_read(data_ptr d)
   {
-    this->get_aspect().template getg<_on_read_>()(*this, d->begin(), d->end() );
-    this->get_aspect().template get<_incoming_>()(*this, std::move(d) );
+    this->get_aspect().template getg<conn::_on_read_>()(*this, d->begin(), d->end() );
+    this->get_aspect().template get<conn::_incoming_>()(*this, std::move(d) );
     /*
      *
     Отработка будет в одном из _on_read_
@@ -180,7 +180,7 @@ public:
 
   void shutdown()
   {
-    this->get_aspect().template get<_shutdown_>()(*this);
+    this->get_aspect().template get<conn::_shutdown_>()(*this);
   }
 
   void __release()
@@ -193,7 +193,7 @@ public:
   
   void send(data_ptr d)
   {
-    this->get_aspect().template get<_write_>()(*this, std::move(d) );
+    this->get_aspect().template get<conn::_write_>()(*this, std::move(d) );
   }
 
 private:

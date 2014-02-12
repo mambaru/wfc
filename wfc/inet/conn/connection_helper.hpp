@@ -2,7 +2,7 @@
 #include <fas/aop.hpp>
 #include <wfc/inet/conn/tags.hpp>
 
-namespace wfc{ namespace inet{ 
+namespace wfc{ namespace inet{ namespace conn{
   
 template<typename A, template<typename> class AspectClass >
 struct connection_helper
@@ -17,4 +17,4 @@ struct connection_helper
   typedef AspectClass<new_aspect> base_class;
 };
 
-}}
+}}}

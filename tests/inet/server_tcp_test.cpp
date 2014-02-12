@@ -1,5 +1,6 @@
 #include <wfc/inet/server.hpp>
-#include <wfc/inet/echo/aspect_stream_rn.hpp>
+//#include <wfc/inet/conn/echo/aspect_stream_rn.hpp>
+#include <wfc/inet/conn/echo/rn/stream/tcp/aspect.hpp>
 #include <wfc/inet/client/aspect_client_tcp.hpp>
 #include <wfc/inet/client/aspect_client_default.hpp>
 #include <wfc/inet/client/client_aspect.hpp>
@@ -26,7 +27,7 @@ namespace wfc{ namespace inet{
 
 struct common_aspect: 
   fas::aspect< 
-    wfc::inet::connection_aspect< wfc::inet::echo::aspect_stream_rn >
+    wfc::inet::connection_aspect< wfc::inet::conn::echo::rn::stream::tcp::aspect >
   > 
 {
 };
@@ -176,7 +177,7 @@ struct test_context
 
 struct test_aspect: fas::aspect<
   wfc::inet::context<test_context>,
-  fas::advice< wfc::inet::rn::_incoming_, ad_test >
+  fas::advice< wfc::inet::conn::rn::_incoming_, ad_test >
 >{};
 
 struct client_common_aspect: 
@@ -184,7 +185,7 @@ struct client_common_aspect:
     wfc::inet::connection_aspect< 
       fas::merge_aspect<
         test_aspect,
-        wfc::inet::echo::aspect_stream_rn 
+        wfc::inet::conn::echo::aspect_stream_rn 
       >::type
     >
   > 
@@ -273,7 +274,7 @@ int main(int argc, char */*argv*/[])
 // BUG:
 // TODO:
   // config.listen_threads = 3;
-  config.worker_threads = 3;
+  config.worker_threads = 0;
   srv.server_context(config);
   srv.start();
   if ( argc==1)
@@ -289,6 +290,8 @@ int main(int argc, char */*argv*/[])
     client_test2();
     */
   }
+  else
+    receiver_count = 1;
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
   //for (;;)
   std::cout << "run" << std::endl;

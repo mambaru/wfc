@@ -2,7 +2,7 @@
 
 #include <wfc/inet/conn/connection_context.hpp>
 
-namespace wfc{ namespace inet{ namespace stream{
+namespace wfc{ namespace inet{ namespace conn{ namespace stream{
 
 
 template<typename Base = empty_context>
@@ -19,4 +19,4 @@ struct context: connection_context<Base>
   {}
 };
 
-}}}
+}}}}

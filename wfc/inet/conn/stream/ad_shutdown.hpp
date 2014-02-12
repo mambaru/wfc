@@ -1,9 +1,9 @@
 #pragma once
 
-#include <wfc/inet/stream/tags.hpp>
+#include <wfc/inet/conn/stream/tags.hpp>
 #include <boost/asio.hpp>
 
-namespace wfc{ namespace inet{ namespace stream{
+namespace wfc{ namespace inet{ namespace conn{ namespace stream{
 
 struct ad_shutdown
 {
@@ -28,4 +28,4 @@ struct ad_shutdown
   }
 };
 
-}}}
+}}}}

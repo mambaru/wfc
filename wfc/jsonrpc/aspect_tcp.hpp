@@ -2,19 +2,19 @@
 
 #include <wfc/jsonrpc/aspect.hpp>
 
-#include <wfc/inet/stream/tcp/aspect.hpp>
-#include <wfc/inet/rn/aspect.hpp>
+#include <wfc/inet/conn/stream/tcp/aspect.hpp>
+#include <wfc/inet/conn/rn/aspect.hpp>
 #include <wfc/inet/context.hpp>
 #include <wfc/inet/conn/connection_context.hpp>
 
 namespace wfc{ namespace jsonrpc{
   
-template<typename BaseContext = inet::empty_context>
-struct context_stream: inet::stream::context<BaseContext>
+template<typename BaseContext = inet::conn::empty_context>
+struct context_stream: inet::conn::stream::context<BaseContext>
 {
   bool close_after_response;
   context_stream()
-    : inet::stream::context<BaseContext>()
+    : inet::conn::stream::context<BaseContext>()
     , close_after_response(false)
   {};
 };
@@ -36,14 +36,14 @@ struct aspect_stream
   : fas::aspect<
       typename fas::type_list_n<Args...>::type,
       inet::basic_context_t< context_stream >, 
-      inet::stream::tcp::aspect,
-      inet::rn::aspect,
+      inet::conn::stream::tcp::aspect,
+      inet::conn::rn::aspect,
       aspect,
-      fas::alias< inet::_incoming_, inet::rn::_input_        >,
-      fas::alias< inet::rn::_output_,       inet::stream::_outgoing_ >,
-      fas::alias< inet::rn::_incoming_,     jsonrpc::_input_   >,
+      fas::alias< inet::conn::_incoming_, inet::conn::rn::_input_        >,
+      fas::alias< inet::conn::rn::_output_,       inet::conn::stream::_outgoing_ >,
+      fas::alias< inet::conn::rn::_incoming_,     jsonrpc::_input_   >,
       fas::advice< _write_ , ad_stream_write>,
-      fas::alias< _output_, inet::rn::_outgoing_ >
+      fas::alias< _output_, inet::conn::rn::_outgoing_ >
   >
 {};
 
