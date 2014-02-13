@@ -1,5 +1,4 @@
 
-#include <iostream>
 
 namespace wfc{ namespace json{
 
