@@ -24,10 +24,24 @@ namespace wfc{ namespace inet{
 
 }}
 
+struct ad_close_after
+{
+  template<typename T>
+  void operator() ( T& t, wfc::inet::data_ptr d)
+  {
+    t.get_aspect().template get< wfc::inet::conn::rn::_outgoing_>()(t, std::move(d) );
+    t.shutdown();
+  }
+};
 
 struct common_aspect: 
   fas::aspect< 
-    wfc::inet::connection_aspect< wfc::inet::conn::echo::rn::stream::tcp::aspect >
+    
+    wfc::inet::connection_aspect< fas::aspect<
+      fas::advice< wfc::inet::conn::rn::_incoming_, ad_close_after>,
+      wfc::inet::conn::echo::rn::stream::tcp::aspect 
+      >
+    >
   > 
 {
 };
@@ -275,7 +289,7 @@ int main(int argc, char */*argv*/[])
 // BUG:
 // TODO:
   config.listen_threads = 0;
-  config.worker_threads = 10;
+  config.worker_threads = 0;
   srv.server_context(config);
   srv.start();
   if ( argc==1)

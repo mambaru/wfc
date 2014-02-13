@@ -211,9 +211,12 @@ public:
 
   void erase(connection_ptr conn)
   {
-    
     std::lock_guard<mutex_type> lk(_mutex);
+    std::cout << "erase0 " << conn.use_count() << std::endl;
+    conn->get_aspect().template get<conn::_activity_>() = nullptr; // Ахтунг, lambda захватывает pconn
+    std::cout << "erase1 " << conn.use_count() << std::endl;
     this->erase( this->find_by_conn(conn) );
+    std::cout << "erase2 " << conn.use_count()  << " " << _wait_list.size() << " " << _by_ts.size() << std::endl;
     
   }
   

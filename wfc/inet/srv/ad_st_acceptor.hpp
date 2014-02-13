@@ -89,12 +89,14 @@ struct ad_st_acceptor
               sock, 
               [&t](std::shared_ptr<connection_type> pconn)->void
               {
-                
                 t.connection_manager()->erase(pconn);
               }
             );
+            std::cout <<  "pconn->start() " << pconn.use_count() <<  std::endl;
             manager->insert(pconn);
+            std::cout <<  "pconn->start() " << pconn.use_count() <<  std::endl;
             pconn->start();
+            std::cout <<  "pconn->start() " << pconn.use_count() <<  std::endl;
           });
         }
         else

@@ -15,6 +15,7 @@ struct ad_new_connection
 
     std::shared_ptr<connection_type> pconn = t.create_connection(
       sock, 
+      // relaise function
       [this, &t](std::shared_ptr<connection_type> pconn)->void
       {
         t.connection_manager()->erase(pconn);

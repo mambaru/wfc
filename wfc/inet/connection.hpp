@@ -42,6 +42,7 @@ public:
 
   ~connection ()
   {
+    std::cout << "~connection ()" << std::endl; 
     if ( _socket->is_open() )
       _socket->close();
   }
@@ -199,6 +200,7 @@ public:
 
   void close()
   {
+    std::cout << "close " << _closed << " " << size_t(_socket.get()) << std::endl; 
     // TODOD: strand
     // _socket->get_io_service().post([this]
     //this->get_io_service().post( this->strand().wrap([this]
@@ -210,7 +212,7 @@ public:
         _closed = true;
         this->__release(); 
       }
-      this->_socket = nullptr;
+      // this->_socket = nullptr;
     });
   }
 
@@ -227,7 +229,9 @@ public:
   {
     if ( this->_release!=nullptr)
     {
-      _release( super_shared::shared_from_this() );
+      auto tmp = super_shared::shared_from_this();
+      _release( tmp );
+      std::cout << "__release() " <<  tmp.use_count() << std::endl;
     }
   }
   
