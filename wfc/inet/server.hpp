@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wfc/inet/srv/server_helper.hpp>
+#include <wfc/inet/srv/tmp/server_helper.hpp>
 #include <wfc/inet/server_config.hpp>
 #include <wfc/core/global.hpp>
 #include <wfc/io_service.hpp>
@@ -24,6 +24,7 @@ public:
   
   typedef typename helper::config_type config_type;
   typedef typename helper::socket_type socket_type;
+  typedef typename helper::acceptor_type acceptor_type;
   
   typedef typename helper::connection_manager_type connection_manager_type;
 public:

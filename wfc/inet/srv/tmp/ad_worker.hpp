@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wfc/inet/srv/work_thread.hpp>
+#include <wfc/inet/srv/tmp/work_thread.hpp>
 #include <wfc/thread/rwlock.hpp>
 #include <boost/asio.hpp>
 #include <functional>

@@ -7,15 +7,15 @@
 
 #include <wfc/inet/context.hpp>
 #include <wfc/inet/server_tcp_config.hpp>
-#include <wfc/inet/srv/server_tcp_context.hpp>
-#include <wfc/inet/srv/ad_worker.hpp>
-#include <wfc/inet/srv/ad_acceptor.hpp>
-#include <wfc/inet/srv/ad_dgram_acceptor.hpp>
-#include <wfc/inet/srv/ad_st_acceptor.hpp>
-#include <wfc/inet/srv/ad_mt_acceptor.hpp>
-#include <wfc/inet/srv/ad_tcp_socket.hpp>
-#include <wfc/inet/srv/ad_server_start.hpp>
-#include <wfc/inet/srv/connection_manager.hpp>
+#include <wfc/inet/srv/tmp/server_tcp_context.hpp>
+#include <wfc/inet/srv/tmp/ad_worker.hpp>
+#include <wfc/inet/srv/tmp/ad_acceptor.hpp>
+#include <wfc/inet/srv/tmp/ad_dgram_acceptor.hpp>
+#include <wfc/inet/srv/tmp/ad_st_acceptor.hpp>
+#include <wfc/inet/srv/tmp/ad_mt_acceptor.hpp>
+#include <wfc/inet/srv/tmp/ad_tcp_socket.hpp>
+#include <wfc/inet/srv/tmp/ad_server_start.hpp>
+#include <wfc/inet/srv/tmp/connection_manager.hpp>
 
 #include <fas/aop.hpp>
 
@@ -25,6 +25,7 @@ struct aspect_server_tcp: fas::aspect< fas::type_list_n<
   context<server_tcp_context>,
   fas::advice<_configurator_, server_tcp_configurator>,
   fas::advice<_socket_,  ad_tcp_socket>, 
+  fas::type<_acceptor_type_, ::boost::asio::ip::tcp::acceptor>, 
   fas::advice<_worker_,  ad_worker/*< ::boost::asio::ip::tcp::socket >*/ >, 
   fas::advice<_acceptor_, ad_acceptor>,
   fas::advice<_st_acceptor_, ad_st_acceptor>,
@@ -54,6 +55,8 @@ struct aspect_server_udp: fas::aspect< fas::type_list_n<
   fas::advice<_acceptor_, ad_dgram_acceptor >,
   fas::advice<_server_start_, ad_server_start>,
   connection_manager_type<connection_manager>, 
+  // Временная мера
+  fas::type<_acceptor_type_, ::boost::asio::ip::tcp::acceptor>, 
   //fas::value< _connection_manager_, std::shared_ptr<connection_manager<>> >,
   fas::group<_start_, _acceptor_>,
   fas::group<_start_, _server_start_>,
