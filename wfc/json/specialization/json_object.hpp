@@ -145,14 +145,6 @@ private:
     return serialize_member( t, end, MR() );
   }
 
-  template<typename P, typename N, typename M, typename JT, typename VT >
-  P serialize_member( const T& t, P end, const member_proxy<N, T, M, JT, VT>& memb )
-  {
-    end = serialize_member_name(t, end, memb);
-    typedef typename JT::serializer serializer;
-    return serializer()( t.get(M()), end );
-  }
-
 private:
 
   template<typename N, typename G, typename M, M G::* m, typename W >
@@ -290,20 +282,6 @@ private:
       return beg;
     typedef typename member<N, G, M, m, W>::serializer serializer;
     return serializer()( memb.ref(t), beg, end);
-  }
-
-  template<typename P, typename N, typename M, typename JT, typename VT >
-  P unserialize_member( T& t, P beg, P end, member_proxy<N, T, M, JT, VT> memb, bool& unserialized )
-  {
-    beg = unserialize_member_name(t, beg, end, memb, unserialized);
-    if ( !unserialized )
-      return beg;
-    typedef typename JT::serializer serializer;
-    typedef VT value_type;
-    value_type value = value_type();
-    beg = serializer()( value, beg, end);
-    t.set(M(), value);
-    return beg;
   }
 
   template<typename P, typename N, typename G, typename M, typename GT, typename W >
