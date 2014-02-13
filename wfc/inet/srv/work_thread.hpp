@@ -22,7 +22,7 @@ public:
   
   ~work_thread()
   {
-    std::cout << "~~~work_thread()" << std::endl;
+    
   }
   
   work_thread(const work_thread&) = delete;
@@ -39,13 +39,13 @@ public:
   
   void stop()
   {
-    std::cout << "work_thread()::stop [[[" << std::endl;
+    
     callback_owner::reset();
-    std::cout << "work_thread()::stop 1" << std::endl;
+    
     this->_io_service.stop();
-    std::cout << "work_thread()::stop 2" << std::endl;
+    
     _thread.join();
-    std::cout << "]]] work_thread()::stop" << std::endl;
+    
   }
 
   template<typename SockType,  typename F>

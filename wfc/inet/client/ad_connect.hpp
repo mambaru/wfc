@@ -25,11 +25,11 @@ struct ad_connect
     
     sock->connect( endpoint );
     std::shared_ptr<connection_type> conn = t.create_connection(sock, [&t](std::shared_ptr<connection_type> conn){
-        std::cout << "closed" << std::endl;
+        
         t.connection_manager()->erase(conn);
         //t.get_aspect().template get<_connection_manager_>()->erase(conn);
     });
-    std::cout << "connected" << std::endl;
+    
     //t.get_aspect().template get<_connection_manager_>()->insert(conn);
     t.connection_manager()->insert(conn);
     conn->start();

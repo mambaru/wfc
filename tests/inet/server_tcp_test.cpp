@@ -274,8 +274,8 @@ int main(int argc, char */*argv*/[])
   config.port = "12345";
 // BUG:
 // TODO:
-  // config.listen_threads = 3;
-  config.worker_threads = 0;
+  config.listen_threads = 0;
+  config.worker_threads = 10;
   srv.server_context(config);
   srv.start();
   if ( argc==1)
@@ -296,6 +296,7 @@ int main(int argc, char */*argv*/[])
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
   //for (;;)
   std::cout << "run" << std::endl;
+  /*!!!
   std::thread([&srv](){
     while (receiver_count)
     {
@@ -306,6 +307,7 @@ int main(int argc, char */*argv*/[])
     io_service.run_one();
     io_service.stop();
   }).detach();
+  */
   io_service.run();
   
   std::cout << "FINAL" << std::endl;

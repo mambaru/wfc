@@ -13,7 +13,7 @@
 namespace wfc{ namespace inet{
 
 struct aspect_default: fas::aspect< fas::type_list_n<
-  connection_aspect< conn::echo::rn::stream::tcp::aspect/*conn::echo::aspect_stream_rn*/ >,
+  connection_aspect< conn::echo::rn::stream::tcp::aspect >,
   server_aspect< aspect_server_tcp >,
   connection_base_class< fas::aspect_class >,
   connection_class< connection >

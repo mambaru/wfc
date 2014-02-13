@@ -18,7 +18,7 @@ struct ad_tailor
   {
     d->reserve( d->size() + std::distance(beg, end) );
     std::copy( beg, end, std::inserter(*d, d->end()) );
-    std::cout << "WRITE[[" << std::string(d->begin(), d->end() ) << "]]" << std::endl;
+    //std::cout << "WRITE[[" << std::string(d->begin(), d->end() ) << "]]" << std::endl;
     t.get_aspect().template get<Tg>()( t, std::move(d) );
   }
 

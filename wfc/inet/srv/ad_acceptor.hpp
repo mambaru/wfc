@@ -30,7 +30,7 @@ struct ad_acceptor
   template<typename T>
   void operator()(T& t, fas::tag<_start_>)
   {
-    _acceptor = std::make_shared<acceptor_type>(t.get_io_service());
+    _acceptor = std::make_shared<acceptor_type>( t.get_io_service() );
     
     boost::asio::ip::tcp::resolver resolver( _acceptor->get_io_service() );
     boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve({

@@ -75,6 +75,7 @@ struct ad_st_acceptor
         if (!acceptor->is_open())
           return;
 
+        // TODO; aborted сделать
         if (!ec)
         {
           t.get_aspect().template get<_socket_>()(t, *sock); 
@@ -88,26 +89,18 @@ struct ad_st_acceptor
               sock, 
               [&t](std::shared_ptr<connection_type> pconn)->void
               {
-                std::cout << "lamda release { " << std::endl;
+                
                 t.connection_manager()->erase(pconn);
-                std::cout << "} lamda release " << std::endl;
-                //t.get_aspect().template get<_connection_manager_>()->erase(pconn);
-                //this->_connection_manager->erase(pconn);
               }
             );
-            
-            //pconn->context().activity = manager;
-
-            /*
-            std::shared_ptr<connection_type> pconn = std::make_shared<connection_type>();
-            pconn->context() = t.connection_context();
-            */
             manager->insert(pconn);
             pconn->start();
           });
         }
         else
-          std::cout <<  "single do accept error " <<  ec.message() <<  std::endl;
+        {
+          // std::cout <<  "single do accept error " <<  ec.message() <<  std::endl;
+        }
 
         this->do_accept(t);
       } // callback

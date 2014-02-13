@@ -9,7 +9,17 @@ namespace wfc{ namespace inet{
 template<typename... Args>
 struct server_helper
 {
-  typedef typename fas::merge_aspect< fas::aspect<Args...>, aspect_default>::type aspect_type;
+  /*typedef typename fas::merge_aspect< fas::aspect<Args...>, aspect_default>::type aspect_type;
+   * */
+  
+  typedef fas::aspect< 
+    Args... ,
+    connection_aspect< conn::echo::rn::stream::tcp::aspect >,
+    server_aspect< aspect_server_tcp >,
+    connection_base_class< fas::aspect_class >,
+    connection_class< connection >
+  > aspect_type;
+ 
   typedef typename fas::aspect_class<aspect_type>::aspect aspect;
   
   ///
