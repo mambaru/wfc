@@ -34,18 +34,18 @@ public:
   client( ::wfc::io_service& io_service, const config_type& conf )
     : _io_service(io_service)
   {
-    this->get_aspect().template get<_configurator_>()(*this, conf);
+    this->get_aspect().template get<srv::_configurator_>()(*this, conf);
   }
   
   client( std::weak_ptr< wfc::global > g, const config_type& conf )
     : client( *(g.lock()->io_service.lock()), conf)
   {
-    this->get_aspect().template get<_configurator_>()(*this, conf);
+    this->get_aspect().template get<srv::_configurator_>()(*this, conf);
   }
   
   void reconfigure(const config_type& conf)
   {
-    this->get_aspect().template get<_configurator_>()(*this, conf);
+    this->get_aspect().template get<srv::_configurator_>()(*this, conf);
   }
   
   void initialize()

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wfc/inet/srv/tmp/server_helper.hpp>
-#include <wfc/inet/server_config.hpp>
+#include <wfc/inet/srv/tmp/server_config.hpp>
 #include <wfc/core/global.hpp>
 #include <wfc/io_service.hpp>
 #include <fas/aop.hpp>
@@ -34,18 +34,18 @@ public:
   server( ::wfc::io_service& io_service, const config_type& conf )
     : _io_service(io_service)
   {
-    this->get_aspect().template get<_configurator_>()(*this, conf);
+    this->get_aspect().template get< srv::_configurator_>()(*this, conf);
   }
   
   server( std::weak_ptr< wfc::global > g, const config_type& conf )
     : server( *(g.lock()->io_service.lock()), conf)
   {
-    this->get_aspect().template get<_configurator_>()(*this, conf);
+    this->get_aspect().template get< srv::_configurator_>()(*this, conf);
   }
   
   void reconfigure(const config_type& conf)
   {
-    this->get_aspect().template get<_configurator_>()(*this, conf);
+    this->get_aspect().template get< srv::_configurator_>()(*this, conf);
   }
   
   void initialize()

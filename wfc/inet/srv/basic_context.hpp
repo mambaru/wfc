@@ -1,23 +1,22 @@
 #pragma once
 
-//#include <wfc/inet/srv/iactivity.hpp>
+#include <string>
 
-namespace wfc{ namespace inet{ namespace conn{
-
-/*struct empty_context
-{
-};*/
-
+namespace wfc{ namespace inet{ namespace srv{
+  
 template<typename Base = fas::empty_type>
 struct basic_context: Base
 {
   bool enable_stat;
-  //std::weak_ptr<iactivity> activity;
+  std::string host;
+  std::string port;
   
   basic_context()
     : Base()
     , enable_stat(false)
   {}
+  
 };
+
 
 }}}

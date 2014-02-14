@@ -29,7 +29,7 @@ fas::advice< inet::_configuration_, server_tcp_config>,
 
 struct aspect_tcp: fas::merge_aspect<
   fas::aspect<
-    fas::advice<inet::_configurator_, server_tcp_configurator>
+    fas::advice<inet::srv::_configurator_, server_tcp_configurator>
   >,
   inet::aspect_server_tcp
 >::type

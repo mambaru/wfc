@@ -5,10 +5,11 @@
 
 namespace wfc{ namespace inet{
   
-template<typename V = fas::empty_type>
-struct context: 
-  ::fas::value<_context_, V>
+template< template<typename> class T >
+struct basic_context_class:
+  fas::provider_t<_basic_context_, T>
 {
 };
+
 
 }}

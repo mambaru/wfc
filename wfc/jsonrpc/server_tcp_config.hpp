@@ -1,6 +1,6 @@
 #pragma once 
 
-#include <wfc/inet/server_tcp_config.hpp>
+#include <wfc/inet/srv/tmp/server_tcp_config.hpp>
 
 namespace wfc{ namespace jsonrpc{
 

@@ -18,15 +18,18 @@ class connection
   //, public iconnection
 {
 public:
-  typedef typename conn::helper<A, AspectClass>::base_class super;
-  typedef std::enable_shared_from_this< connection <A, AspectClass> > super_shared;
+  typedef connection<A, AspectClass> self;
   
-  typedef connection <A, AspectClass> self;
+  typedef conn::helper<A, AspectClass> helper;
+  typedef typename helper::base_class super;
+  
+  typedef std::enable_shared_from_this< self > super_shared;
+  
   typedef self connection_type;
   typedef std::shared_ptr<connection_type> connection_ptr;
   typedef std::function<void( connection_ptr )> release_function;
 
-  typedef typename super::aspect::template advice_cast<_socket_type_>::type socket_type;
+  typedef typename helper::socket_type socket_type;
   typedef typename socket_type::endpoint_type endpoint_type;
   //typedef boost::asio::ip::tcp::socket socket_type;
   typedef std::shared_ptr<socket_type> socket_ptr;
@@ -35,8 +38,9 @@ public:
   typedef std::unique_ptr<strand_type> strand_ptr;
 
 public:
-  
-  typedef typename super::aspect::template advice_cast<_context_>::type context_type;
+
+  typedef typename helper::context_type context_type;
+  //typedef typename super::aspect::template advice_cast<_context_>::type context_type;
   typedef callback_owner<> owner_type;
   typedef owner_type::mutex_type  mutex_type;
 

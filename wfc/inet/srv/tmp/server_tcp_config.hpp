@@ -1,5 +1,5 @@
 #pragma once 
-#include <wfc/inet/server_config.hpp>
+#include <wfc/inet/srv/tmp/server_config.hpp>
 
 
 namespace wfc{ namespace inet{

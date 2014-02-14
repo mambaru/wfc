@@ -2,6 +2,7 @@
 
 namespace wfc{ namespace inet{
 
+// TODO: удалить
 //
 struct _startup_;
 struct _start_;
@@ -18,5 +19,5 @@ struct _connection_class_;
 
 struct _server_aspect_;
 
-struct _configurator_;
+//struct _configurator_;
 }}

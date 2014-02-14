@@ -26,8 +26,13 @@ struct client_helper
   using connection_t = typename aspect::template advice_cast<_connection_class_>::type::template type<ConnAspect, ConnBase>;
   
   typedef connection_t<connection_aspect_type, connection_base_t> connection_type;
-  typedef typename connection_type::aspect::template advice_cast<_context_>::type connection_context_type;
+  //typedef typename connection_type::aspect::template advice_cast<_context_>::type connection_context_type;
   typedef typename connection_type::aspect::template advice_cast<_socket_type_>::type socket_type;
+  
+  typedef typename connection_type::aspect::template advice_cast<_context_>::type user_context;
+  typedef typename connection_type::aspect::template advice_cast<_basic_context_>::type
+                   ::template apply<user_context>::type connection_context_type;
+
   
   ///
   /// client
@@ -41,7 +46,7 @@ struct client_helper
 
   
   typedef typename client_base::aspect::template advice_cast<_context_>::type client_context_type;
-  typedef typename client_base::aspect::template advice_cast<_configurator_>::type::config_type config_type;
+  typedef typename client_base::aspect::template advice_cast<srv::_configurator_>::type::config_type config_type;
   
   
   

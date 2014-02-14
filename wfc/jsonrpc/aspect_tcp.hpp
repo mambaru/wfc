@@ -9,7 +9,7 @@
 
 namespace wfc{ namespace jsonrpc{
   
-template<typename BaseContext = inet::conn::empty_context>
+template<typename BaseContext = fas::empty_type/*inet::conn::empty_context*/>
 struct context_stream: inet::conn::stream::basic_context<BaseContext>
 {
   bool close_after_response;

@@ -4,6 +4,7 @@
 #include <set>
 #include <mutex>
 #include <memory>
+#include <wfc/inet/conn/tags.hpp>
 
 
 namespace wfc{ namespace inet{
@@ -185,14 +186,14 @@ public:
     return nullptr;
   }
   
-  bool insert(connection_ptr conn, address_type addr, port_type port)
+  bool insert(connection_ptr c, address_type addr, port_type port)
   {
-    conn->get_aspect().template get< conn::_activity_>()=[this, conn]()
+    c->get_aspect().template get< conn::_activity_>()=[this, c]()
     {
-      this->update2(conn); 
+      this->update2(c); 
     };
     
-    info* inf = new info{conn, addr, port, time(0) };
+    info* inf = new info{c, addr, port, time(0) };
     std::lock_guard<mutex_type> lk(_mutex);
     return this->insert(inf);    
   }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wfc/inet/tags.hpp>
+#include <wfc/inet/srv/tags.hpp>
 #include <wfc/inet/srv/tmp/aspect_default.hpp>
 #include <fas/aop.hpp>
 
@@ -34,8 +35,13 @@ struct server_helper
   using connection_t = typename aspect::template advice_cast<_connection_class_>::type::template type<ConnAspect, ConnBase>;
   
   typedef connection_t<connection_aspect_type, connection_base_t> connection_type;
+  typedef typename connection_type::context_type connection_context_type;
+  // TODO: не брать из connection а внедрить явно
+  typedef typename connection_type::socket_type socket_type;
+  /*
   typedef typename connection_type::aspect::template advice_cast<_context_>::type connection_context_type;
   typedef typename connection_type::aspect::template advice_cast<_socket_type_>::type socket_type;
+  */
   
   ///
   /// server
@@ -48,9 +54,15 @@ struct server_helper
     ::template advice_cast<_connection_manager_type_>::type
     ::template apply<connection_type>::type connection_manager_type;
   
-  typedef typename server_base::aspect::template advice_cast<_context_>::type server_context_type;
-  typedef typename server_base::aspect::template advice_cast<_acceptor_type_>::type acceptor_type;
-  typedef typename server_base::aspect::template advice_cast<_configurator_>::type::config_type config_type;
+  //typedef typename server_base::aspect::template advice_cast<_context_>::type server_context_type;
+    
+  typedef typename server_base::aspect::template advice_cast< _context_>::type user_context;
+  typedef typename server_base::aspect::template advice_cast< _basic_context_>::type
+                   ::template apply<user_context>::type context_type;
+
+    
+  typedef typename server_base::aspect::template advice_cast<srv::_acceptor_type_>::type acceptor_type;
+  typedef typename server_base::aspect::template advice_cast<srv::_configurator_>::type::config_type config_type;
   
 
 };

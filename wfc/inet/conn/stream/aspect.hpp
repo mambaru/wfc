@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wfc/inet/context.hpp>
+#include <wfc/inet/basic_context_class.hpp>
 #include <wfc/inet/conn/ad_connection_start.hpp>
 #include <wfc/inet/conn/ad_do_active.hpp>
 #include <wfc/inet/conn/tags.hpp>
@@ -19,7 +20,7 @@ namespace wfc{ namespace inet{ namespace conn{ namespace stream{
 // Перенести часть в connection
 struct aspect: fas::aspect
 < 
-  ::wfc::inet::context<empty_context>,
+  ::wfc::inet::context< /*empty_context*/ >,
   basic_context_class<basic_context>, 
   fas::advice<_start_,    ad_connection_start<_reader_> >,
   fas::advice<_do_active_, ad_do_active>,

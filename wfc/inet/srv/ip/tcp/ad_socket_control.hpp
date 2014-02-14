@@ -1,7 +1,6 @@
 #pragma once 
 
-#include <efc/inet/srv/tags.hpp>
-#include <efc/inet/srv/connection_manager.hpp>
+#include <wfc/inet/srv/tags.hpp>
 #include <boost/asio.hpp>
 
 namespace wfc{ namespace inet{ namespace srv{ namespace ip{ namespace tcp{

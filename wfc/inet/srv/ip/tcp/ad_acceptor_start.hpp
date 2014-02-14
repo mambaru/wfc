@@ -1,7 +1,10 @@
 #pragma once 
 
-#include <efc/inet/srv/tags.hpp>
+#include <wfc/inet/srv/tags.hpp>
+#include <wfc/inet/tags.hpp>
 #include <boost/asio.hpp>
+#include <thread>
+#include <list>
 
 namespace wfc{ namespace inet{ namespace srv{ namespace ip{ namespace tcp{
  
@@ -33,8 +36,8 @@ public:
         auto io = std::make_shared<boost::asio::io_service>();
         auto t = std::make_shared<std::thread>([this, &t, io, pacc]() 
         {
-          acceptor_type::endpoint_type endpoint = pacc->local_endpoint();
-          acceptor_type::native_type fd = ::dup( pacc->native() );
+          typename acceptor_type::endpoint_type endpoint = pacc->local_endpoint();
+          typename acceptor_type::native_type fd = ::dup( pacc->native() );
           acceptor_type acceptor(*io);
           acceptor.assign(endpoint.protocol(), fd);
           this->do_accept(t, acceptor);
@@ -49,16 +52,16 @@ public:
   void do_accept(T& t, Acceptor& acc)
   {
     typedef typename T::socket_type socket_type;
-    typedef typename T::connection_type connection_type;
+    //typedef typename T::connection_type connection_type;
     typedef std::shared_ptr<socket_type> socket_ptr;
     
     socket_ptr sock = std::make_shared< socket_type >( acc.get_io_service() );
     
-    _acceptor.async_accept(
+    acc.async_accept(
       *sock,
       [this, &t, &acc, sock](boost::system::error_code ec)
       {
-        if (!this->acc.is_open())
+        if (!acc.is_open())
           return;
 
         // TODO: aborted!!!
@@ -68,7 +71,7 @@ public:
           t.get_aspect().template get<_new_connection_>()(t, sock); 
         }
         
-        this->do_accept(t);
+        this->do_accept(t, acc);
       }
     );
     
