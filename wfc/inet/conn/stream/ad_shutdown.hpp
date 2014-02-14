@@ -10,7 +10,7 @@ struct ad_shutdown
   template<typename T>
   void operator()(T& t)
   {
-    t.get_io_service().dispatch([&t]()
+    t.strand_dispatch([&t]()
     {
       if ( t.context().shutdown )
         return;

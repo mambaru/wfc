@@ -2,6 +2,13 @@
 
 namespace wfc{ namespace inet{ namespace conn{
 
+struct _context_;
+struct _configure_;
+
+struct _activity_;
+struct _do_active_;
+
+/*
 // connection
 struct _write_;
 struct _send_;
@@ -21,5 +28,6 @@ struct _shutdown_;
 
 struct _activity_;
 struct _do_active_;
-
+*/
+  
 }}}

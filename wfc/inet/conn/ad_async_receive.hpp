@@ -9,7 +9,7 @@ struct ad_async_receive
   template<typename T, typename DataType, typename F>
   void operator()(T& t, DataType& d, F callback)
   {
-    // TODO: нужно ди owner
+    // TODO: нужно ли owner (нет, owner в callback)
     
     t.socket().async_receive( 
       ::boost::asio::buffer( d ), 

@@ -13,7 +13,7 @@ struct ad_async_send
   {
     t.socket().async_send( 
       ::boost::asio::buffer( d.data(), d.size() ), 
-      /*t.strand().wrap(*/callback/*)*/
+      t.strand().wrap(callback)
     );
   }
 };

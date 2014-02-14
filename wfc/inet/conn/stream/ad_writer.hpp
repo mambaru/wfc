@@ -14,8 +14,6 @@ namespace wfc{ namespace inet{ namespace conn{ namespace stream{
 template<size_t BufferSize = 8096*2 >
 struct ad_writer
 {
-  //typedef std::vector<char> data_type;
-  //typedef std::unique_ptr<data_type> data_ptr;
   typedef std::list<data_ptr> data_list_type;
   typedef ::boost::asio::const_buffer buffer_type;
 
@@ -30,14 +28,6 @@ struct ad_writer
   {
     _outgoing_size += d->size();
     this->dispatch(t, std::move(d) );
-    /*
-    //auto capt = unique_wrap( std::move(d), "ad_writer" );
-    auto pd = std::make_shared<data_ptr>( std::move(d) );
-    t.socket().get_io_service().dispatch([this, &t, pd]() {
-      //this->dispatch(t, unique_unwrap(capt) );
-      this->dispatch(t, std::move(*pd) );
-    });
-    */
   }
   
   size_t outgoing_size() const
@@ -78,7 +68,7 @@ private:
           }
           else
           {
-            this->_data_list.push_back( std::make_unique<data_type>(beg, end));
+            this->_data_list.push_back( std::make_unique<data_type>(beg, end) );
             beg = end;
           }
         }
