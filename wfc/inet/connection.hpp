@@ -164,7 +164,7 @@ public:
     */
   }
   
-  
+  /*
   boost::asio::ip::address remote_address()
   {
     return _remote_endpoint.address();
@@ -173,7 +173,7 @@ public:
   unsigned short remote_port()
   {
     return _remote_endpoint.port();
-  }
+  */
   
   void on_read(data_ptr d)
   {

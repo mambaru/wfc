@@ -204,7 +204,7 @@ public:
     {
       this->update2(conn); 
     };
-    info* inf = new info{conn, conn->remote_address(), conn->remote_port(), time(0) };
+    info* inf = new info{conn, /*conn->remote_address()*/conn->remote_endpoint().address(), conn->remote_endpoint().port(), time(0) };
     std::lock_guard<mutex_type> lk(_mutex);
     return this->insert(inf);
   }

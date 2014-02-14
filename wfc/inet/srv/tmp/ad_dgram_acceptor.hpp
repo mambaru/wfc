@@ -2,7 +2,7 @@
 
 #include <wfc/inet/tags.hpp>
 #include <wfc/inet/srv/tags.hpp>
-#include <wfc/inet/srv/connection_manager.hpp>
+#include <wfc/inet/srv/tmp/connection_manager.hpp>
 #include <wfc/memory.hpp>
 #include <fas/aop/tag.hpp>
 #include <boost/asio.hpp>
@@ -108,7 +108,7 @@ struct ad_dgram_acceptor
               std::cout << "EXIST CONNECTION" << std::endl;
             
             
-            std::cout << "FOUNDED " << conn->remote_port() << "(" << size_t( conn.get() ) << ")"<< ": " << std::string(data->begin(), data->end()) << std::endl;
+            // std::cout << "FOUNDED " << conn->remote_port() << "(" << size_t( conn.get() ) << ")"<< ": " << std::string(data->begin(), data->end()) << std::endl;
             
             //auto d = unique_unwrap(wdata);
             conn->on_read(std::move(data) );
