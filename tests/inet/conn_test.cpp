@@ -11,12 +11,26 @@ typedef fas::aspect<
   // fas::type< wfc::inet::_socket_type_, boost::asio::ip::tcp::socket>
 > connection_aspect;
 
-
+struct conf 
+{
+  bool enable_stat;
+};
 int main()
 {
   typedef wfc::inet::connection< connection_aspect > connection_type;
   connection_type conn;
   conn.context() = 10;
+  
+  conn.context();
+  conn.socket();
+  conn.dispatch([](){});
+  conn.post([](){});
+  conn.configure(conf());
+  conn.initialize(fas::empty_type());
+  conn.start();
+  conn.stop();
+  
+  
   auto conn1 = conn.clone();
   
   conn1->start();

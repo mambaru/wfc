@@ -12,7 +12,7 @@ struct _post_;
 struct _configure_;
 struct _initialize_;
 struct _start_;
-struct _close_;
+struct _stop_;
 
   
 }}

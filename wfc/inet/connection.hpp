@@ -263,10 +263,10 @@ public:
     */
   }
   
-  void close()
+  void stop()
   {
     // TODO: close
-    this->get_aspect().template get<_close_>()(*this/*, _release_function*/);
+    this->get_aspect().template get<_stop_>()(*this/*, _release_function*/);
     /*
     this->strand_post([this]()
     {
