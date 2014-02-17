@@ -5,8 +5,11 @@ namespace wfc{ namespace inet{ namespace conn{
 struct _context_;
 struct _configure_;
 
+struct _on_read_;
+/*
 struct _activity_;
 struct _do_active_;
+*/
 
 /*
 // connection
