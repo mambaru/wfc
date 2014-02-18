@@ -2,9 +2,7 @@
 
 #include <wfc/io/tags.hpp>
 
-namespace wfc{ namespace inet{ namespace async{
+namespace wfc{ namespace io{ namespace async{
 
-struct _read_;
-struct _write_;
-  
+// TODO: дофига всего после reader::sync  
 }}}

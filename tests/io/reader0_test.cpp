@@ -1,10 +1,12 @@
 
 #include <wfc/io/reader/reader.hpp>
-#include <wfc/io/reader/aspect.hpp>
+//#include <wfc/io/reader/aspect.hpp>
 #include <iostream>
 #include <string>
+#include <boost/asio.hpp>
 int main()
 {
+  /*
   boost::asio::io_service io_service;
   int dd[2];
   ::pipe(dd);
@@ -27,5 +29,6 @@ int main()
     std::cout << "[" << result << "]"<< std::endl;
   });
   io_service.run_one();
+  */
   return 0;
 }

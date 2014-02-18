@@ -10,10 +10,9 @@
 namespace wfc{ namespace io{ namespace base{
 
 typedef fas::type_list_n<
+  //fas::type<_data_type_, std::vector<char> >,
   fas::advice<_initialize_, ad_initialize>,
-  fas::group< wfc::io::_initialize_, _initialize_>, 
-  fas::type< wfc::io::_io_service_type_, boost::asio::io_service>, 
-  fas::type< wfc::io::_io_service_ptr_, std::shared_ptr<boost::asio::io_service> >
+  fas::group< wfc::io::_initialize_, _initialize_>
 >::type advice_list;
 
 

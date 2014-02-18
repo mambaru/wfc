@@ -1,6 +1,7 @@
 #pragma once
-#include <fas/aop.hpp>
+
 #include <wfc/io/tags.hpp>
+#include <fas/aop.hpp>
 
 namespace wfc{ namespace io{ 
   
@@ -19,6 +20,7 @@ public:
   typedef typename super::aspect::template advice_cast<_data_type_>::type data_type;
   typedef typename super::aspect::template advice_cast<_config_type_>::type config_type;
   typedef typename super::aspect::template advice_cast<_init_type_>::type init_type;
+  typedef typename super::aspect::template advice_cast<_io_service_type_>::type io_service_type;
 
   context_type& context()
   {
@@ -39,7 +41,17 @@ public:
   {
     return *(this->get_aspect().template get<_descriptor_ptr_>());
   }
-  
+
+  io_service_type& get_io_service()
+  {
+    return *(this->get_aspect().template get<_io_service_ptr_>());
+  }
+
+  const io_service_type& get_io_service() const
+  {
+    return *(this->get_aspect().template get<_io_service_ptr_>());
+  }
+
 protected:
   
   template<typename T>

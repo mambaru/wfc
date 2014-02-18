@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wfc/io/reader/tags.hpp>
+#include <wfc/io/reader/sync/read/tags.hpp>
 #include <wfc/io/io_base.hpp>
 #include <fas/aop.hpp>
 #include <memory>
@@ -75,12 +75,13 @@ public:
   template<typename Callback>
   void async_read(Callback callback = nullptr/*std::function<void(data_ptr)>*/)
   {
-    this->get_aspect().template get<_async_read_>().call(*this, callback);
+    //this->get_aspect().template get<_async_read_>().call(*this, callback);
   }
   
   data_ptr read()
   {
-    return this->get_aspect().template get<_read_>()(*this);
+    return this->get_aspect().template get<sync::read::_read_>()(*this);
+    //return this->get_aspect().template get<_read_>()(*this);
   }
 
 private:

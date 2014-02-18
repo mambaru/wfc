@@ -2,8 +2,13 @@
 
 namespace wfc{ namespace io{
 
+
 struct _descriptor_type_;
 struct _descriptor_ptr_;
+
+
+struct _io_service_type_;
+struct _io_service_ptr_;
 
 struct _context_;
 struct _data_type_;
