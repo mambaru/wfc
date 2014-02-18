@@ -1,0 +1,101 @@
+#pragma once
+#include <fas/aop.hpp>
+#include <wfc/io/tags.hpp>
+
+namespace wfc{ namespace io{ 
+  
+template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
+class io_base
+  : public AspectClass<A>
+{
+public:
+  
+  typedef io_base<A, AspectClass> self;
+  typedef AspectClass<A> super;
+  typedef typename super::aspect::template advice_cast<_descriptor_type_>::type descriptor_type;
+  typedef typename super::aspect::template advice_cast<_descriptor_ptr_>::type descriptor_ptr;
+  
+  typedef typename super::aspect::template advice_cast<_context_>::type context_type;
+  typedef typename super::aspect::template advice_cast<_data_type_>::type data_type;
+  typedef typename super::aspect::template advice_cast<_config_type_>::type config_type;
+  typedef typename super::aspect::template advice_cast<_init_type_>::type init_type;
+
+  context_type& context()
+  {
+    return this->get_aspect().template get<_context_>();
+  }
+
+  const context_type& context() const
+  {
+    return this->get_aspect().template get<_context_>();
+  }
+
+  descriptor_type& descriptor()
+  {
+    return *(this->get_aspect().template get<_descriptor_ptr_>());
+  }
+
+  const descriptor_type& descriptor() const
+  {
+    return *(this->get_aspect().template get<_descriptor_ptr_>());
+  }
+  
+protected:
+  
+  template<typename T>
+  void create(T& t) 
+  {
+    t.get_aspect().template gete<_create_>()(t);
+  }
+
+  template<typename T>
+  void create(T& t, const config_type& conf) 
+  {
+    t.get_aspect().template gete<_create_>()(t);
+    t.get_aspect().template gete<_configure_>()(t, conf);
+  }
+
+  template<typename T>
+  void create(T& t, const config_type& conf, const init_type& init) 
+  {
+    t.get_aspect().template gete<_create_>()(t);
+    t.get_aspect().template gete<_configure_>()(t, conf);
+    t.get_aspect().template gete<_initialize_>()(t, init);
+  }
+
+  template<typename T>
+  void create(T& t, const init_type& init) 
+  {
+    t.get_aspect().template gete<_create_>()(t);
+    t.get_aspect().template gete<_initialize_>()(t, init);
+  }
+
+  template<typename T>
+  void configure(T& t, const config_type& conf)
+  {
+    t.get_aspect().template gete<_configure_>()( t, conf );
+  }
+
+  template<typename T>
+  void initialize(T& t, const init_type& init)
+  {
+    t.get_aspect().template gete<_initialize_>()(t, init );
+  }
+
+  template<typename T>
+  void start(T& t)
+  {
+    t.get_aspect().template get<_start_>()(t);
+  }
+  
+  template<typename T>
+  void stop(T& t)
+  {
+    t.get_aspect().template get<_stop_>()(t);
+  }
+
+private:
+
+};
+
+}}

@@ -1,11 +1,20 @@
 #pragma once
 
+#include <wfc/inet/tags.hpp>
+
 namespace wfc{ namespace inet{ namespace conn{
 
 struct _context_;
 struct _configure_;
 
-struct _on_read_;
+struct _incoming_;
+struct _outgoing_;
+
+struct _on_read_ ;
+struct _on_write_;
+
+
+
 /*
 struct _activity_;
 struct _do_active_;

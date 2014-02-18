@@ -14,7 +14,7 @@ struct ad_shutdown
     {
       if ( t.context().shutdown )
         return;
-      t.socket().shutdown( boost::asio::socket_base::shutdown_receive);
+      t.socket().shutdown( boost::asio::socket_base::shutdown_receive );
       size_t size  = t.get_aspect().template get<_writer_>().outgoing_size();
       if ( size == 0)
       {

@@ -1,26 +1,46 @@
 #pragma once
 
-#include <wfc/inet/context.hpp>
-#include <wfc/inet/basic_context_class.hpp>
-#include <wfc/inet/conn/ad_connection_start.hpp>
-#include <wfc/inet/conn/ad_do_active.hpp>
-#include <wfc/inet/conn/tags.hpp>
-#include <wfc/inet/conn/stream/ad_outgoing.hpp>
-#include <wfc/inet/conn/stream/ad_writer.hpp>
-#include <wfc/inet/conn/stream/ad_on_write.hpp>
-#include <wfc/inet/conn/stream/ad_shutdown.hpp>
-#include <wfc/inet/conn/basic_context.hpp>
-#include <wfc/inet/conn/stream/basic_context.hpp>
-
-#include <functional>
+#include <wfc/inet/conn/aspect.hpp>
 
 namespace wfc{ namespace inet{ namespace conn{ namespace stream{
 
+typedef fas::type_list_n<
+  wfc::inet::conn::advice_list
+>::type advice_list;
 
-// Перенести часть в connection
 struct aspect: fas::aspect
 < 
-  ::wfc::inet::context< /*empty_context*/ >,
+  advice_list
+>
+{};
+
+
+/*
+
+  // Базовые типы
+  fas::type < _socket_type_,  boost::asio::socket_base >,
+  fas::value< _socket_ptr_ ,  std::shared_ptr<boost::asio::socket_base> >,
+  
+  // Заглушки
+  fas::stub< _start_ >,
+  fas::stub< _stop_ >,
+  fas::stub< _dispatch_ >,
+  fas::stub< _post_ >,
+  
+  // связка 
+  fas::alias< _incoming_, wfc::inet::_incoming_ >,
+  fas::alias< _outgoing_, wfc::inet::_outgoing_ >,
+  
+  // эхо
+  fas::alias< wfc::inet::_outgoing_, wfc::inet::_incoming_ >
+
+*/
+
+// Перенести часть в connection
+/*
+struct aspect: fas::aspect
+< 
+  ::wfc::inet::context<  >,
   basic_context_class<basic_context>, 
   fas::advice<_start_,    ad_connection_start<_reader_> >,
   fas::advice<_do_active_, ad_do_active>,
@@ -38,5 +58,6 @@ struct aspect: fas::aspect
   
 >
 {};
+*/
 
 }}}}

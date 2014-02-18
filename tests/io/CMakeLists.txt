@@ -1,6 +1,6 @@
-add_executable(conn2_test conn2_test.cpp)
-add_test(conn2_test conn2_test)
-target_link_libraries(conn2_test wfc boost_system)
+add_executable(reader0_test reader0_test.cpp)
+add_test(reader0_test reader0_test)
+target_link_libraries(reader0_test boost_system)
 
 #add_executable(server_tcp_test server_tcp_test.cpp)
 #add_executable(server_udp_test server_udp_test.cpp)

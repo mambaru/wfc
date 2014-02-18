@@ -46,20 +46,6 @@ struct ad_reader
         }
         else if (!ec)
         {
-          /*
-          if ( auto a = t.context().activity.lock() )
-          {
-            a->update(t.shared_from_this());
-          }
-          else
-          {
-          }
-          */
-          /*
-          if ( auto activity = t.get_aspect().template get<_activity_>() )
-            activity();
-          */
-          
           data_ptr data = std::make_unique<data_type>(_data.begin(), _data.begin() + bytes_transferred);
           t.get_aspect().template getg<_on_read_>()(t, data->begin(), data->end() );
           t.get_aspect().template get<_incoming_>()
@@ -70,10 +56,9 @@ struct ad_reader
         else if (ec != boost::asio::error::operation_aborted)
         {
           t.get_aspect().template get<_read_error_>()(t, ec);
-          t.close(); /*перенести в _read_error_*/
+          t.close();
         }
       }
-     // ) // t.strand().wrap(
     );
   }
   

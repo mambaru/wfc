@@ -1,20 +1,20 @@
 #include <boost/asio.hpp>
 #include <wfc/inet/connection.hpp>
-#include <wfc/inet/conn/aspect.hpp>
+#include <wfc/inet/conn/stream/aspect.hpp>
 #include <wfc/inet/tags.hpp>
 #include <wfc/inet/context.hpp>
 
 
 typedef fas::aspect<
   wfc::inet::context<int>,
-  wfc::inet::conn::aspect
-  // fas::type< wfc::inet::_socket_type_, boost::asio::ip::tcp::socket>
+  wfc::inet::conn::stream::aspect
 > connection_aspect;
 
 struct conf 
 {
   bool enable_stat;
 };
+
 int main()
 {
   typedef wfc::inet::connection< connection_aspect > connection_type;

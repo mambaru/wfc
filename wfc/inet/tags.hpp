@@ -9,6 +9,10 @@ struct _socket_ptr_;
 struct _dispatch_;
 struct _post_;
 
+// для conn::send();
+struct _incoming_;
+struct _outgoing_;
+
 struct _configure_;
 struct _initialize_;
 struct _start_;
