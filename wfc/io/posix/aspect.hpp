@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wfc/io/base/aspect.hpp>
+#include <wfc/io/basic/aspect.hpp>
 #include <wfc/io/posix/tags.hpp>
 #include <wfc/io/context.hpp>
 #include <wfc/io/tags.hpp>
@@ -17,7 +17,7 @@ typedef fas::type_list_n<
   fas::value<_descriptor_ptr_, std::shared_ptr<boost::asio::posix::stream_descriptor> >,
   fas::advice<_initialize_, ad_initialize>,
   fas::group< wfc::io::_initialize_, _initialize_>,
-  wfc::io::base::advice_list
+  wfc::io::basic::advice_list
 >::type advice_list;
 
 
@@ -25,7 +25,7 @@ struct aspect: fas::aspect
 < 
   advice_list,
   fas::type<_init_type_, init >,
-  fas::type<_config_type_, wfc::io::base::config>,
+  fas::type<_config_type_, wfc::io::basic::config>,
   context<>
 >
 {};

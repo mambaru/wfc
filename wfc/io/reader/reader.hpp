@@ -1,6 +1,7 @@
 #pragma once
 
-#include <wfc/io/reader/sync/read/tags.hpp>
+#include <wfc/io/reader/read/sync/tags.hpp>
+#include <wfc/io/reader/read/async/tags.hpp>
 #include <wfc/io/io_base.hpp>
 #include <fas/aop.hpp>
 #include <memory>
@@ -37,27 +38,36 @@ public:
     super::create(*this);
   };
 
-  reader(const config_type& conf) 
+  /*
+  template<typename Config>
+  reader(const Config& conf) 
   {
     super::create(*this, conf);
   };
+  */
 
+  /*
   reader(const init_type& conf) 
   {
     super::create(*this, conf);
   };
-
+  */
+  /*
+  template<typename Config, typename >
   reader(const config_type& conf, const init_type& init) 
   {
     super::create(*this, conf, init);
   };
+  */
   
-  void configure(const config_type& conf)
+  template<typename Config>
+  void configure(const Config& conf)
   {
     super::configure(*this, conf);
   }
 
-  void initialize(const init_type& init)
+  template<typename Init>
+  void initialize(const Init& init)
   {
     super::initialize(*this, init);
   }
@@ -71,17 +81,24 @@ public:
   {
     super::stop(*this);
   }
+  
+  template<typename Handler>
+  std::function<void()> wrap(Handler&& handler)
+  {
+    return super::wrap(*this, handler);
+  }
 
   template<typename Callback>
   void async_read(Callback callback = nullptr/*std::function<void(data_ptr)>*/)
   {
     //this->get_aspect().template get<_async_read_>().call(*this, callback);
+    this->get_aspect().template get<read::async::_read_>()(*this, callback);
   }
   
   data_ptr read()
   {
-    return this->get_aspect().template get<sync::read::_read_>()(*this);
-    //return this->get_aspect().template get<_read_>()(*this);
+    return this->get_aspect().template get< read::sync::_read_ >()(*this);
+    
   }
 
 private:

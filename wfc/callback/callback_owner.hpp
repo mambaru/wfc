@@ -80,11 +80,11 @@ public:
     };
   }
   
-  template<typename Callback, typename CallbackNotAlive >
-  Callback wrap(Callback callback, CallbackNotAlive not_alive = nullptr)
+  template<typename Callback/*, typename CallbackNotAlive*/ >
+  std::function<void()> wrap(Callback callback, /*CallbackNotAlive*/std::function<void()> not_alive = nullptr)
   {
     std::weak_ptr<int> alive = _alive;
-    return [alive,callback, not_alive]()
+    return [alive, callback, not_alive]()
     {
       if ( auto p = alive.lock() )
       {
@@ -92,7 +92,7 @@ public:
       }
       else
       {
-        if (not_alive)
+        if (not_alive!=nullptr)
         {
           not_alive();
         }

@@ -2,6 +2,7 @@
 
 #include <wfc/io/tags.hpp>
 #include <fas/aop.hpp>
+#include <functional>
 
 namespace wfc{ namespace io{ 
   
@@ -60,36 +61,31 @@ protected:
     t.get_aspect().template gete<_create_>()(t);
   }
 
-  template<typename T>
-  void create(T& t, const config_type& conf) 
+  /*
+  template<typename T, typename Config>
+  void create(T& t, const Config& conf) 
   {
     t.get_aspect().template gete<_create_>()(t);
     t.get_aspect().template gete<_configure_>()(t, conf);
   }
 
-  template<typename T>
-  void create(T& t, const config_type& conf, const init_type& init) 
+  template<typename T, typename Config, typename Init>
+  void create(T& t, const Config& conf, const Init& init) 
   {
     t.get_aspect().template gete<_create_>()(t);
     t.get_aspect().template gete<_configure_>()(t, conf);
     t.get_aspect().template gete<_initialize_>()(t, init);
   }
+  */
 
-  template<typename T>
-  void create(T& t, const init_type& init) 
-  {
-    t.get_aspect().template gete<_create_>()(t);
-    t.get_aspect().template gete<_initialize_>()(t, init);
-  }
-
-  template<typename T>
-  void configure(T& t, const config_type& conf)
+  template<typename T, typename Config>
+  void configure(T& t, const Config& conf)
   {
     t.get_aspect().template gete<_configure_>()( t, conf );
   }
 
-  template<typename T>
-  void initialize(T& t, const init_type& init)
+  template<typename T, typename Init>
+  void initialize(T& t, const Init& init)
   {
     t.get_aspect().template gete<_initialize_>()(t, init );
   }
@@ -104,6 +100,12 @@ protected:
   void stop(T& t)
   {
     t.get_aspect().template get<_stop_>()(t);
+  }
+  
+  template<typename T, typename Handler>
+  std::function<void()> wrap(T& t, Handler&& handler)
+  {
+    return t.get_aspect().template get<_wrap_>()(t, handler);
   }
 
 private:
