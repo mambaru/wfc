@@ -1,8 +1,8 @@
+#include <iostream>
 
 #include <wfc/io/reader/reader.hpp>
 #include <wfc/io/reader/read/sync/aspect.hpp>
 //#include <wfc/io/reader/aspect.hpp>
-#include <iostream>
 #include <string>
 #include <boost/asio.hpp>
 #include <thread>
@@ -16,17 +16,25 @@ void my_handler (int )
   signal (SIGINT, prev_handler);
 }
 
+struct init_info 
+{
+  std::shared_ptr<boost::asio::io_service> io_service;
+  boost::asio::posix::stream_descriptor::native_handle_type native_handle;
+  size_t input_buffer_size;
+  std::function<void()> not_alive;
+
+};
+
 int main()
 {
-  auto io_service = std::make_shared<boost::asio::io_service>();
-  wfc::io::posix::init init;
-  init.io_service = io_service;
-  
+  init_info init;
+  init.io_service = std::make_shared<boost::asio::io_service>();
   int dd[2];
   ::pipe(dd);
   init.native_handle = dd[0];
-  wfc::io::reader::reader< wfc::io::reader::read::sync::aspect > reader;
-  reader.initialize(init);
+  init.input_buffer_size = 8096;
+  wfc::io::reader::reader< wfc::io::reader::read::sync::aspect > reader(init);
+  //reader.initialize(init);
   std::cout << "native_handle = " 
             <<  reader.get_aspect().get< wfc::io::_descriptor_ptr_>()->native_handle() << std::endl;
   

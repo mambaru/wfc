@@ -2,6 +2,6 @@
 
 namespace wfc{ namespace io{ namespace posix{
 
-struct _initialize_;
+struct _create_;
 
 }}}

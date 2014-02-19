@@ -6,10 +6,13 @@ namespace wfc{ namespace io{ namespace reader{ namespace common{
 
 struct ad_create
 {
-  template<typename T>
-  void operator()(T& t)
+  template<typename T, typename Config>
+  void operator()(T& t, const Config& config)
   {
-    t.get_aspect().template get<_input_buffer_size_>() = 1024*8;
+    std::cout <<  "common ad_create {" << std::endl;
+    t.get_aspect().template get<_input_buffer_size_>() = config.input_buffer_size;
+    std::cout <<  "}common ad_create" << std::endl;
+
   }
 };
 

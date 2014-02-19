@@ -9,8 +9,6 @@
 
 #include <wfc/io/context.hpp>
 #include <wfc/io/basic/aspect.hpp>
-#include <wfc/io/basic/config.hpp>
-#include <wfc/io/posix/init.hpp>
 #include <wfc/io/posix/aspect.hpp>
 
 
@@ -20,11 +18,11 @@
 namespace wfc{ namespace io{ namespace reader{ namespace read{ namespace async{ 
 
 typedef std::function<void(basic::data_ptr)> callback_type;
-
+typedef std::list< basic::data_ptr> data_list;
 typedef std::list<callback_type> callback_list;
 
 typedef fas::type_list_n<
-  fas::value<_incoming_list_, basic::data_list>,
+  fas::value<_incoming_list_, data_list>,
   // fas::value<_input_list_, base::data_list>,
   fas::value<_callback_list_, callback_list>,
   fas::advice<_read_, ad_read>,
@@ -40,9 +38,9 @@ struct aspect: fas::aspect
   basic::advice_list,
   wfc::io::reader::async::advice_list,
   wfc::io::reader::errors::advice_list,
-  wfc::io::reader::common::advice_list,
+  wfc::io::reader::common::advice_list/*,
   fas::type< wfc::io::_config_type_, basic::config>,
-  fas::type< wfc::io::_init_type_, posix::init >
+  fas::type< wfc::io::_init_type_, posix::init >*/
 >
 {};
 

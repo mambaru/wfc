@@ -17,8 +17,8 @@ public:
   
   typedef reader<A, AspectClass> self;
   typedef io_base<A, AspectClass> super;
-  typedef typename super::config_type config_type;
-  typedef typename super::init_type   init_type;
+  // typedef typename super::config_type config_type;
+  // typedef typename super::init_type   init_type;
   
   typedef typename super::aspect::template advice_cast<_data_type_>::type data_type;
   typedef std::unique_ptr<data_type> data_ptr;
@@ -32,11 +32,17 @@ public:
   */
   
 public:
-  
-  reader() 
+
+  reader(const reader& ) = delete;
+  void operator = (const reader& conf) = delete;
+
+  template<typename Conf>
+  reader(const Conf& conf) 
   {
-    super::create(*this);
-  };
+    std::cout <<  "create{" << std::endl;
+    super::create(*this, conf);
+    std::cout <<  "}create" << std::endl;
+  }
 
   /*
   template<typename Config>
@@ -60,6 +66,7 @@ public:
   };
   */
   
+  /*
   template<typename Config>
   void configure(const Config& conf)
   {
@@ -71,6 +78,7 @@ public:
   {
     super::initialize(*this, init);
   }
+  */
 
   void start()
   {

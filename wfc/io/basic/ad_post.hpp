@@ -1,6 +1,5 @@
 #pragma once
 
-#include <wfc/io/basic/tags.hpp>
 #include <wfc/io/tags.hpp>
 
 namespace wfc{ namespace io{ namespace basic{

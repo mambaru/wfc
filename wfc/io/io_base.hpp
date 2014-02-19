@@ -19,8 +19,8 @@ public:
   
   typedef typename super::aspect::template advice_cast<_context_>::type context_type;
   typedef typename super::aspect::template advice_cast<_data_type_>::type data_type;
-  typedef typename super::aspect::template advice_cast<_config_type_>::type config_type;
-  typedef typename super::aspect::template advice_cast<_init_type_>::type init_type;
+  //typedef typename super::aspect::template advice_cast<_config_type_>::type config_type;
+  //typedef typename super::aspect::template advice_cast<_init_type_>::type init_type;
   typedef typename super::aspect::template advice_cast<_io_service_type_>::type io_service_type;
 
   context_type& context()
@@ -55,10 +55,10 @@ public:
 
 protected:
   
-  template<typename T>
-  void create(T& t) 
+  template<typename T, typename Config>
+  void create(T& t, const Config& conf)
   {
-    t.get_aspect().template gete<_create_>()(t);
+    t.get_aspect().template gete<_create_>()(t, conf);
   }
 
   /*
@@ -78,6 +78,7 @@ protected:
   }
   */
 
+  /*
   template<typename T, typename Config>
   void configure(T& t, const Config& conf)
   {
@@ -89,6 +90,7 @@ protected:
   {
     t.get_aspect().template gete<_initialize_>()(t, init );
   }
+  */
 
   template<typename T>
   void start(T& t)

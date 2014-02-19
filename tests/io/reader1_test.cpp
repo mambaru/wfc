@@ -1,8 +1,8 @@
+#include <iostream>
 
 #include <wfc/io/reader/reader.hpp>
 #include <wfc/io/reader/read/async/aspect.hpp>
 //#include <wfc/io/reader/aspect.hpp>
-#include <iostream>
 #include <string>
 #include <boost/asio.hpp>
 #include <thread>
@@ -16,24 +16,37 @@ void my_handler (int )
   signal (SIGINT, prev_handler);
 }
 
+struct init_info 
+{
+  std::shared_ptr<boost::asio::io_service> io_service;
+  boost::asio::posix::stream_descriptor::native_handle_type native_handle;
+  size_t input_buffer_size;
+  std::function<void()> not_alive;
+};
+
 int main()
 {
   std::function<void()> wrp = nullptr;
-  {
+  init_info init;
   auto io_service = std::make_shared<boost::asio::io_service>();
-  wfc::io::posix::init init;
   init.io_service = io_service;
-  
+  init.input_buffer_size = 1024*8;
+  init.not_alive = []() { std::cout << "not alive" << std::endl; };
+
+  {
   int dd[2];
   ::pipe(dd);
   init.native_handle = dd[0];
   typedef wfc::io::reader::reader< wfc::io::reader::read::async::aspect > reader_type;
-  reader_type reader;
-  reader.initialize(init);
+  reader_type reader(init);
+  // reader.initialize(init);
   
   std::function<void()> zzz = [](){ std::cout << "wrapped" << std::endl;};
   wrp = reader.wrap(zzz);
+  
+  std::cout << "{{{" << std::endl;
   wrp();
+  std::cout << "}}}" << std::endl;
   
   /*
   boost::asio::io_service::strand strand(*io_service);
@@ -47,9 +60,11 @@ int main()
   
   std::string result;
   
-  boost::asio::io_service::work wrk(*io_service);
+  boost::asio::io_service::work wrk(*init.io_service);
 
+  std::cout << "---" << std::endl;
   io_service->poll_one();
+  std::cout << "---" << std::endl;
   io_service->poll_one();
 
 
