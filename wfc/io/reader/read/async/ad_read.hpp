@@ -15,12 +15,10 @@ struct ad_read
     auto& lst = t.get_aspect().template get<_incoming_list_>();
     if ( lst.empty() )
     {
-      // auto d = std::make_unique<typename T::data_type>(8096);
       auto d = t.get_aspect().template get<common::_make_buffer_>()(t);
       t.get_aspect().template get< wfc::io::reader::async::_async_read_some_ >()(t, std::move(d) );
     }
   
-    std::cout << "list size " << lst.size() << std::endl;
     if ( !lst.empty() )
     {
       typename T::data_ptr d = std::move( lst.front() );

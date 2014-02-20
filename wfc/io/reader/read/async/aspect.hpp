@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wfc/io/reader/read/async/ad_read.hpp>
-#include <wfc/io/reader/read/async/ad_ready.hpp>
+#include <wfc/io/reader/read/async/ad_incoming.hpp>
 #include <wfc/io/reader/read/async/tags.hpp>
 #include <wfc/io/reader/errors/aspect.hpp>
 #include <wfc/io/reader/async/aspect.hpp>
@@ -23,10 +23,10 @@ typedef std::list<callback_type> callback_list;
 
 typedef fas::type_list_n<
   fas::value<_incoming_list_, data_list>,
-  // fas::value<_input_list_, base::data_list>,
+  
   fas::value<_callback_list_, callback_list>,
-  fas::advice<_read_, ad_read>,
-  fas::advice< wfc::io::reader::async::_ready_, ad_ready >
+  fas::advice< _read_, ad_read>,
+  fas::advice< wfc::io::reader::async::_incoming_, ad_incoming >
 >::type advice_list;
 
 

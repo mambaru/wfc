@@ -7,12 +7,11 @@
 
 namespace wfc{ namespace io{ namespace reader{ namespace read{ namespace async{ 
 
-struct ad_ready
+struct ad_incoming
 {
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
-    std::cout << "ready " << std::string( d->begin(), d->end() ) << std::endl;
     auto& clb_lst = t.get_aspect().template get<_callback_list_>();
     if ( !clb_lst.empty() )
     {

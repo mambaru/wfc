@@ -5,6 +5,8 @@
 #include <wfc/io/reader/common/tags.hpp>
 #include <wfc/io/tags.hpp>
 
+#include <fas/aop.hpp>
+
 namespace wfc{ namespace io{ namespace reader{  namespace common{
 
 typedef fas::type_list_n<
