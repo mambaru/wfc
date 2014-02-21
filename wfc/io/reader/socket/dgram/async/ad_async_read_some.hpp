@@ -19,8 +19,10 @@ struct ad_async_read_some
     (
       ::boost::asio::buffer( **dd ),
       t.get_aspect().template get< basic::_strand_>()->wrap(
-      [&t, dd]( boost::system::error_code ec, std::size_t bytes_transferred )
-      {
+      [this, &t, dd]( boost::system::error_code ec, std::size_t bytes_transferred )
+      { 
+        this->next(t, std::move(*dd), ec, bytes_transferred);
+        /*
         if (!ec)
         {
           (*dd)->resize( bytes_transferred);
@@ -34,9 +36,29 @@ struct ad_async_read_some
         {
           t.get_aspect().template get< errors::_error_ >()(t, ec, std::move(*dd) );
         }
+        */
       }
         )
     );
+  }
+  
+private:
+  template<typename T>
+  void next(T& t, typename T::data_ptr d, boost::system::error_code ec, std::size_t bytes_transferred)
+  {
+    if (!ec)
+    {
+      d->resize( bytes_transferred);
+      t.get_aspect().template get<_ready_>()( t, std::move(d) );
+    }
+    else if ( ec == boost::asio::error::operation_aborted)
+    {
+      t.get_aspect().template get< errors::_aborted_ >()(t, std::move(d) );
+    }
+    else
+    {
+      t.get_aspect().template get< errors::_error_ >()(t, ec, std::move(d) );
+    }
   }
 };
 

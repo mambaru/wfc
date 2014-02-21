@@ -5,7 +5,7 @@
 #include <wfc/io/reader/read/sync/tags.hpp>
 
 #include <wfc/io/reader/errors/aspect.hpp>
-#include <wfc/io/reader/sync/aspect.hpp>
+#include <wfc/io/reader/stream/sync/aspect.hpp>
 #include <wfc/io/reader/common/aspect.hpp>
 #include <wfc/io/context.hpp>
 #include <wfc/io/basic/aspect.hpp>
@@ -33,7 +33,7 @@ struct aspect: fas::aspect
   context<>,
   advice_list,
   fas::alias< wfc::io::reader::_incoming_, wfc::io::reader::_outgoing_>,
-  wfc::io::reader::sync::aspect,
+  wfc::io::reader::stream::sync::aspect,
   wfc::io::reader::errors::advice_list,
   wfc::io::reader::common::advice_list, 
   posix::advice_list,

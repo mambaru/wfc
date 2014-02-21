@@ -3,7 +3,7 @@
 #include <wfc/memory.hpp>
 #include <wfc/io/tags.hpp>
 
-#include <wfc/io/reader/sync/tags.hpp>
+#include <wfc/io/reader/stream/sync/tags.hpp>
 
 namespace wfc{ namespace io{ namespace reader{ namespace read{ namespace sync{ 
 

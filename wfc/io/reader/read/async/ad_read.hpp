@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wfc/io/reader/async/tags.hpp>
+#include <wfc/io/reader/stream/async/tags.hpp>
 #include <wfc/io/reader/read/async/tags.hpp>
 #include <wfc/io/reader/common/tags.hpp>
 #include <wfc/memory.hpp>
@@ -16,7 +16,7 @@ struct ad_read
     if ( lst.empty() )
     {
       auto d = t.get_aspect().template get<common::_make_buffer_>()(t);
-      t.get_aspect().template get< wfc::io::reader::async::_async_read_some_ >()(t, std::move(d) );
+      t.get_aspect().template get< wfc::io::reader::stream::async::_async_read_some_ >()(t, std::move(d) );
     }
   
     if ( !lst.empty() )

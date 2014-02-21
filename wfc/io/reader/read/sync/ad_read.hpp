@@ -4,7 +4,7 @@
 #include <wfc/io/tags.hpp>
 
 #include <wfc/io/reader/common/tags.hpp>
-#include <wfc/io/reader/sync/tags.hpp>
+#include <wfc/io/reader/stream/sync/tags.hpp>
 
 namespace wfc{ namespace io{ namespace reader{ namespace read{ namespace sync{ 
 
@@ -18,7 +18,7 @@ struct ad_read
     {
       // auto d = std::make_unique<typename T::data_type>(8096);
       auto d = t.get_aspect().template get<common::_make_buffer_>()(t);
-      t.get_aspect().template get< wfc::io::reader::sync::_read_some_ >()(t, std::move(d) );
+      t.get_aspect().template get< wfc::io::reader::stream::sync::_read_some_ >()(t, std::move(d) );
     }
   
     std::cout << "list size " << lst.size() << std::endl;

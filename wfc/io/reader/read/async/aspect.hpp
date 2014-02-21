@@ -4,7 +4,7 @@
 #include <wfc/io/reader/read/async/ad_incoming.hpp>
 #include <wfc/io/reader/read/async/tags.hpp>
 #include <wfc/io/reader/errors/aspect.hpp>
-#include <wfc/io/reader/async/aspect.hpp>
+#include <wfc/io/reader/stream/async/aspect.hpp>
 #include <wfc/io/reader/common/aspect.hpp>
 
 #include <wfc/io/context.hpp>
@@ -26,7 +26,7 @@ typedef fas::type_list_n<
   
   fas::value<_callback_list_, callback_list>,
   fas::advice< _read_, ad_read>,
-  fas::advice< wfc::io::reader::async::_incoming_, ad_incoming >
+  fas::advice< wfc::io::reader::stream::async::_incoming_, ad_incoming >
 >::type advice_list;
 
 
@@ -36,7 +36,7 @@ struct aspect: fas::aspect
   advice_list,
   posix::advice_list,
   basic::advice_list,
-  wfc::io::reader::async::advice_list,
+  wfc::io::reader::stream::async::advice_list,
   wfc::io::reader::errors::advice_list,
   wfc::io::reader::common::advice_list/*,
   fas::type< wfc::io::_config_type_, basic::config>,

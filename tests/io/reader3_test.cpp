@@ -52,6 +52,28 @@ struct reader_aspect: fas::aspect<
   wfc::io::basic::aspect
 > {};
 
+
+struct holder
+{
+  holder(boost::asio::posix::stream_descriptor&& desc)
+    : desc( std::move(desc) )
+  {
+  };
+  
+  boost::asio::posix::stream_descriptor detach()
+  {
+    return std::move(desc);
+  }
+  
+  void attach(boost::asio::posix::stream_descriptor&& desc)
+  {
+    this->desc = std::move(desc);
+  }
+  
+  
+  boost::asio::posix::stream_descriptor desc;
+};
+
 int main()
 {
   /*
@@ -64,6 +86,13 @@ int main()
   ::pipe(dd);
 
   auto io_service = std::make_shared<boost::asio::io_service>();
+  
+  boost::asio::posix::stream_descriptor desc(*io_service);
+  holder h( std::move(desc) );
+  desc = h.detach();
+  h.attach( std::move(desc) );
+
+  
   boost::asio::io_service::work wrk(*io_service);
   init_info init;
   init.io_service = io_service;
