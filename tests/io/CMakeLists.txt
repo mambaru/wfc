@@ -1,11 +1,11 @@
 add_executable(reader0_test reader0_test.cpp)
 add_test(reader0_test reader0_test)
-target_link_libraries(reader0_test boost_system pthread)
+target_link_libraries(reader0_test wfc boost_system pthread)
 
 
 add_executable(reader1_test reader1_test.cpp)
 add_test(reader1_test reader1_test)
-target_link_libraries(reader1_test boost_system pthread)
+target_link_libraries(reader1_test wfc boost_system pthread)
 
 add_executable(reader2_test reader2_test.cpp)
 add_test(reader2_test reader2_test)

@@ -9,6 +9,12 @@ namespace wfc{ namespace io{ namespace reader{  namespace read{ namespace async{
 
 struct ad_read
 {
+  template<typename>
+  struct return_type
+  {
+    typedef void type;
+  };
+  
   template<typename T, typename Callback>
   void operator()(T& t, Callback callback)
   {

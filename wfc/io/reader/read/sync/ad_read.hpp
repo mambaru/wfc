@@ -11,6 +11,12 @@ namespace wfc{ namespace io{ namespace reader{ namespace read{ namespace sync{
 struct ad_read
 {
   template<typename T>
+  struct return_type
+  {
+    typedef typename T::data_ptr type;
+  };
+  
+  template<typename T>
   typename T::data_ptr operator()(T& t)
   {
     auto& lst = t.get_aspect().template get<_incoming_list_>();

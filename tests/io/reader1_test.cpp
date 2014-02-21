@@ -1,7 +1,11 @@
 #include <iostream>
 
 #include <wfc/io/reader/reader.hpp>
-#include <wfc/io/reader/read/async/aspect.hpp>
+//#include <wfc/io/reader/read/async/aspect.hpp>
+
+#include <wfc/io/reader/reader.hpp>
+#include <wfc/io/strategy/posix/reader/async_read_ws_log.hpp>
+
 #include <string>
 #include <boost/asio.hpp>
 
@@ -33,13 +37,15 @@ int main()
   
   
   {
-    typedef wfc::io::reader::reader< wfc::io::reader::read::async::aspect > reader_type;
-    reader_type reader(init);
+    typedef wfc::io::strategy::posix::reader::async_read_ws_log async_read_ws_log;
+    typedef wfc::io::reader::reader< async_read_ws_log > reader_type;
+    boost::asio::posix::stream_descriptor sd(*io_service, dd[0]);
+    reader_type reader( std::move(sd), init);
     
     handler = reader.wrap([&](){ ++handler_count;});
     
     write(dd[1], "test1", 5);    
-    reader.async_read([&]( reader_type::data_ptr d )
+    reader.read([&]( reader_type::data_ptr d )
     {
       ++test_count;
       std::string result( d->begin(), d->end() );
@@ -55,7 +61,7 @@ int main()
     if ( test_count!=1 )
       std::abort();
 
-    reader.async_read([&]( reader_type::data_ptr d )
+    reader.read([&]( reader_type::data_ptr d )
     {
       ++test_count;
       std::string result( d->begin(), d->end() );
@@ -66,7 +72,7 @@ int main()
     if ( test_count!=1 )
       std::abort();
 
-    reader.async_read([&]( reader_type::data_ptr d )
+    reader.read([&]( reader_type::data_ptr d )
     {
       ++test_count;
       std::string result( d->begin(), d->end() );

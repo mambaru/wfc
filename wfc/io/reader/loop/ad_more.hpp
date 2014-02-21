@@ -10,8 +10,8 @@ struct ad_more
   template<typename T>
   void operator()(T& t)
   {
-    std::cout << "loop ad_more" << std::endl;
-    auto d = t.get_aspect().template get<common::_make_buffer_>()(t);
+    std::cout << "loop more" << std::endl;
+    auto d = t.get_aspect().template get< common::_make_buffer_ >()(t);
     t.get_aspect().template get< _read_some_ >()(t, std::move(d) );
   }
 };

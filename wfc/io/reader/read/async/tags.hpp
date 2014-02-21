@@ -8,6 +8,7 @@ struct _read_;
 struct _input_list_;
 struct _incoming_list_;
 struct _callback_list_;
+struct _incoming_;
 
 
 }}}}}

@@ -23,24 +23,18 @@ typedef std::list<callback_type> callback_list;
 
 typedef fas::type_list_n<
   fas::value<_incoming_list_, data_list>,
-  
   fas::value<_callback_list_, callback_list>,
   fas::advice< _read_, ad_read>,
-  fas::advice< wfc::io::reader::stream::async::_incoming_, ad_incoming >
+  fas::advice< _incoming_, ad_incoming>
 >::type advice_list;
 
 
 struct aspect: fas::aspect
 < 
-  context<>,
   advice_list,
-  posix::advice_list,
-  basic::advice_list,
-  wfc::io::reader::stream::async::advice_list,
-  wfc::io::reader::errors::advice_list,
-  wfc::io::reader::common::advice_list/*,
-  fas::type< wfc::io::_config_type_, basic::config>,
-  fas::type< wfc::io::_init_type_, posix::init >*/
+  //fas::alias< wfc::reader::_outgoing_, _incoming_ >,
+  fas::alias< common::_outgoing_, _incoming_ >,
+  fas::alias< wfc::io::reader::_read_, _read_ >
 >
 {};
 

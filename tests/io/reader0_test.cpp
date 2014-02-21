@@ -1,9 +1,34 @@
 #include <iostream>
 
-#include <wfc/io/reader/reader.hpp>
+#include <wfc/logger/ilogger.hpp>
+#include <wfc/core/global.hpp>
+
+/*
+#include <wfc/io/reader/common/trace/aspect.hpp>
+#include <wfc/io/reader/errors/log/aspect.hpp>
 #include <wfc/io/reader/read/sync/aspect.hpp>
+#include <wfc/io/basic/log/aspect.hpp>
+*/
+#include <wfc/io/reader/reader.hpp>
+#include <wfc/io/strategy/posix/reader/sync_read_ws_log.hpp>
 #include <string>
 #include <boost/asio.hpp>
+
+
+class logger
+  : public wfc::ilogger
+{
+public:
+  virtual void initialize(const std::string& , std::stringstream& )
+  {
+    
+  }
+  
+  virtual void write(const std::string& name, const std::string& ident,  const std::string& str)
+  {
+    std::clog << "LOG " << name << "\t" << ident << "\t" << str << std::endl;
+  }
+};
 
 
 struct init_info 
@@ -16,6 +41,14 @@ struct init_info
 
 int main()
 {
+  auto reg = std::make_shared<wfc::registry< wfc::ilogger> >();
+  auto log = std::make_shared<logger>();
+  auto global = std::make_shared<wfc::global>() ;
+  wfc::global::static_global = global;
+  global->loggers = reg;
+  reg->set("common", log);
+  reg->set("trace", log);
+  
   size_t handler_count = 0;
   size_t not_alive_count = 0;
   std::function< void() > handler = nullptr;
@@ -31,10 +64,21 @@ int main()
   init.input_buffer_size = 8096;
   init.not_alive = [&](){ ++not_alive_count;};
   
+  //_daemon_log = std::make_shared<logger>( lconf );
+  
   
   {
-    typedef wfc::io::reader::reader< wfc::io::reader::read::sync::aspect > reader_type;
-    reader_type reader(init);
+    /*typedef fas::aspect< 
+      wfc::io::strategy::posix::reader::sync_read,
+      //wfc::io::basic::log::aspect, 
+      wfc::io::reader::errors::log::aspect,
+      wfc::io::reader::common::trace::aspect
+      //wfc::io::reader::read::sync::aspect 
+    > reader_aspect;*/
+    typedef wfc::io::strategy::posix::reader::sync_read_ws_log sync_read_ws_log;
+    typedef wfc::io::reader::reader< sync_read_ws_log > reader_type;
+    boost::asio::posix::stream_descriptor sd(*io_service, dd[0]);
+    reader_type reader( std::move(sd), init);
     
     handler = reader.wrap([&](){ ++handler_count;});
     
@@ -52,6 +96,8 @@ int main()
     
     reader.get_io_service().post( handler );
     io_service->run_one();
+    close(dd[0]);
+    d = reader.read();
     reader.get_io_service().post( handler );
   }
   

@@ -8,11 +8,6 @@ namespace wfc{ namespace io{ namespace rn{ namespace reader{
 
 struct ad_splitter
 {
-  /*
-  typedef std::vector<char> data_type;
-  typedef std::unique_ptr<data_type> data_ptr;
-  */
-
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
@@ -21,8 +16,6 @@ struct ad_splitter
     
     auto beg = d->begin();
     auto end = d->end();
-    
-    //std::cout << "DGRAM SPLIT " << std::string( beg, end ) << std::endl;
     
     // если buffer != nullptr, то beg и end итераторы buffer
     // если buffer == nullptr, то beg и end итераторы d

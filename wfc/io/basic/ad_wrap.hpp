@@ -12,7 +12,6 @@ struct ad_wrap
   {
     if ( auto strand = t.get_aspect().template get<_strand_>() )
     {
-      //return strand_wrap(strand, callback);
       return this->owner_wrap(t, strand_wrap(strand, callback) );
     }
     else

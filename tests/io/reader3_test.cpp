@@ -2,7 +2,9 @@
 
 #include <wfc/io/reader/aspect.hpp>
 #include <wfc/io/reader/reader.hpp>
-#include <wfc/io/reader/read/async/aspect.hpp>
+#include <wfc/io/reader/read/aspect.hpp>
+#include <wfc/io/posix/aspect.hpp>
+#include <wfc/io/basic/aspect.hpp>
 #include <wfc/io/rn/reader/aspect.hpp>
 #include <wfc/io/rn/reader/check/aspect.hpp>
 #include <string>
@@ -24,9 +26,9 @@ std::vector<std::string> result_list;
 struct ad_reset_buffer
 {
   template<typename T>
-  void operator()(T& t, size_t)
+  void operator()(T& /*t*/, size_t)
   {
-    t.get_aspect().template get<wfc::io::rn::reader::_buffer_>() = nullptr;
+    //t.get_aspect().template get<wfc::io::rn::reader::_buffer_>() = nullptr;
   }
 };
 
@@ -44,12 +46,14 @@ struct reader_aspect: fas::aspect<
   wfc::io::context<>,
   wfc::io::rn::reader::check::aspect,
   wfc::io::rn::reader::aspect,
-  fas::alias<wfc::io::reader::_incoming_, wfc::io::rn::reader::_incoming_>,
+  fas::alias<wfc::io::reader::_outgoing_, wfc::io::rn::reader::_incoming_>,
   fas::advice<wfc::io::rn::reader::_outgoing_, ad_handler>,
   fas::advice<wfc::io::rn::reader::check::_on_limit_error_, ad_reset_buffer>,
   wfc::io::posix::aspect,
   wfc::io::reader::aspect,
+  wfc::io::reader::read::aspect,
   wfc::io::basic::aspect
+  
 > {};
 
 
@@ -103,7 +107,9 @@ int main()
   init.rn_limit_warning = 0;
   {
     typedef wfc::io::reader::reader< reader_aspect > reader_type;
-    reader_type reader(init);
+    boost::asio::posix::stream_descriptor sd(*io_service, dd[0]);
+    reader_type reader( std::move(sd), init);
+
     reader.start();
     write(dd[1], "te", 2);
     io_service->run_one();

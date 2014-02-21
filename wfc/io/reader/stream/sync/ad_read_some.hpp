@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wfc/io/reader/errors/tags.hpp>
+#include <wfc/io/reader/common/tags.hpp>
 #include <wfc/io/reader/stream/sync/tags.hpp>
 #include <wfc/io/tags.hpp>
 
@@ -17,21 +18,9 @@ struct ad_read_some
     boost::system::error_code ec;
     
     size_t bytes_transferred = 
-      t.get_aspect().template get<_descriptor_ptr_>()->read_some( ::boost::asio::buffer( *d ), ec);
+      t.descriptor().read_some( ::boost::asio::buffer( *d ), ec);
       
-    if (!ec)
-    {
-      d->resize(bytes_transferred);
-      t.get_aspect().template get<_ready_>()( t, std::move(d) );
-    }
-    else if ( ec == boost::asio::error::operation_aborted)
-    {
-      t.get_aspect().template get<errors::_aborted_>()(t, std::move(d));
-    }
-    else
-    {
-      t.get_aspect().template get<errors::_error_>()(t, ec, std::move(d));
-    }
+    t.get_aspect().template get<common::_handler_>()(t, std::move(d), ec, bytes_transferred);
   }
 };
 

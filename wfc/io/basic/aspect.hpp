@@ -13,6 +13,9 @@
 #include <wfc/callback/callback_owner.hpp>
 #include <fas/aop.hpp>
 
+#include <boost/asio/strand.hpp>
+#include <boost/asio/io_service.hpp>
+
 namespace wfc{ namespace io{ namespace basic{
 
 typedef fas::type_list_n<
@@ -22,12 +25,11 @@ typedef fas::type_list_n<
   fas::type< _owner_type_, wfc::callback_owner>,
   fas::type< wfc::io::_data_type_, data_type>,
 
-  fas::advice<_create_, ad_create>,
+  fas::advice< _create_, ad_create>,
   fas::advice< wfc::io::_post_, ad_post>,
   fas::advice< wfc::io::_wrap_, ad_wrap>,
   fas::advice< wfc::io::_dispatch_, ad_dispatch>, 
 
-  fas::value< wfc::io::_io_service_ptr_, std::shared_ptr<boost::asio::io_service> >,
   fas::value< _strand_, std::shared_ptr<boost::asio::strand> >, 
   fas::value< _owner_, std::shared_ptr<wfc::callback_owner> >, 
   fas::value< _not_alive_, std::function<void()> >, 

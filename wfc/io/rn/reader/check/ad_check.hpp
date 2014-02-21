@@ -4,7 +4,6 @@
 #include <wfc/io/rn/reader/check/tags.hpp>
 #include <utility>
 
-
 namespace wfc{ namespace io{ namespace rn{ namespace reader{ namespace check{
 
 struct ad_check

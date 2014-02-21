@@ -3,7 +3,6 @@
 #include <wfc/io/rn/reader/tags.hpp>
 #include <utility>
 
-
 namespace wfc{ namespace io{ namespace rn{ namespace reader{
 
 struct ad_ready

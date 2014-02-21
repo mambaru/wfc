@@ -18,7 +18,8 @@ public:
   typedef reader<A, AspectClass> self;
   typedef io_base<A, AspectClass> super;
   
-  typedef typename super::aspect::template advice_cast<_data_type_>::type data_type;
+  typedef typename super::data_type data_type;
+  typedef typename super::descriptor_type descriptor_type;
   typedef std::unique_ptr<data_type> data_ptr;
   
 public:
@@ -27,7 +28,8 @@ public:
   void operator = (const reader& conf) = delete;
 
   template<typename Conf>
-  reader(const Conf& conf) 
+  reader(descriptor_type&& desc, const Conf& conf)
+    : super( std::move(desc) )
   {
     super::create(*this, conf);
   }
@@ -48,17 +50,39 @@ public:
     return super::wrap(*this, handler);
   }
 
+  /*
   template<typename Callback>
-  void async_read(Callback callback = nullptr/*std::function<void(data_ptr)>*/)
+  void read(Callback callback = nullptr)
   {
-    this->get_aspect().template get<read::async::_read_>()(*this, callback);
+    this->get_aspect().template get<_read_>()(*this, callback);
   }
   
   data_ptr read()
   {
-    return this->get_aspect().template get< read::sync::_read_ >()(*this);
-    
+    return this->get_aspect().template get< _read_ >()(*this);
   }
+  */
+  
+  template<typename ...Args>
+  typename super::aspect::template advice_cast<_read_>::type::template return_type<self>::type
+  read(Args&& ...args)
+  {
+    return this->get_aspect().template get< _read_ >()(*this, std::forward<Args>(args)...);
+  }
+  
+  /*
+template<typename T, typename ...Args>
+std::unique_ptr<T> make_unique( Args&& ...args )
+{
+  return std::unique_ptr<T>( new T( std::forward<Args>(args)... ) );
+}
+
+   */
+  
+  /*
+  template<typename T>
+  typename T::aspect::template advice_cast<read::sync::_read_>::type::return_type
+  */
 
 private:
 

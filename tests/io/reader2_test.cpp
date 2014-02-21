@@ -1,8 +1,10 @@
 #include <iostream>
 
 #include <wfc/io/reader/aspect.hpp>
+#include <wfc/io/posix/aspect.hpp>
+#include <wfc/io/basic/aspect.hpp>
 #include <wfc/io/reader/reader.hpp>
-#include <wfc/io/reader/read/async/aspect.hpp>
+#include <wfc/io/reader/read/aspect.hpp>
 #include <string>
 #include <boost/asio.hpp>
 
@@ -28,9 +30,13 @@ struct ad_handler
 
 struct reader_aspect: fas::aspect<
   wfc::io::context<>,
-  fas::advice<wfc::io::reader::_incoming_, ad_handler>,
-  wfc::io::posix::aspect,
+  fas::advice<wfc::io::_incoming_, ad_handler>,
+  fas::alias<wfc::io::reader::_outgoing_, wfc::io::_incoming_>,
+  //fas::advice<wfc::io::reader::_outgoing_, ad_handler>,
+  wfc::io::reader::loop::aspect,
   wfc::io::reader::aspect,
+  wfc::io::posix::aspect,
+  wfc::io::reader::read::aspect,
   wfc::io::basic::aspect
 > {};
 
@@ -54,13 +60,16 @@ int main()
   init.not_alive = nullptr;
   {
     typedef wfc::io::reader::reader< reader_aspect > reader_type;
-    reader_type reader(init);
+
+    boost::asio::posix::stream_descriptor sd(*io_service, dd[0]);
+    reader_type reader( std::move(sd), init);
     reader.start();
     write(dd[1], "test1", 5);
     io_service->run_one();
     write(dd[1], "test2", 5);
     io_service->run_one();
   }
+  
   
   if ( result_list.size()!=2 )
     abort();

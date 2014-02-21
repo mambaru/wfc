@@ -20,9 +20,14 @@ struct aspect: fas::aspect
   common::advice_list,
   errors::advice_list,
   stream::async::advice_list,
+  fas::alias< loop::_read_some_, common::_reader_>,
+  fas::alias< common::_outgoing_, _outgoing_ >,
+  //fas::alias< loop::_read_some_, stream::async::_async_read_some_>,
+  /*
   fas::alias< loop::_read_some_, stream::async::_async_read_some_>,
   fas::alias< stream::async::_incoming_, loop::_ready_ >,
   fas::alias< loop::_incoming_, _incoming_ >,
+  */
   loop::advice_list
 >
 {};
