@@ -10,7 +10,9 @@
 #include <wfc/io/basic/log/aspect.hpp>
 */
 #include <wfc/io/reader/reader.hpp>
-#include <wfc/io/strategy/posix/reader/sync_read_ws_log.hpp>
+#include <wfc/io/strategy/posix/reader/sync_read.hpp>
+#include <wfc/io/strategy/posix/reader/log.hpp>
+#include <wfc/io/strategy/posix/reader/trace.hpp>
 #include <string>
 #include <boost/asio.hpp>
 
@@ -75,11 +77,14 @@ int main()
       wfc::io::reader::common::trace::aspect
       //wfc::io::reader::read::sync::aspect 
     > reader_aspect;*/
-    typedef wfc::io::strategy::posix::reader::sync_read_ws_log sync_read_ws_log;
-    typedef wfc::io::reader::reader< sync_read_ws_log > reader_type;
+    typedef fas::type_list_n<
+        wfc::io::strategy::posix::reader::trace,
+        wfc::io::strategy::posix::reader::log,
+        wfc::io::strategy::posix::reader::sync_read
+    >::type sync_read_ws_log;
+    typedef wfc::io::reader::reader< fas::aspect<sync_read_ws_log> > reader_type;
     boost::asio::posix::stream_descriptor sd(*io_service, dd[0]);
     reader_type reader( std::move(sd), init);
-    
     handler = reader.wrap([&](){ ++handler_count;});
     
     write(dd[1], "test1", 5);

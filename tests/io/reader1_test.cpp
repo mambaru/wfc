@@ -4,7 +4,9 @@
 //#include <wfc/io/reader/read/async/aspect.hpp>
 
 #include <wfc/io/reader/reader.hpp>
-#include <wfc/io/strategy/posix/reader/async_read_ws_log.hpp>
+#include <wfc/io/strategy/posix/reader/async_read.hpp>
+#include <wfc/io/strategy/posix/reader/trace.hpp>
+#include <wfc/io/strategy/posix/reader/log.hpp>
 
 #include <string>
 #include <boost/asio.hpp>
@@ -37,7 +39,11 @@ int main()
   
   
   {
-    typedef wfc::io::strategy::posix::reader::async_read_ws_log async_read_ws_log;
+    typedef fas::aspect<
+      wfc::io::strategy::posix::reader::async_read,
+      wfc::io::strategy::posix::reader::log,
+      wfc::io::strategy::posix::reader::trace
+    > async_read_ws_log;
     typedef wfc::io::reader::reader< async_read_ws_log > reader_type;
     boost::asio::posix::stream_descriptor sd(*io_service, dd[0]);
     reader_type reader( std::move(sd), init);
