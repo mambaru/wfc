@@ -48,6 +48,8 @@ int main()
     reader_type reader( std::move(sd), init);
     
     reader.start();
+    io_service->run_one();
+    
     write(dd[1], "test1", 5);
     io_service->run_one();
     write(dd[1], "test2", 5);

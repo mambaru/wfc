@@ -47,9 +47,10 @@ int main()
     boost::asio::posix::stream_descriptor sd(*io_service, dd[0]);
     reader_type reader( std::move(sd), init);
     
-    std::thread th([&reader]()
+    std::thread th([&reader, &io_service]()
     {
       reader.start();
+      io_service->run_one();
     });
     usleep(100000);
     write(dd[1], "test1", 5);

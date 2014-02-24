@@ -72,10 +72,23 @@ public:
   {
     return *(this->get_aspect().template get<_strand_>());
   }
+  
 
 
 protected:
-  
+
+  template<typename T, typename Handler>
+  void dispatch(T& t, Handler h)
+  {
+    this->get_aspect().template get<_dispatch_>()(t, h);
+  }
+
+  template<typename T, typename Handler>
+  void post(T& t, Handler h)
+  {
+    this->get_aspect().template get<_dispatch_>()(t, h);
+  }
+
   template<typename T, typename Config>
   void create(T& t, const Config& conf)
   {

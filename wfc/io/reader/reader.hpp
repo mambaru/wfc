@@ -50,6 +50,19 @@ public:
   {
     return super::wrap(*this, handler);
   }
+  
+  template<typename Handler>
+  void dispatch(Handler h)
+  {
+    return super::dispatch(*this, h);
+  }
+
+  template<typename Handler>
+  void post(Handler h)
+  {
+    return super::post(*this, h);
+  }
+
 
   /*
   template<typename Callback>
