@@ -6,7 +6,6 @@
 
 namespace wfc{ namespace io{ namespace rn{ namespace reader{
 
-
 struct ad_trimmer
 {
   template<typename T>

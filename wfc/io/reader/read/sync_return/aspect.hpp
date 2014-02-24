@@ -1,8 +1,8 @@
 #pragma once
 
-#include <wfc/io/reader/read/sync/ad_read.hpp>
-#include <wfc/io/reader/read/sync/ad_incoming.hpp>
-#include <wfc/io/reader/read/sync/tags.hpp>
+#include <wfc/io/reader/read/sync_return/ad_read.hpp>
+#include <wfc/io/reader/read/sync_return/ad_incoming.hpp>
+#include <wfc/io/reader/read/sync_return/tags.hpp>
 
 #include <wfc/io/reader/errors/aspect.hpp>
 #include <wfc/io/reader/stream/sync/aspect.hpp>
@@ -14,7 +14,7 @@
 #include <fas/aop.hpp>
 #include <list>
 
-namespace wfc{ namespace io{ namespace reader{ namespace read{ namespace sync{ 
+namespace wfc{ namespace io{ namespace reader{ namespace read{ namespace sync_return{ 
 
 // TODO: сделать mutex
 
@@ -30,7 +30,7 @@ typedef fas::type_list_n<
 struct aspect: fas::aspect
 < 
   advice_list,
-  fas::alias< common::_outgoing_, _incoming_ >,
+  //fas::alias< common::_outgoing_, _incoming_ >,
   fas::alias< wfc::io::reader::_read_, _read_ >
 >
 {};

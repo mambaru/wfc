@@ -8,6 +8,9 @@ struct _io_service_type_;
 struct _context_;
 struct _data_type_;
 
+struct _strand_;
+struct _strand_type_;
+
 struct _post_;
 struct _wrap_;
 struct _dispatch_;

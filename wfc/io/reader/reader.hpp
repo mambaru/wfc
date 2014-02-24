@@ -1,7 +1,8 @@
 #pragma once
 
-#include <wfc/io/reader/read/sync/tags.hpp>
-#include <wfc/io/reader/read/async/tags.hpp>
+//#include <wfc/io/reader/read/sync/tags.hpp>
+//#include <wfc/io/reader/read/async_callback/tags.hpp>
+#include <wfc/io/reader/tags.hpp>
 #include <wfc/io/io_base.hpp>
 #include <fas/aop.hpp>
 #include <memory>

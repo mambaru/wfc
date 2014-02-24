@@ -13,8 +13,6 @@ typedef fas::type_list_n<
   fas::advice<_ready_, ad_ready>,
   fas::advice<_start_, ad_start>,
   fas::alias<_incoming_, _ready_>,
-  fas::alias<common::_ready_, _ready_>,
-  fas::alias<wfc::io::reader::loop::_outgoing_, wfc::io::reader::_outgoing_>,
   fas::group< wfc::io::_start_, _start_>
 >::type advice_list;
 

@@ -6,6 +6,7 @@ namespace wfc{ namespace io{ namespace reader{ namespace stream{ namespace sync{
 
 struct _read_some_;
 struct _incoming_;
-struct _ready_;
+struct _outgoing_;
+//struct _ready_;
 
 }}}}}

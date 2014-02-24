@@ -19,6 +19,7 @@ public:
   
   typedef typename super::aspect::template advice_cast<_context_>::type context_type;
   typedef typename super::aspect::template advice_cast<_data_type_>::type data_type;
+  typedef typename super::aspect::template advice_cast<_strand_type_>::type strand_type;
   //typedef typename super::aspect::template advice_cast<_config_type_>::type config_type;
   //typedef typename super::aspect::template advice_cast<_init_type_>::type init_type;
   typedef typename super::aspect::template advice_cast<_io_service_type_>::type io_service_type;
@@ -61,6 +62,17 @@ public:
     return this->descriptor().get_io_service();
     //return *(this->get_aspect().template get<_io_service_ptr_>());
   }
+  
+  strand_type& strand()
+  {
+    return *(this->get_aspect().template get<_strand_>());
+  }
+
+  const strand_type& strand() const
+  {
+    return *(this->get_aspect().template get<_strand_>());
+  }
+
 
 protected:
   

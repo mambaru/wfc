@@ -1,11 +1,11 @@
 #pragma once
 
 #include <wfc/io/reader/stream/async/tags.hpp>
-#include <wfc/io/reader/read/async/tags.hpp>
+#include <wfc/io/reader/read/async_callback/tags.hpp>
 #include <wfc/io/reader/common/tags.hpp>
 #include <wfc/memory.hpp>
 
-namespace wfc{ namespace io{ namespace reader{  namespace read{ namespace async{
+namespace wfc{ namespace io{ namespace reader{  namespace read{ namespace async_callback{
 
 struct ad_read
 {
@@ -22,7 +22,7 @@ struct ad_read
     if ( lst.empty() )
     {
       auto d = t.get_aspect().template get<common::_make_buffer_>()(t);
-      t.get_aspect().template get< wfc::io::reader::stream::async::_async_read_some_ >()(t, std::move(d) );
+      t.get_aspect().template get< _outgoing_ >()(t, std::move(d) );
     }
   
     if ( !lst.empty() )

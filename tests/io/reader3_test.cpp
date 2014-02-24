@@ -1,37 +1,19 @@
 #include <iostream>
 
-#include <wfc/io/reader/aspect.hpp>
 #include <wfc/io/reader/reader.hpp>
-#include <wfc/io/reader/read/aspect.hpp>
-#include <wfc/io/posix/aspect.hpp>
-#include <wfc/io/basic/aspect.hpp>
-#include <wfc/io/rn/reader/aspect.hpp>
-#include <wfc/io/rn/reader/check/aspect.hpp>
+#include <wfc/io/strategy/posix/reader/async_handler.hpp>
+#include <wfc/io/strategy/posix/reader/trace.hpp>
+#include <wfc/io/strategy/posix/reader/log.hpp>
+#include <wfc/io/strategy/posix/reader/config.hpp>
+
 #include <string>
 #include <boost/asio.hpp>
 
-struct init_info 
-{
-  std::shared_ptr<boost::asio::io_service> io_service;
-  boost::asio::posix::stream_descriptor::native_handle_type native_handle;
-  size_t input_buffer_size;
-  std::function<void()> not_alive;
-  
-  size_t rn_limit_error;
-  size_t rn_limit_warning;
-};
+typedef wfc::io::strategy::posix::reader::config init_info;
 
 std::vector<std::string> result_list;
 
-struct ad_reset_buffer
-{
-  template<typename T>
-  void operator()(T& /*t*/, size_t)
-  {
-    //t.get_aspect().template get<wfc::io::rn::reader::_buffer_>() = nullptr;
-  }
-};
-
+struct _handler_;
 struct ad_handler
 {
   template<typename T>
@@ -43,83 +25,36 @@ struct ad_handler
 };
 
 struct reader_aspect: fas::aspect<
-  wfc::io::context<>,
-  wfc::io::rn::reader::check::aspect,
-  wfc::io::rn::reader::aspect,
-  fas::alias<wfc::io::reader::_outgoing_, wfc::io::rn::reader::_incoming_>,
-  fas::advice<wfc::io::rn::reader::_outgoing_, ad_handler>,
-  fas::advice<wfc::io::rn::reader::check::_on_limit_error_, ad_reset_buffer>,
-  wfc::io::posix::aspect,
-  wfc::io::reader::aspect,
-  wfc::io::reader::read::aspect,
-  wfc::io::basic::aspect
-  
+  fas::advice< wfc::io::reader::_outgoing_, ad_handler>,
+  wfc::io::strategy::posix::reader::async_handler,
+  wfc::io::strategy::posix::reader::log,
+  wfc::io::strategy::posix::reader::trace
 > {};
-
-
-struct holder
-{
-  holder(boost::asio::posix::stream_descriptor&& desc)
-    : desc( std::move(desc) )
-  {
-  };
-  
-  boost::asio::posix::stream_descriptor detach()
-  {
-    return std::move(desc);
-  }
-  
-  void attach(boost::asio::posix::stream_descriptor&& desc)
-  {
-    this->desc = std::move(desc);
-  }
-  
-  
-  boost::asio::posix::stream_descriptor desc;
-};
 
 int main()
 {
-  /*
-  size_t test_count = 0;
-  size_t handler_count = 0;
-  size_t not_alive_count = 0;
-  std::function< void() > handler = nullptr;
-  */
   int dd[2];
   ::pipe(dd);
 
   auto io_service = std::make_shared<boost::asio::io_service>();
-  
-  boost::asio::posix::stream_descriptor desc(*io_service);
-  holder h( std::move(desc) );
-  desc = h.detach();
-  h.attach( std::move(desc) );
-
-  
   boost::asio::io_service::work wrk(*io_service);
   init_info init;
-  init.io_service = io_service;
-  init.native_handle = dd[0];
   init.input_buffer_size = 8096;
   init.not_alive = nullptr;
-  init.rn_limit_error = 0;
-  init.rn_limit_warning = 0;
   {
     typedef wfc::io::reader::reader< reader_aspect > reader_type;
+
     boost::asio::posix::stream_descriptor sd(*io_service, dd[0]);
     reader_type reader( std::move(sd), init);
-
-    reader.start();
-    write(dd[1], "te", 2);
+    reader.read();
+    write(dd[1], "test1", 5);
     io_service->run_one();
-    write(dd[1], "st1\r\n", 5);
+    reader.read();
+    write(dd[1], "test2", 5);
     io_service->run_one();
-    write(dd[1], "test2\r", 6);
-    io_service->run_one();
-    write(dd[1], "\n", 1);
-    io_service->run_one();
+    reader.read();
   }
+  
   
   if ( result_list.size()!=2 )
     abort();

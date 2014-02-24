@@ -5,7 +5,7 @@
 
 #include <wfc/io/reader/stream/sync/tags.hpp>
 
-namespace wfc{ namespace io{ namespace reader{ namespace read{ namespace sync{ 
+namespace wfc{ namespace io{ namespace reader{ namespace read{ namespace sync_return{ 
 
 struct ad_incoming
 {

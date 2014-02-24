@@ -12,7 +12,8 @@ struct ad_handler
   template<typename T>
   void operator()(T& t, typename T::data_ptr d, boost::system::error_code ec, std::size_t bytes_transferred)
   {
-    std::cout << "ad_handler " << std::endl;
+    std::cout << "ad_handler { " << std::endl;
+      
     if (!ec)
     {
       d->resize( bytes_transferred);
@@ -26,6 +27,8 @@ struct ad_handler
     {
       t.get_aspect().template get< errors::_error_ >()(t, ec, std::move(d) );
     }
+    
+    std::cout << "} ad_handler" << std::endl;
   }
 };
 
