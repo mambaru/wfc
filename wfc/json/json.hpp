@@ -24,6 +24,9 @@ struct value;
 template<typename T = std::string>
 struct raw_value;
 
+template<typename T>
+struct value_quoted;
+
 template<typename N, typename T, T v>
 struct enum_value;
 
@@ -494,5 +497,6 @@ struct array< object<T, L>, R>
 #include "specialization/json_array.hpp"
 #include "specialization/json_enum.hpp"
 #include "specialization/json_set_enum.hpp"
+#include "specialization/json_quoted.hpp"
 
 
