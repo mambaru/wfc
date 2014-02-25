@@ -24,7 +24,9 @@ private:
   template<typename T>
   void process(T& t, typename T::data_ptr d, std::size_t bytes_transferred)
   {
-    typedef decltype(lst)::value_type::element_type data_type;
+    // TODO: протестировать 
+    //typedef decltype(lst)::value_type::element_type data_type;
+    typedef typename T::data_type data_type;
 
     size_t size = d->size() - bytes_transferred;
     size_t limit = t.get_aspect().template get<_output_buffer_size_>();
