@@ -35,6 +35,13 @@ public:
     super::create(*this, conf);
   }
 
+  template<typename Conf>
+  void reconfigure(const Conf& conf)
+  {
+    super::create(*this, conf);
+  }
+
+  
   void start()
   {
     super::start(*this);

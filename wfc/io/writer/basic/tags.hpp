@@ -11,6 +11,7 @@ struct _ready_;
 struct _process_;
 
 struct _make_buffer_;
+struct _free_buffer_;
 struct _output_buffer_size_;
 struct _outgoing_buffer_list_;
 

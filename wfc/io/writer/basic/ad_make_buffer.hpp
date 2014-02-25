@@ -19,6 +19,7 @@ struct ad_make_buffer
       std::cout << "ad_make_buffer -2-" << (d==nullptr) << std::endl;
       if (d==nullptr)
         return nullptr;
+      lst.push_back(nullptr);
       std::cout << "ad_make_buffer -3- " << (d==nullptr) << std::endl;
       return std::move(d);
     }
@@ -51,7 +52,9 @@ struct ad_make_buffer
     // TODO: отдать в список буфферов
     
     d = std::move( lst.front() );
-    lst.pop_front();
+    
+    // Оставляем до free_buffer
+    // lst.pop_front();
     
     return std::move(d);
   }

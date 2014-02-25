@@ -11,6 +11,8 @@ struct ad_process
   void operator()(T& t, typename T::data_ptr d, std::size_t bytes_transferred)
   {
     std::cout << "common ad_process { " << std::endl;
+    auto& lst = t.get_aspect().template get<_outgoing_buffer_list_>();
+    lst.pop_front();
     if ( d->size() != bytes_transferred )
     {
       this->process(t, std::move(d), bytes_transferred);
@@ -24,6 +26,8 @@ private:
   template<typename T>
   void process(T& t, typename T::data_ptr d, std::size_t bytes_transferred)
   {
+    std::cout << "---[[[" <<  std::string( d->begin(), d->end()) << "]]]---" <<  std::endl;
+
     // TODO: протестировать 
     //typedef decltype(lst)::value_type::element_type data_type;
     typedef typename T::data_type data_type;
@@ -40,6 +44,7 @@ private:
       if ( std::distance(beg, end) > static_cast<ptrdiff_t>(limit*2) ) // Последний блок может быть [BufferSize..BufferSize*2]
       {
         lst.push_front( std::make_unique<data_type>( (beg + limit).base(), beg.base()));
+        std::cout << "[[[" <<  std::string( lst.front()->begin(), lst.front()->end()) << "]]]" <<  std::endl;
         std::advance(beg, limit);
       }
       else

@@ -49,13 +49,48 @@ int main()
     
     boost::asio::posix::stream_descriptor sd(*io_service, dd[1]);
     writer_type writer( std::move(sd), init);
-    typedef writer_type::data_type data_type;
+    // typedef writer_type::data_type data_type;
     handler = writer.wrap([&](){ ++handler_count;});
-    std::string data = "test1";
-    size_t result = writer.write( std::make_unique<data_type>(data.begin(), data.end()) );
-    if ( result != 5 )
+    size_t size = writer.write_string( "test1" );
+    if ( size != 0 )
       abort();
+    size = writer.write_string( "test2" );
+    if ( size != 0 )
+      abort();
+    //std::cout << "-1-" << std::endl;
+    //io_service->run_one();
+    //std::cout << "-2-" << std::endl;
     
+    
+    /*if ( result != "test1test2" )
+      abort();*/
+    
+    init.output_buffer_size = 1;
+    writer.reconfigure(init);
+    size = writer.write_string( "test1" );
+    if ( size != 0 )
+      abort();
+    size = writer.write_string( "test2" );
+    if ( size != 0 )
+      abort();
+    for (int i=0; i < 5+5 + 5 + 5; ++i)
+    {
+      std::cout << "-" << i << "-" << std::endl;
+      io_service->run_one();
+    }
+
+    char buffer[100];
+    size = read( dd[0], buffer, 100);
+    buffer[size]=0;
+    std::string result = buffer;
+
+    std::cout << result << std::endl;
+    
+    if ( result != "test1test2test1test2" )
+      abort();
+
+    
+
     /*
     write(dd[1], "test1", 5);
     auto d = reader.read();
@@ -80,11 +115,12 @@ int main()
   // not posted last handler
   //io_service->run_one();
   // execute not alive
-  handler();
+  /*handler();
   
   if ( handler_count!=1 || not_alive_count!=2)
   {
     abort();
   }
+  */
 }
 

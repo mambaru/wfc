@@ -11,7 +11,8 @@ struct ad_write_some
   void operator()(T& t, typename T::data_ptr d)
   {
     std::cout << "ad_write_some { " << std::endl;
-      
+    if (d != nullptr)
+      std::cout << std::string(d->begin(), d->end() )<< std::endl;
     boost::system::error_code ec;
     
     size_t bytes_transferred = 
