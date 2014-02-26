@@ -7,6 +7,7 @@
 #include <string>
 #include <thread>
 
+class 
 
 struct ad_ready
 {
