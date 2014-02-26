@@ -26,8 +26,6 @@ public:
   std::function<void(data_ptr)> sender_function;
 public:
   
-  
-
   connection(const connection& ) = delete;
   void operator = (const connection& conf) = delete;
 
