@@ -14,14 +14,17 @@ struct ad_handler
   {
     if (!ec)
     {
+      std::cout << "READY" << std::endl;
       t.get_aspect().template get<_ready_>()( t, std::move(d), bytes_transferred);
     }
     else if ( ec == boost::asio::error::operation_aborted)
     {
+      std::cout << "ABORT" << std::endl;
       t.get_aspect().template get< errors::_aborted_ >()(t, std::move(d) );
     }
     else
     {
+      std::cout << "ERROR" << std::endl;
       t.get_aspect().template get< errors::_error_ >()(t, ec, std::move(d) );
     }
   }

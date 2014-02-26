@@ -1,29 +1,22 @@
 #pragma once
 
 #include <wfc/inet/types.hpp>
+#include <cstring>
 
 namespace wfc{ namespace io{ namespace rn{ namespace writer{
 
-template<typename Tg, typename Str /*= rn*/>
 struct ad_tailor
 {
-  ad_tailor()
-    : beg(Str()())
-    , end(beg + std::strlen(beg))
-  {
-  }
-  
   template<typename T>
-  void operator()(T& t, data_ptr d)
+  void operator()(T& t, typename T::data_ptr d)
   {
-    d->reserve( d->size() + std::distance(beg, end) );
-    std::copy( beg, end, std::inserter(*d, d->end()) );
-    t.get_aspect().template get<Tg>()( t, std::move(d) );
+    static const char* sep =  t.get_aspect().template get<_separator_>()();
+    static size_t size = std::strlen( sep );
+    d->reserve( d->size() + size );
+    std::copy( sep, sep + size, std::inserter(*d, d->end()) );
+    t.get_aspect().template get<_ready_>()( t, std::move(d) );
   }
-
 private:
-  const char *beg;
-  const char *end;
 };
 
 }}}}

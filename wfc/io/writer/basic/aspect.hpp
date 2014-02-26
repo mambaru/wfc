@@ -5,6 +5,7 @@
 #include <wfc/io/writer/basic/ad_handler.hpp>
 #include <wfc/io/writer/basic/ad_make_buffer.hpp>
 #include <wfc/io/writer/basic/ad_process.hpp>
+#include <wfc/io/writer/basic/ad_write.hpp>
 #include <wfc/io/writer/basic/tags.hpp>
 #include <wfc/io/tags.hpp>
 
@@ -20,6 +21,7 @@ typedef fas::type_list_n<
   fas::advice<_handler_, ad_handler>,
   fas::advice<_make_buffer_, ad_make_buffer>,
   fas::advice<_process_, ad_process>,
+  fas::advice<_write_, ad_write>,
   fas::alias< _incoming_, _handler_>,
   
   fas::value< _output_buffer_size_, size_t>,

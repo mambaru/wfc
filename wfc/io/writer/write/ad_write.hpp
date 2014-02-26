@@ -19,10 +19,13 @@ struct ad_write
   template<typename T>
   size_t operator()(T& t, typename T::data_ptr d)
   {
+    /*
     d = t.get_aspect().template get<basic::_make_buffer_>()(t, std::move(d) );
     
     if ( d != nullptr )
       t.get_aspect().template get< _outgoing_ >()(t, std::move(d) );
+    */
+    t.get_aspect().template get< _outgoing_ >()(t, std::move(d) );
     
     size_t result = t.get_aspect().template get<_writed_size_>();
     t.get_aspect().template get<_writed_size_>() = 0;

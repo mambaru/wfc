@@ -3,7 +3,7 @@
 
 #include <wfc/io/writer/writer.hpp>
 #include <wfc/io/strategy/posix/writer/config.hpp>
-#include <wfc/io/strategy/posix/writer/async_loop.hpp>
+#include <wfc/io/strategy/posix/writer/rn/async_loop.hpp>
 #include <wfc/io/strategy/posix/writer/trace.hpp>
 #include <wfc/io/strategy/posix/writer/log.hpp>
 #include <boost/asio.hpp>
@@ -65,7 +65,7 @@ struct write_aspect:
   fas::aspect<
     fas::advice< ts::sync::_incoming_, ad_write_some>,
     fas::advice< ts::async::_incoming_, ad_async_write_some>,
-    wfc::io::strategy::posix::writer::async_loop,
+    wfc::io::strategy::posix::writer::rn::async_loop,
     wfc::io::strategy::posix::writer::trace,
     wfc::io::strategy::posix::writer::log
   >
@@ -103,7 +103,7 @@ int main()
     if ( size != 0 )
       abort();
 
-    while (global_bytes_transferred!=20)
+    while (global_bytes_transferred!=20 + 4)
     {
       std::cout << "-" << global_bytes_transferred << "-" << std::endl;
       io_service->run_one();
@@ -112,13 +112,13 @@ int main()
     init.output_buffer_size = 1;
     writer.reconfigure(init);
     size = writer.write_string( "0123456789" );
-    if ( size != 20 ) // 19 + 1
+    if ( size != 24 )
       abort();
     size = writer.write_string( "0123456789" );
     if ( size != 0 )
       abort();
     //for (int i=0; i < 5+5 + 5 + 5; ++i)
-    while (global_bytes_transferred!=40)
+    while (global_bytes_transferred!=40 + 8)
     {
       std::cout << "-" << global_bytes_transferred << "-" << std::endl;
       io_service->run_one();
@@ -131,7 +131,7 @@ int main()
 
     std::cout << result << std::endl;
     
-    if ( result != "0123456789012345678901234567890123456789" )
+    if ( result != "0123456789\r\n0123456789\r\n0123456789\r\n0123456789\r\n" )
       abort();
 
 

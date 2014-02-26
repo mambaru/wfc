@@ -13,14 +13,11 @@ struct ad_make_buffer
     typedef typename T::data_type data_type;
     auto& lst = t.get_aspect().template get<_outgoing_buffer_list_>();
     
-    std::cout << "ad_make_buffer -1-" << (d==nullptr) << std::endl;
     if ( lst.empty() )
     {
-      std::cout << "ad_make_buffer -2-" << (d==nullptr) << std::endl;
       if (d==nullptr)
         return nullptr;
       lst.push_back(nullptr);
-      std::cout << "ad_make_buffer -3- " << (d==nullptr) << std::endl;
       return std::move(d);
     }
     

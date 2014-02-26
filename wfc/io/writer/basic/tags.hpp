@@ -16,4 +16,7 @@ struct _output_buffer_size_;
 struct _outgoing_buffer_list_;
 
 
+struct _write_;
+struct _write_some_;
+
 }}}}

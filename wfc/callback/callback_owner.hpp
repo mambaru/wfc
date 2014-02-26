@@ -9,6 +9,38 @@
 #include <list>
 
 namespace wfc{
+  
+template<typename H, typename NA >
+struct callback_wrapper
+{
+  H _handler;
+  NA _not_alive;
+  typedef std::weak_ptr<int> weak_type; 
+  
+  callback_wrapper(H h, NA not_alive,  weak_type alive)
+    : _handler(h)
+    , _not_alive(not_alive)
+    , _alive(alive)
+  {
+  }
+  
+  template <class... Args>
+  auto operator()(Args&&... args)
+    -> decltype( _handler(std::forward<Args>(args)...)) 
+  {
+    if ( auto p = _alive.lock() )
+    {
+      return _handler(std::forward<Args>(args)...);
+    }
+    else 
+    {
+      return _not_alive(std::forward<Args>(args)...);
+    }
+  }
+private:
+  weak_type _alive;
+};
+
 
 // TODO: spinlock
 // а лучше callback_owner<mutex_type>
@@ -63,13 +95,12 @@ public:
   }
   */
 
+  
   template<typename R, typename ... Args>
   std::function<R(Args&&...)> callback(typename identity<std::function<R(Args&&...)>>::type f)
   {
-    //std::lock_guard<mutex_type> lk(_mutex);
     std::weak_ptr<int> alive = _alive;
-    //_mutex.unlock();
-    
+
     return [alive,f](Args&&... args) -> R
     {
       if ( auto p = alive.lock() )
@@ -79,34 +110,17 @@ public:
       return R();
     };
   }
-  
-  template<typename Callback/*, typename CallbackNotAlive*/ >
-  std::function<void()> wrap(Callback callback, /*CallbackNotAlive*/std::function<void()> not_alive = nullptr)
+
+  template<typename Handler, typename NotAliveHandler>
+  callback_wrapper<Handler, NotAliveHandler>
+  wrap(Handler handler, NotAliveHandler not_alive)
   {
-    std::weak_ptr<int> alive = _alive;
-    return [alive, callback, not_alive]()
-    {
-      if ( auto p = alive.lock() )
-      {
-        callback();
-      }
-      else
-      {
-        if (not_alive!=nullptr)
-        {
-          not_alive();
-        }
-      }
-    };
-    
+    return callback_wrapper<Handler, NotAliveHandler>( handler, not_alive, _alive);
   }
-  
 
 private:
   
   alive_type _alive;
-  //mutex_type _mutex;
-  
 };
 
 

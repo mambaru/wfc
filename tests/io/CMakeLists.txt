@@ -57,3 +57,16 @@ target_link_libraries(writer0_test wfc boost_system pthread)
 add_executable(writer5_test writer5_test.cpp logger.cpp)
 add_test(writer5_test writer5_test)
 target_link_libraries(writer5_test wfc boost_system pthread)
+
+add_executable(writer_rn5_test writer_rn5_test.cpp logger.cpp)
+add_test(writer_rn5_test writer_rn5_test)
+target_link_libraries(writer_rn5_test wfc boost_system pthread)
+
+
+add_executable(connection1_test connection1_test.cpp logger.cpp)
+add_test(connection1_test connection1_test)
+target_link_libraries(connection1_test wfc boost_system pthread)
+
+add_executable(accept1_test accept1_test.cpp logger.cpp)
+add_test(accept1_test accept1_test)
+target_link_libraries(accept1_test wfc boost_system pthread)
