@@ -15,6 +15,16 @@
 #include <set>
 /// connection
 
+struct config
+{
+    size_t output_buffer_size = 1024;
+    size_t input_buffer_size = 1024;
+    std::function<void()> not_alive = nullptr;
+  std::function<void()> release_function = nullptr;
+
+};
+
+
 struct ad_reverse
 {
   template<typename T>
@@ -29,6 +39,7 @@ struct ad_reverse
   
 struct connection_aspect: 
   fas::aspect<
+    fas::advice< wfc::io::_options_type_, config>,
     fas::advice< wfc::io::_incoming_, ad_reverse>,
     fas::type< wfc::io::_descriptor_type_, boost::asio::ip::tcp::socket>,
     wfc::io::strategy::posix::connection::rn::stream
@@ -45,13 +56,6 @@ struct _holder_storage_;
 struct _insert_;
 struct _holder_type_;
 
-struct holder_config
-{
-  size_t output_buffer_size = 1024;
-  size_t input_buffer_size = 1024;
-  std::function<void()> not_alive = nullptr;
-  std::function<void()> release_function = nullptr;
-};
 
 struct ad_insert
 {
@@ -67,11 +71,14 @@ struct ad_insert
   }
 };
 
+
 ///////////////////
 
 struct aspect: fas::aspect<
+  fas::advice< wfc::io::_options_type_, config>,
   fas::type<  _holder_type_,         connection_type >,
-  fas::value< _config_,              holder_config   >,
+  fas::value< _config_,              config   >,
+  fas::advice< wfc::io::_options_type_, config>,
   fas::value< _holder_storage_,      std::set< std::unique_ptr<connection_type> >   >,
   fas::advice< _insert_, ad_insert>
 >{};
@@ -128,6 +135,7 @@ struct ad_ready
   
 struct acceptor_aspect: 
   fas::aspect<
+    fas::advice< wfc::io::_options_type_, config>,
     fas::advice< wfc::io::_incoming_, ad_ready>,
     wfc::io::strategy::ip::tcp::acceptor::async
   >
@@ -135,12 +143,6 @@ struct acceptor_aspect:
 
 typedef wfc::io::acceptor::acceptor<acceptor_aspect> acceptor_type;
 
-struct config
-{
-    size_t output_buffer_size = 1024;
-    size_t input_buffer_size = 1024;
-    std::function<void()> not_alive = nullptr;
-};
 
 int main()
 {
@@ -167,7 +169,7 @@ int main()
   acceptor_type acceptor( std::move(desc), conf );
   
   
-  holder_config conn_config;
+  config conn_config;
   auto mgr = std::make_unique<manager>();
   mgr->configure = [&conn_config](manager::holder_type& holder)
   {

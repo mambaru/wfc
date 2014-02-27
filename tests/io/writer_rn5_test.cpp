@@ -63,6 +63,7 @@ typedef wfc::io::strategy::posix::writer::config init_info;
 
 struct write_aspect: 
   fas::aspect<
+    fas::advice< wfc::io::_options_type_, init_info>,
     fas::advice< ts::sync::_incoming_, ad_write_some>,
     fas::advice< ts::async::_incoming_, ad_async_write_some>,
     wfc::io::strategy::posix::writer::rn::async_loop,

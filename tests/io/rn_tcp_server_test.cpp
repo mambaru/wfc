@@ -1,6 +1,6 @@
 #include <wfc/io/ip/tcp/rn/server.hpp>
 #include <wfc/io_service.hpp>
-
+#include <boost/asio.hpp>
 #include <thread>
 #include <algorithm>
 
@@ -19,10 +19,39 @@ void handler(server::data_ptr d, server::handler_callback callback)
 
 int main(int argc, char* /*argv*/[])
 {
+  wfc::io_service io_service;
+
+  boost::asio::ip::udp::resolver resolver( io_service );
+  boost::asio::ip::udp::endpoint endpoint = *resolver.resolve({
+      "0.0.0.0", 
+      "12345"
+  });
+
+  boost::asio::ip::udp::socket srv1(io_service, boost::asio::ip::udp::v4());
+  srv1.bind(endpoint);
+  std::thread([&srv1]() {
+    for (int i=0;i<2;++i)
+    {
+    boost::asio::ip::udp::endpoint endpoint;
+    char ch;
+    srv1.receive_from( boost::asio::buffer(&ch, 1),  endpoint);
+    std::cout << 'A' << std::endl;
+    srv1.connect(endpoint);
+    std::cout << srv1.local_endpoint().port() << std::endl;
+    std::cout << srv1.remote_endpoint().port() << std::endl;
+    std::cout << endpoint.port() << std::endl;
+    }
+    exit(1);
+  }).detach();
+  boost::asio::ip::udp::socket cli(io_service, boost::asio::ip::udp::v4());
+  char ch='A';
+  cli.send_to(boost::asio::buffer(&ch, 1), endpoint );
+  boost::asio::ip::udp::socket cli2(io_service, boost::asio::ip::udp::v4());
+  cli2.send_to(boost::asio::buffer(&ch, 1), endpoint );
+  
   
   server::config conf;
   conf.threads = 10;
-  wfc::io_service io_service;
   wfc::io_service::work wrk(io_service);
   
   server srv(io_service);

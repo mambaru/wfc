@@ -19,7 +19,7 @@ typedef fas::type_list_n<
   fas::advice<_handler_, ad_handler>,
   
   fas::alias< _incoming_, _handler_>,
-  fas::value< _input_buffer_size_, size_t>,
+  //fas::value< _input_buffer_size_, size_t>,
   
   fas::group< wfc::io::_create_, _create_>
   

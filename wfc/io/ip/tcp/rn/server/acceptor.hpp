@@ -6,6 +6,7 @@
 #include <wfc/io/strategy/ip/tcp/acceptor/async.hpp>
 #include <wfc/io/server/tags.hpp>
 #include <fas/aop.hpp>
+#include <wfc/io/ip/tcp/rn/server/config.hpp>
 
 #include <set>
 
@@ -20,6 +21,7 @@ struct _holder_storage_;
 struct _insert_;
 struct _holder_type_;
 
+/*
 struct holder_config
 {
   size_t output_buffer_size = 1024;
@@ -27,7 +29,7 @@ struct holder_config
   std::function<void()> not_alive = nullptr;
   std::function<void()> release_function = nullptr;
 };
-
+*/
 struct ad_insert
 {
   template<typename T>
@@ -36,7 +38,7 @@ struct ad_insert
     typedef typename T::aspect::template advice_cast<_holder_type_>::type holder_type;
     //auto& config = t.get_aspect().template get<_config_>();
     
-    auto holder = std::make_unique<holder_type>( std::move(*d), holder_config() /*!!!!*/);
+    auto holder = std::make_unique<holder_type>( std::move(*d), config() /*!!!!*/);
     //t.configure( *holder);
     holder->start();
     t.get_aspect().template get<_holder_storage_>().insert( std::move(holder) );
@@ -46,8 +48,9 @@ struct ad_insert
 ///////////////////
 
 struct connection_manager_aspect: fas::aspect<
+  fas::advice< wfc::io::_options_type_, config>,
   fas::type<  _holder_type_,         connection >,
-  fas::value< _config_,              holder_config   >,
+  fas::value< _config_,              config   >,
   fas::value< _holder_storage_,      std::set< std::unique_ptr<connection> >   >,
   fas::advice< _insert_, ad_insert>
 >{};

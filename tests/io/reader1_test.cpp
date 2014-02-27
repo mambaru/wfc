@@ -13,6 +13,8 @@ typedef wfc::io::strategy::posix::reader::config init_info;
 
 struct reader_aspect: 
   fas::aspect<
+        fas::advice< wfc::io::_options_type_, init_info>,
+
     wfc::io::strategy::posix::reader::async_read_callback,
     wfc::io::strategy::posix::reader::log,
     wfc::io::strategy::posix::reader::trace

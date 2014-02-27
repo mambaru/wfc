@@ -19,9 +19,17 @@ struct ad_reverse
   }
 };
 
+struct config
+{
+    size_t output_buffer_size = 1024;
+    size_t input_buffer_size = 1024;
+    std::function<void()> not_alive = nullptr;
+};
+
   
 struct connection_aspect: 
   fas::aspect<
+    fas::advice< wfc::io::_options_type_, config>,
     fas::advice< wfc::io::_incoming_, ad_reverse>,
     fas::type< wfc::io::_descriptor_type_, boost::asio::local::stream_protocol::socket>,
     wfc::io::strategy::posix::connection::rn::stream
@@ -31,12 +39,6 @@ struct connection_aspect:
 
 typedef wfc::io::connection::connection<connection_aspect> connection_type;
 
-struct config
-{
-    size_t output_buffer_size = 1024;
-    size_t input_buffer_size = 1024;
-    std::function<void()> not_alive = nullptr;
-};
 
 int main()
 {

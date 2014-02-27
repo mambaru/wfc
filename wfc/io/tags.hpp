@@ -22,5 +22,6 @@ struct _stop_;
 // for user --> <_incoming_, (){ t->_outgoing_ }>
 struct _incoming_;
 struct _outgoing_;
+struct _options_type_;
   
 }}

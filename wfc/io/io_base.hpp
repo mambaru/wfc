@@ -20,7 +20,7 @@ public:
   typedef typename super::aspect::template advice_cast<_context_>::type context_type;
   typedef typename super::aspect::template advice_cast<_data_type_>::type data_type;
   typedef typename super::aspect::template advice_cast<_strand_type_>::type strand_type;
-  //typedef typename super::aspect::template advice_cast<_config_type_>::type config_type;
+  typedef typename super::aspect::template advice_cast<_options_type_>::type options_type;
   //typedef typename super::aspect::template advice_cast<_init_type_>::type init_type;
   typedef typename super::aspect::template advice_cast<_io_service_type_>::type io_service_type;
   
@@ -74,6 +74,10 @@ public:
   }
   
 
+  const options_type& options() const
+  {
+    return *_options;
+  }
 
 protected:
 
@@ -92,6 +96,7 @@ protected:
   template<typename T, typename Config>
   void create(T& t, const Config& conf)
   {
+    _options = &conf;
     t.get_aspect().template gete<_create_>()(t, conf);
   }
 
@@ -143,8 +148,12 @@ protected:
   {
     return t.get_aspect().template get<_wrap_>()(t, handler);
   }
+  
+  
 
 private:
+  
+  const options_type* _options;
   
   descriptor_type _descriptor;
 

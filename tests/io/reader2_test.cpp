@@ -25,6 +25,8 @@ struct ad_handler
 };
 
 struct reader_aspect: fas::aspect<
+      fas::advice< wfc::io::_options_type_, init_info>,
+
   fas::advice< wfc::io::reader::_outgoing_, ad_handler>,
   wfc::io::strategy::posix::reader::sync_handler,
   wfc::io::strategy::posix::reader::log,

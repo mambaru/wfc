@@ -7,9 +7,9 @@ namespace wfc{ namespace io{ namespace reader{ namespace common{
 struct ad_create
 {
   template<typename T, typename Config>
-  void operator()(T& t, const Config& config)
+  void operator()(T& , const Config& )
   {
-    t.get_aspect().template get<_input_buffer_size_>() = config.input_buffer_size;
+    // t.get_aspect().template get<_input_buffer_size_>() = config.input_buffer_size;
   }
 };
 
