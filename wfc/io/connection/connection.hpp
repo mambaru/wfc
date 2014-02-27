@@ -36,6 +36,17 @@ public:
     super::create(*this, conf);
   }
 
+  connection(descriptor_type&& desc)
+    : super( std::move(desc) )
+  {
+  }
+
+  template<typename Conf>
+  void configure(const Conf& conf)
+  {
+    super::create(*this, conf);
+  }
+
   template<typename Conf>
   void reconfigure(const Conf& conf)
   {

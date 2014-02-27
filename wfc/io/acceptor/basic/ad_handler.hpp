@@ -13,8 +13,6 @@ struct ad_handler
   template<typename T>
   void operator()(T& t, typename T::data_ptr d, boost::system::error_code ec)
   {
-    std::cout << "acceptor ad_handler { " << std::endl;
-      
     if (!ec)
     {
       t.get_aspect().template get<_ready_>()( t, std::move(d) );
@@ -27,8 +25,6 @@ struct ad_handler
     {
       ///!!!!!!!!!  t.get_aspect().template get< errors::_error_ >()(t, ec, std::move(d) );
     }
-    
-    std::cout << "} acceptor ad_handler" << std::endl;
   }
 };
 

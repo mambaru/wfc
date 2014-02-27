@@ -23,11 +23,11 @@ struct ad_reverse
 struct connection_aspect: 
   fas::aspect<
     fas::advice< wfc::io::_incoming_, ad_reverse>,
-    //fas::alias< wfc::io::_incoming_, wfc::io::_outgoing_>,
     fas::type< wfc::io::_descriptor_type_, boost::asio::local::stream_protocol::socket>,
     wfc::io::strategy::posix::connection::rn::stream
   >
-{};
+{
+};
 
 typedef wfc::io::connection::connection<connection_aspect> connection_type;
 

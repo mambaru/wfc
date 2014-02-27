@@ -63,6 +63,13 @@ public:
     return super::post(*this, h);
   }
 
+  template<typename Config>
+  void create(const Config& conf)
+  {
+    return super::create(*this, conf);
+    //t.get_aspect().template gete<_create_>()(t, conf);
+  }
+
   /*
    TODO:
   template<typename ...Args>

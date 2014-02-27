@@ -12,7 +12,7 @@ struct ad_async_read_some
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
-    std::cout << "ad_async_read_some" << std::endl;
+    
     auto dd = std::make_shared<typename T::data_ptr>( std::move(d) );
     
     t.get_aspect().template get<_descriptor_ptr_>()->async_read_some

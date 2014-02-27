@@ -13,8 +13,6 @@ struct ad_async_read_some
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
-    std::cout << "ad_async_read_some " << std::endl;
-    
     auto dd = std::make_shared<typename T::data_ptr>( std::move(d) );
     
     t.descriptor().async_read_some
@@ -23,7 +21,7 @@ struct ad_async_read_some
       t.strand().wrap(
         [this, &t, dd]( boost::system::error_code ec, std::size_t bytes_transferred )
         { 
-          std::cout << "ad_async_read_some ready" << std::endl;
+          
           //t.get_aspect().template get< common::_handler_>()(t, std::move(*dd), ec, bytes_transferred);
           t.get_aspect().template get< _outgoing_>()(t, std::move(*dd), ec, bytes_transferred);
         }
