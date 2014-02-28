@@ -53,9 +53,9 @@ struct ad_configure
       if ( acceptors.size() < conf.acceptors )
       {
         std::cout << "listen" << std::endl;
-        //typename acceptor_type::descriptor_type descriptor(t.get_io_service());
-        acceptors.push_back( std::make_unique<acceptor_type>( std::move(desc), conf) );
-        break;
+        typename descriptor_type::native_handle_type fd = ::dup(desc.native_handle());
+        descriptor_type descriptor(t.get_io_service(), boost::asio::ip::tcp::v4(), fd);
+        acceptors.push_back( std::make_unique<acceptor_type>( std::move(descriptor), conf) );
       }
       else
       {

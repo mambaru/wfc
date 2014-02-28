@@ -3,31 +3,27 @@
 #include <wfc/io/tags.hpp>
 #include <fas/aop.hpp>
 #include <functional>
-#include <boost/asio.hpp>
+
 namespace wfc{ namespace io{ 
   
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
-class descriptor_holder
+class io_base
   : public AspectClass<A>
 {
 public:
   
   typedef descriptor_holder<A, AspectClass> self;
   typedef AspectClass<A> super;
-  typedef typename super::aspect::template advice_cast<_descriptor_type_>::type descriptor_type;
-  //typedef typename super::aspect::template advice_cast<_descriptor_ptr_>::type descriptor_ptr;
   
   typedef typename super::aspect::template advice_cast<_context_>::type context_type;
   typedef typename super::aspect::template advice_cast<_data_type_>::type data_type;
   typedef typename super::aspect::template advice_cast<_strand_type_>::type strand_type;
   typedef typename super::aspect::template advice_cast<_options_type_>::type options_type;
-  //typedef typename super::aspect::template advice_cast<_init_type_>::type init_type;
   typedef typename super::aspect::template advice_cast<_io_service_type_>::type io_service_type;
   
-  descriptor_holder(descriptor_type desc)
-    : _descriptor( std::move(desc) )
+  io_base(descriptor_type desc)
+    : 
   {
-
   }
   
   context_type& context()
@@ -40,27 +36,16 @@ public:
     return this->get_aspect().template get<_context_>();
   }
 
-  descriptor_type& descriptor()
-  {
-    return _descriptor;
-    //return *(this->get_aspect().template get<_descriptor_ptr_>());
-  }
-
-  const descriptor_type& descriptor() const
-  {
-    return _descriptor;
-    //return *(this->get_aspect().template get<_descriptor_ptr_>());
-  }
-
   io_service_type& get_io_service()
   {
-    return this->descriptor().get_io_service();
+    // return this->descriptor().get_io_service();
     //return *(this->get_aspect().template get<_io_service_ptr_>());
   }
 
   const io_service_type& get_io_service() const
   {
-    return this->descriptor().get_io_service();
+    return _io_service;
+    // return this->descriptor().get_io_service();
     //return *(this->get_aspect().template get<_io_service_ptr_>());
   }
   
@@ -153,11 +138,8 @@ protected:
   
 
 private:
-  
+  wfc::io_service& _io_service;
   options_type _options;
-  
-  descriptor_type _descriptor;
-
 };
 
 }}
