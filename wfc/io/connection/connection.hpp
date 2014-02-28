@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wfc/io/connection/tags.hpp>
-#include <wfc/io/io_base.hpp>
+#include <wfc/io/descriptor_holder.hpp>
 #include <wfc/memory.hpp>
 #include <fas/aop.hpp>
 #include <memory>
@@ -11,31 +11,31 @@ namespace wfc{ namespace io{ namespace connection{
   
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class connection
-  : public io_base<A, AspectClass>
+  : public descriptor_holder<A, AspectClass>
   , public std::enable_shared_from_this< connection<A, AspectClass> >
 {
 public:
   
   typedef connection<A, AspectClass> self;
-  typedef io_base<A, AspectClass> super;
+  typedef descriptor_holder<A, AspectClass> super;
   
   typedef typename super::data_type data_type;
   typedef typename super::descriptor_type descriptor_type;
   typedef std::unique_ptr<data_type> data_ptr;
-  
+  typedef typename super::options_type options_type;
   std::function<void(data_ptr)> sender_function;
 public:
   
   connection(const connection& ) = delete;
   void operator = (const connection& conf) = delete;
 
-  template<typename Conf>
-  connection(descriptor_type&& desc, const Conf& conf)
+  connection(descriptor_type&& desc, const options_type& conf)
     : super( std::move(desc) )
   {
     super::create(*this, conf);
   }
 
+  /*
   connection(descriptor_type&& desc)
     : super( std::move(desc) )
   {
@@ -52,6 +52,7 @@ public:
   {
     super::create(*this, conf);
   }
+  */
   
   void start()
   {

@@ -12,7 +12,9 @@ SET(
   logger/global_log.cpp
   pubsub/message_queue.cpp
   pubsub/topic_hub.cpp
+  io/ip/tcp/rn/connection.cpp
   io/ip/tcp/rn/server.cpp
+  io/ip/tcp/rn/acceptor.cpp
 )
 
 add_library(

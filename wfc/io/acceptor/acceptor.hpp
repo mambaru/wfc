@@ -3,7 +3,7 @@
 //#include <wfc/io/reader/read/sync/tags.hpp>
 //#include <wfc/io/reader/read/async_callback/tags.hpp>
 #include <wfc/io/acceptor/tags.hpp>
-#include <wfc/io/io_base.hpp>
+#include <wfc/io/descriptor_holder.hpp>
 #include <fas/aop.hpp>
 #include <memory>
 
@@ -11,13 +11,13 @@ namespace wfc{ namespace io{ namespace acceptor{
   
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class acceptor
-  : public io_base<A, AspectClass>
+  : public descriptor_holder<A, AspectClass>
   , public std::enable_shared_from_this< acceptor<A, AspectClass> >
 {
 public:
   
   typedef acceptor<A, AspectClass> self;
-  typedef io_base<A, AspectClass> super;
+  typedef descriptor_holder<A, AspectClass> super;
   
   typedef typename super::data_type data_type;
   typedef typename super::descriptor_type descriptor_type;

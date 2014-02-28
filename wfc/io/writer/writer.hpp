@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wfc/io/writer/tags.hpp>
-#include <wfc/io/io_base.hpp>
+#include <wfc/io/descriptor_holder.hpp>
 #include <wfc/memory.hpp>
 #include <fas/aop.hpp>
 #include <memory>
@@ -11,13 +11,13 @@ namespace wfc{ namespace io{ namespace writer{
   
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class writer
-  : public io_base<A, AspectClass>
+  : public descriptor_holder<A, AspectClass>
   , public std::enable_shared_from_this< writer<A, AspectClass> >
 {
 public:
   
   typedef writer<A, AspectClass> self;
-  typedef io_base<A, AspectClass> super;
+  typedef descriptor_holder<A, AspectClass> super;
   
   typedef typename super::data_type data_type;
   typedef typename super::descriptor_type descriptor_type;

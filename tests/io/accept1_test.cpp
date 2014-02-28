@@ -64,7 +64,7 @@ struct ad_insert
   {
     typedef typename T::holder_type holder_type;
     //auto& config = t.get_aspect().template get<_config_>();
-    auto holder = std::make_unique<holder_type>( std::move(*d) );
+    auto holder = std::make_unique<holder_type>( std::move(*d), t.options() );
     t.configure( *holder);
     holder->start();
     t.get_aspect().template get<_holder_storage_>().insert( std::move(holder) );
@@ -107,9 +107,9 @@ public:
     // this->get_aspect().template get<_config_>() = conf;
   }
   
-  void insert(descriptor_ptr d)
+  void insert(descriptor_ptr /*d*/)
   {
-    this->get_aspect().template get<_insert_>()( *this, std::move(d) );
+    //this->get_aspect().template get<_insert_>()( *this, std::move(d) );
   }
   
 private:
@@ -171,10 +171,12 @@ int main()
   
   config conn_config;
   auto mgr = std::make_unique<manager>();
+  /*
   mgr->configure = [&conn_config](manager::holder_type& holder)
   {
     holder.configure(conn_config);
   };
+  */
   acceptor.get_aspect().get<wfc::io::_incoming_>().manager_ptr = std::move(mgr);
   
   acceptor.start();

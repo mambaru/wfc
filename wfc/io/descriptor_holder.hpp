@@ -7,12 +7,12 @@
 namespace wfc{ namespace io{ 
   
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
-class io_base
+class descriptor_holder
   : public AspectClass<A>
 {
 public:
   
-  typedef io_base<A, AspectClass> self;
+  typedef descriptor_holder<A, AspectClass> self;
   typedef AspectClass<A> super;
   typedef typename super::aspect::template advice_cast<_descriptor_type_>::type descriptor_type;
   //typedef typename super::aspect::template advice_cast<_descriptor_ptr_>::type descriptor_ptr;
@@ -24,7 +24,7 @@ public:
   //typedef typename super::aspect::template advice_cast<_init_type_>::type init_type;
   typedef typename super::aspect::template advice_cast<_io_service_type_>::type io_service_type;
   
-  io_base(descriptor_type desc)
+  descriptor_holder(descriptor_type desc)
     : _descriptor( std::move(desc) )
   {
   }
@@ -76,7 +76,7 @@ public:
 
   const options_type& options() const
   {
-    return *_options;
+    return _options;
   }
 
 protected:
@@ -93,11 +93,11 @@ protected:
     this->get_aspect().template get<_dispatch_>()(t, h);
   }
 
-  template<typename T, typename Config>
-  void create(T& t, const Config& conf)
+  template<typename T>
+  void create(T& t, const options_type& conf)
   {
-    _options = &conf;
-    t.get_aspect().template gete<_create_>()(t, conf);
+    _options = conf;
+    t.get_aspect().template gete<_create_>()(t, _options);
   }
 
   /*
@@ -153,7 +153,7 @@ protected:
 
 private:
   
-  const options_type* _options;
+  options_type _options;
   
   descriptor_type _descriptor;
 

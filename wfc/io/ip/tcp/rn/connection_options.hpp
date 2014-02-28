@@ -2,10 +2,12 @@
 
 #include <cstddef>
 #include <functional>
+#include <wfc/io/types.hpp>
 
-namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{ namespace impl{ 
+
+namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{
   
-struct config
+struct connection_options
 {
   size_t acceptors = 1;
   size_t threads = 0;
@@ -15,6 +17,7 @@ struct config
   std::function<void()> not_alive = nullptr;
   std::function<void()> release_function = nullptr;
 
+  wfc::io::handler handler = nullptr;
 };
   
-}}}}}}
+}}}}}

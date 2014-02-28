@@ -2,7 +2,9 @@
 
 #include <wfc/io_service.hpp>
 #include <wfc/io/server/tags.hpp>
+#include <wfc/io/tags.hpp>
 
+#include <list>
 #include <thread>
 #include <memory>
 
@@ -57,7 +59,8 @@ struct ad_configure
       }
       else
       {
-        (*itr)->create( conf );
+        // TODO: сделать реконфигурацию
+        // (*itr)->create( conf );
       }
     }
   }
@@ -113,6 +116,7 @@ class server
 {
 public:
   typedef fas::aspect_class<A> super;
+  typedef typename super::aspect::template advice_cast< wfc::io::_options_type_>::type options_type;
 
   server(wfc::io_service& io): io_service(io)
   {
