@@ -12,7 +12,7 @@ class io_base
 {
 public:
   
-  typedef descriptor_holder<A, AspectClass> self;
+  typedef io_base<A, AspectClass> self;
   typedef AspectClass<A> super;
   
   typedef typename super::aspect::template advice_cast<_context_>::type context_type;
@@ -21,11 +21,12 @@ public:
   typedef typename super::aspect::template advice_cast<_options_type_>::type options_type;
   typedef typename super::aspect::template advice_cast<_io_service_type_>::type io_service_type;
   
-  io_base(descriptor_type desc)
-    : 
+  io_base(io_service_type& io_service, const options_type& opt)
+    : _io_service(io_service)
+    , _options(opt)
   {
   }
-  
+    
   context_type& context()
   {
     return this->get_aspect().template get<_context_>();
@@ -38,6 +39,7 @@ public:
 
   io_service_type& get_io_service()
   {
+    return _io_service;
     // return this->descriptor().get_io_service();
     //return *(this->get_aspect().template get<_io_service_ptr_>());
   }
@@ -65,6 +67,45 @@ public:
     return _options;
   }
 
+  void options(const options_type& opt)
+  {
+    _options = opt;
+  }
+
+///  //////////////////////////////////////////////
+
+  template<typename Handler>
+  void dispatch(Handler h)
+  {
+    this->dispatch(*this, h);
+  }
+
+  template<typename Handler>
+  void post(Handler h)
+  {
+    this->post(*this, h);
+  }
+
+  template<typename Handler>
+  std::function<void()> wrap(Handler&& handler)
+  {
+    return this->wrap(*this, handler);
+  }
+
+  /*
+  void start()
+  {
+    this->start(*this);
+  }
+  
+  template<typename T>
+  void stop(T& t)
+  {
+    this->stop(*this);
+  }
+  */
+  
+
 protected:
 
   template<typename T, typename Handler>
@@ -76,47 +117,21 @@ protected:
   template<typename T, typename Handler>
   void post(T& t, Handler h)
   {
-    this->get_aspect().template get<_dispatch_>()(t, h);
+    this->get_aspect().template get<_post_>()(t, h);
+  }
+
+  template<typename T, typename Handler>
+  std::function<void()> wrap(T& t, Handler&& handler)
+  {
+    return t.get_aspect().template get<_wrap_>()(t, handler);
   }
 
   template<typename T>
-  void create(T& t, const options_type& conf)
+  void create(T& t)
   {
-    _options = conf;
-    t.get_aspect().template gete<_create_>()(t, _options);
+    t.get_aspect().template get<_create_>()(t, _options);
   }
-
-  /*
-  template<typename T, typename Config>
-  void create(T& t, const Config& conf) 
-  {
-    t.get_aspect().template gete<_create_>()(t);
-    t.get_aspect().template gete<_configure_>()(t, conf);
-  }
-
-  template<typename T, typename Config, typename Init>
-  void create(T& t, const Config& conf, const Init& init) 
-  {
-    t.get_aspect().template gete<_create_>()(t);
-    t.get_aspect().template gete<_configure_>()(t, conf);
-    t.get_aspect().template gete<_initialize_>()(t, init);
-  }
-  */
-
-  /*
-  template<typename T, typename Config>
-  void configure(T& t, const Config& conf)
-  {
-    t.get_aspect().template gete<_configure_>()( t, conf );
-  }
-
-  template<typename T, typename Init>
-  void initialize(T& t, const Init& init)
-  {
-    t.get_aspect().template gete<_initialize_>()(t, init );
-  }
-  */
-
+  
   template<typename T>
   void start(T& t)
   {
@@ -129,16 +144,11 @@ protected:
     t.get_aspect().template get<_stop_>()(t);
   }
   
-  template<typename T, typename Handler>
-  std::function<void()> wrap(T& t, Handler&& handler)
-  {
-    return t.get_aspect().template get<_wrap_>()(t, handler);
-  }
   
   
 
 private:
-  wfc::io_service& _io_service;
+  io_service_type& _io_service;
   options_type _options;
 };
 

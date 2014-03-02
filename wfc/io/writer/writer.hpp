@@ -30,16 +30,18 @@ public:
 
   template<typename Conf>
   writer(descriptor_type&& desc, const Conf& conf)
-    : super( std::move(desc) )
+    : super( std::move(desc), conf)
   {
-    super::create(*this, conf);
+    super::create(*this);
   }
 
+  /*
   template<typename Conf>
   void reconfigure(const Conf& conf)
   {
-    super::create(*this, conf);
-  }
+    //this->optopns
+    //super::create(*this, conf);
+  }*/
   
   void start()
   {

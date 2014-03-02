@@ -30,9 +30,9 @@ public:
   void operator = (const connection& conf) = delete;
 
   connection(descriptor_type&& desc, const options_type& conf)
-    : super( std::move(desc) )
+    : super( std::move(desc), conf)
   {
-    super::create(*this, conf);
+    super::create(*this);
     
     boost::asio::socket_base::non_blocking_io non_blocking_io(true);
     super::descriptor().io_control(non_blocking_io);

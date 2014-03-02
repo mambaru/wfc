@@ -30,9 +30,9 @@ public:
 
   template<typename Conf>
   reader(descriptor_type&& desc, const Conf& conf)
-    : super( std::move(desc), conf)
+    : super( std::move(desc) )
   {
-    super::create(*this);
+    super::create(*this, conf);
   }
 
   void start()

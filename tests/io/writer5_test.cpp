@@ -111,7 +111,8 @@ int main()
     }
     
     init.output_buffer_size = 1;
-    writer.reconfigure(init);
+    writer.options(init);
+    //writer.create();
     size = writer.write_string( "0123456789" );
     if ( size != 20 ) // 19 + 1
       abort();
