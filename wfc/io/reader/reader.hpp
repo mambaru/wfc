@@ -24,7 +24,6 @@ public:
   typedef typename super::data_type data_type;
   typedef typename super::descriptor_type descriptor_type;
   typedef typename super::options_type options_type;
-  typedef std::unique_ptr<data_type> data_ptr;
   
 public:
 
@@ -47,6 +46,7 @@ public:
     super::stop(*this);
   }
   
+  /*
   template<typename Handler>
   std::function<void()> wrap(Handler&& handler)
   {
@@ -64,6 +64,7 @@ public:
   {
     return super::post(*this, h);
   }
+  */
 
   data_ptr read()
   {

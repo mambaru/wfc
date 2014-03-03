@@ -43,7 +43,7 @@ private:
   {
     return t.get_aspect().template get<_owner_>()->wrap(
         callback, 
-        t.get_aspect().template get<_not_alive_>()
+        t.options().not_alive
     );
   
   }

@@ -18,12 +18,22 @@ struct callback_wrapper
   typedef std::weak_ptr<int> weak_type; 
   
   callback_wrapper(H h, NA not_alive,  weak_type alive)
-    : _handler(h)
+    : _handler( h )
+    , _not_alive(not_alive )
+    , _alive(alive)
+  {
+  }
+
+  /*
+  template<typename Strand>
+  callback_wrapper(Strand& strand, H h, NA not_alive,  weak_type alive)
+    : _handler( strand.wrap(h))
     , _not_alive(not_alive)
     , _alive(alive)
   {
   }
-  
+  */
+
   template <class... Args>
   auto operator()(Args&&... args)
     -> decltype( _handler(std::forward<Args>(args)...)) 
@@ -34,7 +44,7 @@ struct callback_wrapper
     }
     else 
     {
-      return _not_alive(std::forward<Args>(args)...);
+      return _not_alive(/*std::forward<Args>(args)...*/);
     }
   }
 private:
@@ -111,18 +121,34 @@ public:
     };
   }
 
-  template<typename Handler, typename NotAliveHandler>
+  template<typename Handler, typename NotAliveHandler = std::function<void()> >
   callback_wrapper<Handler, NotAliveHandler>
-  wrap(Handler handler, NotAliveHandler not_alive)
+  wrap(Handler handler, NotAliveHandler not_alive = nullptr)
   {
     return callback_wrapper<Handler, NotAliveHandler>( handler, not_alive, _alive);
   }
+
+  /*
+  template<typename Strand, typename Handler, typename NotAliveHandler>
+  callback_wrapper<Handler, NotAliveHandler>
+  wrap(Strand& strand, Handler handler, NotAliveHandler not_alive)
+  {
+    return callback_wrapper<Handler, NotAliveHandler>( strand, handler, not_alive, _alive);
+  }
+  */
 
 private:
   
   alive_type _alive;
 };
+/*
+  template<typename Handler, typename NotAliveHandler>
+  inline
+  callback_wrapper<Handler, NotAliveHandler>
+  owner_wrap(callback_owner& owner, Handler handler, NotAliveHandler not_alive)
+  {
+    return owner.wrap( handler, not_alive);
+  }
 
-
-
+*/
 }

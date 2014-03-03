@@ -169,10 +169,37 @@ struct user_handler
     }
     else
     {
-      handler( std::move(d), [&t](typename T::data_ptr d)
+      /*
+      wfc::io::callback callback1 = [&t](typename T::data_ptr d)
       {
         t.get_aspect().template get<TgResult>()(t, std::move(d) );
-      });
+      };
+      
+      auto callback2 = [callback1](std::shared_ptr<typename T::data_ptr> d)
+      {
+        callback1(std::move(*d));
+      };
+      
+      auto callback3 = t.strand().wrap( callback2 );
+
+      callback3( std::make_shared<typename T::data_ptr>(std::move(d)) );
+      
+      auto callback4 = [callback3](typename T::data_ptr )
+      {
+      };
+      
+      wfc::io::callback callback5 = t.owner().wrap( callback4, t.options().not_alive);
+      */
+      
+      // 
+      handler( std::move(d), t.owner().wrap([&t](typename T::data_ptr d) 
+      {
+        auto dd = std::make_shared<typename T::data_ptr>( std::move(d));
+        t.get_io_service().dispatch( t.strand().wrap([dd, &t]() 
+        {
+          t.get_aspect().template get<TgResult>()(t, std::move(*dd) );
+        }));
+      }));
     }
   }
 };
