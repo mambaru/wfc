@@ -23,5 +23,9 @@ struct _stop_;
 struct _incoming_;
 struct _outgoing_;
 struct _options_type_;
-  
+
+// Descriptor holder
+struct _status_;
+struct _error_code_;
+
 }}

@@ -16,7 +16,8 @@ struct ad_read_some
     size_t bytes_transferred = 
       t.descriptor().read_some( ::boost::asio::buffer( *d ), ec);
       
-    t.get_aspect().template get< _outgoing_ >()(t, std::move(d), ec, bytes_transferred);
+    d->resize(bytes_transferred);
+    t.get_aspect().template get< _outgoing_ >()(t, std::move(d), ec/*, bytes_transferred*/);
   }
 };
 

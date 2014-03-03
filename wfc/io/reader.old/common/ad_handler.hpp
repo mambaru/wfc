@@ -10,13 +10,11 @@ namespace wfc{ namespace io{ namespace reader{ namespace common{
 struct ad_handler
 {
   template<typename T>
-  void operator()(T& t, typename T::data_ptr d, boost::system::error_code ec, std::size_t bytes_transferred)
+  void operator()(T& t, typename T::data_ptr d, boost::system::error_code ec/*, std::size_t bytes_transferred*/)
   {
-    
-      
     if (!ec)
     {
-      d->resize( bytes_transferred);
+      // d->resize( bytes_transferred);
       t.get_aspect().template get<_ready_>()( t, std::move(d) );
     }
     else if ( ec == boost::asio::error::operation_aborted)
@@ -27,8 +25,6 @@ struct ad_handler
     {
       t.get_aspect().template get< errors::_error_ >()(t, ec, std::move(d) );
     }
-    
-    
   }
 };
 

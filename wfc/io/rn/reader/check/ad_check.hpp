@@ -14,11 +14,11 @@ struct ad_check
     auto& buffer = t.get_aspect().template get<_buffer_>();
     if ( buffer != nullptr )
     {
-      if ( buffer->size() > t.get_aspect().template get<_limit_error_>() )
+      if ( buffer->size() > t.options().rn_limit_error )
       {
         t.get_aspect().template gete<_on_limit_error_>()(t, buffer->size() );
       }
-      else if ( buffer->size() > t.get_aspect().template get<_limit_warning_>() )
+      else if ( buffer->size() > t.options().rn_limit_warning )
       {
         t.get_aspect().template gete<_on_limit_warning_>()(t, buffer->size());
       }

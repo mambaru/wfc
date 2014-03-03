@@ -3,7 +3,9 @@
 //#include <wfc/io/reader/read/sync/tags.hpp>
 //#include <wfc/io/reader/read/async_callback/tags.hpp>
 #include <wfc/io/reader/tags.hpp>
+#include <wfc/io/reader/aspect.hpp>
 #include <wfc/io/descriptor_holder.hpp>
+#include <wfc/io/types.hpp>
 #include <fas/aop.hpp>
 #include <memory>
 
@@ -21,6 +23,7 @@ public:
   
   typedef typename super::data_type data_type;
   typedef typename super::descriptor_type descriptor_type;
+  typedef typename super::options_type options_type;
   typedef std::unique_ptr<data_type> data_ptr;
   
 public:
@@ -28,9 +31,8 @@ public:
   reader(const reader& ) = delete;
   void operator = (const reader& conf) = delete;
 
-  template<typename Conf>
-  reader(descriptor_type&& desc, const Conf& conf)
-    : super( std::move(desc), conf)
+  reader(descriptor_type&& desc, const options_type& opt)
+    : super( std::move(desc), opt)
   {
     super::create(*this);
   }
@@ -63,41 +65,25 @@ public:
     return super::post(*this, h);
   }
 
-
-  /*
-  template<typename Callback>
-  void read(Callback callback = nullptr)
-  {
-    this->get_aspect().template get<_read_>()(*this, callback);
-  }
-  
   data_ptr read()
   {
     return this->get_aspect().template get< _read_ >()(*this);
   }
-  */
-  
+
+  void async_read(wfc::io::callback handler)
+  {
+    this->get_aspect().template get< _async_read_ >()(*this, handler);
+  }
+
+  /*
   template<typename ...Args>
   typename super::aspect::template advice_cast<_read_>::type::template return_type<self>::type
   read(Args&& ...args)
   {
     return this->get_aspect().template get< _read_ >()(*this, std::forward<Args>(args)...);
   }
-  
-  /*
-template<typename T, typename ...Args>
-std::unique_ptr<T> make_unique( Args&& ...args )
-{
-  return std::unique_ptr<T>( new T( std::forward<Args>(args)... ) );
-}
-
-   */
-  
-  /*
-  template<typename T>
-  typename T::aspect::template advice_cast<read::sync::_read_>::type::return_type
   */
-
+  
 private:
 
 };

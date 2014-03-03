@@ -15,7 +15,6 @@ struct ad_incoming
     auto& lst = t.get_aspect().template get<_incoming_list_>();
     lst.push_back( std::move(d) );
   }
-
 };
 
 }}}}}

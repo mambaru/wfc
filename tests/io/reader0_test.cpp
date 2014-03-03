@@ -9,15 +9,18 @@
 #include <wfc/io/reader/read/sync/aspect.hpp>
 #include <wfc/io/basic/log/aspect.hpp>
 */
-#include <wfc/io/reader/reader.hpp>
+/*#include <wfc/io/reader/reader.hpp>
 #include <wfc/io/strategy/posix/reader/sync_read_return.hpp>
 #include <wfc/io/strategy/posix/reader/log.hpp>
 #include <wfc/io/strategy/posix/reader/trace.hpp>
 #include <wfc/io/strategy/posix/reader/config.hpp>
+*/
+#include <wfc/io/reader/reader.hpp>
 #include <string>
 #include <boost/asio.hpp>
 
 
+/*
 typedef wfc::io::strategy::posix::reader::config init_info;
 
 struct reader_aspect: 
@@ -28,10 +31,20 @@ struct reader_aspect:
     wfc::io::strategy::posix::reader::sync_read_return
   >
 {};
+*/
+
+struct reader_aspect
+  : fas::aspect<
+      wfc::io::reader::stream< boost::asio::posix::stream_descriptor >,
+      wfc::io::reader::error_log
+    >
+{};
+
     
 
 int main()
 {
+  std::cout << sizeof(boost::system::error_code) << std::endl;
   
   size_t handler_count = 0;
   size_t not_alive_count = 0;
@@ -42,7 +55,7 @@ int main()
 
   auto io_service = std::make_shared<boost::asio::io_service>();
   boost::asio::io_service::work wrk(*io_service);
-  init_info init;
+  wfc::io::reader::options init;
   init.input_buffer_size = 8096;
   init.not_alive = [&](){ ++not_alive_count;};
   
@@ -69,7 +82,18 @@ int main()
     reader.get_io_service().post( handler );
     io_service->run_one();
     close(dd[0]);
+    
+    if ( !reader.status() )
+      abort();
+    
     d = reader.read();
+    
+    if ( d!=nullptr )
+      abort();
+
+    if ( reader.status() )
+      abort();
+    
     reader.get_io_service().post( handler );
   }
   

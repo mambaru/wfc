@@ -9,16 +9,19 @@ namespace wfc{ namespace io{ namespace basic{
 struct ad_create
 {
   template<typename T,  typename Init>
-  void operator()(T& t, const Init& init)
+  void operator()(T& t, const Init& )
   {
+    std::cout << "basic::ad_create" << std::endl;
     typedef typename T::aspect::template advice_cast<_owner_type_>::type owner_type;
     t.get_aspect().template get<_owner_>() = std::make_shared<owner_type>();
 
     typedef typename T::aspect::template advice_cast<_strand_type_>::type strand_type;
     t.get_aspect().template get<_strand_>() 
       = std::make_shared<strand_type>( t.get_io_service() );
-      
-    t.get_aspect().template get<_not_alive_>() = init.not_alive;
+    
+    // Копируем, т.к. на момент вызова not_alive объект t уже умер
+    t.get_aspect().template get<_not_alive_>() = t.options().not_alive;
+    
   }
 };
 

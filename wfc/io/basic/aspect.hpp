@@ -9,6 +9,7 @@
 
 #include <wfc/io/basic/types.hpp>
 #include <wfc/io/tags.hpp>
+#include <wfc/io/context.hpp>
 
 #include <wfc/callback/callback_owner.hpp>
 #include <fas/aop.hpp>
@@ -33,7 +34,7 @@ typedef fas::type_list_n<
   fas::value< _strand_, std::shared_ptr<boost::asio::strand> >, 
   fas::value< _owner_, std::shared_ptr<wfc::callback_owner> >, 
   fas::value< _not_alive_, std::function<void()> >, 
-  
+
   fas::group< wfc::io::_create_, _create_>
   
 >::type advice_list;
@@ -41,6 +42,7 @@ typedef fas::type_list_n<
 
 struct aspect: fas::aspect
 < 
+  wfc::io::context<>,
   advice_list
 >
 {};
