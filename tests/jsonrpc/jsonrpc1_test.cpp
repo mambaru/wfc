@@ -149,6 +149,8 @@ public:
   {
     if ( !this->has_params() )
       return nullptr;
+    if ( 'n'==*_incoming.params.first)
+      return nullptr; // is null 
     auto result = std::make_unique<typename J::value_type>();
     typename J::serializer()(*result, _incoming.params.first, _incoming.params.second);
     return std::move(result);
@@ -321,6 +323,40 @@ struct outgoing_error_json
 };
 
 
+template<typename T>
+struct outgoing_result
+  : outgoing
+{
+  std::unique_ptr<T> result;
+  std::unique_ptr<data_type> id;
+};
+
+template<typename T>
+struct outgoing_result_json
+{
+  typedef typename T::target target;
+  typedef outgoing_result<target> result_type;
+  typedef typename result_type::version_type version_type;
+
+  typedef json::pointer<std::unique_ptr<target>, T> result_json;
+  typedef json::pointer<std::unique_ptr<data_type>, json::raw_value<data_type> > id_json;
+  
+  FAS_NAME(id)
+  FAS_NAME(result)
+  
+  typedef json::object<
+    result_type,
+    typename fas::type_list_n<
+      version_member::type,
+      json::member<n_result, result_type, std::unique_ptr<target>,  &result_type::result, result_json >,
+      json::member<n_id,     result_type, std::unique_ptr<data_type>, &result_type::id,   id_json >
+    >::type
+  > type;
+
+  typedef typename type::serializer serializer;
+};
+
+
 
 /// end OUTGOING JSON
 
@@ -339,6 +375,89 @@ public:
   // Инициализируеться jsonrpc
   // Обработчик исходящего запроса
   std::function< void( data_ptr /*d*/, data_ptr /*id*/, std::shared_ptr<instance_base>) > outgoing = nullptr;
+};
+
+template<typename N>
+struct name
+{
+  typedef fas::metalist::advice metatype;
+  typedef N tag;
+  typedef name<N> advice_class;
+
+  advice_class& get_advice() { return *this;}
+  const advice_class& get_advice() const { return *this;}
+
+  template<typename Itr>
+  bool operator()(Itr beg, Itr end)
+  {
+    static const char *name = N()();
+    const char *ch = name;
+    for (; beg != end && *beg==*ch; ++beg, ++ch);
+    return beg==end && *ch='\0';
+  }
+};
+
+struct _request_;
+template<typename JReq, typename JResp, typename Handler>
+struct request: Handler
+{
+  typedef fas::metalist::advice metatype;
+  typedef _request_ tag;
+  typedef request<JReq, JResp, Handler> advice_class;
+
+  advice_class& get_advice() { return *this;}
+  const advice_class& get_advice() const { return *this;}
+  
+  typedef JReq  request_json;
+  typedef JResp response_json;
+  typedef typename request_json::target  request_type;
+  typedef typename response_json::target response_type;
+  
+  
+  template<typename T>
+  void operator()(T& t, incoming_holder holder)
+  {
+    try
+    {
+      auto req = holder.get_params<request_json>();
+      if (holder.is_notify())
+      {
+        Handler::operator()( t, std::move(req), nullptr);
+      }
+      else
+      {
+        auto ph = std::make_shared<incoming_holder>( std::move(holder) );
+        Handler::operator()( t, std::move(req), 
+          [ph]( std::unique_ptr<response_type> params, std::unique_ptr<error> err )
+          {
+            if (err != nullptr )
+            {
+              typedef outgoing_error_json< error_json::type >::type json_type;
+              outgoing_error<error> error_message;
+              error_message.error = std::move(err);
+              error_message.id = std::move( ph->raw_id() );
+              
+              auto d = ph->detach();
+              d->clear();
+              typename json_type::serializer()(error_message, std::inserter( *d, d->end() ));
+              ph->handler( std::move(d) );
+            }
+            else
+            {
+              outgoing_result<response_type> result;
+              result.result = std::move(params);
+              result.id = ph->raw_id();
+            }
+          } // callback 
+        );
+      }
+    }
+    catch(const json::json_error& e)
+    {
+      // SEND INVALID Params и перенести выше
+      //t.get_aspect().template get<_invalid_params_>()(t, id);
+    }
+  }
 };
 
 template< typename A = fas::aspect<> >
@@ -367,13 +486,14 @@ public:
   {
   }
   
+  /*
   template<typename T>
   void request(T& t, void params, callback callback)
   {
-  }
+  }*/
   
   
-}
+};
 
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class instance
@@ -394,7 +514,6 @@ public:
   
   virtual bool process_result(incoming_holder holder)
   {
-    
   }
   
   virtual bool process_error(incoming_holder holder)
