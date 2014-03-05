@@ -10,7 +10,8 @@ struct ad_post
   void operator()(T& t, Callback callback)
   {
     t.get_io_service().post( 
-      t.get_aspect().template get<_wrap_>()(t, callback) 
+      t.strand().wrap(callback)
+      //t.get_aspect().template get<_wrap_>()(t, callback) 
     );
   }
 };

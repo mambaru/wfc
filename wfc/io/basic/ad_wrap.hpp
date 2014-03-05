@@ -41,13 +41,16 @@ private:
   template<typename T, typename F>
   std::function<void()> owner_wrap(T& t, F callback)
   {
+    auto tmp = t.options();
+    auto tmp2 = tmp.not_alive;
     return t.get_aspect().template get<_owner_>()->wrap(
         callback, 
-        t.options().not_alive
+        tmp2
+        //t.options().not_alive
     );
-  
   }
   
 };
 
 }}}
+

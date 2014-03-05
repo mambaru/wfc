@@ -11,6 +11,7 @@
 #include <fas/aop.hpp>
 
 #include <wfc/logger.hpp>
+#include <wfc/callback/callback_status.hpp>
 
 #include <list>
 
@@ -161,45 +162,27 @@ struct user_handler
   template<typename T>
   void operator()( T& t, typename T::data_ptr d)
   {
-    std::cout << "user_handler" << std::endl;
     auto handler = t.options().handler;
     if ( handler == nullptr )
     {
+      std::cout << "user_handler null " << std::endl;
       t.get_aspect().template get<TgResult>()(t, std::move(d) );
     }
     else
     {
-      /*
-      wfc::io::callback callback1 = [&t](typename T::data_ptr d)
-      {
-        t.get_aspect().template get<TgResult>()(t, std::move(d) );
-      };
+      std::cout << "user_handler shared_from_this{ " << std::endl;
+      t.shared_from_this();
+      std::cout << "}user_handler shared_from_this " << std::endl;
+      std::cout << "user_handler { " << std::endl;
+      handler(
+        std::move(d), 
+        t.shared_from_this(), 
+        t.callback([&t](typename T::data_ptr d){
+          t.get_aspect().template get<TgResult>()(t, std::move(d) );
+        })
+      );
+      std::cout << "} user_handler " << std::endl;
       
-      auto callback2 = [callback1](std::shared_ptr<typename T::data_ptr> d)
-      {
-        callback1(std::move(*d));
-      };
-      
-      auto callback3 = t.strand().wrap( callback2 );
-
-      callback3( std::make_shared<typename T::data_ptr>(std::move(d)) );
-      
-      auto callback4 = [callback3](typename T::data_ptr )
-      {
-      };
-      
-      wfc::io::callback callback5 = t.owner().wrap( callback4, t.options().not_alive);
-      */
-      
-      // 
-      handler( std::move(d), t.owner().wrap([&t](typename T::data_ptr d) 
-      {
-        auto dd = std::make_shared<typename T::data_ptr>( std::move(d));
-        t.get_io_service().dispatch( t.strand().wrap([dd, &t]() 
-        {
-          t.get_aspect().template get<TgResult>()(t, std::move(*dd) );
-        }));
-      }));
     }
   }
 };
@@ -233,7 +216,7 @@ struct basic_options
 {
   wfc::io::handler handler = nullptr;
   size_t input_buffer_size = 8096;
-  std::function<void()> not_alive = nullptr;
+  std::function<callback_status()> not_alive = nullptr;
 };
 
 /*
@@ -271,7 +254,7 @@ struct aspect: fas::aspect<
 
 struct options: basic_options
 {
-  std::function<void()> not_alive = nullptr;
+  std::function<callback_status()> not_alive = nullptr;
 };
 
 typedef std::list< wfc::io::data_ptr> data_list;
@@ -288,8 +271,10 @@ struct read_incoming
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
+    std::cout << "read_incoming!!!" << std::endl;
     auto& lst = t.get_aspect().template get<_outgoing_list_>();
-    lst.push_back( std::move(d) );
+    if ( d!=nullptr)
+      lst.push_back( std::move(d) );
     
     auto& clb = t.get_aspect().template get<_callback_list_>();
     while ( !clb.empty() &&  !lst.empty() )
@@ -304,6 +289,8 @@ struct read_incoming
     
     if ( !clb.empty() )
       t.get_aspect().template get< TgAsyncReadMore >()(t);
+    
+    std::cout << "read_incoming!!! " << lst.size() << std::endl;
 
   }
 };
@@ -315,21 +302,32 @@ struct read
   template<typename T>
   typename T::data_ptr operator()(T& t)
   {
+    std::cout << "READ{" << std::endl;
     if ( !t.status() )
     {
-      std::cout << t.error_code().message() << std::endl;
+      std::cout << "status1! " << t.error_code().message() << std::endl;
       return nullptr;
     }
     
     auto& lst = t.get_aspect().template get<_outgoing_list_>();
-    while ( lst.empty() && t.status() )
+    if ( lst.empty() && t.status() )
       t.get_aspect().template get< TgReadMore >()(t);
+
+    if ( !t.status() )
+    {
+      std::cout << "status2! " << t.error_code().message() << std::endl;
+      return nullptr;
+    }
+
+    
     typename T::data_ptr d = nullptr;
     if ( !lst.empty() )
     {
+      std::cout << "READ OK " << std::string(d->begin(), d->end()) <<std::endl;
       d = std::move( lst.front() );
       lst.pop_front();
     }
+    std::cout << "}READ " <<  std::endl;
     return std::move(d);
   }
 };

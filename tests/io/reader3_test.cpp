@@ -45,13 +45,13 @@ int main()
 
     boost::asio::posix::stream_descriptor sd(*io_service, dd[0]);
     reader_type reader( std::move(sd), init);
-    reader.async_read([](wfc::io::data_ptr d) { async_count++; if ( std::string(d->begin(), d->end())!="test1") abort(); });
+    reader.async_read([](wfc::io::data_ptr d) { async_count++; if ( std::string(d->begin(), d->end())!="test1") abort(); return wfc::callback_status::ready;});
     write(dd[1], "test1", 5);
     io_service->run_one();
-    reader.async_read([](wfc::io::data_ptr d) { async_count++; if ( std::string(d->begin(), d->end())!="test2") abort(); });
+    reader.async_read([](wfc::io::data_ptr d) { async_count++; if ( std::string(d->begin(), d->end())!="test2") abort(); return wfc::callback_status::ready;});
     write(dd[1], "test2", 5);
     io_service->run_one();
-    reader.async_read([](wfc::io::data_ptr d) { async_count++; if ( std::string(d->begin(), d->end())!="test3") abort(); });
+    reader.async_read([](wfc::io::data_ptr d) { async_count++; if ( std::string(d->begin(), d->end())!="test3") abort(); return wfc::callback_status::ready;});
   }
   
   if ( async_count!=2 )

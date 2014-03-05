@@ -19,12 +19,19 @@
 
 namespace wfc{ namespace io{ namespace basic{
 
+struct options
+{
+  std::function<void()> not_alive = nullptr;
+};
+
+  
 typedef fas::type_list_n<
   
   fas::type< wfc::io::_io_service_type_, boost::asio::io_service>, 
   fas::type< _strand_type_, boost::asio::strand>,
   fas::type< _owner_type_, wfc::callback_owner>,
   fas::type< wfc::io::_data_type_, data_type>,
+  fas::type< wfc::io::_options_type_, options>,
 
   fas::advice< _create_, ad_create>,
   fas::advice< wfc::io::_post_, ad_post>,

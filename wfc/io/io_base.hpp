@@ -10,6 +10,7 @@ namespace wfc{ namespace io{
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class io_base
   : public AspectClass<A>
+  , public iio
 {
 public:
   
@@ -57,11 +58,15 @@ public:
   
   strand_type& strand()
   {
+    if ( nullptr == this->get_aspect().template get<_strand_>() )
+      abort();
     return *(this->get_aspect().template get<_strand_>());
   }
 
   const strand_type& strand() const
   {
+    if ( nullptr == this->get_aspect().template get<_strand_>() )
+      abort();
     return *(this->get_aspect().template get<_strand_>());
   }
 
@@ -88,6 +93,12 @@ public:
 
 ///  //////////////////////////////////////////////
 
+  void add_release_handler( release_handler handler)
+  {
+    _release_handlers.push_back(handler);
+  }
+
+
   template<typename Handler>
   void dispatch(Handler h)
   {
@@ -100,26 +111,40 @@ public:
     this->post(*this, h);
   }
 
+  wfc::io::callback callback( std::function<void(data_ptr)> handler)
+  {
+    return this->owner().wrap( [handler, this](data_ptr d)->callback_status 
+      {
+        auto dd = std::make_shared<data_ptr>( std::move(d) );
+        auto fun  = [dd, handler]()
+        {
+          handler( std::move(*dd) );
+        };
+        
+        this->get_io_service().dispatch( fun );
+        
+        return callback_status::ready;
+      },
+      this->options().not_alive
+    );
+    
+    /*
+    auto hh = t.owner.wrap( t.strand().wrap()  )
+    return [handler](data_ptr d) -> callback_status
+    {
+      auto pd = std::make_shared<data_ptr>(d);
+    }
+    */
+    
+    //return this->callback(*this, handler);
+  }
   
+  /*
   template<typename Handler>
-  //callback_wrapper<Handler, std::function<void()> > 
   std::function<void()>
   wrap(Handler handler)
   {
     return this->wrap(*this, handler);
-  }
-  
-
-  /*
-  void start()
-  {
-    this->start(*this);
-  }
-  
-  template<typename T>
-  void stop(T& t)
-  {
-    this->stop(*this);
   }
   */
   
@@ -139,6 +164,7 @@ protected:
   }
 
   
+  /*
   template<typename T, typename Handler>
   //callback_wrapper<Handler, std::function<void()> > 
   
@@ -147,6 +173,7 @@ protected:
     return t.get_aspect().template get<_wrap_>()(t, handler);
   }
   
+  */
 
   template<typename T>
   void create(T& t)
@@ -163,12 +190,16 @@ protected:
   template<typename T>
   void stop(T& t)
   {
+    for ( auto& h : _release_handlers)
+      h(t.shared_from_this());
+    _release_handlers.clear();
     t.get_aspect().template get<_stop_>()(t);
   }
   
 private:
   io_service_type& _io_service;
   options_type _options;
+  std::list<release_handler> _release_handlers;
 };
 
 }}

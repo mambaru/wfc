@@ -78,8 +78,9 @@ class incoming_holder
 {
   typedef data_type::iterator iterator;
 public:
-  incoming_holder(data_ptr d, callback clb)
-    : handler( clb )
+  incoming_holder(data_ptr d, std::weak_ptr< wfc::io::iio> iio, callback clb)
+    : iio(iio)
+    , handler( clb )
     , _data( std::move(d) )
   {
     _begin = wfc::json::parser::parse_space(_data->begin(), _data->end());
@@ -104,6 +105,7 @@ public:
     return std::make_unique<data_type>(beg, _data->end());
   }
   
+  bool empty() const { return !$();}
   bool $() const{ return _data != nullptr;}
   
   bool has_method()   const { return $() && _incoming.method.first!=_incoming.method.second;}
@@ -127,6 +129,24 @@ public:
       || this->is_error();
   }
   
+    
+  bool method(const char* ch)
+  {
+    incoming::iterator beg = _incoming.method.first;
+    incoming::iterator end = _incoming.method.second;
+    if (beg++==end) return false;
+    if (beg==end--) return false;
+    for (; beg != end && *beg==*ch; ++beg, ++ch);
+    return beg==end && *ch=='\0';
+    
+    /*static const char *name = N()();
+    const char *ch = name;
+    for (; beg != end && *beg==*ch; ++beg, ++ch);
+    return beg==end && *ch='\0';
+    */
+  }
+
+  
   template<typename V, typename J = json::value<V> >
   V get_id() const
   {
@@ -145,13 +165,13 @@ public:
   }
   
   template<typename J>
-  std::unique_ptr<typename J::value_type> get_params() const
+  std::unique_ptr<typename J::target> get_params() const
   {
     if ( !this->has_params() )
       return nullptr;
     if ( 'n'==*_incoming.params.first)
       return nullptr; // is null 
-    auto result = std::make_unique<typename J::value_type>();
+    auto result = std::make_unique<typename J::target>();
     typename J::serializer()(*result, _incoming.params.first, _incoming.params.second);
     return std::move(result);
   }
@@ -166,9 +186,16 @@ public:
     return std::move(result);
   }
   
+  std::weak_ptr<wfc::io::iio> iio;
   callback handler;
   
+  const incoming& get()  const 
+  {
+    return _incoming;
+  }
+  
 private:
+  
   data_ptr _data;
   incoming _incoming;
   iterator _begin;
@@ -368,32 +395,74 @@ class instance_base
 public:
   virtual ~instance_base() {}
   virtual std::shared_ptr<instance_base> clone() = 0;
+  
+  virtual void process(incoming_holder holder) = 0;
+  /*
   virtual bool process_method(incoming_holder holder) = 0;
   virtual bool process_result(incoming_holder holder) = 0;
   virtual bool process_error(incoming_holder holder) = 0;
+  */
   
   // Инициализируеться jsonrpc
   // Обработчик исходящего запроса
   std::function< void( data_ptr /*d*/, data_ptr /*id*/, std::shared_ptr<instance_base>) > outgoing = nullptr;
 };
 
+struct _name_;
+
 template<typename N>
 struct name
 {
   typedef fas::metalist::advice metatype;
-  typedef N tag;
+  typedef _name_ tag;
   typedef name<N> advice_class;
+  typedef N name_type;
 
   advice_class& get_advice() { return *this;}
   const advice_class& get_advice() const { return *this;}
 
-  template<typename Itr>
-  bool operator()(Itr beg, Itr end)
+  const char* operator()() const
   {
-    static const char *name = N()();
-    const char *ch = name;
-    for (; beg != end && *beg==*ch; ++beg, ++ch);
-    return beg==end && *ch='\0';
+    return name_type()();
+  }
+};
+
+struct _invoke_interface_;
+
+template<typename I>
+struct invoke_interface
+  : fas::value<_invoke_interface_, std::weak_ptr<I> >
+{
+};
+
+
+//float (SomeClass::*my_memfunc_ptr)(int, char *);
+
+template<
+  typename Req, 
+  typename Resp, 
+  typename I, 
+  void (I::*mem_ptr)( std::unique_ptr<Req>, std::function< callback_status(std::unique_ptr<Req>) > ) >
+struct invoke_handler
+{
+  
+  template<typename T>
+  void operator()(T& t, std::unique_ptr<Req> req, std::function< wfc::callback_status(std::unique_ptr<Resp>, std::unique_ptr<wfc::jsonrpc::error>) > callback)
+  {
+    if ( auto i = t.get_interface().lock() )
+    {
+      if ( callback==nullptr)
+      {
+        (i.get()->*mem_ptr)( std::move(req), nullptr );
+      }
+      else
+      {
+        (i.get()->*mem_ptr)( std::move(req), [callback](std::unique_ptr<Resp> resp)
+        {
+          return callback( std::move(resp), nullptr);
+        } );
+      }
+    }
   }
 };
 
@@ -428,7 +497,7 @@ struct request: Handler
       {
         auto ph = std::make_shared<incoming_holder>( std::move(holder) );
         Handler::operator()( t, std::move(req), 
-          [ph]( std::unique_ptr<response_type> params, std::unique_ptr<error> err )
+          [ph]( std::unique_ptr<response_type> params, std::unique_ptr<error> err ) -> callback_status
           {
             if (err != nullptr )
             {
@@ -440,13 +509,22 @@ struct request: Handler
               auto d = ph->detach();
               d->clear();
               typename json_type::serializer()(error_message, std::inserter( *d, d->end() ));
-              ph->handler( std::move(d) );
+              return ph->handler( std::move(d) );
             }
             else
             {
               outgoing_result<response_type> result;
               result.result = std::move(params);
               result.id = ph->raw_id();
+              auto d = ph->detach();
+              d->clear();
+              typedef outgoing_result_json<response_json> result_json;
+              typename result_json::serializer()(result, std::inserter( *d, d->end() ));
+              std::cout << "method SEND: " << std::string(d->begin(), d->end()) << std::endl;
+              return ph->handler( std::move(d) );
+              /*typename error_json::serializer()(error_message, std::inserter( *d, d->end() ));
+              return ph->handler( std::move(d) );
+              */
             }
           } // callback 
         );
@@ -460,15 +538,45 @@ struct request: Handler
   }
 };
 
-template< typename A = fas::aspect<> >
+struct method_aspect: fas::aspect<> {};
+
+template< typename... Args >
 class method
-  : public fas::aspect_class<A>
+  : public fas::aspect_class< typename fas::merge_aspect<fas::aspect<Args...>, method_aspect>::type >
 {
 public:
   
-  typedef method<A> self;
-  typedef fas::aspect_class<A> super;
+  typedef method<Args...> self;
+  typedef fas::aspect_class< typename fas::merge_aspect<fas::aspect<Args...>, method_aspect>::type > super;
+  
+  typedef fas::metalist::advice metatype;
+  typedef typename super::aspect::template advice_cast<_name_>::type::name_type tag;
+  typedef self advice_class;
 
+  advice_class& get_advice() { return *this;}
+  const advice_class& get_advice() const { return *this;}
+
+  const char* name() const
+  {
+    return this->get_aspect().template get<_name_>()();
+  }
+
+  /*
+  template<typename Itr>
+  bool name(Itr beg, Itr end) const
+  {
+    this->get_aspect().template get<_name_>()( beg, end);
+  }
+  */
+
+  template<typename T>
+  void operator()(T& t, incoming_holder holder)
+  {
+    std::cout << "METHOD!" << std::endl;
+    this->get_aspect().template get<_request_>()(t, std::move(holder));
+  }
+
+  /*
   template<typename T>
   void process_method(T& t, incoming_holder holder)
   {
@@ -485,46 +593,197 @@ public:
   void process_error(T& t, incoming_holder holder)
   {
   }
+  */
   
   /*
   template<typename T>
   void request(T& t, void params, callback callback)
   {
   }*/
-  
-  
 };
+
+struct _method_;
+
+template< typename Method>
+struct add_method: fas::type_list_n<
+  Method,
+  fas::group<_method_, typename Method::tag>
+>::type {};
+
+struct instance_aspect: fas::aspect<
+  invoke_interface<fas::empty_type>
+>{};
+
+struct f_invoke
+{
+  incoming_holder& holder;
+  
+  f_invoke(incoming_holder& holder)
+    : holder( holder )
+  {
+  }
+  
+  template<typename T, typename Tg>
+  void operator()(T& t, fas::tag<Tg> )
+  {
+    if ( holder.$() )
+    {
+      if ( holder.method( t.get_aspect().template get<Tg>().name() ) )
+      {
+        t.get_aspect().template get<Tg>()(t, std::move(holder) );
+      }
+    }
+  }
+};
+
 
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class instance
   : public instance_base
-  , public AspectClass<A>
+  , public AspectClass< typename fas::merge_aspect<A, instance_aspect>::type >
   , public std::enable_shared_from_this< instance<A, AspectClass> >
 {
 public:
+  typedef instance<A, AspectClass> self;
+  typedef self magic;
+  typedef AspectClass< typename fas::merge_aspect<A, instance_aspect>::type > super;
+  
+  typedef typename super::aspect::template advice_cast<_invoke_interface_>::type invoke_interface;
+  
+  /*
+  instance(invoke_interface itf = invoke_interface() )
+  {
+    this->get_aspect().template get<_invoke_interface_>() = itf;
+  }
+  */
+  
+  virtual void process(incoming_holder holder)
+  {
+    std::cout << "instance process!!!" << std::endl;
+    fas::for_each_group<_method_>(*this, f_invoke( holder ) );
+  }
+  
+  invoke_interface get_interface() const
+  {
+    return this->get_aspect().template get<_invoke_interface_>();
+  }
+
+};
+
+template<typename Instanse>
+class instance_wrapper
+  : public Instanse
+{
+public:
+  typedef instance_wrapper<Instanse> self;
+  typedef Instanse super;
+  typedef typename Instanse::invoke_interface invoke_interface;
+  
+  instance_wrapper(invoke_interface itf = invoke_interface() )
+  {
+    this->get_aspect().template get<_invoke_interface_>() = itf;
+  }
+
   virtual std::shared_ptr<instance_base> clone()
   {
-    
-  }
-  
-  virtual bool process_method(incoming_holder holder)
-  {
-    
-  }
-  
-  virtual bool process_result(incoming_holder holder)
-  {
-  }
-  
-  virtual bool process_error(incoming_holder holder)
-  {
-    
+    std::cout << "CLONE!!!" << std::endl;
+    return std::make_shared<self>(*this);
   }
   
 };
 
 
 /// END INSTANCE
+
+struct worker_options
+  : wfc::io::basic::options
+{
+  std::shared_ptr<instance_base> instance;
+};
+
+
+/// WORKER
+
+template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
+class worker_base
+  : public io::basic_io<A, AspectClass>
+  , public std::enable_shared_from_this< worker_base<A, AspectClass> >
+{
+public:
+  typedef worker_base<A, AspectClass> self;
+  typedef io::basic_io<A, AspectClass> super;
+  typedef typename super::options_type options_type;
+  typedef typename super::io_service_type io_service_type;
+  typedef typename super::data_ptr data_ptr;
+  
+  worker_base(io_service_type& io_service, const options_type& opt)
+    : super( io_service, opt)
+  {
+    super::create(*this);
+  }
+  
+  void operator()(incoming_holder holder)
+  {
+    auto ph = std::make_shared<incoming_holder>(std::move(holder) );
+    this->dispatch([this, ph](){
+      if ( auto p1 = ph->iio.lock() )
+      {
+        auto p2 = p1.get();
+        auto itr = _instance_map.find(p2);
+        if ( itr == _instance_map.end() )
+        {
+          itr = _instance_map.insert( std::make_pair(p2, this->options().instance->clone() ) ).first;
+          p1->add_release_handler(
+            [this](std::weak_ptr<wfc::io::iio> wp)
+            {
+              auto pp = wp.lock().get();
+              this->dispatch([this, pp](){
+                std::cout << "RELEASE1: " << this->_instance_map.size() << std::endl;
+                // Здесь проверок не ставим
+                // Если поломато, значит ошибка в логике
+                this->_instance_map.erase(pp);
+                std::cout << "RELEASE2: " << this->_instance_map.size() << std::endl;
+              });
+            }
+          );
+        }
+        
+        itr->second->process( std::move(*ph) );
+      }
+    });
+  }
+private:
+  std::map< wfc::io::iio*, std::shared_ptr<instance_base> > _instance_map;
+  
+};
+
+struct worker_aspect: fas::aspect<
+  fas::type<wfc::io::_options_type_, worker_options>
+> {};
+
+template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
+class worker:
+  public worker_base< typename fas::merge_aspect< A, worker_aspect>::type, AspectClass>
+{
+public:
+  typedef worker<A, AspectClass> self;
+  typedef worker_base< typename fas::merge_aspect< A, worker_aspect>::type, AspectClass> super;
+
+  typedef typename super::options_type options_type;
+  typedef typename super::io_service_type io_service_type;
+
+  worker(io_service_type& io_service, const options_type& opt)
+    : super( io_service, opt)
+  {
+  }
+
+};
+
+
+
+
+
+/// END WORKER
 
 
 
@@ -544,33 +803,22 @@ public:
 
   jsonrpc_base(io_service_type& io_service, const options_type& opt)
     : super( io_service, opt)
-    , handler (std::bind( &self::operator(), this, std::placeholders::_1, std::placeholders::_2) )
+    , handler (std::bind( &self::operator(), this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3) )
+    , tmp_worker(io_service, opt)
   {
     super::create(*this);
   }
 
-  /*
-  void doit( data_ptr d, wfc::io::callback handler)
+  void operator()( data_ptr d, std::weak_ptr<wfc::io::iio> iio, wfc::io::callback&& handler)
   {
-    std::cout << "JSON RPC {" <<  std::string(d->begin(), d->end())<< std::endl;
-    handler( std::move(d) );
-    std::cout << "}JSON RPC" << std::endl;
-  }
-  */
+    auto dd = std::make_shared<data_ptr>( std::move(d) );
+    this->dispatch([this, dd, iio, handler]()
+    {
+        std::cout << "jsonrpc_base" << std::endl; 
+        
 
-  
-  void operator()( data_ptr d, wfc::io::callback&& handler)
-  {
-    this->get_aspect().template get<_incoming_>()( *this, std::move(d), std::move(handler) );
-    /*
-    std::cout << "JSON RPC operator(1) " <<  (d != nullptr) << std::endl;
-
-    auto dd = std::make_shared<data_ptr>(std::move(d));
-    this->dispatch( [this, dd,  handler]() {
-      std::cout << "JSON RPC operator(2) " <<  ( *dd != nullptr) << std::endl;
-      this->doit( std::move(*dd), handler);
+      this->get_aspect().template get<_incoming_>()( *this, std::move(*dd), iio, std::move(handler) );
     });
-    */
   }
   
   void start()
@@ -584,6 +832,8 @@ public:
   }
 
   wfc::io::handler handler;
+  
+  worker<> tmp_worker;
 };
 
 /// /////////////////////////////////////////
@@ -641,11 +891,13 @@ struct _process_error_;
 struct _process_method_;
 struct _process_result_;
 
+
 struct ad_process_method
 {
   template<typename T>
-  void operator()( T&, incoming_holder)
+  void operator()( T& t, incoming_holder holder)
   {
+    t.tmp_worker( std::move(holder) );
   }
 };
 
@@ -654,6 +906,7 @@ struct ad_process_error
   template<typename T>
   void operator()( T&, incoming_holder)
   {
+    
   }
 };
 
@@ -707,7 +960,7 @@ struct ad_verify
 struct ad_incoming
 {
   template<typename T>
-  void operator()( T& t, typename T::data_ptr d, wfc::io::callback&& handler)
+  void operator()( T& t, typename T::data_ptr d, std::weak_ptr<wfc::io::iio> iio, wfc::io::callback handler)
   {
     std::cout << "ad_incoming { " << std::string( d->begin(), d->end()) << std::endl;
     try
@@ -715,7 +968,7 @@ struct ad_incoming
       while (d != nullptr)
       {
         std::cout << "ad_incoming next: " << std::string( d->begin(), d->end()) << std::endl;
-        incoming_holder hold(std::move(d), handler );
+        incoming_holder hold(std::move(d), iio, handler );
         d = hold.tail();
         t.get_aspect().template get<_verify_>()( t, std::move(hold) );
       }
@@ -741,9 +994,9 @@ struct ad_incoming
 
 /// /////////////////////////////////////////
 
-struct options
+struct options: worker_options
 {
-  std::function<void()> not_alive = nullptr;
+  
 };
 
 struct aspect: fas::aspect<
@@ -779,13 +1032,73 @@ public:
 
 }} // wfc
 
+typedef std::vector<int> test1_params;
+typedef wfc::json::array< std::vector< wfc::json::value<int> > > test1_json;
+
+
+struct itest
+{
+  virtual ~itest() {}
+  virtual void test1(std::unique_ptr<test1_params> req, std::function< wfc::callback_status(std::unique_ptr<test1_params>) > callback) = 0;
+};
+
+class test: public itest
+{
+public:
+  
+  virtual void test1(std::unique_ptr<test1_params> req, std::function< wfc::callback_status(std::unique_ptr<test1_params>) > callback)
+  {
+    std::cout << "test::test" << std::endl;
+    std::reverse(req->begin(), req->end());
+    callback(std::move(req));
+  }
+  
+};
+
+FAS_STRING(_test1_, "test1")
+FAS_STRING(_test2_, "test2")
+
+
+struct test1_handler
+{
+  template<typename T>
+  void operator()(T& t, std::unique_ptr<test1_params> req, std::function< wfc::callback_status(std::unique_ptr<test1_params>, std::unique_ptr<wfc::jsonrpc::error>) > callback)
+  {
+    callback(std::move(req), nullptr);
+  }
+};
+
+struct method_test1: wfc::jsonrpc::method<
+  wfc::jsonrpc::name<_test1_>,
+  wfc::jsonrpc::request<test1_json, test1_json, wfc::jsonrpc::invoke_handler<test1_params, test1_params, itest, &itest::test1> >
+>{};
+
+struct method_test2: wfc::jsonrpc::method<
+  wfc::jsonrpc::name<_test2_>,
+  wfc::jsonrpc::request<test1_json, test1_json, wfc::jsonrpc::invoke_handler<test1_params, test1_params, itest, &itest::test1> >
+>{};
+
+
+struct instance: wfc::jsonrpc::instance< fas::aspect<
+  wfc::jsonrpc::invoke_interface<itest>,
+  wfc::jsonrpc::add_method<method_test1>,
+  wfc::jsonrpc::add_method<method_test2>
+> >{};
+
+
+
 int main()
 {
   int dd[2];
   ::pipe(dd);
 
+  typedef wfc::jsonrpc::instance_wrapper<instance> instance_wrapper;
+  
   wfc::io_service io_service;
+  wfc::io_service::work wrk(io_service);
   wfc::jsonrpc::options options;
+  auto t = std::make_shared<test>();
+  options.instance = std::make_shared<instance_wrapper>( t );
   wfc::jsonrpc::jsonrpc<> jsonrpc(io_service, options);
   
   typedef wfc::io::posix::rn::reader reader_type;
@@ -794,7 +1107,7 @@ int main()
   reader_options.handler = jsonrpc.handler;
   
   reader_type::descriptor_type desc(io_service, dd[0]);
-  reader_type reader( std::move(desc), reader_options );
+  reader_type reader = reader_type( std::move(desc), reader_options );
   /*
   wfc::io::rn::reader::options init;
   init.input_buffer_size = 8096;
@@ -809,7 +1122,7 @@ int main()
   
   std::thread th([&dd, &io_service]()
   {
-    const char *req1="\t {\"method\":\"test1\",\"params\":[1,2,3,4,5],\"id\":12345} \t\t {\"method\":\"test1\",\"params\":[1,2,3,4,5],\"id\":12345} \r\n";
+    const char *req1="\t {\"method\":\"test1\",\"params\":[1,2,3,4,5],\"id\":12345} \t\t {\"method\":\"test2\",\"params\":[1,2,3,4,5],\"id\":12345} \r\n";
     const char *req2="{-}\r\n";
     const char *req3="--\r\n";
     const char *req4="{\"id\":[\"66!\"]}\r\n";
@@ -834,21 +1147,53 @@ int main()
   });
     
   std::vector<std::string> result;
+  while( reader.status() ) 
+  {
+    std::cout << "WHILE { " << std::endl;
+    if ( auto d = reader.read() )
+    {
+      std::cout << "READ READY " << std::string(d->begin(), d->end()) << std::endl;
+      result.push_back( std::string(d->begin(), d->end()) );
+    }
+    else
+    {
+      std::cout << "READ NOT READY " << std::endl;
+    }
     
+    if ( result.size() == 5)
+      break;
+    
+    std::cout << "} WHILE" << std::endl;
+  }
+  
+  
+  /*
+  reader.start();
+  for (int i=0; i < 50; ++i)
+  {
+    io_service.poll_one();
+  }
+  reader.stop();
+  */
+  /*
   for (int i=0; i < 5; ++i)
   {
     reader.async_read([&result]( wfc::io::data_ptr d){
       std::cout << "----> " << std::string(d->begin(), d->end()) <<std::endl;
       result.push_back( std::string(d->begin(), d->end()) );
+      return wfc::callback_status::ready;
     });
   }
+  */
   
+  /*
   while ( result.size() != 4 )
   {
     std::cout << "result.size() " << result.size() << std::endl;
     io_service.poll_one();
     usleep(100000);
   }
+  */
   std::cout << "result.size() " << result.size() << std::endl;
   
   io_service.stop();

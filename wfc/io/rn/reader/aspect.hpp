@@ -40,7 +40,7 @@ struct basic_options
 
 struct options: basic_options
 {
-  std::function<void()> not_alive = nullptr;
+  std::function<callback_status()> not_alive = nullptr;
 };
 
 

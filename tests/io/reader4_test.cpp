@@ -66,11 +66,11 @@ int main()
   wfc::io::reader::options init;
   init.input_buffer_size = 8096;
   init.not_alive = nullptr;
-  init.handler = [](wfc::io::data_ptr d, wfc::io::callback)
+  init.handler = wfc::io::simple_handler( [](wfc::io::data_ptr d, wfc::io::callback) 
   {
     std::cout << "handle " << std::string(d->begin(), d->end() ) << std::endl;
     result_list.push_back( std::string(d->begin(), d->end() ) );
-  };
+  });
   
   
   {

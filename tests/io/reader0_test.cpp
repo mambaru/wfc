@@ -2,6 +2,7 @@
 
 #include <wfc/logger/ilogger.hpp>
 #include <wfc/core/global.hpp>
+#include <wfc/callback/callback_status.hpp>
 
 /*
 #include <wfc/io/reader/common/trace/aspect.hpp>
@@ -57,7 +58,11 @@ int main()
   boost::asio::io_service::work wrk(*io_service);
   wfc::io::reader::options init;
   init.input_buffer_size = 8096;
-  init.not_alive = [&](){ ++not_alive_count;};
+  /*init.not_alive = [&]()
+  {
+    ++not_alive_count;
+    return wfc::callback_status::died;
+  };*/
   
   {
     
@@ -65,13 +70,17 @@ int main()
     
     boost::asio::posix::stream_descriptor sd(*io_service, dd[0]);
     reader_type reader( std::move(sd), init);
-    handler = reader.owner().wrap([&](){ ++handler_count;});
+    handler = reader.owner().wrap([&](){ ++handler_count;}, [&](){++not_alive_count;} );
     
     write(dd[1], "test1", 5);
+    
+    std::cout << "-read1.1-" << std::endl;
     auto d = reader.read();
+    std::cout << "-read1.2-" << std::endl;
     std::string result( d->begin(), d->end() );
     if ( result != "test1" )
       abort();
+    std::cout << "-read1.3-" << std::endl;
     
     write(dd[1], "test2", 5);
     d = reader.read();

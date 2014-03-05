@@ -46,6 +46,11 @@ public:
     super::stop(*this);
   }
   
+  bool status() const
+  {
+    return this->get_aspect().template get<_status_>();
+  }
+  
   /*
   template<typename Handler>
   std::function<void()> wrap(Handler&& handler)

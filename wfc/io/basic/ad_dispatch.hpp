@@ -11,7 +11,7 @@ struct ad_dispatch
   {
     std::cout <<  "t.get_io_service().dispatch" <<  std::endl;
     t.get_io_service().dispatch( 
-      t.get_aspect().template get<_wrap_>()(t, callback) 
+      t.strand().wrap(callback)
     );
   }
 };

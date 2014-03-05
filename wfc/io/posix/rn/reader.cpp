@@ -11,7 +11,7 @@ reader::~reader()
 
   
 reader::reader(reader::descriptor_type&& desc, const reader::options_type& conf)
-  : _impl( std::make_unique<reader_impl>(std::move(desc), conf) )
+  : _impl( std::make_shared<reader_impl>(std::move(desc), conf) )
 {
   
 }
@@ -24,6 +24,11 @@ void reader::start()
 void reader::stop()
 {
   _impl->stop();
+}
+
+bool reader::status() const
+{
+  return _impl->status();
 }
   
 void reader::shutdown()

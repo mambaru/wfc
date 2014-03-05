@@ -43,7 +43,7 @@ int main()
   boost::asio::io_service::work wrk(*io_service);
   wfc::io::rn::reader::options init;
   init.input_buffer_size = 8096;
-  init.not_alive = [&](){ ++not_alive_count;};
+  init.not_alive = [&](){ ++not_alive_count; return wfc::callback_status::died;};
   
   {
     
@@ -51,7 +51,7 @@ int main()
     
     boost::asio::posix::stream_descriptor sd(*io_service, dd[0]);
     reader_type reader( std::move(sd), init);
-    handler = reader.wrap([&](){ ++handler_count;});
+    handler = reader.strand().wrap([&](){ ++handler_count;});
     
     std::thread th([&dd](){
       write(dd[1], "test1", 5);

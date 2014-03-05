@@ -20,11 +20,12 @@ public:
   void stop();
   void shutdown();
   
+  bool status() const;
   wfc::io::data_ptr read();
   void async_read(wfc::io::callback handler);
 
 private:
-  std::unique_ptr<reader_impl> _impl;
+  std::shared_ptr<reader_impl> _impl;
 };
   
 }}}}

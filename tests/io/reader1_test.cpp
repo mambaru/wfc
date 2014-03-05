@@ -50,7 +50,7 @@ int main()
   boost::asio::io_service::work wrk(*io_service);
   wfc::io::reader::options init;
   init.input_buffer_size = 8096;
-  init.not_alive = [&](){ ++not_alive_count;};
+  init.not_alive = [&](){ ++not_alive_count; return wfc::callback_status::died;};
   
   {
     typedef wfc::io::reader::reader< reader_aspect > reader_type;
@@ -67,6 +67,7 @@ int main()
       std::cout << "result1 " << result << std::endl;
       if ( result != "test1" )
         abort();
+      return wfc::callback_status::ready;
     });
     
     if ( test_count!=0 )
@@ -83,6 +84,7 @@ int main()
       std::string result( d->begin(), d->end() );
       if ( result != "test2" )
         abort();
+      return wfc::callback_status::ready;
     });
     
     if ( test_count!=1 )
@@ -94,6 +96,7 @@ int main()
       std::string result( d->begin(), d->end() );
       if ( result != "test3" )
         abort();
+      return wfc::callback_status::ready;
     });
 
     if ( test_count!=1 )
