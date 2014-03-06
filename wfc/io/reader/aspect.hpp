@@ -4,7 +4,7 @@
 #include <wfc/io/types.hpp>
 #include <wfc/io/reader/tags.hpp>
 #include <wfc/io/async_read_some.hpp>
-
+#include <wfc/io/basic/aspect.hpp>
 #include <wfc/io/common/fork.hpp>
 
 #include <wfc/memory.hpp>
@@ -155,6 +155,25 @@ struct readed
 };
 
 
+struct _set_transfer_handler_;
+
+template<typename TgResult>
+struct set_transfer_handler
+{
+  template<typename T, typename Tmp>
+  void operator()( T& t, const Tmp&)
+  {
+    auto& th = t.get_aspect().template get< wfc::io::basic::_transfer_handler_>();
+    if ( th == nullptr )
+    {
+      // TODO убрать callback_status
+      th = t.callback([&t](typename T::data_ptr d)
+      {
+          t.get_aspect().template get<TgResult>()(t, std::move(d) );
+      });
+    }
+  }
+};
 
 template<typename TgResult>
 struct user_handler
@@ -216,7 +235,7 @@ struct basic_options
 {
   wfc::io::handler handler = nullptr;
   size_t input_buffer_size = 8096;
-  std::function<callback_status()> not_alive = nullptr;
+  //std::function<callback_status()> not_alive = nullptr;
 };
 
 /*
@@ -227,6 +246,10 @@ template< template<typename> class AsyncReadSome, typename TgOutgoing = _incomin
 struct aspect: fas::aspect<
   fas::advice< _make_buffer_, make_buffer>,
   fas::value< _is_started_, bool>,
+  
+  fas::advice< _set_transfer_handler_, set_transfer_handler<TgOutput> >,
+  
+  fas::group< wfc::io::_create_, _set_transfer_handler_ >,
   
   // start
   fas::advice< wfc::io::_start_, dispatch<_start_> >,
@@ -252,9 +275,11 @@ struct aspect: fas::aspect<
   fas::advice< _error_, output_stub>
 >{};
 
-struct options: basic_options
+struct options
+  : basic_options
+  , wfc::io::basic::options
 {
-  std::function<callback_status()> not_alive = nullptr;
+  // std::function<callback_status()> not_alive = nullptr;
 };
 
 typedef std::list< wfc::io::data_ptr> data_list;
@@ -323,8 +348,8 @@ struct read
     typename T::data_ptr d = nullptr;
     if ( !lst.empty() )
     {
-      std::cout << "READ OK " << std::string(d->begin(), d->end()) <<std::endl;
       d = std::move( lst.front() );
+      std::cout << "READ OK " << std::string(d->begin(), d->end()) <<std::endl;
       lst.pop_front();
     }
     std::cout << "}READ " <<  std::endl;

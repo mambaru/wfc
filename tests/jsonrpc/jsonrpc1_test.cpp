@@ -2,6 +2,7 @@
 
 #include <wfc/io/posix/rn/reader.hpp>
 #include <wfc/jsonrpc/service.hpp>
+#include <wfc/jsonrpc/handler.hpp>
 
 #include <string>
 #include <thread>
@@ -15,14 +16,14 @@ typedef wfc::json::array< std::vector< wfc::json::value<int> > > test1_json;
 struct itest
 {
   virtual ~itest() {}
-  virtual void test1(std::unique_ptr<test1_params> req, std::function< wfc::callback_status(std::unique_ptr<test1_params>) > callback) = 0;
+  virtual void test1(std::unique_ptr<test1_params> req, std::function< void(std::unique_ptr<test1_params>) > callback) = 0;
 };
 
 class test: public itest
 {
 public:
   
-  virtual void test1(std::unique_ptr<test1_params> req, std::function< wfc::callback_status(std::unique_ptr<test1_params>) > callback)
+  virtual void test1(std::unique_ptr<test1_params> req, std::function< void(std::unique_ptr<test1_params>) > callback)
   {
     std::cout << "test::test" << std::endl;
     std::reverse(req->begin(), req->end());
@@ -35,10 +36,11 @@ FAS_STRING(_test1_, "test1")
 FAS_STRING(_test2_, "test2")
 
 
+
 struct test1_handler
 {
   template<typename T>
-  void operator()(T& t, std::unique_ptr<test1_params> req, std::function< wfc::callback_status(std::unique_ptr<test1_params>, std::unique_ptr<wfc::jsonrpc::error>) > callback)
+  void operator()(T& t, std::unique_ptr<test1_params> req, std::function< void(std::unique_ptr<test1_params>, std::unique_ptr<wfc::jsonrpc::error>) > callback)
   {
     callback(std::move(req), nullptr);
   }
@@ -72,9 +74,9 @@ int main()
   
   wfc::io_service io_service;
   wfc::io_service::work wrk(io_service);
-  wfc::jsonrpc::options options;
+  wfc::jsonrpc::service_options options;
   auto t = std::make_shared<test>();
-  options.instance = std::make_shared<instance_wrapper>( t );
+  options.handler = std::make_shared<instance_wrapper>( t );
   wfc::jsonrpc::service<> jsonrpc(io_service, options);
   
   typedef wfc::io::posix::rn::reader reader_type;
@@ -82,8 +84,28 @@ int main()
   
   reader_options.handler = jsonrpc.handler;
   
+  std::function<void(std::string)> test_send;
+  reader_options.startup_handler = [&]( wfc::io::io_id_t id, wfc::io::callback clb, wfc::io::add_shutdown_handler add )
+  {
+    test_send = [clb](std::string s) { clb( std::make_unique<wfc::io::data_type>(s.begin(), s.end()) ); } ;
+    std::cout << "---- STARTUP---- id=" << id << std::endl;
+    add([id](){
+      std::cout << "---- SHUTDOWN---- id=" << id << std::endl;
+    });
+  };
+  
+  
   reader_type::descriptor_type desc(io_service, dd[0]);
   reader_type reader = reader_type( std::move(desc), reader_options );
+  
+  /*
+  reader.get_aspect().template get< wfc::io::basic::_startup_handler_>() = []( io_id_t id, callback clb, add_shutdown_handler add )
+  {
+    std::cout << "---- STARTUP---- id" << id << std::endl;
+  };
+  */
+  
+  reader.start();
   /*
   wfc::io::rn::reader::options init;
   init.input_buffer_size = 8096;
@@ -122,6 +144,8 @@ int main()
     io_service.run();
   });
     
+  
+  test_send( "BLA-BLA-BLA" );
   std::vector<std::string> result;
   while( reader.status() ) 
   {
@@ -136,12 +160,13 @@ int main()
       std::cout << "READ NOT READY " << std::endl;
     }
     
-    if ( result.size() == 5)
+    if ( result.size() == 2)
       break;
     
     std::cout << "} WHILE" << std::endl;
   }
   
+  reader.stop();
   
   /*
   reader.start();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wfc/memory.hpp>
+#include <wfc/json/name.hpp>
 #include <fas/type_list.hpp>
 #include <fas/integral/int_.hpp>
 #include <fas/typemanip/empty_type.hpp>

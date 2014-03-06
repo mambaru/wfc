@@ -38,9 +38,11 @@ struct basic_options
   size_t rn_limit_warning= static_cast<size_t>(-1);
 };
 
-struct options: basic_options
+struct options
+  : basic_options
+  , wfc::io::basic::options
 {
-  std::function<callback_status()> not_alive = nullptr;
+  //std::function<callback_status()> not_alive = nullptr;
 };
 
 

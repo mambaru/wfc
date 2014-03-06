@@ -58,7 +58,6 @@ public:
   {
     typedef callback_type callback;
   };
-
   
   call_handler(M& method)
     : _method(method)

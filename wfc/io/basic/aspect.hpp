@@ -19,9 +19,22 @@
 
 namespace wfc{ namespace io{ namespace basic{
 
+  /*
+struct _startup_handler_; 
+struct _shutdown_handler_;
+*/
+struct _transfer_handler_;
+  
 struct options
 {
   std::function<void()> not_alive = nullptr;
+  
+  startup_handler_t  startup_handler = nullptr;
+  shutdown_handler_t shutdown_handler = nullptr;
+  /*
+  transfer_handler_t transfer_handler = nullptr;
+  */
+
 };
 
   
@@ -41,6 +54,10 @@ typedef fas::type_list_n<
   fas::value< _strand_, std::shared_ptr<boost::asio::strand> >, 
   fas::value< _owner_, std::shared_ptr<wfc::callback_owner> >, 
   fas::value< _not_alive_, std::function<void()> >, 
+  //fas::value< _startup_handler_, startup_handler_t>,
+  //fas::value< _shutdown_handler_, shutdown_handler_t>,
+  fas::value< _transfer_handler_, transfer_handler_t>,
+
 
   fas::group< wfc::io::_create_, _create_>
   

@@ -25,11 +25,12 @@ public:
   typedef typename super::aspect::template advice_cast<_io_service_type_>::type io_service_type;
   typedef std::unique_ptr<data_type> data_ptr;
 
-  
   io_base(io_service_type& io_service, const options_type& opt)
     : _io_service(io_service)
     , _options(opt)
   {
+    static std::atomic<io_id_t> id_counter(0);
+    _id = ++id_counter;
   }
     
   context_type& context()
@@ -80,7 +81,6 @@ public:
     return *(this->get_aspect().template get<_owner_>());
   }
 
-
   const options_type& options() const
   {
     return _options;
@@ -113,7 +113,7 @@ public:
 
   wfc::io::callback callback( std::function<void(data_ptr)> handler)
   {
-    return this->owner().wrap( [handler, this](data_ptr d)->callback_status 
+    return this->owner().wrap( [handler, this](data_ptr d)// ->callback_status 
       {
         auto dd = std::make_shared<data_ptr>( std::move(d) );
         auto fun  = [dd, handler]()
@@ -123,7 +123,7 @@ public:
         
         this->get_io_service().dispatch( fun );
         
-        return callback_status::ready;
+        //return callback_status::ready;
       },
       this->options().not_alive
     );
@@ -178,13 +178,57 @@ protected:
   template<typename T>
   void create(T& t)
   {
-    t.get_aspect().template get<_create_>()(t, _options);
+    t.get_aspect().template gete<_create_>()(t, _options);
   }
   
+  /*
+  startup_handler_t startup_handler() const 
+  {
+    return this->get_aspect().template get< basic::_startup_handler_>();
+  }
+  */
+
+  transfer_handler_t transfer_handler() const 
+  {
+    return this->get_aspect().template get< basic::_transfer_handler_>();
+  }
+
+  /*
+  shutdown_handler_t shutdown_handler() const 
+  {
+    return this->get_aspect().template get< basic::_shutdown_handler_>();
+  }
+  */
+
   template<typename T>
   void start(T& t)
   {
     t.get_aspect().template get<_start_>()(t);
+    
+    auto& sh = _options.startup_handler;
+    
+    if ( sh != nullptr )
+    {
+      /*
+      typedef std::function< void(io_id_t, callback, add_shutdown_handler )> startup_handler_t;
+      typedef std::function< void( std::function< void() > ) > add_shutdown_handler;
+      typedef std::function< void(io_id_t, callback, add_shutdown_handler )> startup_handler_t;
+      typedef std::function< void(io_id_t) > shutdown_handler_t;
+      typedef std::function< void(data_ptr, io_id_t, callback )> transfer_handler_t;
+      */
+      
+      sh(
+        _id, 
+        this->transfer_handler(),
+        [&t, this]( std::function<void()> release_fun ) 
+        {
+          t.dispatch( [this, release_fun]()
+          {
+            this->_release_handlers2.push_back(release_fun);
+          });
+        }
+      );
+    }
   }
   
   template<typename T>
@@ -193,6 +237,17 @@ protected:
     for ( auto& h : _release_handlers)
       h(t.shared_from_this());
     _release_handlers.clear();
+    
+    for ( auto& h : _release_handlers2)
+      h();
+    _release_handlers2.clear();
+    
+    auto& sh = _options.shutdown_handler;
+    if ( sh!=nullptr )
+    {
+      _options.shutdown_handler( _id );
+    }
+
     t.get_aspect().template get<_stop_>()(t);
   }
   
@@ -200,6 +255,9 @@ private:
   io_service_type& _io_service;
   options_type _options;
   std::list<release_handler> _release_handlers;
+  std::list<std::function<void()>> _release_handlers2;
+  
+  io_id_t _id;
 };
 
 }}

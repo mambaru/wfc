@@ -1,6 +1,10 @@
 #pragma once
 
 #include <fas/functional/tstring.hpp>
+
+#define JSON_NAME(X) FAS_NAME(X)
+#define JSON_STRING(X, Y) FAS_STRING(X, Y)
+
 /*
 #ifndef NAME
 #define NAME(X) struct n_##X { const char* operator()() const{ return #X;} };
