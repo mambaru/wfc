@@ -85,7 +85,7 @@ struct ad_process_method
   template<typename T>
   void operator()( T& t, incoming_holder holder)
   {
-    t.tmp_worker( std::move(holder) );
+    t.tmp_worker->operator()( std::move(holder) );
   }
 };
 
@@ -182,8 +182,21 @@ struct ad_incoming
 
 /// /////////////////////////////////////////
 
-struct service_options: worker_options
+struct service_options
+  : worker_options
 {
+  struct service
+  {
+    struct queue
+    {
+      int count = 1;
+      std::vector<std::string> methods = {"*"};
+    };
+    
+    int threads = 0;
+    std::vector<queue> queues = {queue()};
+  };
+  std::vector< service> services = { service() };
 };
 
 struct _worker_type_;

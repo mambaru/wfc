@@ -58,7 +58,7 @@ typedef fas::type_list_n<
   //fas::value< _shutdown_handler_, shutdown_handler_t>,
   fas::value< _transfer_handler_, transfer_handler_t>,
 
-
+  fas::stub< wfc::io::_start_>, 
   fas::group< wfc::io::_create_, _create_>
   
 >::type advice_list;

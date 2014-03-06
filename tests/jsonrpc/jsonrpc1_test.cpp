@@ -105,6 +105,7 @@ int main()
   };
   */
   
+  jsonrpc.start();
   reader.start();
   /*
   wfc::io::rn::reader::options init;
