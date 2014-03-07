@@ -7,12 +7,12 @@
 namespace wfc{ namespace jsonrpc{
 
 template< typename... Args >
-class method
+class method_impl
   : public fas::aspect_class< typename fas::merge_aspect<fas::aspect<Args...>, method_aspect>::type >
 {
 public:
   
-  typedef method<Args...> self;
+  typedef method_impl<Args...> self;
   typedef fas::aspect_class< typename fas::merge_aspect<fas::aspect<Args...>, method_aspect>::type > super;
   
   typedef fas::metalist::advice metatype;
@@ -33,7 +33,20 @@ public:
     std::cout << "METHOD!" << std::endl;
     this->get_aspect().template get<_invoke_>()(t, std::move(holder));
   }
+  
+  template<typename T, typename ReqPtr, typename Callback>
+  void call(T& t, ReqPtr req, Callback callback)
+  {
+    this->get_aspect().template get<_call_>()( t, *this, std::move(req), callback);
+  }
 };
+
+template< typename... Args>
+struct method: fas::type_list_n<
+  method_impl<Args...>,
+  fas::group<_method_, typename method_impl<Args...>::tag>
+>::type {};
+
 
 }} // wfc
 

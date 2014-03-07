@@ -1,4 +1,4 @@
-
+#include <iostream>
 
 #include <wfc/io/posix/rn/reader.hpp>
 #include <wfc/io/posix/rn/reader_impl.hpp>

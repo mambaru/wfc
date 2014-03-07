@@ -24,6 +24,7 @@ typedef std::unique_ptr<data_type> data_ptr;
 typedef std::function< void(data_ptr) > callback;
 typedef std::function<void(data_ptr, std::weak_ptr<iio>, callback )> handler;
 
+inline 
 std::function<void(data_ptr, std::weak_ptr<iio>, callback  )> 
 simple_handler( std::function<void(data_ptr, callback )> handler )
 {
@@ -35,7 +36,7 @@ simple_handler( std::function<void(data_ptr, callback )> handler )
 
 typedef size_t io_id_t;
 
-typedef std::function< void( std::function< void() > ) > add_shutdown_handler;
+typedef std::function< void( std::function< void(io_id_t) > ) > add_shutdown_handler;
 typedef std::function< void(io_id_t, callback, add_shutdown_handler )> startup_handler_t;
 typedef std::function< void(io_id_t) > shutdown_handler_t;
 //typedef std::function< void(data_ptr, io_id_t, callback )> transfer_handler_t;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wfc/io/tags.hpp>
+#include <wfc/io/basic/tags.hpp>
 #include <wfc/callback/callback_owner.hpp>
 #include <fas/aop.hpp>
 #include <functional>
@@ -190,7 +191,7 @@ protected:
 
   transfer_handler_t transfer_handler() const 
   {
-    return this->get_aspect().template get< basic::_transfer_handler_>();
+    return this->get_aspect().template get< basic::_transfer_handler_ >();
   }
 
   /*
@@ -220,7 +221,7 @@ protected:
       sh(
         _id, 
         this->transfer_handler(),
-        [&t, this]( std::function<void()> release_fun ) 
+        [&t, this]( std::function<void(io_id_t id)> release_fun ) 
         {
           t.dispatch( [this, release_fun]()
           {
@@ -239,7 +240,7 @@ protected:
     _release_handlers.clear();
     
     for ( auto& h : _release_handlers2)
-      h();
+      h( this->_id );
     _release_handlers2.clear();
     
     auto& sh = _options.shutdown_handler;
@@ -255,7 +256,7 @@ private:
   io_service_type& _io_service;
   options_type _options;
   std::list<release_handler> _release_handlers;
-  std::list<std::function<void()>> _release_handlers2;
+  std::list<std::function<void(io_id_t id)> > _release_handlers2;
   
   io_id_t _id;
 };

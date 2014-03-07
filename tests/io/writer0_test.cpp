@@ -1,41 +1,21 @@
 #include <iostream>
 
+#include <wfc/logger/ilogger.hpp>
+#include <wfc/core/global.hpp>
+#include <wfc/callback/callback_status.hpp>
 
-#include <wfc/io/writer/writer.hpp>
-#include <wfc/io/strategy/posix/writer/config.hpp>
-#include <wfc/io/strategy/posix/writer/sync_write.hpp>
-
-#include <wfc/memory.hpp>
-/*
-#include <wfc/io/strategy/posix/reader/sync_read_return.hpp>
-#include <wfc/io/strategy/posix/reader/log.hpp>
-#include <wfc/io/strategy/posix/reader/trace.hpp>
-#include <wfc/io/strategy/posix/reader/config.hpp>
-*/
-#include <boost/asio.hpp>
+#include <wfc/io/reader/reader.hpp>
 #include <string>
+#include <boost/asio.hpp>
 
 
 
-typedef wfc::io::strategy::posix::writer::config init_info;
-
-
-struct write_aspect: 
-  fas::aspect<
-    fas::advice< wfc::io::_options_type_, init_info>,
-    wfc::io::strategy::posix::writer::sync_write
-    /*
-    wfc::io::strategy::posix::reader::trace,
-    wfc::io::strategy::posix::reader::log,
-    
-    */
-  >
-{};
 
     
 
 int main()
 {
+  std::cout << sizeof(boost::system::error_code) << std::endl;
   
   size_t handler_count = 0;
   size_t not_alive_count = 0;
@@ -46,53 +26,54 @@ int main()
 
   auto io_service = std::make_shared<boost::asio::io_service>();
   boost::asio::io_service::work wrk(*io_service);
-  
-  init_info init;
-  init.output_buffer_size = 8096;
-  init.not_alive = [&](){ ++not_alive_count;};
+  wfc::io::reader::options init;
+  init.input_buffer_size = 8096;
+  /*init.not_alive = [&]()
+  {
+    ++not_alive_count;
+    return wfc::callback_status::died;
+  };*/
   
   {
     
+    typedef wfc::io::reader::reader< reader_aspect > reader_type;
     
-    typedef wfc::io::writer::writer< write_aspect > writer_type;
+    boost::asio::posix::stream_descriptor sd(*io_service, dd[0]);
+    reader_type reader( std::move(sd), init);
+    handler = reader.owner().wrap([&](){ ++handler_count;}, [&](){++not_alive_count;} );
     
-    boost::asio::posix::stream_descriptor sd(*io_service, dd[1]);
-    writer_type writer( std::move(sd), init);
-    //typedef writer_type::data_type data_type;
-    handler = writer.wrap([&](){ ++handler_count;});
-    std::string data = "test1";
-    size_t size = writer.write_string( "test1" );
-    if ( size != 5 )
-      abort();
-    
-    char buffer[100];
-    size = read( dd[0], buffer, 100);
-    buffer[size]=0;
-    std::string result = buffer;
-    if ( result != "test1" )
-      abort();
-    
-    
-    /*
     write(dd[1], "test1", 5);
+    
+    std::cout << "-read1.1-" << std::endl;
     auto d = reader.read();
+    std::cout << "-read1.2-" << std::endl;
     std::string result( d->begin(), d->end() );
     if ( result != "test1" )
       abort();
+    std::cout << "-read1.3-" << std::endl;
     
     write(dd[1], "test2", 5);
     d = reader.read();
     result.assign( d->begin(), d->end() );
     if ( result != "test2" )
       abort();
-    */
-    writer.post( handler );
+    
+    reader.get_io_service().post( handler );
     io_service->run_one();
     close(dd[0]);
-    close(dd[1]);
-    //d = reader.read();
-    writer.post( handler );
     
+    if ( !reader.status() )
+      abort();
+    
+    d = reader.read();
+    
+    if ( d!=nullptr )
+      abort();
+
+    if ( reader.status() )
+      abort();
+    
+    reader.get_io_service().post( handler );
   }
   
   // not posted last handler

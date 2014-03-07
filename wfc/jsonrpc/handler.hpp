@@ -10,3 +10,4 @@
 #include <wfc/jsonrpc/handler/name.hpp>
 #include <wfc/jsonrpc/handler/target.hpp>
 
+#include <wfc/jsonrpc/handler/call.hpp>

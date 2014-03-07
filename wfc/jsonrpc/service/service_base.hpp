@@ -53,7 +53,33 @@ public:
   {
     super::create(*this);
   }
+  
+  /*
+  typedef std::function< void(io_id_t, callback, add_shutdown_handler )> startup_handler_t;
+  */
+  
+  typedef std::map< wfc::io::io_id_t, wfc::io::callback> io_map_t;
+  io_map_t _io_map;
+  
+  void startup_handler(wfc::io::io_id_t io_id, wfc::io::callback writer, wfc::io::add_shutdown_handler add_shutdown )
+  {
+    this->dispatch([this, io_id, writer, add_shutdown]()
+    {
+      auto itr = _io_map.find(io_id);
+      
+      if ( itr == _io_map.end() )
+        _io_map.insert( std::make_pair(io_id, writer)  );
+      
+      add_shutdown( this->strand().wrap( [this](wfc::io::io_id_t io_id)
+      {
+        std::cout << "connection shutdown id " << io_id << std::endl;
+        this->_io_map.erase(io_id);
+      }));
+    });
+  }
+  
 
+  /// Для входящих запросов
   void operator()( data_ptr d, std::weak_ptr<wfc::io::iio> iio, wfc::io::callback&& handler)
   {
     auto dd = std::make_shared<data_ptr>( std::move(d) );
@@ -63,6 +89,14 @@ public:
       this->get_aspect().template get<_incoming_>()( *this, std::move(*dd), iio, std::move(handler) );
     });
   }
+  
+  // Для исходящих запросов
+  template<typename PReq, typename Serializer, typename Callback>
+  void send_request( const char* name, PReq , Serializer , Callback  )
+  {
+    
+  }
+
   
   typedef std::shared_ptr< worker_type > worker_ptr;
   typedef std::list<worker_ptr> worker_list;
@@ -76,6 +110,30 @@ public:
   worker_list _workers;
   service_list _services;
   thread_list _threads;
+
+  template<typename T>
+  void push_advice(T& , incoming_holder holder)
+  {
+    if ( holder.has_method() )
+    {
+      auto itr = _method_map.find( holder.method() );
+      
+      if ( itr == _method_map.end() )
+      {
+        itr = _method_map.find( "*" );
+      }
+      
+      if ( itr!=_method_map.end() )
+      {
+        if ( itr->second.first.end() == itr->second.second )
+        {
+          itr->second.second = itr->second.first.begin();
+        }
+        (*(itr->second.second))->operator()( std::move(holder) );
+      }
+    }
+  }
+
   
   template<typename T>
   void start_advice(T& t)

@@ -26,6 +26,12 @@ add_executable(reader_rn0_test reader_rn0_test.cpp logger.cpp)
 add_test(reader_rn0_test reader_rn0_test)
 target_link_libraries(reader_rn0_test wfc boost_system pthread)
 
+
+#
+# writer
+#
+
+
 #add_executable(reader_rn1_test reader_rn1_test.cpp logger.cpp)
 #add_test(reader_rn1_test reader_rn1_test)
 #target_link_libraries(reader_rn1_test wfc boost_system pthread)

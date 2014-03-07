@@ -85,7 +85,8 @@ struct ad_process_method
   template<typename T>
   void operator()( T& t, incoming_holder holder)
   {
-    t.tmp_worker->operator()( std::move(holder) );
+    // t.tmp_worker->operator()( std::move(holder) );
+    t.push_advice(t, std::move( holder ) );
   }
 };
 

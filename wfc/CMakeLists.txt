@@ -13,6 +13,7 @@ SET(
   pubsub/message_queue.cpp
   pubsub/topic_hub.cpp
   io/posix/rn/reader.cpp
+  io/posix/rn/writer.cpp
 #  io/ip/tcp/rn/connection.cpp
 #  io/ip/tcp/rn/server.cpp
 #  io/ip/tcp/rn/acceptor.cpp

@@ -74,6 +74,18 @@ public:
     for (; beg != end && *beg==*ch; ++beg, ++ch);
     return beg==end && *ch=='\0';
   }
+  
+  std::pair< incoming::iterator, incoming::iterator>
+  raw_method() const 
+  {
+    return std::make_pair( _incoming.method.first, _incoming.method.second );
+  }
+  
+  
+  std::string method() const
+  {
+    return std::string( _incoming.method.first, _incoming.method.second);
+  }
 
   
   template<typename V, typename J = json::value<V> >

@@ -2,6 +2,8 @@
 
 namespace wfc{ namespace io{ namespace basic{
 
+struct _transfer_handler_;
+  
 struct _create_;
 struct _not_alive_;
 

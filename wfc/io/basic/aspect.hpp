@@ -23,7 +23,7 @@ namespace wfc{ namespace io{ namespace basic{
 struct _startup_handler_; 
 struct _shutdown_handler_;
 */
-struct _transfer_handler_;
+
   
 struct options
 {
