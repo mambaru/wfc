@@ -58,6 +58,7 @@ public:
   typedef std::function< void(io_id_t, callback, add_shutdown_handler )> startup_handler_t;
   */
   
+  // TODO: сделать связку с method-handler
   typedef std::map< wfc::io::io_id_t, wfc::io::callback> io_map_t;
   io_map_t _io_map;
   
@@ -129,10 +130,11 @@ public:
         {
           itr->second.second = itr->second.first.begin();
         }
+        // Отдаем воркеру
         (*(itr->second.second))->operator()( std::move(holder) );
       }
     }
-  }
+  } 
 
   
   template<typename T>

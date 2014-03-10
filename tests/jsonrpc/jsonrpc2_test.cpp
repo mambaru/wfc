@@ -105,24 +105,39 @@ int main()
 
   typedef wfc::jsonrpc::handler<method_list> handler;
   auto phndl = std::make_shared<handler>();
+  phndl->outgoing_request_handler=[]( handler::incoming_handler_t, handler::request_serializer_t ser) {
+    auto d = ser(333);
+    std::cout << "call JSON READY " << std::string( d->begin(), d->end() ) << std::endl;
+  };
+  
   wfc::io_service io_service;
   wfc::io_service::work wrk(io_service);
   wfc::jsonrpc::service_options options;
-  auto t = std::make_shared<test>();
   options.handler = phndl;
   wfc::jsonrpc::service<> jsonrpc(io_service, options);
   
-  wfc::io::shutdown_handler_t shh;
+  wfc::io::shutdown_handler_t shh = nullptr;
   jsonrpc.startup_handler(
     4, 
-    []( wfc::io::data_ptr d) { std::cout << "call READY " << std::string( d->begin(), d->end() ) << std::endl;},
-    [&shh]( wfc::io::shutdown_handler_t h){ shh=h; } 
+    []( wfc::io::data_ptr d) 
+    { 
+      std::cout << "call READY " << std::string( d->begin(), d->end() ) << std::endl;
+    },
+    [&shh]( wfc::io::shutdown_handler_t h)
+    {
+      std::cout << "shh init shutdown"<< std::endl;
+      shh=h; 
+    } 
   );
   jsonrpc.start();
+  for (int i=0;i<10;++i)
+    io_service.poll_one();
   
   phndl->test1( std::make_unique<test1_params>( test1_params({1,2,3,4,5}) ), nullptr );
   shh(4);
   
+  for (int i=0;i<10;++i)
+    io_service.poll_one();
   
 }
 

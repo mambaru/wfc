@@ -48,8 +48,9 @@ public:
     super::create(*this);
   }
   
-  void operator()(incoming_holder holder)
+  void operator()(incoming_holder holder/*,   TODO: weak_ptr<handler_base> */)
   {
+    // TDOD: После обработки и сериализации ответа, отдаем в jsonrpc сервисе? 
     auto ph = std::make_shared<incoming_holder>(std::move(holder) );
     this->dispatch([this, ph](){
       if ( auto p1 = ph->iio.lock() )
@@ -79,6 +80,7 @@ public:
     });
   }
 private:
+  // Нахрен отсюдова!!! 
   std::map< wfc::io::iio*, std::shared_ptr<handler_base> > _instance_map;
 };
 
