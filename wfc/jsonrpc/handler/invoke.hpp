@@ -27,7 +27,7 @@ struct invoke: Handler
   
   
   template<typename T>
-  void operator()(T& t, incoming_holder holder)
+  void operator()(T& t, incoming_holder holder, wfc::io::callback handler) const
   {
     try
     {
@@ -40,7 +40,7 @@ struct invoke: Handler
       {
         auto ph = std::make_shared<incoming_holder>( std::move(holder) );
         Handler::operator()( t, std::move(req), 
-          [ph]( std::unique_ptr<response_type> params, std::unique_ptr<error> err )
+          [ph, handler]( std::unique_ptr<response_type> params, std::unique_ptr<error> err )
           {
             if (err != nullptr )
             {
@@ -52,7 +52,8 @@ struct invoke: Handler
               auto d = ph->detach();
               d->clear();
               typename json_type::serializer()(error_message, std::inserter( *d, d->end() ));
-              ph->handler( std::move(d) );
+              // ph->handler( std::move(d) );
+              handler( std::move(d) );
             }
             else
             {
@@ -64,7 +65,8 @@ struct invoke: Handler
               typedef outgoing_result_json<response_json> result_json;
               typename result_json::serializer()(result, std::inserter( *d, d->end() ));
               std::cout << "method SEND: " << std::string(d->begin(), d->end()) << std::endl;
-              ph->handler( std::move(d) );
+              //ph->handler( std::move(d) );
+              handler( std::move(d) );
               /*typename error_json::serializer()(error_message, std::inserter( *d, d->end() ));
               return ph->handler( std::move(d) );
               */

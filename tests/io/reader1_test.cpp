@@ -57,7 +57,7 @@ int main()
     boost::asio::posix::stream_descriptor sd(*io_service, dd[0]);
     reader_type reader( std::move(sd), init);
     
-    handler = nullptr;//reader.wrap([&](){ ++handler_count;});
+    handler = reader.owner().wrap([&](){ ++handler_count;}, [&](){++not_alive_count;} );
     
     write(dd[1], "test1", 5);    
     reader.async_read([&]( reader_type::data_ptr d )

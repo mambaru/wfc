@@ -94,15 +94,19 @@ struct result_handler
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
+    std::cout << "result_handler" << std::endl;
     bool status = t.get_aspect().template get<wfc::io::_status_>();
 
     if (status)
     {
+      std::cout << "result_handler ready" << std::endl;
       t.get_aspect().template get<TgReady>()( t, std::move(d) );
     }
     else 
     {
       boost::system::error_code ec = t.get_aspect().template get<wfc::io::_error_code_>();
+      
+      std::cout << "result_handler ERROR: " << ec.message() << std::endl;
       if ( ec == boost::asio::error::operation_aborted)
       {
         t.get_aspect().template get< TgAborted >()(t, ec, std::move(d) );
@@ -181,7 +185,8 @@ struct user_handler
   template<typename T>
   void operator()( T& t, typename T::data_ptr d)
   {
-    auto handler = t.options().handler;
+    //auto handler = t.options().handler;
+    auto handler = t._handler;
     if ( handler == nullptr )
     {
       std::cout << "user_handler null " << std::endl;
@@ -189,15 +194,20 @@ struct user_handler
     }
     else
     {
-      std::cout << "user_handler shared_from_this{ " << std::endl;
-      t.shared_from_this();
-      std::cout << "}user_handler shared_from_this " << std::endl;
+      //std::cout << "user_handler shared_from_this{ " << std::endl;
+      //t.shared_from_this();
+      //std::cout << "}user_handler shared_from_this " << std::endl;
       std::cout << "user_handler { " << std::endl;
+      std::cout << "user_handler = " << std::string( d->begin(), d->end()) << std::endl;
       handler(
         std::move(d), 
-        t.shared_from_this(), 
-        t.callback([&t](typename T::data_ptr d){
+        //t.shared_from_this(),
+        t.get_id(), 
+        t.callback([&t](typename T::data_ptr d)
+        {
+          std::cout << "CALLBACK "<< std::string( d->begin(), d->end()) << std::endl;
           t.get_aspect().template get<TgResult>()(t, std::move(d) );
+          std::cout << "CALLBACK READY"<< std::endl;
         })
       );
       std::cout << "} user_handler " << std::endl;
@@ -233,7 +243,7 @@ struct _user_handler_;
   
 struct basic_options
 {
-  wfc::io::handler handler = nullptr;
+  //wfc::io::handler handler = nullptr;
   size_t input_buffer_size = 8096;
   //std::function<callback_status()> not_alive = nullptr;
 };

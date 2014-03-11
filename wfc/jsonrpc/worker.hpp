@@ -25,7 +25,7 @@ namespace wfc{ namespace jsonrpc{
 struct worker_options
   : wfc::io::basic::options
 {
-  std::shared_ptr<handler_base> handler;
+  //std::shared_ptr<handler_base> handler;
 };
 
 /// WORKER
@@ -48,8 +48,21 @@ public:
     super::create(*this);
   }
   
-  void operator()(incoming_holder holder/*,   TODO: weak_ptr<handler_base> */)
+  // TODO: вынести method_handler из incoming_holder
+  // TODO: вместо handler_base std::functional
+  // или вообще убрать worker и оставить io_base
+  void operator()(incoming_holder holder, std::weak_ptr<handler_base> wh, wfc::io::callback callback/*,   TODO: weak_ptr<handler_base> */)
   {
+    auto ph = std::make_shared<incoming_holder>(std::move(holder) );
+    super::dispatch([this, ph, wh, callback]()
+    {
+      //if ( auto h = ph->method_handler.lock() )
+      if ( auto h = wh.lock() )
+      {
+        h->process( std::move(*ph), callback );
+      }
+    }); // dispatch
+    /*
     // TDOD: После обработки и сериализации ответа, отдаем в jsonrpc сервисе? 
     auto ph = std::make_shared<incoming_holder>(std::move(holder) );
     this->dispatch([this, ph](){
@@ -78,10 +91,11 @@ public:
         itr->second->process( std::move(*ph) );
       }
     });
+    */
   }
 private:
   // Нахрен отсюдова!!! 
-  std::map< wfc::io::iio*, std::shared_ptr<handler_base> > _instance_map;
+  //std::map< wfc::io::iio*, std::shared_ptr<handler_base> > _instance_map;
 };
 
 struct worker_aspect: fas::aspect<

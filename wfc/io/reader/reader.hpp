@@ -30,8 +30,12 @@ public:
   reader(const reader& ) = delete;
   void operator = (const reader& conf) = delete;
 
-  reader(descriptor_type&& desc, const options_type& opt)
+  // TODO: в аспект
+  wfc::io::handler _handler;
+  
+  reader(descriptor_type&& desc, const options_type& opt, wfc::io::handler handler = nullptr)
     : super( std::move(desc), opt)
+    , _handler( handler )
   {
     super::create(*this);
   }

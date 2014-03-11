@@ -28,14 +28,14 @@ public:
   }
 
   template<typename T>
-  void operator()(T& t, incoming_holder holder)
+  void operator()(T& t, incoming_holder holder, wfc::io::callback callback) const
   {
     std::cout << "METHOD!" << std::endl;
-    this->get_aspect().template get<_invoke_>()(t, std::move(holder));
+    this->get_aspect().template get<_invoke_>()(t, std::move(holder), callback);
   }
   
   template<typename T, typename ReqPtr, typename Callback>
-  void call(T& t, ReqPtr req, Callback callback)
+  void call(T& t, ReqPtr req, Callback callback) const
   {
     this->get_aspect().template get<_call_>()( t, *this, std::move(req), callback);
   }

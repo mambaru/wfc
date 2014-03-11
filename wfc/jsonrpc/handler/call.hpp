@@ -35,9 +35,12 @@ struct call
   typedef typename std::unique_ptr<error> error_ptr;
   
   template<typename T, typename TT>
-  void operator()(T& t, TT& tt, request_ptr req, 
+  void operator()(
+    T& t, 
+    TT& tt, 
+    request_ptr req, 
     std::function< void (response_ptr, error_ptr)> callback
-  )
+  ) const
   {
     auto serializer = [](const char* name, request_ptr req, int id) -> typename T::data_ptr 
       {
@@ -58,12 +61,24 @@ struct call
     {
       result_handler = [callback](incoming_holder holder)
       {
+        std::cout << "call::result_handler!!!" << std::endl;
         // получатель
         if ( holder.is_response() )
         {
-          callback( nullptr, nullptr);
+          auto pres = holder.get_result<response_json>();
+          /*std::make_unique<response_type>
+          response_json::serializer()( 
+          // TODO!!!
+          */
+          callback( std::move(pres), nullptr);
         }
         else if ( holder.is_error() )
+        {
+          // TODO!!!
+          auto perr = holder.get_error<error_json::type>();
+          callback( nullptr, std::move(perr) );
+        }
+        else
         {
           callback( nullptr, nullptr);
         }

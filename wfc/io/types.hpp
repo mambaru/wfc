@@ -22,8 +22,21 @@ typedef std::vector<char> data_type;
 typedef std::unique_ptr<data_type> data_ptr;
 
 typedef std::function< void(data_ptr) > callback;
-typedef std::function<void(data_ptr, std::weak_ptr<iio>, callback )> handler;
+//typedef std::function<void(data_ptr, std::weak_ptr<iio>, callback )> handler;
+typedef size_t io_id_t;
+typedef std::function<void(data_ptr, io_id_t, callback )> handler;
 
+inline 
+std::function<void(data_ptr, io_id_t, callback  )> 
+simple_handler( std::function<void(data_ptr, callback )> handler )
+{
+  return [handler]( data_ptr d, io_id_t, callback clb  )
+  {
+    handler( std::move(d), clb);
+  };
+}
+
+/*
 inline 
 std::function<void(data_ptr, std::weak_ptr<iio>, callback  )> 
 simple_handler( std::function<void(data_ptr, callback )> handler )
@@ -33,8 +46,8 @@ simple_handler( std::function<void(data_ptr, callback )> handler )
     handler( std::move(d), clb);
   };
 }
+*/
 
-typedef size_t io_id_t;
 
 typedef std::function< void( std::function< void(io_id_t) > ) > add_shutdown_handler;
 typedef std::function< void(io_id_t, callback, add_shutdown_handler )> startup_handler_t;

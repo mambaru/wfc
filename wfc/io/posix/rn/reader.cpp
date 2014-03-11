@@ -10,8 +10,8 @@ reader::~reader()
 }
 
   
-reader::reader(reader::descriptor_type&& desc, const reader::options_type& conf)
-  : _impl( std::make_shared<reader_impl>(std::move(desc), conf) )
+reader::reader(reader::descriptor_type&& desc, const reader::options_type& conf, wfc::io::handler handler )
+  : _impl( std::make_shared<reader_impl>(std::move(desc), conf, handler) )
 {
   
 }

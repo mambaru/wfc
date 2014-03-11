@@ -11,9 +11,11 @@ namespace wfc{ namespace jsonrpc{
 struct f_invoke
 {
   incoming_holder& holder;
+  wfc::io::callback& callback;
   
-  f_invoke(incoming_holder& holder)
+  f_invoke(incoming_holder& holder, wfc::io::callback& callback)
     : holder( holder )
+    , callback(callback)
   {
   }
   
@@ -24,7 +26,7 @@ struct f_invoke
     {
       if ( holder.method( t.get_aspect().template get<Tg>().name() ) )
       {
-        t.get_aspect().template get<Tg>()(t, std::move(holder) );
+        t.get_aspect().template get<Tg>()(t, std::move(holder), callback );
       }
     }
   }
@@ -44,16 +46,21 @@ public:
     this->get_aspect().template get<_target_>() = trg;
   }
 
-  virtual std::shared_ptr<handler_base> clone()
+  virtual std::shared_ptr<handler_base> clone(/*outgoing_request_handler_t request_handler*/) const 
   {
-    std::cout << "CLONE!!!" << std::endl;
     return std::make_shared<self>(*this);
+    /*
+    std::cout << "CLONE!!!" << std::endl;
+    auto cln = std::make_shared<self>(*this);
+    cln.outgoing_request_handler = request_handler;
+    return cln;
+    */
   }
 
-  virtual void process(incoming_holder holder)
+  virtual void process(incoming_holder holder, wfc::io::callback callback) const
   {
     std::cout << "instance process!!!" << std::endl;
-    fas::for_each_group<_method_>(*this, f_invoke( holder ) );
+    fas::for_each_group<_method_>(*this, f_invoke( holder, callback ) );
   }
   
   target_type target() const

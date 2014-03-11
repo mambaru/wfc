@@ -15,7 +15,7 @@ public:
   typedef reader_options options_type;
   typedef boost::asio::posix::stream_descriptor descriptor_type;
   ~reader();
-  reader(descriptor_type&& desc, const options_type& conf);
+  reader(descriptor_type&& desc, const options_type& conf, wfc::io::handler handler = nullptr);
   void start();
   void stop();
   void shutdown();

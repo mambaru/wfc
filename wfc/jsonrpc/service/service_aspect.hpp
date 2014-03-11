@@ -30,15 +30,18 @@ struct _send_json_;
 
 struct ad_send_json
 {
+  
   template<typename T, typename J, typename O>
-  void operator()( T&, J, O obj, incoming_holder holder)
+  void operator()( T&, J, O obj, /*incoming_holder holder*/ typename T::data_ptr d, wfc::io::callback callback)
   {
-    auto d = holder.detach();
+    //auto d = holder.detach();
     d->clear();
     d->reserve(80);
     typename J::serializer()(obj, std::inserter( *d, d->end() ));
-    holder.handler( std::move(d) );
+    //holder.handler( std::move(d) );
+    callback( std::move(d) );
   }
+  
   
   template<typename T, typename J, typename O>
   void operator()( T&, J, O obj, wfc::io::callback handler)
@@ -55,23 +58,23 @@ struct _jsonrpc_error_;
 struct ad_jsonrpc_error
 {
   template<typename T>
-  void operator()( T& t, const error& err, incoming_holder holder)
+  void operator()( T& t, const error& err, incoming_holder holder, wfc::io::callback callback)
   {
     typedef outgoing_error_json< error_json::type >::type json_type;
     outgoing_error<error> error_message;
     error_message.error = std::make_unique<error>(err);
     error_message.id = std::move( holder.raw_id() );
-    t.get_aspect().template get<_send_json_>()(t, json_type(), std::move(error_message), std::move(holder) );
+    t.get_aspect().template get<_send_json_>()(t, json_type(), std::move(error_message), /*std::move(holder)*/holder.detach(), callback );
   }
 
   template<typename T>
-  void operator()( T& t, const error& err, wfc::io::callback handler)
+  void operator()( T& t, const error& err, /*wfc::io::callback handler,*/ wfc::io::callback callback)
   {
     typedef outgoing_error_json< error_json::type >::type json_type;
     outgoing_error<error> error_message;
     error_message.error = std::make_unique<error>(err);
     error_message.id = nullptr;
-    t.get_aspect().template get<_send_json_>()(t, json_type(), std::move(error_message), handler );
+    t.get_aspect().template get<_send_json_>()(t, json_type(), std::move(error_message), /*handler,*/ callback );
   }
 };
 
@@ -83,17 +86,18 @@ struct _process_result_;
 struct ad_process_method
 {
   template<typename T>
-  void operator()( T& t, incoming_holder holder)
+  void operator()( T& t, incoming_holder holder, std::weak_ptr<handler_base> hb, wfc::io::callback callback)
   {
     // t.tmp_worker->operator()( std::move(holder) );
-    t.push_advice(t, std::move( holder ) );
+    std::cout << "ad_process_method"  << std::endl;
+    t.push_advice(t, std::move( holder ), hb, callback );
   }
 };
 
 struct ad_process_error
 {
   template<typename T>
-  void operator()( T&, incoming_holder)
+  void operator()( T&, incoming_holder, wfc::io::callback)
   {
     
   }
@@ -102,8 +106,10 @@ struct ad_process_error
 struct ad_process_result
 {
   template<typename T>
-  void operator()( T&, incoming_holder)
+  void operator()( T& t, incoming_holder holder, wfc::io::callback callback)
   {
+    std::cout << "ad_process_result"  << std::endl;
+    t.process_result(t, std::move(holder), callback);
   }
 };
 
@@ -111,19 +117,21 @@ struct _process_;
 struct ad_process
 {
   template<typename T>
-  void operator()( T& t, incoming_holder holder)
+  void operator()( T& t, incoming_holder holder, std::weak_ptr<handler_base> hb, wfc::io::callback handler)
   {
     if ( holder.has_method() )
     {
-      t.get_aspect().template get<_process_method_>()(t, std::move(holder) );
+      std::cout << "ad_process has_method"  << std::endl;
+      t.get_aspect().template get<_process_method_>()(t, std::move(holder), hb, handler );
     }
     else if ( holder.has_result() )
     {
-      t.get_aspect().template get<_process_result_>()(t, std::move(holder) );
+      std::cout << "ad_process has_result"  << std::endl;
+      t.get_aspect().template get<_process_result_>()(t, std::move(holder), handler );
     }
     else if ( holder.has_error() )
     {
-      t.get_aspect().template get<_process_error_>()(t, std::move(holder) );
+      t.get_aspect().template get<_process_error_>()(t, std::move(holder), handler );
     }
   }
 };
@@ -133,15 +141,16 @@ struct _verify_;
 struct ad_verify
 {
   template<typename T>
-  void operator()( T& t, incoming_holder holder)
+  void operator()( T& t, incoming_holder holder, std::weak_ptr<handler_base> hb, wfc::io::callback handler)
   {
     if ( holder.is_valid() )
     {
-      t.get_aspect().template get<_process_>()(t, std::move(holder) );
+      std::cout << "ad_verify is_valid"  << std::endl;
+      t.get_aspect().template get<_process_>()(t, std::move(holder), hb, handler );
     }
     else
     {
-      t.get_aspect().template get<_jsonrpc_error_>()(t, invalid_request(), std::move(holder) );
+      t.get_aspect().template get<_jsonrpc_error_>()(t, invalid_request(), std::move(holder), handler );
     }
   }
 };
@@ -149,32 +158,33 @@ struct ad_verify
 struct ad_incoming
 {
   template<typename T>
-  void operator()( T& t, typename T::data_ptr d, std::weak_ptr<wfc::io::iio> iio, wfc::io::callback handler)
+  void operator()( T& t, typename T::data_ptr d, /*std::weak_ptr<wfc::io::iio> iio*/ wfc::io::io_id_t id, wfc::io::callback callback)
   {
     std::cout << "ad_incoming { " << std::string( d->begin(), d->end()) << std::endl;
+    auto  handler = t._io_map.find(id)->second.method_handler;
     try
     {
       while (d != nullptr)
       {
         std::cout << "ad_incoming next: " << std::string( d->begin(), d->end()) << std::endl;
-        incoming_holder hold(std::move(d), iio, handler );
+        incoming_holder hold(std::move(d), handler /*, iio, handler*/ );
         d = hold.tail();
-        t.get_aspect().template get<_verify_>()( t, std::move(hold) );
+        t.get_aspect().template get<_verify_>()( t, std::move(hold), handler, callback );
       }
     }
     catch(const json::json_error& er)
     {
-      t.get_aspect().template get<_jsonrpc_error_>()(t, parse_error(), handler );
+      t.get_aspect().template get<_jsonrpc_error_>()(t, parse_error(), callback );
     }
     catch(const std::exception& ex)
     {
       // TODO; сделать логгирование 
-      t.get_aspect().template get<_jsonrpc_error_>()(t, server_error(ex.what() ), handler );
+      t.get_aspect().template get<_jsonrpc_error_>()(t, server_error(ex.what() ), callback);
     }
     catch(...)
     {
       // TODO; сделать логгирование 
-      t.get_aspect().template get<_jsonrpc_error_>()(t, server_error(), handler );
+      t.get_aspect().template get<_jsonrpc_error_>()(t, server_error(), callback);
     }
     std::cout << "} ad_incoming" << std::endl;
   }

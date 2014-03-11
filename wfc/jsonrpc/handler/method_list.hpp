@@ -29,11 +29,13 @@ public:
   outgoing_request_handler_t outgoing_request_handler;
   */
  
+  /*
   typedef std::function< wfc::io::data_ptr(int id) > request_serializer_t;
   typedef std::function<void(incoming_holder holder)> incoming_handler_t;
   typedef std::function< void(incoming_handler_t, request_serializer_t) > outgoing_request_handler_t;
+  */
   
-  outgoing_request_handler_t outgoing_request_handler;
+  // outgoing_request_handler_t outgoing_request_handler;
   /*
   /// wfc::io::handler handler;
   
@@ -41,13 +43,18 @@ public:
   std::function< void(wfc::io::data_ptr, incoming_handler_t) > outgoing_request_handler;
   */
   template<typename PReq, typename Serializer>
-  void send_request( const char* name, PReq req, Serializer ser, incoming_handler_t  clb)
+  void send_request( const char* name, PReq req, Serializer ser, incoming_handler_t  clb) const
   {
-    auto p = std::make_shared<PReq>( std::move(req) );
-    outgoing_request_handler( 
+    std::cout << "method_list::send_request" << std::endl;
+    std::shared_ptr<PReq> p = nullptr;
+    if (req!=nullptr)
+      p = std::make_shared<PReq>( std::move(req) );
+    outgoing_request_handler(
+      name,
       std::move(clb), // обработчик ответ
-      [name, p, ser](int id)->wfc::io::data_ptr // сериализатор (для отложенной сериализации)
+      [p, ser](const char* name, int id)->wfc::io::data_ptr // сериализатор (для отложенной сериализации)
       {
+        std::cout << "method_list::send_request serialize" << std::endl;
         return ser(name, std::move(*p), id);
       }
     );
@@ -91,7 +98,7 @@ public:
   };
 
   template<typename Tg, typename ReqPtr, typename Callback>
-  void call(ReqPtr req, Callback callback)
+  void call(ReqPtr req, Callback callback) const
   {
     std::cout << "handler call" << std::endl;
     this->get_aspect().template get<Tg>().call( *this, std::move(req), callback);

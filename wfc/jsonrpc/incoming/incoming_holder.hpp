@@ -2,20 +2,29 @@
 
 #include <wfc/jsonrpc/incoming/incoming.hpp>
 #include <wfc/jsonrpc/incoming/incoming_json.hpp>
+//#include <wfc/jsonrpc/handler/handler_base.hpp>
 #include <wfc/memory.hpp>
 #include <wfc/io/types.hpp>
 
 namespace wfc{ namespace jsonrpc{
 
+  
+class handler_base;
+
+  
 class incoming_holder
 {
   typedef wfc::io::data_type data_type;
   typedef wfc::io::data_ptr  data_ptr;
   typedef data_type::iterator iterator;
+  
 public:
-  incoming_holder(data_ptr d, std::weak_ptr< wfc::io::iio> iio, wfc::io::callback clb)
-    : iio(iio)
+  
+  incoming_holder(data_ptr d, /*std::weak_ptr< wfc::io::iio> iio, wfc::io::callback clb*/ std::weak_ptr<handler_base> method_handler)
+    : method_handler1(method_handler)
+      /*iio(iio)
     , handler( clb )
+    */
     , _data( std::move(d) )
   {
     _begin = wfc::json::parser::parse_space(_data->begin(), _data->end());
@@ -106,6 +115,19 @@ public:
   }
   
   template<typename J>
+  std::unique_ptr<typename J::target> get_result() const
+  {
+    if ( !this->has_result() )
+      return nullptr;
+    if ( 'n'==*_incoming.result.first)
+      return nullptr; // is null 
+    auto result = std::make_unique<typename J::target>();
+    typename J::serializer()(*result, _incoming.result.first, _incoming.result.second);
+    return std::move(result);
+  }
+
+  
+  template<typename J>
   std::unique_ptr<typename J::target> get_params() const
   {
     if ( !this->has_params() )
@@ -118,22 +140,35 @@ public:
   }
   
   template<typename J>
-  std::unique_ptr<typename J::value_type> get_error() const
+  std::unique_ptr<typename J::target> get_error() const
   {
+    if ( !this->has_error() )
+      return nullptr;
+    if ( 'n'==*_incoming.error.first)
+      return nullptr; // is null 
+    auto result = std::make_unique<typename J::target>();
+    typename J::serializer()(*result, _incoming.error.first, _incoming.error.second);
+    return std::move(result);
+    /*
     if ( !this->has_error() )
       return nullptr;
     auto result = std::make_unique<typename J::value_type>();
     typename J::serializer()(*result, _incoming.error.first, _incoming.error.second);
     return std::move(result);
+    */
   }
   
+  /*
   std::weak_ptr<wfc::io::iio> iio;
   wfc::io::callback handler;
+  */
   
   const incoming& get()  const 
   {
     return _incoming;
   }
+  
+  std::weak_ptr<handler_base> method_handler1;
   
 private:
   

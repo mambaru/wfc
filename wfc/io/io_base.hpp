@@ -34,6 +34,8 @@ public:
     _id = ++id_counter;
   }
     
+  io_id_t get_id() const { return _id;}
+  
   context_type& context()
   {
     return this->get_aspect().template get<_context_>();
@@ -149,6 +151,23 @@ public:
   }
   */
   
+  /*
+  startup_handler_t  startup_handler = nullptr;
+  shutdown_handler_t shutdown_handler = nullptr;
+  */
+
+  /*
+  void set_startup_handler( startup_handler_t  startup_handler )
+  {
+    this->startup_handler = startup_handler;
+  }
+
+  void set_shutdown_handler( shutdown_handler_t  shutdown_handler )
+  {
+    this->shutdown_handler = shutdown_handler;
+  }
+  */
+
 
 protected:
 
@@ -207,6 +226,7 @@ protected:
     t.get_aspect().template get<_start_>()(t);
     
     auto& sh = _options.startup_handler;
+    //auto& sh = t.startup_handler;
     
     if ( sh != nullptr )
     {
@@ -244,9 +264,10 @@ protected:
     _release_handlers2.clear();
     
     auto& sh = _options.shutdown_handler;
+    //auto& sh = t.shutdown_handler;
     if ( sh!=nullptr )
     {
-      _options.shutdown_handler( _id );
+      sh( _id );
     }
 
     t.get_aspect().template get<_stop_>()(t);

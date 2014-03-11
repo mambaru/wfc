@@ -51,7 +51,7 @@ int main()
     
     boost::asio::posix::stream_descriptor sd(*io_service, dd[0]);
     reader_type reader( std::move(sd), init);
-    handler = reader.strand().wrap([&](){ ++handler_count;});
+    handler = reader.owner().wrap([&](){ ++handler_count;},[&](){ ++not_alive_count;});
     
     std::thread th([&dd](){
       write(dd[1], "test1", 5);
@@ -67,10 +67,11 @@ int main()
     
     std::vector<std::string> result;
     
-    for (int i=0; i < 4; ++i)
+    //for (int i=0; i < 4; ++i)
+    while ( result.size() < 4 )
     {
-      auto d = reader.read();
-      result.push_back( std::string(d->begin(), d->end()) );
+      if ( auto d = reader.read() )
+        result.push_back( std::string(d->begin(), d->end()) );
     }
     th.join();
     if (result.size() != 4)

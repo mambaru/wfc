@@ -17,7 +17,7 @@ struct mem_fun_handler
 {
   
   template<typename T>
-  void operator()(T& t, std::unique_ptr<Req> req, std::function< void(std::unique_ptr<Resp>, std::unique_ptr<wfc::jsonrpc::error>) > callback)
+  void operator()(T& t, std::unique_ptr<Req> req, std::function< void(std::unique_ptr<Resp>, std::unique_ptr<wfc::jsonrpc::error>) > callback) const
   {
     if ( auto i = t.target().lock() )
     {
