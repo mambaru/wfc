@@ -15,7 +15,7 @@ public:
   typedef acceptor_options options_type;
   typedef boost::asio::ip::tcp::acceptor descriptor_type;
   ~acceptor();
-  acceptor(descriptor_type&& desc, const options_type& conf);
+  acceptor(descriptor_type&& desc, const options_type& conf, wfc::io::handler handler = nullptr);
   void start();
   void stop();
   void shutdown();

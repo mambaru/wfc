@@ -2,6 +2,8 @@
 
 #include <wfc/io/tags.hpp>
 #include <wfc/io/basic/tags.hpp>
+#include <wfc/io/types.hpp>
+
 #include <wfc/callback/callback_owner.hpp>
 #include <fas/aop.hpp>
 #include <functional>

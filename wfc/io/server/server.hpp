@@ -55,7 +55,7 @@ struct ad_configure
         std::cout << "listen" << std::endl;
         typename descriptor_type::native_handle_type fd = ::dup(desc.native_handle());
         descriptor_type descriptor(t.get_io_service(), boost::asio::ip::tcp::v4(), fd);
-        acceptors.push_back( std::make_unique<acceptor_type>( std::move(descriptor), conf) );
+        acceptors.push_back( std::make_unique<acceptor_type>( std::move(descriptor), conf, t._handler) );
       }
       else
       {
@@ -118,27 +118,30 @@ public:
   typedef fas::aspect_class<A> super;
   typedef typename super::aspect::template advice_cast< wfc::io::_options_type_>::type options_type;
 
-  server(wfc::io_service& io): io_service(io)
+  server(wfc::io_service& io, wfc::io::handler handler = nullptr)
+    : io_service(io)
+    , _handler(handler)
   {
     this->get_aspect().template get<_create_>()(*this);
   }
   
-  template<typename Conf>
-  server(wfc::io_service& io, const Conf& conf)
+  
+  server(wfc::io_service& io, const options_type& conf, wfc::io::handler handler = nullptr)
     : io_service(io)
+    , _handler(handler)
   {
     this->get_aspect().template get<_create_>()(*this);
     this->get_aspect().template gete<_configure_>()(*this, conf);
   }
 
-  template<typename Conf>
-  void configure(const Conf& conf)
+  
+  void configure(const options_type& conf)
   {
     this->get_aspect().template gete<_configure_>()(*this, conf);
   }
   
-  template<typename Conf>
-  void reconfigure(const Conf& conf)
+  
+  void reconfigure(const options_type& conf)
   {
     this->get_aspect().template get<_reconfigure_>()(*this, conf);
   }
@@ -159,6 +162,7 @@ public:
   }
   
   wfc::io_service& io_service;
+  wfc::io::handler _handler;
   
 };
   

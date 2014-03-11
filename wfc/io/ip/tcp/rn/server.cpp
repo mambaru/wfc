@@ -11,8 +11,8 @@ server::~server()
 }
 
   
-server::server(wfc::io_service& io, const server::options_type& conf)
-  : _impl( std::make_unique<server_impl>(io, conf) )
+server::server(wfc::io_service& io, const server::options_type& conf, wfc::io::handler handler)
+  : _impl( std::make_unique<server_impl>(io, conf, handler) )
 {
   
 }

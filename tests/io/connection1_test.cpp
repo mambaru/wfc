@@ -1,14 +1,20 @@
 #include <iostream>
 
 
+/*
 #include <wfc/io/connection/connection.hpp>
 #include <wfc/io/strategy/posix/writer/config.hpp>
 #include <wfc/io/strategy/posix/connection/rn/stream.hpp>
+*/
+
+#include <wfc/io/connection/connection.hpp>
+#include <wfc/io/ip/tcp/rn/connection_aspect.hpp>
 #include <boost/asio.hpp>
 #include <string>
 #include <thread>
 
 
+/*
 struct ad_reverse
 {
   template<typename T>
@@ -17,7 +23,7 @@ struct ad_reverse
     std::reverse( d->begin(), d->end() );
     t.get_aspect().template get<wfc::io::_outgoing_>()(t, std::move(d) );
   }
-};
+};*/
 
 struct config
 {
@@ -29,16 +35,21 @@ struct config
   
 struct connection_aspect: 
   fas::aspect<
+    fas::type< wfc::io::_descriptor_type_, boost::asio::local::stream_protocol::socket>, 
+    wfc::io::ip::tcp::rn::connection_aspect
+    /*
     fas::advice< wfc::io::_options_type_, config>,
     fas::advice< wfc::io::_incoming_, ad_reverse>,
     fas::type< wfc::io::_descriptor_type_, boost::asio::local::stream_protocol::socket>,
     wfc::io::strategy::posix::connection::rn::stream
+    */
   >
 {
 };
 
 typedef wfc::io::connection::connection<connection_aspect> connection_type;
 
+//typedef wfc::io::ip::tcp::rn::connection connection_type;
 
 int main()
 {
@@ -64,9 +75,13 @@ int main()
   
   std::cout << "-3-" << std::endl;
   
-  config conf;
+  connection_type::options_type conf;
   
-  connection_type conn( std::move(sock), conf );
+  connection_type conn( std::move(sock), conf, wfc::io::simple_handler( [](wfc::io::data_ptr d, wfc::io::callback callback) {
+    std::cout << "------handler-------" << std::endl;
+    std::reverse(d->begin(), d->end());
+    callback( std::move(d) );
+  }));
   conn.start();
   
    
@@ -74,6 +89,7 @@ int main()
   std::string income_string = "Hello World\r\n";
   sock1.write_some( boost::asio::buffer(income_string));
   
+  sleep(1);
   std::cout << "-5-" << std::endl;
   std::vector<char> result_data;
   result_data.resize(100);

@@ -56,10 +56,10 @@ int main(int argc, char* /*argv*/[])
   server::options_type conf;
   conf.acceptors = 1;
   conf.threads = 4;
-  conf.handler = handler;
+  //conf.handler = handler;
   wfc::io_service::work wrk(io_service);
   
-  server srv(io_service, conf);
+  server srv(io_service, conf, wfc::io::simple_handler(handler) );
   
   // srv.configure(conf);
   // srv.initialize(handler);

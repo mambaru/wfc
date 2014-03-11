@@ -11,8 +11,8 @@ connection::~connection()
 }
 
   
-connection::connection(connection::descriptor_type&& desc, const connection::options_type& conf)
-  : _impl( std::make_unique<connection_impl>(std::move(desc), conf) )
+connection::connection(connection::descriptor_type&& desc, const connection::options_type& conf, wfc::io::handler handler )
+  : _impl( std::make_unique<connection_impl>(std::move(desc), conf, handler) )
 {
   
 }

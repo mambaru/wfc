@@ -1,6 +1,5 @@
 #pragma once
 
-#include <wfc/io/reader/common/tags.hpp>
 #include <wfc/memory.hpp>
 
 namespace wfc{ namespace io{ namespace acceptor{ namespace basic{

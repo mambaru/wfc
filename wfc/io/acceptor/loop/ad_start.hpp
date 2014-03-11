@@ -1,6 +1,5 @@
 #pragma once
 
-#include <wfc/io/reader/loop/tags.hpp>
 
 namespace wfc{ namespace io{ namespace acceptor{ namespace loop{
 

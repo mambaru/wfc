@@ -28,7 +28,7 @@ struct ad_insert
   {
     typedef typename T::aspect::template advice_cast<_holder_type_>::type holder_type;
     
-    auto holder = std::make_unique<holder_type>( std::move(*d), t.options() );
+    auto holder = std::make_unique<holder_type>( std::move(*d), t.options(), t._handler );
     holder->start();
     t.get_aspect().template get<_holder_storage_>().insert( std::move(holder) );
   }

@@ -20,6 +20,7 @@ public:
   typedef descriptor_holder<A, AspectClass> super;
   
   typedef typename super::data_type data_type;
+  typedef typename super::options_type options_type;
   typedef typename super::descriptor_type descriptor_type;
   typedef std::unique_ptr<data_type> data_ptr;
   
@@ -28,9 +29,9 @@ public:
   acceptor(const acceptor& ) = delete;
   void operator = (const acceptor& conf) = delete;
 
-  template<typename Conf>
-  acceptor(descriptor_type&& desc, const Conf& conf)
-    : super( std::move(desc), conf)
+  
+  acceptor(descriptor_type&& desc, const options_type& conf, wfc::io::handler handler = nullptr)
+    : super( std::move(desc), conf, handler)
   {
     super::create(*this);
   }

@@ -11,8 +11,8 @@ class server_impl
 public:
   typedef typename super::options_type options_type; 
 
-  server_impl(wfc::io_service& io, const options_type& conf)
-    : super( io, conf )
+  server_impl(wfc::io_service& io, const options_type& conf, wfc::io::handler handler = nullptr)
+    : super( io, conf, handler)
   {
   }
 };

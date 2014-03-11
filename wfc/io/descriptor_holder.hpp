@@ -38,9 +38,11 @@ public:
   typedef typename super::aspect::template advice_cast<_descriptor_type_>::type descriptor_type;
   typedef typename super::options_type options_type;
   
-  descriptor_holder(descriptor_type&& desc, const options_type& conf)
+
+  descriptor_holder(descriptor_type&& desc, const options_type& conf, wfc::io::handler handler = nullptr)
     : super( desc.get_io_service(), conf)
     , _descriptor( std::move(desc) )
+    , _handler(handler)
   {
   }
   
@@ -67,6 +69,10 @@ public:
 private:
   
   descriptor_type _descriptor;
+
+public:
+  // TODO: в аспект
+  wfc::io::handler _handler;
 
 };
 

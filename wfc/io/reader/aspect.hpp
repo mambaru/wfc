@@ -170,7 +170,6 @@ struct set_transfer_handler
     auto& th = t.get_aspect().template get< wfc::io::basic::_transfer_handler_>();
     if ( th == nullptr )
     {
-      // TODO убрать callback_status
       th = t.callback([&t](typename T::data_ptr d)
       {
           t.get_aspect().template get<TgResult>()(t, std::move(d) );

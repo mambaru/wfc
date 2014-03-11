@@ -34,8 +34,10 @@ struct aspect: fas::aspect<
 struct basic_options
   : wfc::io::reader::basic_options
 {
+  
   size_t rn_limit_error = static_cast<size_t>(-1);
   size_t rn_limit_warning= static_cast<size_t>(-1);
+  
 };
 
 struct options
