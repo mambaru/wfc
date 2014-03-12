@@ -1,4 +1,4 @@
-#include <wfc/io/ip/tcp/rn/server.hpp>
+#include <wfc/io/ip/tcp/rn/jsonrpc/server.hpp>
 #include <wfc/jsonrpc/service.hpp>
 #include <wfc/jsonrpc/handler.hpp>
 #include <wfc/io_service.hpp>
@@ -56,7 +56,7 @@ void test_loop(wfc::io_service& io_service)
   io_service.stop();
 }
 
-typedef wfc::io::ip::tcp::rn::server server;
+typedef wfc::io::ip::tcp::rn::jsonrpc::server server;
 
 /*
  {\"method\":\"test1\",\"params\":[1,2,3,4,5],\"id\":1}\r\n
@@ -81,12 +81,11 @@ int main(int argc, char* [])
   jsonrpc_options.services[0].threads = 1;
   jsonrpc_options.services[0].queues[0].count = 16;
   
-  wfc::jsonrpc::service<> jsonrpc(io_service, jsonrpc_options, wfc::jsonrpc::handler<method_list>(ptest) ) ;
-//!!  conf.startup_handler = std::bind( &wfc::jsonrpc::service<>::startup_handler, &jsonrpc, _1, _2, _3 );
-  server srv(io_service, conf/*, std::bind( &wfc::jsonrpc::service<>::operator(), &jsonrpc, _1, _2, _3 )*/  );
+  auto jsonrpc = std::make_shared<wfc::jsonrpc::service>(io_service, jsonrpc_options, wfc::jsonrpc::handler<method_list>(ptest) ) ;
+  auto srv = std::make_shared<server>(io_service, conf, jsonrpc );
   
-  jsonrpc.start();
-  srv.start();
+  jsonrpc->start();
+  srv->start();
   
   
   std::thread th;
@@ -98,7 +97,7 @@ int main(int argc, char* [])
   io_service.run();
   std::cout << "done" << std::endl;
   
-  srv.stop();
+  srv->stop();
   //!!! jsonrpc.stop();
   
   if (argc == 1)

@@ -81,7 +81,7 @@ int main()
   */
   
   wfc::jsonrpc::service_options options;
-  typedef wfc::jsonrpc::service<> service_type;
+  typedef wfc::jsonrpc::service service_type;
   service_type jsonrpc(io_service, options, test_handler);
   
   typedef wfc::io::posix::rn::reader reader_type;

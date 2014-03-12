@@ -123,46 +123,22 @@ int main()
   wfc::io_service::work wrk(io_service);
   wfc::jsonrpc::service_options options;
   //options.handler = phndl;
-  wfc::jsonrpc::service<> jsonrpc(io_service, options, *handler);
-  
+  wfc::jsonrpc::service jsonrpc(io_service, options, *handler);
+
+  /*
   jsonrpc.attach_handler( 1, handler, [&jsonrpc](wfc::io::data_ptr d)
   {
-    std::cout << "call READY " << std::string( d->begin(), d->end() ) << std::endl;
-    wfc::jsonrpc::incoming_holder holder( std::move(d) /*, std::weak_ptr<wfc::jsonrpc::handler_base>()*/ );
+    wfc::jsonrpc::incoming_holder holder( std::move(d) );
     wfc::jsonrpc::outgoing_result<test1_params> result;
     result.id = std::move(holder.raw_id());
     result.result = std::make_unique<test1_params>(test1_params({5,4,3,2,1}));
     auto dd = std::make_unique<wfc::io::data_type>();
     wfc::jsonrpc::outgoing_result_json<test1_json>::serializer() ( result, std::back_inserter(*dd) );
     jsonrpc.operator()( std::move(dd), 1, []( wfc::io::data_ptr){} );
-  }); 
-  
-  //wfc::io::shutdown_handler_t shh = nullptr;
-  
-  /*
-  jsonrpc.startup_handler(
-    4, 
-    [&]( wfc::io::data_ptr d) 
-    { 
-      std::cout << "call READY " << std::string( d->begin(), d->end() ) << std::endl;
-      wfc::jsonrpc::incoming_holder holder( std::move(d), std::weak_ptr<wfc::jsonrpc::handler_base>() );
-      
-      wfc::jsonrpc::outgoing_result<test1_params> result;
-      result.id = std::move(holder.raw_id());
-      std::string res = "[5,4,3,2,1]";
-      result.result = std::make_unique<test1_params>(test1_params({5,4,3,2,1}));
-      auto dd = std::make_unique<wfc::io::data_type>();
-      wfc::jsonrpc::outgoing_result_json<test1_json>::serializer() ( result, std::back_inserter(*dd) );
-      
-      jsonrpc.operator()( std::move(dd), 4, []( wfc::io::data_ptr){} );
-    },
-    [&shh]( wfc::io::shutdown_handler_t h)
-    {
-      std::cout << "shh init shutdown"<< std::endl;
-      shh=h; 
-    } 
-  );
+  });
   */
+  
+
   jsonrpc.start();
   
   
