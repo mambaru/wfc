@@ -330,7 +330,7 @@ public:
   {
     auto services = t.options().services;
     if (services.empty())
-      services.push_back( service_options::service());
+      services.push_back( options::service());
     
     for (auto &s : services)
     {

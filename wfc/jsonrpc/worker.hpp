@@ -22,12 +22,13 @@
 
 namespace wfc{ namespace jsonrpc{
 
+/*
 struct worker_options
   : wfc::io::basic::options
 {
   //std::shared_ptr<handler_base> handler;
 };
-
+*/
 /// WORKER
 
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >

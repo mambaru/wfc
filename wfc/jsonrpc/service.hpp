@@ -48,7 +48,7 @@ public:
 class service
 {
 public:
-  typedef service_options options_type;
+  typedef options options_type;
   
   service(wfc::io_service& io_service, const options_type& opt, const handler_base& handler)
     : _impl( std::make_shared<service_impl>(io_service, opt, handler) )

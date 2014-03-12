@@ -18,7 +18,7 @@ SET(
   io/ip/tcp/rn/server.cpp
   io/ip/tcp/rn/acceptor.cpp
   io/ip/tcp/rn/jsonrpc/server.cpp
-  service/service.cpp
+  service/rn/jsonrpc/service.cpp
 )
 
 add_library(

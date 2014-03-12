@@ -121,7 +121,7 @@ int main()
   
   wfc::io_service io_service;
   wfc::io_service::work wrk(io_service);
-  wfc::jsonrpc::service_options options;
+  wfc::jsonrpc::options options;
   //options.handler = phndl;
   wfc::jsonrpc::service jsonrpc(io_service, options, *handler);
 

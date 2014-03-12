@@ -80,7 +80,7 @@ int main()
   options.startup_handler = std::bind( &startup_handler::operator(), &jsonrpc, _1, _2, _3);
   */
   
-  wfc::jsonrpc::service_options options;
+  wfc::jsonrpc::options options;
   typedef wfc::jsonrpc::service service_type;
   service_type jsonrpc(io_service, options, test_handler);
   

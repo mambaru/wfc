@@ -9,6 +9,8 @@
 #include <thread>
 #include <functional>
 #include <boost/asio.hpp>
+#include <wfc/jsonrpc/options.hpp>
+
 
 #include "../worker.hpp"
 
@@ -187,22 +189,6 @@ struct ad_incoming
 
 /// /////////////////////////////////////////
 
-struct service_options
-  : worker_options
-{
-  struct service
-  {
-    struct queue
-    {
-      int count = 1;
-      std::vector<std::string> methods = {"*"};
-    };
-    
-    int threads = 0;
-    std::vector<queue> queues = {queue()};
-  };
-  std::vector< service> services = { service() };
-};
 
 struct _worker_type_;
 
@@ -219,7 +205,7 @@ struct service_basic_aspect: fas::aspect<
 
 struct service_aspect: fas::aspect<
   service_basic_aspect::advice_list,
-  fas::type<wfc::io::_options_type_, service_options>,
+  fas::type<wfc::io::_options_type_, wfc::jsonrpc::options>,
   fas::type<_worker_type_, worker<> >
 >{};
 

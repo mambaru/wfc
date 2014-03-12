@@ -77,7 +77,7 @@ int main(int argc, char* [])
   
   auto ptest = std::make_shared<test>();
 
-  wfc::jsonrpc::service_options jsonrpc_options;
+  wfc::jsonrpc::options jsonrpc_options;
   jsonrpc_options.services[0].threads = 1;
   jsonrpc_options.services[0].queues[0].count = 16;
   
