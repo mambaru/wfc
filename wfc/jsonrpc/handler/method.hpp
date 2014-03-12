@@ -30,7 +30,6 @@ public:
   template<typename T>
   void operator()(T& t, incoming_holder holder, wfc::io::callback callback) const
   {
-    std::cout << "METHOD!" << std::endl;
     this->get_aspect().template get<_invoke_>()(t, std::move(holder), callback);
   }
   

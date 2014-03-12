@@ -49,17 +49,11 @@ public:
   virtual std::shared_ptr<handler_base> clone(/*outgoing_request_handler_t request_handler*/) const 
   {
     return std::make_shared<self>(*this);
-    /*
-    std::cout << "CLONE!!!" << std::endl;
-    auto cln = std::make_shared<self>(*this);
-    cln.outgoing_request_handler = request_handler;
-    return cln;
-    */
   }
 
   virtual void process(incoming_holder holder, wfc::io::callback callback) const
   {
-    std::cout << "instance process!!!" << std::endl;
+    
     fas::for_each_group<_method_>(*this, f_invoke( holder, callback ) );
   }
   

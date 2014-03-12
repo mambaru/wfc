@@ -11,7 +11,7 @@ struct async_read_some
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
-    std::cout << "async_read_some" << std::endl;
+    
     auto dd = std::make_shared<typename T::data_ptr>( std::move(d) );
     
     t.descriptor().async_read_some
@@ -20,14 +20,12 @@ struct async_read_some
       t.strand().wrap(
         [this, &t, dd]( boost::system::error_code ec , std::size_t bytes_transferred )
         { 
-          std::cout << "async_read_some ready " << bytes_transferred << std::endl;
+          
           (*dd)->resize(bytes_transferred);
           t.get_aspect().template get<Tg>()(t, std::move(*dd), ec /*, bytes_transferred*/);
         }
       )
     );
-    
-    std::cout << "async_read_some done" << std::endl;
   }
 };
 
@@ -37,7 +35,6 @@ struct async_read_some2
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
-    std::cout << "async_read_some" << std::endl;
     auto dd = std::make_shared<typename T::data_ptr>( std::move(d) );
     
     t.descriptor().async_read_some
@@ -46,7 +43,6 @@ struct async_read_some2
       t.strand().wrap(
         [this, &t, dd]( boost::system::error_code ec , std::size_t bytes_transferred )
         { 
-          std::cout << "async_read_some ready " << bytes_transferred << std::endl;
           if ( ec )
           {
             t.get_aspect().template get<_status_>() = false;
@@ -58,7 +54,6 @@ struct async_read_some2
       )
     );
     
-    std::cout << "async_read_some done" << std::endl;
   }
 };
 
@@ -68,7 +63,7 @@ struct read_some
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
-    std::cout << "sync read_some {" << std::endl;
+   
     boost::system::error_code ec;
     
     size_t bytes_transferred = 
@@ -82,7 +77,7 @@ struct read_some
       
     d->resize(bytes_transferred);
     t.get_aspect().template get< Tg >()(t, std::move(d));
-    std::cout << "} sync read_some " << bytes_transferred << ": " << ec.message() << ": " << t.descriptor().native_handle()<< std::endl;
+    
   }
 };
 

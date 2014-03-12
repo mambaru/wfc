@@ -64,12 +64,7 @@ struct invoke: Handler
               d->clear();
               typedef outgoing_result_json<response_json> result_json;
               typename result_json::serializer()(result, std::inserter( *d, d->end() ));
-              std::cout << "method SEND: " << std::string(d->begin(), d->end()) << std::endl;
-              //ph->handler( std::move(d) );
               handler( std::move(d) );
-              /*typename error_json::serializer()(error_message, std::inserter( *d, d->end() ));
-              return ph->handler( std::move(d) );
-              */
             }
           } // callback 
         );

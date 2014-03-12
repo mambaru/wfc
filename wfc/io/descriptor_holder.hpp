@@ -14,7 +14,6 @@ struct ad_holder_create
   template<typename T, typename Tmp>
   void operator()(T& t, Tmp)
   {
-    std::cout << "ad_holder_create" << std::endl;
     t.get_aspect().template get<_status_>()=true;
   }
 };

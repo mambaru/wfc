@@ -128,7 +128,7 @@ int main()
   jsonrpc.attach_handler( 1, handler, [&jsonrpc](wfc::io::data_ptr d)
   {
     std::cout << "call READY " << std::string( d->begin(), d->end() ) << std::endl;
-    wfc::jsonrpc::incoming_holder holder( std::move(d), std::weak_ptr<wfc::jsonrpc::handler_base>() );
+    wfc::jsonrpc::incoming_holder holder( std::move(d) /*, std::weak_ptr<wfc::jsonrpc::handler_base>()*/ );
     wfc::jsonrpc::outgoing_result<test1_params> result;
     result.id = std::move(holder.raw_id());
     result.result = std::make_unique<test1_params>(test1_params({5,4,3,2,1}));

@@ -53,45 +53,18 @@ public:
   // или вообще убрать worker и оставить io_base
   void operator()(incoming_holder holder, std::weak_ptr<handler_base> wh, wfc::io::callback callback/*,   TODO: weak_ptr<handler_base> */)
   {
+
     auto ph = std::make_shared<incoming_holder>(std::move(holder) );
     super::dispatch([this, ph, wh, callback]()
     {
-      //if ( auto h = ph->method_handler.lock() )
       if ( auto h = wh.lock() )
       {
         h->process( std::move(*ph), callback );
       }
-    }); // dispatch
-    /*
-    // TDOD: После обработки и сериализации ответа, отдаем в jsonrpc сервисе? 
-    auto ph = std::make_shared<incoming_holder>(std::move(holder) );
-    this->dispatch([this, ph](){
-      if ( auto p1 = ph->iio.lock() )
+      else
       {
-        auto p2 = p1.get();
-        auto itr = _instance_map.find(p2);
-        if ( itr == _instance_map.end() )
-        {
-          itr = _instance_map.insert( std::make_pair(p2, this->options().handler->clone() ) ).first;
-          p1->add_release_handler(
-            [this](std::weak_ptr<wfc::io::iio> wp)
-            {
-              auto pp = wp.lock().get();
-              this->dispatch([this, pp](){
-                std::cout << "RELEASE1: " << this->_instance_map.size() << std::endl;
-                // Здесь проверок не ставим
-                // Если поломато, значит ошибка в логике
-                this->_instance_map.erase(pp);
-                std::cout << "RELEASE2: " << this->_instance_map.size() << std::endl;
-              });
-            }
-          );
-        }
-        
-        itr->second->process( std::move(*ph) );
       }
-    });
-    */
+    }); // dispatch
   }
 private:
   // Нахрен отсюдова!!! 

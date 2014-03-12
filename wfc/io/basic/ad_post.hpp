@@ -9,10 +9,13 @@ struct ad_post
   template<typename T, typename Callback>
   void operator()(T& t, Callback callback)
   {
+    t.strand().post(callback);
+    /*
     t.get_io_service().post( 
       t.strand().wrap(callback)
       //t.get_aspect().template get<_wrap_>()(t, callback) 
     );
+    */
   }
 };
 

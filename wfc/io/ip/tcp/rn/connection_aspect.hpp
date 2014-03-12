@@ -45,16 +45,12 @@ struct _shutdown_flag_;
 struct ad_on_write
 {
   template<typename T, typename Itr>
-  void operator()(T& t, Itr beg, Itr end)
+  void operator()(T& t, Itr , Itr )
   {
-    std::cout <<  "ad_on_write [" <<  std::string(beg, end) << "]" << std::endl;
     if (t.get_aspect().template get<_shutdown_flag_>())
     {
-      std::cout << "_outgoing_buffer_size_ ==" << t.get_aspect().template get< wfc::io::writer::_outgoing_buffer_size_>() << std::endl;
-      //auto& lst = t.get_aspect().template get< wfc::io::writer::_outgoing_buffer_list_>();
       if ( t.get_aspect().template get< wfc::io::writer::_outgoing_buffer_size_>() == 0 )
       {
-        std::cout << "list empty" << std::endl;
         t.descriptor().close();
       }
     }
@@ -64,9 +60,8 @@ struct ad_on_write
 struct ad_on_rn_write
 {
   template<typename T, typename Itr>
-  void operator()(T& t, Itr beg, Itr end)
+  void operator()(T& t, Itr , Itr )
   {
-    std::cout <<  "ad_on_rn_write [" <<  std::string(beg, end) << "]" << std::endl;
     if (!t.options().keep_alive)
     {
       //t.descriptor().shutdown(boost::asio::ip::tcp::socket::shutdown_receive);

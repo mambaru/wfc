@@ -89,7 +89,7 @@ struct ad_process_method
   void operator()( T& t, incoming_holder holder, std::weak_ptr<handler_base> hb, wfc::io::callback callback)
   {
     // t.tmp_worker->operator()( std::move(holder) );
-    std::cout << "ad_process_method"  << std::endl;
+    
     t.push_advice(t, std::move( holder ), hb, callback );
   }
 };
@@ -108,7 +108,6 @@ struct ad_process_result
   template<typename T>
   void operator()( T& t, incoming_holder holder, wfc::io::callback callback)
   {
-    std::cout << "ad_process_result"  << std::endl;
     t.process_result(t, std::move(holder), callback);
   }
 };
@@ -121,12 +120,10 @@ struct ad_process
   {
     if ( holder.has_method() )
     {
-      std::cout << "ad_process has_method"  << std::endl;
       t.get_aspect().template get<_process_method_>()(t, std::move(holder), hb, handler );
     }
     else if ( holder.has_result() )
     {
-      std::cout << "ad_process has_result"  << std::endl;
       t.get_aspect().template get<_process_result_>()(t, std::move(holder), handler );
     }
     else if ( holder.has_error() )
@@ -145,7 +142,6 @@ struct ad_verify
   {
     if ( holder.is_valid() )
     {
-      std::cout << "ad_verify is_valid"  << std::endl;
       t.get_aspect().template get<_process_>()(t, std::move(holder), hb, handler );
     }
     else
@@ -160,14 +156,12 @@ struct ad_incoming
   template<typename T>
   void operator()( T& t, typename T::data_ptr d, /*std::weak_ptr<wfc::io::iio> iio*/ wfc::io::io_id_t id, wfc::io::callback callback)
   {
-    std::cout << "ad_incoming { " << std::string( d->begin(), d->end()) << std::endl;
     auto  handler = t._io_map.find(id)->second.method_handler;
     try
     {
       while (d != nullptr)
       {
-        std::cout << "ad_incoming next: " << std::string( d->begin(), d->end()) << std::endl;
-        incoming_holder hold(std::move(d), handler /*, iio, handler*/ );
+        incoming_holder hold(std::move(d) /*, handler*/ /*, iio, handler*/ );
         d = hold.tail();
         t.get_aspect().template get<_verify_>()( t, std::move(hold), handler, callback );
       }
@@ -186,7 +180,7 @@ struct ad_incoming
       // TODO; сделать логгирование 
       t.get_aspect().template get<_jsonrpc_error_>()(t, server_error(), callback);
     }
-    std::cout << "} ad_incoming" << std::endl;
+    
   }
 };
 

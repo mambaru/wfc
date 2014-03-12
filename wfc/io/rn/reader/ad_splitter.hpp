@@ -11,7 +11,6 @@ struct ad_splitter
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
-    std::cout << "ad_splitter" << std::endl;
     typedef typename T::data_type data_type;
     auto& buffer = t.get_aspect().template get<_buffer_>();
     
@@ -63,7 +62,7 @@ struct ad_splitter
           t.get_aspect().template get<_trimmer_>()(t, std::move(buffer) );
           if ( buffer!=nullptr )
           {
-            //std::cout << "ad_splitter abort" << std::endl;
+            
             abort();
           }
         }

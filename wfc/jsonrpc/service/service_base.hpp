@@ -80,8 +80,6 @@ public:
   template<typename T>
   void process_result( T& , incoming_holder holder, wfc::io::callback)
   {
-    std::cout << "process_result"  << std::endl;
-    
     _tmp_response_handler( std::move(holder) );
   }
   
@@ -191,13 +189,19 @@ public:
   // Новый коннект
   void startup_handler(wfc::io::io_id_t io_id, wfc::io::callback writer, wfc::io::add_shutdown_handler add_shutdown )
   {
-    std::cout << "jsonrpc_base::startup_handler " << io_id << std::endl; 
-    this->dispatch([this, io_id, writer, add_shutdown]()
+    
+    if ( writer == nullptr)
     {
+      // Костыль (из конфига прут аккцепторы)
+      return;
+    }
+    
+    this->post([this, io_id, writer/*, add_shutdown*/]()
+    {
+      
       auto itr = _io_map.find(io_id);
       if ( itr == _io_map.end() )
       {
-        std::cout << "jsonrpc_base::startup_handler insert " << io_id << std::endl; 
         auto handler = _handler_prototype->clone();
         
         //typedef std::function< void(incoming_handler_t, request_serializer_t) > outgoing_request_handler_t;
@@ -222,42 +226,34 @@ public:
       {
         abort();
       }
+      
+      
     });
     
     add_shutdown( this->strand().wrap( [this](wfc::io::io_id_t io_id)
     {
       _io_map.erase(io_id);
     }));
-
-    
-    /*
-    this->dispatch([this, io_id, writer, add_shutdown]()
-    {
-      auto itr = _io_map.find(io_id);
-      
-      if ( itr == _io_map.end() )
-        _io_map.insert( std::make_pair(io_id, writer)  );
-      
-      add_shutdown( this->strand().wrap( [this](wfc::io::io_id_t io_id)
-      {
-        std::cout << "connection shutdown id " << io_id << std::endl;
-        this->_io_map.erase(io_id);
-      }));
-    });
-    */
-  }
+ }
   
 
   //typedef std::function<void(data_ptr, io_id_t, callback )> handler;
   /// Для входящих запросов
-  void operator()( data_ptr d, /*std::weak_ptr<wfc::io::iio> iid*/ wfc::io::io_id_t id, wfc::io::callback handler)
+  void operator()( data_ptr d, wfc::io::io_id_t id, wfc::io::callback callback)
   {
-    std::cout << "jsonrpc_base::operator()" << std::endl; 
-    auto dd = std::make_shared<data_ptr>( std::move(d) );
-    this->dispatch([this, dd, /*iio*/id, handler]()
+    typedef std::chrono::high_resolution_clock clock_t;
+    clock_t::time_point now = clock_t::now();
+    
+    wfc::io::callback tp_callback = [now, callback]( wfc::io::data_ptr d)
     {
-      std::cout << "jsonrpc_base" << std::endl; 
-      this->get_aspect().template get<_incoming_>()( *this, std::move(*dd), /*iio*/id, std::move(handler) );
+      callback( std::move(d) );
+    };
+    
+    
+    auto dd = std::make_shared<data_ptr>( std::move(d) );
+    this->post([this, dd, /*iio*/id, tp_callback]()
+    {
+      this->get_aspect().template get<_incoming_>()( *this, std::move(*dd), /*iio*/id, std::move(tp_callback) );
     });
   }
   
@@ -298,7 +294,7 @@ public:
       {
         itr->second.second = itr->second.first.begin();
       }
-      return *(itr->second.second);
+      return *(itr->second.second++);
     }
     return nullptr;
   }
@@ -306,7 +302,6 @@ public:
   template<typename T>
   void push_advice(T& , incoming_holder holder, std::weak_ptr<handler_base> hb, wfc::io::callback callback)
   {
-    std::cout << "push_advice"  << std::endl;
     if ( holder.has_method() )
     {
       auto itr = _method_map.find( holder.method() );
@@ -323,11 +318,9 @@ public:
           itr->second.second = itr->second.first.begin();
         }
         // Отдаем воркеру
-        std::cout << "push_advice do worker"  << std::endl;
         (*(itr->second.second))->operator()( std::move(holder), hb, callback );
+        ++(itr->second.second);
       }
-      
-      
     }
   } 
 
@@ -341,46 +334,74 @@ public:
     
     for (auto &s : services)
     {
+      // Ахтунг! вынести в мембер
       io_service_ptr io_ptr = nullptr;
       if (s.threads != 0)
+      {
         io_ptr = std::make_shared<wfc::io_service>();
+        _services.push_back(io_ptr);
+      }
       
       wfc::io_service& io_ref = (io_ptr == nullptr ? t.get_io_service() : *io_ptr );
+      //wfc::io_service* io_ref = &(io_ptr == nullptr ? t.get_io_service() : *io_ptr );
+      
+      /*
+      wfc::io_service* io_raw = nullptr;
+      if ( io_ptr == nullptr )
+        io_raw = &(t.get_io_service());
+      else
+        io_raw = io_ptr.get();
+      */
+      
       for (auto w: s.queues)
       {
         options_type opt = t.options();
-        wfc::io_service ios;
-        auto wrk = std::make_shared<worker_type>( io_ref, t.options() );
-        _workers.push_back( wrk );
-        for (auto& s : w.methods)
+        
+        for (int i = 0; i < w.count; ++i)
         {
-          auto itr = _method_map.find(s);
-          if ( itr == _method_map.end() )
+          auto wrk = std::make_shared<worker_type>( io_ref, t.options() );
+          _workers.push_back( wrk );
+          for (auto& s : w.methods)
           {
-            pair_worker_list pwl;
-            itr = _method_map.insert( std::make_pair(s, pwl) ).first;
+            auto itr = _method_map.find(s);
+            if ( itr == _method_map.end() )
+            {
+              pair_worker_list pwl;
+              itr = _method_map.insert( std::make_pair(s, pwl) ).first;
+            }
+            itr->second.first.push_back(wrk);
+            if ( itr->second.first.size() == 1)
+              itr->second.second = itr->second.first.begin();
           }
-          itr->second.first.push_back(wrk);
-          if ( itr->second.first.size() == 1)
-            itr->second.second = itr->second.first.begin();
         }
       }
       
       for (int i=0; i < s.threads; ++i)
       {
-        _threads.push_back( std::thread([&io_ref]() {
-          io_ref.run();
+        _threads.push_back( std::thread([io_ptr]() {
+          wfc::io_service::work wrk(*io_ptr);
+          io_ptr->run();
         }));
       }
     }
   }
+  void start_no_tf()
+  {
+    
+    super::start(*this);
+    start_advice(*this);
+    
+  }
   
   void start()
   {
-    // TODO: dispatch
-    super::start(*this);
-    start_advice(*this);
-    tmp_worker = std::make_shared<worker_type>(this->get_io_service(), this->options() );
+    this->dispatch( std::bind( &self::start_no_tf, this) );
+    /*this->dispatch([this]()
+    {
+      this->start_no_tf();
+      //tmp_worker = std::make_shared<worker_type>(this->get_io_service(), this->options() );
+    });
+    */
   }
   
   void stop()
@@ -391,7 +412,7 @@ public:
 
   //wfc::io::handler handler;
   
-  std::shared_ptr<worker_type> tmp_worker;
+  //std::shared_ptr<worker_type> tmp_worker;
 };
 
 }} // wfc

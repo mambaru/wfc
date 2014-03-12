@@ -5,6 +5,7 @@
 //#include <wfc/jsonrpc/handler/handler_base.hpp>
 #include <wfc/memory.hpp>
 #include <wfc/io/types.hpp>
+#include <chrono>
 
 namespace wfc{ namespace jsonrpc{
 
@@ -20,15 +21,20 @@ class incoming_holder
   
 public:
   
-  incoming_holder(data_ptr d, /*std::weak_ptr< wfc::io::iio> iio, wfc::io::callback clb*/ std::weak_ptr<handler_base> method_handler)
-    : method_handler1(method_handler)
-      /*iio(iio)
-    , handler( clb )
-    */
-    , _data( std::move(d) )
+  typedef std::chrono::high_resolution_clock clock_t;
+  
+  incoming_holder(data_ptr d/*, std::weak_ptr<handler_base> method_handler*/)
+    : /*method_handler1(method_handler)
+    ,*/ _data( std::move(d) )
   {
+    _time_point = clock_t::now();
     _begin = wfc::json::parser::parse_space(_data->begin(), _data->end());
     _end = incoming_json::serializer()( _incoming, _begin, _data->end());
+  }
+  
+  clock_t::time_point time_point() const 
+  {
+    return _time_point;
   }
   
   data_ptr detach()
@@ -168,7 +174,7 @@ public:
     return _incoming;
   }
   
-  std::weak_ptr<handler_base> method_handler1;
+  //std::weak_ptr<handler_base> method_handler1;
   
 private:
   
@@ -176,6 +182,8 @@ private:
   incoming _incoming;
   iterator _begin;
   iterator _end;
+  
+  clock_t::time_point _time_point;
 };
   
 }}

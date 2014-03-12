@@ -53,7 +53,7 @@ struct ad_ready
   template<typename T>
   void operator()( T& t, typename T::data_ptr d)
   {
-    //std::cout << "NEW SOKET" << std::endl;
+    
     t.get_aspect().template get<_insert_>()(t, std::move(d));
     //manager_ptr->insert(std::move(d));
   }

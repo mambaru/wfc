@@ -1,5 +1,6 @@
 #pragma once
 
+#include <wfc/logger.hpp>
 #include <wfc/io/tags.hpp>
 #include <wfc/io/basic/tags.hpp>
 #include <wfc/io/types.hpp>
@@ -78,11 +79,15 @@ public:
 
   const owner_type& owner() const
   {
+    if ( nullptr == this->get_aspect().template get<_owner_>() )
+      abort();
     return *(this->get_aspect().template get<_owner_>());
   }
 
   owner_type& owner()
   {
+    if ( nullptr == this->get_aspect().template get<_owner_>() )
+      abort();
     return *(this->get_aspect().template get<_owner_>());
   }
 
@@ -225,7 +230,7 @@ protected:
   template<typename T>
   void start(T& t)
   {
-    t.get_aspect().template get<_start_>()(t);
+    
     
     auto& sh = _options.startup_handler;
     //auto& sh = t.startup_handler;
@@ -240,6 +245,7 @@ protected:
       typedef std::function< void(data_ptr, io_id_t, callback )> transfer_handler_t;
       */
       
+      
       sh(
         _id, 
         this->transfer_handler(),
@@ -252,14 +258,18 @@ protected:
         }
       );
     }
+    // Сначала запускаем startup_handler (иначе в mt данные могут прийти раньше )
+    t.get_aspect().template get<_start_>()(t);
   }
   
   template<typename T>
   void stop(T& t)
   {
+    /*
     for ( auto& h : _release_handlers)
       h(t.shared_from_this());
     _release_handlers.clear();
+    */
     
     for ( auto& h : _release_handlers2)
       h( this->_id );

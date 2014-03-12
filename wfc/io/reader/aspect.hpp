@@ -14,6 +14,7 @@
 #include <wfc/callback/callback_status.hpp>
 
 #include <list>
+#include <chrono>
 
 namespace wfc{ namespace io{ namespace reader{ 
 
@@ -25,12 +26,9 @@ struct dispatch
   template<typename T>
   void operator()(T& t)
   {
-    std::cout << "dispatch " << std::endl;
     t.dispatch( [&t]() {
-      std::cout << "dispatch start" << std::endl;
       t.get_aspect().template get<_is_started_>() = true;
       t.get_aspect().template gete<Tg>()(t);
-      std::cout << "dispatch finish" << std::endl;
     });
   }
 };
@@ -76,10 +74,8 @@ struct read_more
   template<typename T>
   void operator()(T& t)
   {
-    std::cout << "read more {" << std::endl;
     auto d = t.get_aspect().template get< _make_buffer_ >()(t);
     t.get_aspect().template get< Tg >()(t, std::move(d) );
-    std::cout << "}read more" << std::endl;
   }
 };
 
@@ -94,19 +90,16 @@ struct result_handler
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
-    std::cout << "result_handler" << std::endl;
     bool status = t.get_aspect().template get<wfc::io::_status_>();
 
     if (status)
     {
-      std::cout << "result_handler ready" << std::endl;
       t.get_aspect().template get<TgReady>()( t, std::move(d) );
     }
     else 
     {
       boost::system::error_code ec = t.get_aspect().template get<wfc::io::_error_code_>();
       
-      std::cout << "result_handler ERROR: " << ec.message() << std::endl;
       if ( ec == boost::asio::error::operation_aborted)
       {
         t.get_aspect().template get< TgAborted >()(t, ec, std::move(d) );
@@ -147,12 +140,10 @@ struct readed
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
-    std::cout << "readed! " << std::endl;
     t.get_aspect().template get< TgMain >()(t, std::move(d));
     
     if ( t.get_aspect().template get<_is_started_>() )
     {
-      std::cout << "readed! is started! " << std::endl;
       t.get_aspect().template get< TgSecond >()(t);
     }
   }
@@ -188,29 +179,30 @@ struct user_handler
     auto handler = t._handler;
     if ( handler == nullptr )
     {
-      std::cout << "user_handler null " << std::endl;
       t.get_aspect().template get<TgResult>()(t, std::move(d) );
     }
     else
     {
-      //std::cout << "user_handler shared_from_this{ " << std::endl;
-      //t.shared_from_this();
-      //std::cout << "}user_handler shared_from_this " << std::endl;
-      std::cout << "user_handler { " << std::endl;
-      std::cout << "user_handler = " << std::string( d->begin(), d->end()) << std::endl;
+      typedef std::chrono::high_resolution_clock clock_t;
+      clock_t::time_point start = clock_t::now();
+      
       handler(
         std::move(d), 
         //t.shared_from_this(),
         t.get_id(), 
-        t.callback([&t](typename T::data_ptr d)
+        t.callback([&t, start](typename T::data_ptr d)
         {
-          std::cout << "CALLBACK "<< std::string( d->begin(), d->end()) << std::endl;
           t.get_aspect().template get<TgResult>()(t, std::move(d) );
-          std::cout << "CALLBACK READY"<< std::endl;
+          clock_t::time_point finish = clock_t::now();
+          
+          size_t ts = std::chrono::duration_cast<std::chrono::microseconds>( finish - start ).count();
+          
+          if ( ts > 5000 )
+            std::cout << "ts: " << ts << std::endl;
+          
+          
         })
       );
-      std::cout << "} user_handler " << std::endl;
-      
     }
   }
 };
@@ -305,7 +297,6 @@ struct read_incoming
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
-    std::cout << "read_incoming!!!" << std::endl;
     auto& lst = t.get_aspect().template get<_outgoing_list_>();
     if ( d!=nullptr)
       lst.push_back( std::move(d) );
@@ -323,8 +314,6 @@ struct read_incoming
     
     if ( !clb.empty() )
       t.get_aspect().template get< TgAsyncReadMore >()(t);
-    
-    std::cout << "read_incoming!!! " << lst.size() << std::endl;
 
   }
 };
@@ -336,10 +325,8 @@ struct read
   template<typename T>
   typename T::data_ptr operator()(T& t)
   {
-    std::cout << "READ{" << std::endl;
     if ( !t.status() )
     {
-      std::cout << "status1! " << t.error_code().message() << std::endl;
       return nullptr;
     }
     
@@ -349,7 +336,6 @@ struct read
 
     if ( !t.status() )
     {
-      std::cout << "status2! " << t.error_code().message() << std::endl;
       return nullptr;
     }
 
@@ -358,10 +344,8 @@ struct read
     if ( !lst.empty() )
     {
       d = std::move( lst.front() );
-      std::cout << "READ OK " << std::string(d->begin(), d->end()) <<std::endl;
       lst.pop_front();
     }
-    std::cout << "}READ " <<  std::endl;
     return std::move(d);
   }
 };

@@ -14,7 +14,10 @@ public:
   
   virtual void write(const std::string& name, const std::string& ident,  const std::string& str)
   {
-    std::clog << "LOG " << name << "\t" << ident << "\t" << str << std::endl;
+    std::stringstream ss;
+    ss << "LOG " << name << "\t" << ident << "\t" << str << std::endl;
+    
+    std::cerr << ss.str();
   }
 };
 

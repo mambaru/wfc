@@ -27,7 +27,6 @@ struct async_write_some
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
-    std::cout << "async_write_some" << std::endl;
     //tmp.assign(d->begin(), d->begin()+1);
     auto dd = std::make_shared<typename T::data_ptr>( std::move(d) );
     t.descriptor().async_write_some
@@ -37,7 +36,6 @@ struct async_write_some
       t.strand().wrap(
         [this, &t, dd]( boost::system::error_code ec, std::size_t bytes_transferred )
         { 
-          std::cout << "async_write_some ready " << bytes_transferred << std::endl;
           if ( ec )
           {
             t.get_aspect().template get<_status_>() = false;
@@ -130,19 +128,16 @@ struct result_handler
   template<typename T>
   void operator()(T& t, typename T::data_ptr d, size_t byte_transfered)
   {
-    std::cout << "writer result_handler" << std::endl;
     bool status = t.get_aspect().template get<wfc::io::_status_>();
 
     if (status)
     {
-      std::cout << "writer result_handler ready" << std::endl;
       t.get_aspect().template get<TgReady>()( t, std::move(d), byte_transfered);
     }
     else 
     {
       boost::system::error_code ec = t.get_aspect().template get<wfc::io::_error_code_>();
       
-      std::cout << "writer result_handler ERROR: " << ec.message() << std::endl;
       if ( ec == boost::asio::error::operation_aborted)
       {
         t.get_aspect().template get< TgAborted >()(t, ec, std::move(d) );
@@ -161,7 +156,6 @@ struct ad_write
   void operator()(T& t, typename T::data_ptr d)
   {
     t.get_aspect().template get<_outgoing_buffer_size_>()+=d->size();
-    std::cout << "ad_write!" <<  std::endl;
     d = t.get_aspect().template get<_make_buffer_>()(t, std::move(d) );
     
     if ( d != nullptr )

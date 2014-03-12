@@ -73,6 +73,9 @@ add_executable(connection1_test connection1_test.cpp logger.cpp)
 add_test(connection1_test connection1_test)
 target_link_libraries(connection1_test wfc boost_system pthread)
 
+# rpc_tcp_test.cpp
+
+
 #add_executable(accept1_test accept1_test.cpp logger.cpp)
 #add_test(accept1_test accept1_test)
 #target_link_libraries(accept1_test wfc boost_system pthread)
@@ -84,3 +87,7 @@ target_link_libraries(connection1_test wfc boost_system pthread)
 add_executable(rn_tcp_server_test rn_tcp_server_test.cpp logger.cpp)
 add_test(rn_tcp_server_test rn_tcp_server_test)
 target_link_libraries(rn_tcp_server_test wfc boost_system pthread)
+
+add_executable(rpc_tcp_test rpc_tcp_test.cpp logger.cpp)
+add_test(rpc_tcp_test rpc_tcp_test)
+target_link_libraries(rpc_tcp_test wfc boost_system pthread)

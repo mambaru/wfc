@@ -61,7 +61,6 @@ struct call
     {
       result_handler = [callback](incoming_holder holder)
       {
-        std::cout << "call::result_handler!!!" << std::endl;
         // получатель
         if ( holder.is_response() )
         {
