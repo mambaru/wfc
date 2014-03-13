@@ -10,6 +10,9 @@ struct _method_;
 struct _call_;
 struct _interface_;
 
+struct _startup_;
+struct _shutdown_;
+
 }} // wfc
 
 

@@ -35,6 +35,7 @@ struct f_invoke
 template<typename Instanse>
 class handler
   : public Instanse
+  , public std::enable_shared_from_this< handler<Instanse> >
 {
 public:
   typedef handler<Instanse> self;
@@ -53,9 +54,19 @@ public:
 
   virtual void process(incoming_holder holder, ::wfc::io::callback callback) const
   {
-    
     fas::for_each_group<_method_>(*this, f_invoke( holder, callback ) );
   }
+  
+  virtual void start(::wfc::io::io_id_t id) 
+  {
+    this->get_aspect().template get<_startup_>()(*this, id);
+  }
+  
+  virtual void stop(::wfc::io::io_id_t id)
+  {
+    this->get_aspect().template get<_shutdown_>()(*this, id);
+  }
+
   
   target_type target() const
   {

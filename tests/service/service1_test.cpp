@@ -21,14 +21,44 @@ struct itest
   virtual void test1(std::unique_ptr<test1_params> req, std::function< void(std::unique_ptr<test1_params>) > callback) = 0;
 };
 
-class test: public itest
+struct itest_ex: itest
 {
+  virtual void startup(size_t id, std::weak_ptr<itest>) = 0;
+  virtual void shutdown(size_t id, std::weak_ptr<itest>) = 0;
+};
+class test: public itest_ex
+{
+  std::weak_ptr<itest> test_conn;
 public:
   virtual void test1(std::unique_ptr<test1_params> req, std::function< void(std::unique_ptr<test1_params>) > callback) 
   {
+    if (auto p = test_conn.lock() )
+    {
+      auto req = std::make_unique<test1_params>( test1_params({1, 2, 3, 4, 5}) );
+      p->test1( std::move(req), nullptr );
+    }
+
+    
     std::reverse(req->begin(), req->end());
     callback( std::move(req) );
   }
+  
+  virtual void startup(size_t , std::weak_ptr<itest> ptest)
+  {
+    test_conn = ptest;
+    
+    if (auto p = ptest.lock() )
+    {
+      auto req = std::make_unique<test1_params>( test1_params({1, 2, 3, 4, 5}) );
+      p->test1( std::move(req), nullptr );
+    }
+  }
+  
+  virtual void shutdown(size_t , std::weak_ptr<itest>)
+  {
+    
+  }
+
 };
 
 JSONRPC_TAG(test1)
@@ -42,15 +72,20 @@ struct method_test1: wfc::jsonrpc::method<
 
 struct method_test2: wfc::jsonrpc::method<
   wfc::jsonrpc::name<_test2_>,
-  wfc::jsonrpc::invoke_mem_fun<test1_json, test1_json, itest, &itest::test1 >
+  wfc::jsonrpc::invoke_mem_fun<test1_json, test1_json, itest, &itest::test1 >, 
+  wfc::jsonrpc::call<test1_json, test1_json>
 >{};
 
 
 struct method_list: wfc::jsonrpc::method_list<
-  wfc::jsonrpc::target<itest>,
+  //wfc::jsonrpc::target<itest>,
+  wfc::jsonrpc::interface_target_ctl<itest, itest_ex, &itest_ex::startup, &itest_ex::shutdown>, 
   wfc::jsonrpc::invoke_method<_test1_, test1_json, test1_json, itest, &itest::test1>,
   method_test2
->{};
+>
+{
+  JSONRPC_METHOD_IMPL( _test2_, test1 )
+};
 
 
 

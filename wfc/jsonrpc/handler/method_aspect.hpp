@@ -8,7 +8,7 @@
 namespace wfc{ namespace jsonrpc{
   
 struct method_aspect
-  : fas::aspect< invoke_stub > 
+  : fas::aspect< invoke_stub> 
 {
   
 };

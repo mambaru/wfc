@@ -11,10 +11,39 @@
 namespace wfc{ namespace jsonrpc{
   
 template<typename I>
-struct interface_
-  : fas::advice<_interface_, I >
+struct interface_ /* , std::enable_shared_from_this< interface_<I> > */
+  //: fas::advice<_interface_, I >
 {
+  typedef fas::metalist::advice metatype;
+  typedef _interface_ tag;
+  typedef I advice_class;
+
+  /*advice_class& get_advice() { return *this;}
+  const advice_class& get_advice() const { return *this;}
+  */
+
 };
+
+#define JSONRPC_METHOD_IMPL(Tg, Method)\
+  virtual void test1( call_params_ptr<Tg>::type req, std::function< void(call_result_ptr<Tg>::type) > callback)\
+  {\
+    if ( callback == nullptr )\
+    {\
+      this->call<Tg>( std::move(req), nullptr );\
+    }\
+    else\
+    {\
+      this->call<Tg>( std::move(req), [callback](call_result_ptr<Tg>::type resp, call_error_ptr<Tg>::type error)\
+      {\
+        if ( error==nullptr){\
+          if ( resp != nullptr) \
+            callback( std::move(resp) );\
+          else\
+            callback( nullptr );\
+        };\
+      });\
+    }\
+  }
   
 template<typename JReq, typename JResp, size_t ReserveSize = 80 >
 struct call

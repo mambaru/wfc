@@ -53,6 +53,10 @@ struct method: fas::type_list_n<
 #include <wfc/jsonrpc/handler/method.hpp>
 #include <memory>
 
+
+#include <wfc/jsonrpc/handler/call.hpp>
+#include <wfc/jsonrpc/handler/target.hpp>
+
 namespace wfc{ namespace jsonrpc{
 template<
   typename TgName, 
@@ -71,6 +75,20 @@ struct invoke_method: method<
   >
 >
 {};
+
+
+template<
+  typename Interface,
+  typename Target, 
+  void (Target::*mem_ptr1)( size_t, std::weak_ptr<Interface> ),
+  void (Target::*mem_ptr2)( size_t, std::weak_ptr<Interface> )
+>
+struct interface_target_ctl: fas::type_list_n<
+    interface_<Interface>, 
+    target<Target>, 
+    startup< mem_fun_ctrl<Interface, Target, mem_ptr1> >, 
+    shutdown< mem_fun_ctrl<Interface, Target, mem_ptr2> >
+>::type {};
 
 }} // wfc
 

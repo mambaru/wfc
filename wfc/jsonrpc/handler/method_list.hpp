@@ -8,16 +8,27 @@
 namespace wfc{ namespace jsonrpc{
 
 template<typename... Args >
+class method_list_base
+  : public fas::aspect_class< typename fas::merge_aspect< fas::aspect<Args...>, handler_aspect>::type >
+{
+public:
+  typedef fas::aspect_class< typename fas::merge_aspect< fas::aspect<Args...>, handler_aspect>::type > super;
+  typedef typename super::aspect::template advice_cast<_target_>::type target_type;
+  typedef typename super::aspect::template advice_cast<_interface_>::type interface_type;
+};
+
+
+template<typename... Args >
 class method_list
   : public handler_base
-  , public fas::aspect_class< typename fas::merge_aspect< fas::aspect<Args...>, handler_aspect>::type >
-  , public std::enable_shared_from_this< method_list<Args...> >
+  , public method_list_base<Args...>
+  , public method_list_base<Args...>::interface_type
+  //, public std::enable_shared_from_this< method_list<Args...> >
 {
 public:
   typedef method_list<Args...> self;
   typedef self magic;
-  typedef fas::aspect_class< typename fas::merge_aspect< fas::aspect<Args...>, handler_aspect>::type > super;
-  typedef typename super::aspect::template advice_cast<_target_>::type target_type;
+  typedef method_list_base<Args...> super;
 
   /*
   typedef std::function<void(incoming_holder holder)> incoming_handler_t;

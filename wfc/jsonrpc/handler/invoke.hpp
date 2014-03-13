@@ -9,6 +9,30 @@
 #include <memory>
 
 namespace wfc{ namespace jsonrpc{
+
+
+template<typename Handler>
+struct startup:
+  fas::advice<_startup_, Handler>
+{};
+
+
+template<typename Handler>
+struct shutdown:
+  fas::advice<_shutdown_, Handler>
+{};
+
+
+  /*: public 
+{
+  typedef fas::metalist::advice metatype;
+  typedef _startup_ tag;
+  typedef startup advice_class;
+
+  advice_class& get_advice() { return *this;}
+  const advice_class& get_advice() const { return *this;}
+};*/
+
   
 template<typename JReq, typename JResp, typename Handler>
 struct invoke: Handler

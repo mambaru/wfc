@@ -221,6 +221,9 @@ public:
             })
           )  
         );
+        
+        handler->start(io_id);
+
       }
       else
       {
@@ -233,7 +236,12 @@ public:
     add_shutdown( this->strand().wrap( [this](::wfc::io::io_id_t io_id)
     {
       std::cout << "jsonrpc shutdown " << io_id << std::endl;
-      _io_map.erase(io_id);
+      auto itr = _io_map.find(io_id);
+      if ( itr != _io_map.end() )
+      {
+        itr->second.method_handler->stop(io_id);
+        _io_map.erase(itr);
+      }
     }));
  }
   
