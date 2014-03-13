@@ -19,7 +19,7 @@ struct invoke_stub
   //template<typename T>
   //void operator()(T&, incoming_holder) const
   template<typename T>
-  void operator()(T& , incoming_holder , wfc::io::callback ) const
+  void operator()(T& , incoming_holder , ::wfc::io::callback ) const
   {
     // TODO: send error
     abort();

@@ -34,7 +34,7 @@ struct ad_send_json
 {
   
   template<typename T, typename J, typename O>
-  void operator()( T&, J, O obj, /*incoming_holder holder*/ typename T::data_ptr d, wfc::io::callback callback)
+  void operator()( T&, J, O obj, /*incoming_holder holder*/ typename T::data_ptr d, ::wfc::io::callback callback)
   {
     //auto d = holder.detach();
     d->clear();
@@ -46,9 +46,9 @@ struct ad_send_json
   
   
   template<typename T, typename J, typename O>
-  void operator()( T&, J, O obj, wfc::io::callback handler)
+  void operator()( T&, J, O obj, ::wfc::io::callback handler)
   {
-    auto d = std::make_unique<wfc::io::data_type>();
+    auto d = std::make_unique< ::wfc::io::data_type>();
     d->reserve(80);
     typename J::serializer()(obj, std::inserter( *d, d->end() ));
     handler( std::move(d) );
@@ -60,7 +60,7 @@ struct _jsonrpc_error_;
 struct ad_jsonrpc_error
 {
   template<typename T>
-  void operator()( T& t, const error& err, incoming_holder holder, wfc::io::callback callback)
+  void operator()( T& t, const error& err, incoming_holder holder, ::wfc::io::callback callback)
   {
     typedef outgoing_error_json< error_json::type >::type json_type;
     outgoing_error<error> error_message;
@@ -70,7 +70,7 @@ struct ad_jsonrpc_error
   }
 
   template<typename T>
-  void operator()( T& t, const error& err, /*wfc::io::callback handler,*/ wfc::io::callback callback)
+  void operator()( T& t, const error& err, /*wfc::io::callback handler,*/ ::wfc::io::callback callback)
   {
     typedef outgoing_error_json< error_json::type >::type json_type;
     outgoing_error<error> error_message;
@@ -88,7 +88,7 @@ struct _process_result_;
 struct ad_process_method
 {
   template<typename T>
-  void operator()( T& t, incoming_holder holder, std::weak_ptr<handler_base> hb, wfc::io::callback callback)
+  void operator()( T& t, incoming_holder holder, std::weak_ptr<handler_base> hb, ::wfc::io::callback callback)
   {
     // t.tmp_worker->operator()( std::move(holder) );
     
@@ -99,7 +99,7 @@ struct ad_process_method
 struct ad_process_error
 {
   template<typename T>
-  void operator()( T&, incoming_holder, wfc::io::callback)
+  void operator()( T&, incoming_holder, ::wfc::io::callback)
   {
     
   }
@@ -108,7 +108,7 @@ struct ad_process_error
 struct ad_process_result
 {
   template<typename T>
-  void operator()( T& t, incoming_holder holder, wfc::io::callback callback)
+  void operator()( T& t, incoming_holder holder, ::wfc::io::callback callback)
   {
     t.process_result(t, std::move(holder), callback);
   }
@@ -118,7 +118,7 @@ struct _process_;
 struct ad_process
 {
   template<typename T>
-  void operator()( T& t, incoming_holder holder, std::weak_ptr<handler_base> hb, wfc::io::callback handler)
+  void operator()( T& t, incoming_holder holder, std::weak_ptr<handler_base> hb, ::wfc::io::callback handler)
   {
     if ( holder.has_method() )
     {
@@ -140,7 +140,7 @@ struct _verify_;
 struct ad_verify
 {
   template<typename T>
-  void operator()( T& t, incoming_holder holder, std::weak_ptr<handler_base> hb, wfc::io::callback handler)
+  void operator()( T& t, incoming_holder holder, std::weak_ptr<handler_base> hb, ::wfc::io::callback handler)
   {
     if ( holder.is_valid() )
     {
@@ -156,7 +156,7 @@ struct ad_verify
 struct ad_incoming
 {
   template<typename T>
-  void operator()( T& t, typename T::data_ptr d, /*std::weak_ptr<wfc::io::iio> iio*/ wfc::io::io_id_t id, wfc::io::callback callback)
+  void operator()( T& t, typename T::data_ptr d, /*std::weak_ptr<wfc::io::iio> iio*/ ::wfc::io::io_id_t id, ::wfc::io::callback callback)
   {
     auto  handler = t._io_map.find(id)->second.method_handler;
     try
@@ -205,7 +205,7 @@ struct service_basic_aspect: fas::aspect<
 
 struct service_aspect: fas::aspect<
   service_basic_aspect::advice_list,
-  fas::type<wfc::io::_options_type_, wfc::jsonrpc::options>,
+  fas::type< ::wfc::io::_options_type_, ::wfc::jsonrpc::options>,
   fas::type<_worker_type_, worker<> >
 >{};
 

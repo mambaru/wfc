@@ -29,12 +29,20 @@ public:
   typedef typename super::aspect::template advice_cast<_io_service_type_>::type io_service_type;
   typedef std::unique_ptr<data_type> data_ptr;
 
+  ~io_base()
+  {
+    std::cout << "io_base::~io_base() " << this->get_id() << std::endl;
+  }
+  
   io_base(io_service_type& io_service, const options_type& opt)
     : _io_service(io_service)
     , _options(opt)
   {
+    _id = create_id();
+    /*
     static std::atomic<io_id_t> id_counter(0);
     _id = ++id_counter;
+    */
   }
     
   io_id_t get_id() const { return _id;}
@@ -121,7 +129,7 @@ public:
     this->post(*this, h);
   }
 
-  wfc::io::callback callback( std::function<void(data_ptr)> handler)
+  ::wfc::io::callback callback( std::function<void(data_ptr)> handler)
   {
     return this->owner().wrap( [handler, this](data_ptr d)// ->callback_status 
       {
@@ -265,24 +273,28 @@ protected:
   template<typename T>
   void stop(T& t)
   {
+    std::cout << "io_base::stop..." << std::endl;
     /*
     for ( auto& h : _release_handlers)
       h(t.shared_from_this());
     _release_handlers.clear();
     */
-    
-    for ( auto& h : _release_handlers2)
-      h( this->_id );
-    _release_handlers2.clear();
-    
-    auto& sh = _options.shutdown_handler;
-    //auto& sh = t.shutdown_handler;
-    if ( sh!=nullptr )
+    t.post([&t, this]()
     {
-      sh( _id );
-    }
+      std::cout << "io_base::stop post" << std::endl;
+      for ( auto& h : _release_handlers2)
+        h( this->_id );
+      _release_handlers2.clear();
+      
+      auto& sh = _options.shutdown_handler;
+      //auto& sh = t.shutdown_handler;
+      if ( sh!=nullptr )
+      {
+        sh( _id );
+      }
 
-    t.get_aspect().template get<_stop_>()(t);
+      t.get_aspect().template get<_stop_>()(t);
+    });
   }
   
 private:

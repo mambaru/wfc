@@ -2,9 +2,16 @@
 
 #include <wfc/jsonrpc/handler.hpp>
 #include <wfc/jsonrpc/options.hpp>
+#include <wfc/jsonrpc/options_json.hpp>
+#include <wfc/jsonrpc/service.hpp>
 #include <wfc/io/ip/tcp/rn/server_options.hpp>
+
 #include <wfc/core/global.hpp>
 #include <list>
+
+#include <wfc/json/json.hpp>
+#include <wfc/json/name.hpp>
+
 
 namespace wfc{ namespace jsonrpc{
 class service;
@@ -17,21 +24,33 @@ class server;
 
 namespace wfc{ namespace service{ namespace rn{ namespace jsonrpc{
 
-typedef wfc::io::ip::tcp::rn::server_options tcp_options;
+typedef  ::wfc::io::ip::tcp::rn::server_options tcp_options;
 
 struct configuration
 {
-  wfc::jsonrpc::options jsonrpc;
-  std::vector<tcp_options> tcp;
+   ::wfc::jsonrpc::options jsonrpc;
+  std::vector<tcp_options> tcp = {tcp_options()};
+};
+
+struct configuration_json
+{
+  JSON_NAME(jsonrpc)
+  
+  typedef ::wfc::json::object<
+    configuration,
+    fas::type_list_n<
+      ::wfc::json::member< n_jsonrpc, configuration, ::wfc::jsonrpc::options, &configuration::jsonrpc, ::wfc::jsonrpc::options_json::type >
+    >::type
+  > type;
 };
 
 struct ifactory
 {
-  typedef wfc::jsonrpc::service jsonrpc_type;
+  typedef  ::wfc::jsonrpc::service jsonrpc_type;
   typedef std::shared_ptr<jsonrpc_type> jsonrpc_ptr;
 
   virtual ~ifactory() {}
-  virtual jsonrpc_ptr create_for_tcp() = 0;
+  virtual jsonrpc_ptr create_for_tcp( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt) = 0;
 };
 
 template<typename MethodList>
@@ -46,9 +65,9 @@ public:
     : _target(target)
     {}
     
-  virtual jsonrpc_ptr create_for_tcp()
+  virtual jsonrpc_ptr create_for_tcp( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt)
   {
-    return std::make_shared< jsonrpc_type >( wfc::jsonrpc::handler<methods_type>(_target) );
+    return std::make_shared< jsonrpc_type >( io_service, opt,  ::wfc::jsonrpc::handler<methods_type>(_target) );
   }
 
 private:
@@ -65,21 +84,25 @@ make_factory(typename ML::target_type target)
 
 class service
 {
-  typedef wfc::jsonrpc::service jsonrpc_type;
-  typedef wfc::io::ip::tcp::rn::jsonrpc::server server_tcp_type;
+  typedef  ::wfc::jsonrpc::service jsonrpc_type;
+  typedef  ::wfc::io::ip::tcp::rn::jsonrpc::server server_tcp_type;
   typedef std::shared_ptr<server_tcp_type> server_tcp_ptr;
   typedef std::shared_ptr<jsonrpc_type> jsonrpc_ptr;
 public:
-  service(std::weak_ptr< wfc::global > g, const configuration& conf, std::shared_ptr<ifactory> fact);
+  service(std::weak_ptr<  ::wfc::global > g, const configuration& conf, std::shared_ptr<ifactory> fact);
+  
+  service( ::wfc::io_service& io, const configuration& conf, std::shared_ptr<ifactory> fact);
   
   void reconfigure(const configuration& conf);
   
-  void initialize( );
+  void initialize(std::shared_ptr<ifactory> fact);
   
   void start();
   
   void stop();
 
+private:
+  void create( ::wfc::io_service& io, const configuration& conf, std::shared_ptr<ifactory> fact);
 private:
   jsonrpc_ptr _jsonrpc_for_tcp;
   std::list< server_tcp_ptr > _tcp_servers;

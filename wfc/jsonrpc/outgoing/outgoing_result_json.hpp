@@ -16,7 +16,7 @@ struct outgoing_result_json
   typedef typename result_type::version_type version_type;
 
   typedef json::pointer<std::unique_ptr<target>, T> result_json;
-  typedef json::pointer<wfc::io::data_ptr, json::raw_value< wfc::io::data_type> > id_json;
+  typedef json::pointer< ::wfc::io::data_ptr, json::raw_value< ::wfc::io::data_type> > id_json;
   
   JSON_NAME(id)
   JSON_NAME(result)
@@ -26,7 +26,7 @@ struct outgoing_result_json
     typename fas::type_list_n<
       version_member::type,
       json::member<n_result, result_type, std::unique_ptr<target>,  &result_type::result, result_json >,
-      json::member<n_id,     result_type, wfc::io::data_ptr, &result_type::id,   id_json >
+      json::member<n_id,     result_type, ::wfc::io::data_ptr, &result_type::id,   id_json >
     >::type
   > type;
 

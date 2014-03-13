@@ -36,6 +36,12 @@ simple_handler( std::function<void(data_ptr, callback )> handler )
   };
 }
 
+inline io_id_t create_id()
+{
+  static std::atomic<io_id_t> counter(0);
+  return ++counter;
+}
+
 /*
 inline 
 std::function<void(data_ptr, std::weak_ptr<iio>, callback  )> 

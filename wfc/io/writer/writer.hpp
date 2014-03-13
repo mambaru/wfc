@@ -23,7 +23,7 @@ template<typename Tg>
 struct async_write_some
 {
 
-  wfc::io::data_type tmp;
+   ::wfc::io::data_type tmp;
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
@@ -128,7 +128,7 @@ struct result_handler
   template<typename T>
   void operator()(T& t, typename T::data_ptr d, size_t byte_transfered)
   {
-    bool status = t.get_aspect().template get<wfc::io::_status_>();
+    bool status = t.get_aspect().template get< ::wfc::io::_status_>();
 
     if (status)
     {
@@ -136,7 +136,7 @@ struct result_handler
     }
     else 
     {
-      boost::system::error_code ec = t.get_aspect().template get<wfc::io::_error_code_>();
+      boost::system::error_code ec = t.get_aspect().template get< ::wfc::io::_error_code_>();
       
       if ( ec == boost::asio::error::operation_aborted)
       {
@@ -233,7 +233,7 @@ private:
 };
 
 
-typedef std::list< wfc::io::basic::data_ptr> data_list;
+typedef std::list<  ::wfc::io::basic::data_ptr> data_list;
 
 template< template<typename> class AsyncWriteSome/*, typename TgOutgoing = _incoming_, typename TgOutput = _output_*/ >
 struct aspect: fas::aspect<
@@ -272,10 +272,10 @@ struct aspect: fas::aspect<
   
   fas::advice< _set_transfer_handler_, set_transfer_handler<TgOutput> >,
   
-  fas::group< wfc::io::_create_, _set_transfer_handler_ >,
+  fas::group<  ::wfc::io::_create_, _set_transfer_handler_ >,
   
   // start
-  fas::advice< wfc::io::_start_, dispatch<_start_> >,
+  fas::advice<  ::wfc::io::_start_, dispatch<_start_> >,
   fas::advice< _start_, event< _read_more_, _on_start_> >, 
   
   // loop
@@ -303,7 +303,7 @@ struct aspect: fas::aspect<
 template<typename Descriptor,  typename TgOutgoing = _incoming_ >
 struct stream: fas::aspect<
   //fas::stub<TgOutgoing>, 
-  fas::type< wfc::io::_descriptor_type_, Descriptor>,
+  fas::type<  ::wfc::io::_descriptor_type_, Descriptor>,
   aspect<async_write_some/*, TgOutgoing*/>
   /*
   fas::advice< _write_, ad_write>,
@@ -323,7 +323,7 @@ struct stream: fas::aspect<
   // methods
   fas::advice< _read_, read<_sync_read_more_> >,
   fas::advice< _async_read_, async_read<_read_more_> >,
-  fas::advice< wfc::io::_options_type_, options >,
+  fas::advice<  ::wfc::io::_options_type_, options >,
   aspect< async_read_some2, TgOutgoing,  _read_incoming_>
   */
 >
@@ -336,7 +336,7 @@ struct basic_options
 };
 
 struct options
-  : wfc::io::basic::options
+  :  ::wfc::io::basic::options
   , basic_options
 {
   

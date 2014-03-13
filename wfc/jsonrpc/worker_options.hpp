@@ -3,7 +3,7 @@
 namespace wfc{ namespace jsonrpc{
 
 struct worker_options
-  : wfc::io::basic::options
+  : ::wfc::io::basic::options
 {
 };
 

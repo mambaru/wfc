@@ -1,10 +1,11 @@
 #pragma once
 
+#include <wfc/io/types.hpp>
 #include <wfc/jsonrpc/incoming/incoming.hpp>
 #include <wfc/jsonrpc/incoming/incoming_json.hpp>
 //#include <wfc/jsonrpc/handler/handler_base.hpp>
 #include <wfc/memory.hpp>
-#include <wfc/io/types.hpp>
+
 #include <chrono>
 
 namespace wfc{ namespace jsonrpc{
@@ -15,8 +16,8 @@ class handler_base;
   
 class incoming_holder
 {
-  typedef wfc::io::data_type data_type;
-  typedef wfc::io::data_ptr  data_ptr;
+  typedef ::wfc::io::data_type data_type;
+  typedef ::wfc::io::data_ptr  data_ptr;
   typedef data_type::iterator iterator;
   
 public:
@@ -28,7 +29,7 @@ public:
     ,*/ _data( std::move(d) )
   {
     _time_point = clock_t::now();
-    _begin = wfc::json::parser::parse_space(_data->begin(), _data->end());
+    _begin = ::wfc::json::parser::parse_space(_data->begin(), _data->end());
     _end = incoming_json::serializer()( _incoming, _begin, _data->end());
   }
   
@@ -48,7 +49,7 @@ public:
     if ( _data == nullptr )
       return nullptr;
     
-    iterator beg = wfc::json::parser::parse_space( _end, _data->end());
+    iterator beg = ::wfc::json::parser::parse_space( _end, _data->end());
     if ( beg == _data->end() )
       return nullptr;
     

@@ -11,9 +11,9 @@ namespace wfc{ namespace jsonrpc{
 struct f_invoke
 {
   incoming_holder& holder;
-  wfc::io::callback& callback;
+  ::wfc::io::callback& callback;
   
-  f_invoke(incoming_holder& holder, wfc::io::callback& callback)
+  f_invoke(incoming_holder& holder, ::wfc::io::callback& callback)
     : holder( holder )
     , callback(callback)
   {
@@ -51,7 +51,7 @@ public:
     return std::make_shared<self>(*this);
   }
 
-  virtual void process(incoming_holder holder, wfc::io::callback callback) const
+  virtual void process(incoming_holder holder, ::wfc::io::callback callback) const
   {
     
     fas::for_each_group<_method_>(*this, f_invoke( holder, callback ) );

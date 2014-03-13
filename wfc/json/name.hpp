@@ -3,7 +3,7 @@
 #include <fas/functional/tstring.hpp>
 
 #define JSON_NAME(X) FAS_NAME(X)
-#define JSON_STRING(X, Y) FAS_STRING(X, Y)
+#define JSON_NAME2(X, Y) FAS_STRING(X, Y)
 
 /*
 #ifndef NAME

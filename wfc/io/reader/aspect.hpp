@@ -90,7 +90,7 @@ struct result_handler
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
-    bool status = t.get_aspect().template get<wfc::io::_status_>();
+    bool status = t.get_aspect().template get< ::wfc::io::_status_>();
 
     if (status)
     {
@@ -98,7 +98,7 @@ struct result_handler
     }
     else 
     {
-      boost::system::error_code ec = t.get_aspect().template get<wfc::io::_error_code_>();
+      boost::system::error_code ec = t.get_aspect().template get< ::wfc::io::_error_code_>();
       
       if ( ec == boost::asio::error::operation_aborted)
       {
@@ -158,7 +158,7 @@ struct set_transfer_handler
   template<typename T, typename Tmp>
   void operator()( T& t, const Tmp&)
   {
-    auto& th = t.get_aspect().template get< wfc::io::basic::_transfer_handler_>();
+    auto& th = t.get_aspect().template get<  ::wfc::io::basic::_transfer_handler_>();
     if ( th == nullptr )
     {
       th = t.callback([&t](typename T::data_ptr d)
@@ -234,7 +234,7 @@ struct _user_handler_;
   
 struct basic_options
 {
-  //wfc::io::handler handler = nullptr;
+  // ::wfc::io::handler handler = nullptr;
   size_t input_buffer_size = 8096;
   //std::function<callback_status()> not_alive = nullptr;
 };
@@ -250,10 +250,10 @@ struct aspect: fas::aspect<
   
   fas::advice< _set_transfer_handler_, set_transfer_handler<TgOutput> >,
   
-  fas::group< wfc::io::_create_, _set_transfer_handler_ >,
+  fas::group<  ::wfc::io::_create_, _set_transfer_handler_ >,
   
   // start
-  fas::advice< wfc::io::_start_, dispatch<_start_> >,
+  fas::advice<  ::wfc::io::_start_, dispatch<_start_> >,
   fas::advice< _start_, event< _read_more_, _on_start_> >, 
   
   // loop
@@ -278,13 +278,13 @@ struct aspect: fas::aspect<
 
 struct options
   : basic_options
-  , wfc::io::basic::options
+  ,  ::wfc::io::basic::options
 {
   // std::function<callback_status()> not_alive = nullptr;
 };
 
-typedef std::list< wfc::io::data_ptr> data_list;
-typedef std::list< wfc::io::callback> callback_list;
+typedef std::list<  ::wfc::io::data_ptr> data_list;
+typedef std::list<  ::wfc::io::callback> callback_list;
 struct _sync_read_some_;
 struct _sync_read_more_;
 struct _read_incoming_;
@@ -356,7 +356,7 @@ template<typename TgAsyncReadMore>
 struct async_read
 {
   template<typename T>
-  void operator()(T& t, wfc::io::callback handler)
+  void operator()(T& t,  ::wfc::io::callback handler)
   {
     if ( !t.status() )
     {
@@ -384,7 +384,7 @@ struct async_read
 
 template<typename Descriptor,  typename TgOutgoing = _incoming_ >
 struct stream: fas::aspect<
-  fas::type< wfc::io::_descriptor_type_, Descriptor>,
+  fas::type<  ::wfc::io::_descriptor_type_, Descriptor>,
   fas::value<  _outgoing_list_, data_list>,
   fas::value<  _callback_list_, callback_list>,
   
@@ -397,7 +397,7 @@ struct stream: fas::aspect<
   // methods
   fas::advice< _read_, read<_sync_read_more_> >,
   fas::advice< _async_read_, async_read<_read_more_> >,
-  fas::advice< wfc::io::_options_type_, options >,
+  fas::advice<  ::wfc::io::_options_type_, options >,
   aspect< async_read_some2, TgOutgoing,  _read_incoming_>
 >
 {};
@@ -409,7 +409,8 @@ struct ad_log_aborted
   template<typename T>
   void operator()(T&, boost::system::error_code ec)
   {
-    COMMON_LOG_WARNING( "READER aborted: " << ec.message() )
+     ::wfc::only_for_log(ec);
+    TRACE_LOG_WARNING( "READER aborted: " << ec.message() )
   }
 };
 
@@ -419,6 +420,7 @@ struct ad_log_error
   template<typename T>
   void operator()(T&, boost::system::error_code ec)
   {
+     ::wfc::only_for_log(ec);
     COMMON_LOG_ERROR( "READER error: " << ec.message() )
   }
 };

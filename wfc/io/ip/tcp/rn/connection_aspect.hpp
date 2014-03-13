@@ -42,6 +42,38 @@ struct _on_write_;
 struct _on_rn_write_;
 struct _shutdown_flag_;
 
+struct _on_read_error_;
+struct _on_write_error_;
+
+struct ad_on_read_error
+{
+  template<typename T>
+  void operator()(T& t, boost::system::error_code& ec )
+  {
+    std::cout << "ad_on_read_error 1 " << ec.message() << std::endl;
+    if ( !t.get_aspect().template get<_shutdown_flag_>())
+    {
+      std::cout << "ad_on_read_error 2" << std::endl;
+      if ( t.get_aspect().template get< wfc::io::writer::_outgoing_buffer_size_>() == 0 )
+      {
+        std::cout << "ad_on_read_error 3" << std::endl;
+        t.descriptor().close();
+        t.stop();
+      }
+    }
+    else if (ec == boost::asio::error::operation_aborted )
+    {
+      std::cout << "ad_on_read_error 4 " << ec.message() << std::endl;
+        t.descriptor().close();
+        t.stop();
+      
+    }
+      
+  }
+};
+
+
+
 struct ad_on_write
 {
   template<typename T, typename Itr>
@@ -77,6 +109,10 @@ struct connection_aspect:
     fas::value<_shutdown_flag_, bool>, 
     fas::advice<_on_write_, ad_on_write>, 
     fas::advice<_on_rn_write_, ad_on_rn_write>, 
+    fas::advice<_on_read_error_, ad_on_read_error>,
+    fas::group<wfc::io::reader::_on_aborted_, _on_read_error_>,
+    //fas::group<wfc::io::writer::_on_aborted_, _on_read_error_>, 
+    fas::group<wfc::io::reader::_on_error_, _on_read_error_>, 
     fas::group<wfc::io::writer::_on_write_, _on_write_>, 
     fas::group<wfc::io::rn::writer::_on_write_, _on_rn_write_>, 
     

@@ -50,17 +50,17 @@ class service
 public:
   typedef options options_type;
   
-  service(wfc::io_service& io_service, const options_type& opt, const handler_base& handler)
+  service( ::wfc::io_service& io_service, const options_type& opt, const handler_base& handler)
     : _impl( std::make_shared<service_impl>(io_service, opt, handler) )
   {
   }
   
-  void startup_handler(wfc::io::io_id_t io_id, wfc::io::callback writer, wfc::io::add_shutdown_handler add_shutdown )
+  void startup_handler( ::wfc::io::io_id_t io_id,  ::wfc::io::callback writer,  ::wfc::io::add_shutdown_handler add_shutdown )
   {
     _impl->startup_handler(io_id, writer, add_shutdown);
   }
 
-  void operator()( wfc::io::data_ptr d, wfc::io::io_id_t id, wfc::io::callback callback)
+  void operator()(  ::wfc::io::data_ptr d,  ::wfc::io::io_id_t id,  ::wfc::io::callback callback)
   {
     _impl->operator ()( std::move(d), id, callback);
   }

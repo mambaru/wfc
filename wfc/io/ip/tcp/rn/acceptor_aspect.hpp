@@ -27,10 +27,41 @@ struct ad_insert
   void operator()(T& t, typename T::data_ptr d)
   {
     typedef typename T::aspect::template advice_cast<_holder_type_>::type holder_type;
+    typedef typename holder_type::options_type holder_options_type;
     
-    auto holder = std::make_unique<holder_type>( std::move(*d), t.options(), t._handler );
+    // TODO: Вынести в аспект и инициализировать на этапе старта 
+    holder_options_type holder_options = t.options();
+    
+    /*if ( holder_options.startup_handler != nullptr )
+      abort();
+      */
+    
+    auto startup_handler = holder_options.startup_handler;
+    
+    holder_options.startup_handler = 
+      [&t, startup_handler]( ::wfc::io::io_id_t id, ::wfc::io::callback clb, ::wfc::io::add_shutdown_handler add )
+    {
+      if ( startup_handler != nullptr )
+        startup_handler( id, clb, add );
+      
+      std::cout << "acceptor startup handler " << id << std::endl;
+      
+      add( [&t](::wfc::io::io_id_t id) 
+      {
+        std::cout << "accept shutdown " << id << std::endl;
+        // post костыль, может не сработать, удаляем объект во время стопа
+        t.post([id,&t]()
+        {
+          std::cout << "close connection id " << id << std::endl;
+          t.get_aspect().template get<_holder_storage_>().erase(id);
+        });
+      });
+    };
+    
+    auto holder = std::make_unique<holder_type>( std::move(*d), holder_options, t._handler );
+    auto id = holder->get_id();
     holder->start();
-    t.get_aspect().template get<_holder_storage_>().insert( std::move(holder) );
+    t.get_aspect().template get<_holder_storage_>().insert( std::make_pair( id, std::move(holder) ) );
   }
 };
 
@@ -40,7 +71,7 @@ struct connection_manager_aspect: fas::aspect<
   fas::advice< wfc::io::_options_type_, acceptor_options>,
   fas::type<  _holder_type_,         connection >,
   fas::value< _config_,              acceptor_options  >,
-  fas::value< _holder_storage_,      std::set< std::unique_ptr<connection> >   >,
+  fas::value< _holder_storage_,      std::map< ::wfc::io::io_id_t, std::unique_ptr<connection> >   >,
   fas::advice< _insert_, ad_insert>
 >{};
 

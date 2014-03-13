@@ -11,13 +11,13 @@ template<
   typename Req, 
   typename Resp, 
   typename I, 
-  void (I::*mem_ptr)( std::unique_ptr<Req>, std::function< void(std::unique_ptr<Req>) > ) 
+  void (I::*mem_ptr)( std::unique_ptr<Req>, std::function< void(std::unique_ptr<Resp>) > ) 
 >
 struct mem_fun_handler
 {
   
   template<typename T>
-  void operator()(T& t, std::unique_ptr<Req> req, std::function< void(std::unique_ptr<Resp>, std::unique_ptr<wfc::jsonrpc::error>) > callback) const
+  void operator()(T& t, std::unique_ptr<Req> req, std::function< void(std::unique_ptr<Resp>, std::unique_ptr< ::wfc::jsonrpc::error>) > callback) const
   {
     if ( auto i = t.target().lock() )
     {

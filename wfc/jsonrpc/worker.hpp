@@ -52,7 +52,7 @@ public:
   // TODO: вынести method_handler из incoming_holder
   // TODO: вместо handler_base std::functional
   // или вообще убрать worker и оставить io_base
-  void operator()(incoming_holder holder, std::weak_ptr<handler_base> wh, wfc::io::callback callback/*,   TODO: weak_ptr<handler_base> */)
+  void operator()(incoming_holder holder, std::weak_ptr<handler_base> wh, ::wfc::io::callback callback/*,   TODO: weak_ptr<handler_base> */)
   {
 
     auto ph = std::make_shared<incoming_holder>(std::move(holder) );
@@ -73,7 +73,7 @@ private:
 };
 
 struct worker_aspect: fas::aspect<
-  fas::type<wfc::io::_options_type_, worker_options>
+  fas::type< ::wfc::io::_options_type_, worker_options>
 > {};
 
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >

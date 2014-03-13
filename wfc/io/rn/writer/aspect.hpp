@@ -25,7 +25,7 @@ struct aspect: fas::aspect<
 
 
 struct basic_options
-  : wfc::io::writer::basic_options
+  : ::wfc::io::writer::basic_options
 {
   /*
   size_t rn_limit_error = static_cast<size_t>(-1);
@@ -35,7 +35,7 @@ struct basic_options
 
 struct options
   : basic_options
-  , wfc::io::basic::options
+  , ::wfc::io::basic::options
 {
 };
 
@@ -44,7 +44,7 @@ struct options
 template<typename TgOutgoing>
 struct aspect2: fas::aspect< 
   advice_list,
-  fas::type< wfc::io::_options_type_, options >,
+  fas::type< ::wfc::io::_options_type_, options >,
   fas::alias<_outgoing_, TgOutgoing>
 >
 {};

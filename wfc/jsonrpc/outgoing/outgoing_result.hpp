@@ -10,7 +10,7 @@ struct outgoing_result
   : outgoing
 {
   std::unique_ptr<T> result;
-  wfc::io::data_ptr id;
+  ::wfc::io::data_ptr id;
 };
 
   

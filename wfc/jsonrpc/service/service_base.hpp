@@ -36,7 +36,7 @@ worker_list _workers;
 struct io_data
 {
   std::shared_ptr<handler_base> method_handler;
-  wfc::io::callback writer;
+  ::wfc::io::callback writer;
 };
 /*
 
@@ -78,7 +78,7 @@ public:
 
   // 
   template<typename T>
-  void process_result( T& , incoming_holder holder, wfc::io::callback)
+  void process_result( T& , incoming_holder holder, ::wfc::io::callback)
   {
     _tmp_response_handler( std::move(holder) );
   }
@@ -86,7 +86,7 @@ public:
   
   
   void send_request(
-    wfc::io::io_id_t io_id,
+    ::wfc::io::io_id_t io_id,
     const char* name,
     handler_base::incoming_handler_t response_handler,
     handler_base::request_serializer_t serializer
@@ -123,7 +123,7 @@ public:
   };
   
   /*
-  typedef std::function< wfc::io::data_ptr(int id) > request_serializer_t;
+  typedef std::function< ::wfc::io::data_ptr(int id) > request_serializer_t;
   typedef std::function<void(incoming_holder holder)> incoming_handler_t;
   typedef std::function< void(incoming_handler_t, request_serializer_t) > outgoing_request_handler_t;
   
@@ -138,12 +138,12 @@ public:
   // TODO: сделать связку с method-handler
   // TODO: убрать
   /*
-  typedef std::map< wfc::io::io_id_t, wfc::io::callback> io_map_t;
+  typedef std::map< ::wfc::io::io_id_t, ::wfc::io::callback> io_map_t;
   io_map_t _io_map;
   */
   
   /*
-  std::weak_ptr<handler_base> get_handler(wfc::io::io_id_t io_id)
+  std::weak_ptr<handler_base> get_handler(::wfc::io::io_id_t io_id)
   {
     auto itr = _io_map.find( io_id );
     if ( itr != _io_map.end() )
@@ -156,7 +156,7 @@ public:
 
   // Для тестирования (и клиента)
   // !!! до запуска
-  void attach_handler(wfc::io::io_id_t io_id, std::shared_ptr<handler_base> handler, wfc::io::callback writer)
+  void attach_handler(::wfc::io::io_id_t io_id, std::shared_ptr<handler_base> handler, ::wfc::io::callback writer)
   {
     //this->dispatch([this, io_id, writer, handler]()
     {
@@ -181,13 +181,13 @@ public:
   
   
   // По сути реестр connections
-  typedef std::map<wfc::io::io_id_t, io_data > io_map;
+  typedef std::map< ::wfc::io::io_id_t, io_data > io_map;
   io_map _io_map;
   
   
   
   // Новый коннект
-  void startup_handler(wfc::io::io_id_t io_id, wfc::io::callback writer, wfc::io::add_shutdown_handler add_shutdown )
+  void startup_handler(::wfc::io::io_id_t io_id, ::wfc::io::callback writer, ::wfc::io::add_shutdown_handler add_shutdown )
   {
     
     if ( writer == nullptr)
@@ -230,8 +230,9 @@ public:
       
     });
     
-    add_shutdown( this->strand().wrap( [this](wfc::io::io_id_t io_id)
+    add_shutdown( this->strand().wrap( [this](::wfc::io::io_id_t io_id)
     {
+      std::cout << "jsonrpc shutdown " << io_id << std::endl;
       _io_map.erase(io_id);
     }));
  }
@@ -239,12 +240,12 @@ public:
 
   //typedef std::function<void(data_ptr, io_id_t, callback )> handler;
   /// Для входящих запросов
-  void operator()( data_ptr d, wfc::io::io_id_t id, wfc::io::callback callback)
+  void operator()( data_ptr d, ::wfc::io::io_id_t id, ::wfc::io::callback callback)
   {
     typedef std::chrono::high_resolution_clock clock_t;
     clock_t::time_point now = clock_t::now();
     
-    wfc::io::callback tp_callback = [now, callback]( wfc::io::data_ptr d)
+    ::wfc::io::callback tp_callback = [now, callback]( ::wfc::io::data_ptr d)
     {
       callback( std::move(d) );
     };
@@ -270,7 +271,7 @@ public:
   typedef std::pair<worker_list, typename worker_list::iterator > pair_worker_list;
   typedef std::map< std::string, pair_worker_list> method_map;
   typedef std::list< std::thread > thread_list;
-  typedef std::shared_ptr< wfc::io_service> io_service_ptr;
+  typedef std::shared_ptr< ::wfc::io_service> io_service_ptr;
   typedef std::list<io_service_ptr> service_list; 
   
   method_map _method_map;
@@ -300,7 +301,7 @@ public:
   }
 
   template<typename T>
-  void push_advice(T& , incoming_holder holder, std::weak_ptr<handler_base> hb, wfc::io::callback callback)
+  void push_advice(T& , incoming_holder holder, std::weak_ptr<handler_base> hb, ::wfc::io::callback callback)
   {
     if ( holder.has_method() )
     {
@@ -338,11 +339,11 @@ public:
       io_service_ptr io_ptr = nullptr;
       if (s.threads != 0)
       {
-        io_ptr = std::make_shared<wfc::io_service>();
+        io_ptr = std::make_shared< ::wfc::io_service>();
         _services.push_back(io_ptr);
       }
       
-      wfc::io_service& io_ref = (io_ptr == nullptr ? t.get_io_service() : *io_ptr );
+      ::wfc::io_service& io_ref = (io_ptr == nullptr ? t.get_io_service() : *io_ptr );
       //wfc::io_service* io_ref = &(io_ptr == nullptr ? t.get_io_service() : *io_ptr );
       
       /*
@@ -379,7 +380,7 @@ public:
       for (int i=0; i < s.threads; ++i)
       {
         _threads.push_back( std::thread([io_ptr]() {
-          wfc::io_service::work wrk(*io_ptr);
+          ::wfc::io_service::work wrk(*io_ptr);
           io_ptr->run();
         }));
       }
@@ -410,7 +411,7 @@ public:
     super::stop(*this);
   }
 
-  //wfc::io::handler handler;
+  //::wfc::io::handler handler;
   
   //std::shared_ptr<worker_type> tmp_worker;
 };

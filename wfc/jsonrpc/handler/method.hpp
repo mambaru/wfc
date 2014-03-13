@@ -2,6 +2,7 @@
 
 #include <wfc/jsonrpc/incoming/incoming_holder.hpp>
 #include <wfc/jsonrpc/handler/method_aspect.hpp>
+
 #include <fas/aop.hpp>
 
 namespace wfc{ namespace jsonrpc{
@@ -28,7 +29,7 @@ public:
   }
 
   template<typename T>
-  void operator()(T& t, incoming_holder holder, wfc::io::callback callback) const
+  void operator()(T& t, incoming_holder holder, ::wfc::io::callback callback) const
   {
     this->get_aspect().template get<_invoke_>()(t, std::move(holder), callback);
   }
@@ -45,7 +46,31 @@ struct method: fas::type_list_n<
   method_impl<Args...>,
   fas::group<_method_, typename method_impl<Args...>::tag>
 >::type {};
+}}
 
+#include <wfc/jsonrpc/handler/name.hpp>
+#include <wfc/jsonrpc/handler/invoke_mem_fun.hpp>
+#include <wfc/jsonrpc/handler/method.hpp>
+#include <memory>
+
+namespace wfc{ namespace jsonrpc{
+template<
+  typename TgName, 
+  typename JParams, 
+  typename JResult, 
+  typename I, 
+  void (I::*mem_ptr)( std::unique_ptr<typename JParams::target>, std::function< void(std::unique_ptr<typename JResult::target>) > ) 
+>
+struct invoke_method: method< 
+  name<TgName>,
+  invoke_mem_fun< 
+    JParams,
+    JResult,
+    I,
+    mem_ptr
+  >
+>
+{};
 
 }} // wfc
 

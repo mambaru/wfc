@@ -7,7 +7,7 @@ namespace wfc{ namespace jsonrpc{
   
 struct incoming
 {
-  typedef wfc::io::data_type data_type;
+  typedef ::wfc::io::data_type data_type;
   typedef data_type::iterator iterator;
   typedef std::pair<iterator, iterator> pair_type;
   pair_type method;
@@ -16,6 +16,5 @@ struct incoming
   pair_type error;
   pair_type id;
 };
-
 
 }}

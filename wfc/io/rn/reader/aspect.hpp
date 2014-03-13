@@ -32,7 +32,7 @@ struct aspect: fas::aspect<
 {};
 
 struct basic_options
-  : wfc::io::reader::basic_options
+  :  ::wfc::io::reader::basic_options
 {
   
   size_t rn_limit_error = static_cast<size_t>(-1);
@@ -42,7 +42,7 @@ struct basic_options
 
 struct options
   : basic_options
-  , wfc::io::basic::options
+  ,  ::wfc::io::basic::options
 {
   //std::function<callback_status()> not_alive = nullptr;
 };
@@ -50,7 +50,7 @@ struct options
 
 template<typename TgOutgoing>
 struct aspect2: fas::aspect<
-  fas::type< wfc::io::_options_type_, options >,
+  fas::type<  ::wfc::io::_options_type_, options >,
   fas::alias<_outgoing_, TgOutgoing>,
   fas::alias<_incoming_, _splitter_>,
   fas::advice<_splitter_, ad_splitter>,

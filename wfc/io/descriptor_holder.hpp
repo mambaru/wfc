@@ -38,7 +38,7 @@ public:
   typedef typename super::options_type options_type;
   
 
-  descriptor_holder(descriptor_type&& desc, const options_type& conf, wfc::io::handler handler = nullptr)
+  descriptor_holder(descriptor_type&& desc, const options_type& conf, ::wfc::io::handler handler = nullptr)
     : super( desc.get_io_service(), conf)
     , _descriptor( std::move(desc) )
     , _handler(handler)
@@ -57,12 +57,12 @@ public:
   
   bool status() const 
   {
-    return this->get_aspect().template get<wfc::io::_status_>();
+    return this->get_aspect().template get< ::wfc::io::_status_>();
   }
   
   const boost::system::error_code& error_code() const 
   {
-    return this->get_aspect().template get<wfc::io::_error_code_>();
+    return this->get_aspect().template get< ::wfc::io::_error_code_>();
   }
   
 private:
@@ -71,7 +71,7 @@ private:
 
 public:
   // TODO: в аспект
-  wfc::io::handler _handler;
+  ::wfc::io::handler _handler;
 
 };
 

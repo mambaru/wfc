@@ -48,7 +48,7 @@ struct call
         request.params = std::move(req);
         request.method = name; 
         request.id = id;
-        auto d = std::make_unique<wfc::io::data_type>();
+        auto d = std::make_unique< ::wfc::io::data_type>();
         d->reserve(ReserveSize); 
         typedef outgoing_request_json<request_json> send_json;
         typename send_json::serializer()(request, std::inserter( *d, d->end() ));

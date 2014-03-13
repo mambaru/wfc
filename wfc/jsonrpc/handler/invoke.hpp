@@ -27,7 +27,7 @@ struct invoke: Handler
   
   
   template<typename T>
-  void operator()(T& t, incoming_holder holder, wfc::io::callback handler) const
+  void operator()(T& t, incoming_holder holder, ::wfc::io::callback handler) const
   {
     try
     {

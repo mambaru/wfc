@@ -56,7 +56,7 @@ public:
 
   mutex_type& get(size_t n)
   {
-    return locs[n%1024];
+    return locs[n%N];
   }
   
 private:

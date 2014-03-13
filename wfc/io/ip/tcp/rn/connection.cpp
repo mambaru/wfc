@@ -8,6 +8,7 @@ namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{
 connection::~connection()
 {
   //_impl.reset();
+  std::cout << "connection::~connection() " << this->get_id() << std::endl;
 }
 
   
@@ -15,6 +16,11 @@ connection::connection(connection::descriptor_type&& desc, const connection::opt
   : _impl( std::make_unique<connection_impl>(std::move(desc), conf, handler) )
 {
   
+}
+
+wfc::io::io_id_t connection::get_id() const
+{
+  return _impl->get_id();
 }
 
 void connection::start()

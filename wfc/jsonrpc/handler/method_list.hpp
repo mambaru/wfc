@@ -52,7 +52,7 @@ public:
     outgoing_request_handler(
       name,
       std::move(clb), // обработчик ответ
-      [p, ser](const char* name, int id)->wfc::io::data_ptr // сериализатор (для отложенной сериализации)
+      [p, ser](const char* name, int id)-> ::wfc::io::data_ptr // сериализатор (для отложенной сериализации)
       {
         
         return ser(name, std::move(*p), id);
@@ -76,7 +76,7 @@ public:
   template<typename Tg>
   struct call_error_ptr
   {
-    typedef std::unique_ptr<wfc::jsonrpc::error> type;
+    typedef std::unique_ptr< ::wfc::jsonrpc::error> type;
   };
 
   template<typename Tg, typename ReqPtr, typename Callback>
