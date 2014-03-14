@@ -27,7 +27,7 @@ struct _shutdown_handler_;
   
 struct options
 {
-  std::function<void()> not_alive = nullptr;
+  std::function<void()> not_alive = [](){ };
 
   
   startup_handler_t  startup_handler = nullptr;

@@ -4,3 +4,6 @@ target_link_libraries(service1_test wfc boost_system pthread)
 
 add_executable(echo1bench echo1bench.cpp)
 target_link_libraries(echo1bench pthread)
+
+add_executable(echo2bench echo2bench.cpp)
+target_link_libraries(echo2bench wfc boost_system pthread)

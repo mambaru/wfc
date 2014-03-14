@@ -6,8 +6,10 @@
 
 namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{ 
   
-struct acceptor_options: connection_options
+struct acceptor_options
+  : ::wfc::io::basic::options
 {
+  connection_options connection;
 };
   
 }}}}}

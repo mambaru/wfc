@@ -6,9 +6,14 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+message(STATUS "---!---> ${CMAKE_CXX_COMPILER_VERSION}")
+
+
 IF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
-    #SET(CMAKE_CXX_STANDARD    "-std=c++11")
-    SET(CMAKE_CXX_STANDARD    "-std=gnu++11  -ftemplate-backtrace-limit=0")
+    SET(CMAKE_CXX_STANDARD    "-std=gnu++11")
+    if ( ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "4.8.0" )
+      SET(CMAKE_CXX_STANDARD    "${CMAKE_CXX_STANDARD} -ftemplate-backtrace-limit=0")
+    endif()
     SET(CMAKE_CXX_WARN_FLAGS  "-W -Wall -pedantic")
     SET(CMAKE_CXX_DEFINES     "-D_THREAD_SAFE -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -DBOOST_SYSTEM_NO_DEPRECATED -D_GLIBCXX_USE_NANOSLEEP")
     SET(CMAKE_CXX_ARCH_FLAGS  "-mfpmath=sse -msse2")

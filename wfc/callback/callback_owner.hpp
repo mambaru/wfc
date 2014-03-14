@@ -33,17 +33,37 @@ struct callback_wrapper
       return _handler(std::forward<Args>(args)...);
     }
     return _not_alive(/*std::forward<Args>(args)...*/);
-    /*
-    else 
-    {
-    return _not_alive();
-    }
-    return decltype( _handler(std::forward<Args>(args)...)) ();
-    */
   }
 private:
   weak_type _alive;
 };
+
+template<typename H>
+struct callback_wrapper2
+{
+  H _handler;
+  typedef std::weak_ptr<int> weak_type;
+  
+  callback_wrapper2(H h, weak_type alive)
+    : _handler( h )
+    , _alive(alive)
+  {
+  }
+  
+  template <class... Args>
+  auto operator()(Args&&... args)
+    -> decltype( _handler(std::forward<Args>(args)...)) 
+  {
+    if ( auto p = _alive.lock() )
+    {
+      return _handler(std::forward<Args>(args)...);
+    }
+    return decltype( _handler(std::forward<Args>(args)...))();
+  }
+private:
+  weak_type _alive;
+};
+
 
 
 // TODO: spinlock
@@ -120,6 +140,13 @@ public:
   wrap(Handler handler, NotAliveHandler not_alive)
   {
     return callback_wrapper<Handler, NotAliveHandler>( handler, not_alive, _alive);
+  }
+
+  template<typename Handler>
+  callback_wrapper2<Handler>
+  wrap(Handler handler)
+  {
+    return callback_wrapper2<Handler>( handler, _alive);
   }
 
   /*

@@ -28,9 +28,10 @@ struct ad_insert
   {
     typedef typename T::aspect::template advice_cast<_holder_type_>::type holder_type;
     typedef typename holder_type::options_type holder_options_type;
+    typedef std::unique_ptr<holder_type> holder_ptr;
     
     // TODO: Вынести в аспект и инициализировать на этапе старта 
-    holder_options_type holder_options = t.options();
+    holder_options_type holder_options = t.options().connection;
     
     /*if ( holder_options.startup_handler != nullptr )
       abort();
@@ -52,8 +53,18 @@ struct ad_insert
         // post костыль, может не сработать, удаляем объект во время стопа
         t.post([id,&t]()
         {
-          std::cout << "close connection id " << id << std::endl;
-          t.get_aspect().template get<_holder_storage_>().erase(id);
+          std::cout << "acceptor close connection id " << id << std::endl;
+          auto &stg = t.get_aspect().template get<_holder_storage_>();
+          auto itr = stg.find(id);
+          if ( itr != stg.end() )
+          {
+            auto pconn = std::make_shared<holder_ptr>( std::move(itr->second) );
+            stg.erase(itr);
+            (*pconn)->strand().post([pconn, id](){
+              std::cout << "smart delete " << id << std::endl;
+            });
+          }
+          // t.get_aspect().template get<_holder_storage_>().erase(id);
         });
       });
     };

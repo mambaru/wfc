@@ -163,6 +163,7 @@ struct set_transfer_handler
     {
       th = t.callback([&t](typename T::data_ptr d)
       {
+        std::cout << "transfer jandler" << std::endl;
           t.get_aspect().template get<TgResult>()(t, std::move(d) );
       });
     }
@@ -192,6 +193,7 @@ struct user_handler
         t.get_id(), 
         t.callback([&t, start](typename T::data_ptr d)
         {
+          std::cout << "user_handler " << t.get_id() << std::endl;
           t.get_aspect().template get<TgResult>()(t, std::move(d) );
           clock_t::time_point finish = clock_t::now();
           

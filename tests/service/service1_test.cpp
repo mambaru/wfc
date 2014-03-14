@@ -32,11 +32,13 @@ class test: public itest_ex
 public:
   virtual void test1(std::unique_ptr<test1_params> req, std::function< void(std::unique_ptr<test1_params>) > callback) 
   {
+    /*
     if (auto p = test_conn.lock() )
     {
       auto req = std::make_unique<test1_params>( test1_params({1, 2, 3, 4, 5}) );
       p->test1( std::move(req), nullptr );
     }
+    */
 
     
     std::reverse(req->begin(), req->end());
@@ -47,11 +49,12 @@ public:
   {
     test_conn = ptest;
     
+    /*
     if (auto p = ptest.lock() )
     {
       auto req = std::make_unique<test1_params>( test1_params({1, 2, 3, 4, 5}) );
       p->test1( std::move(req), nullptr );
-    }
+    }*/
   }
   
   virtual void shutdown(size_t , std::weak_ptr<itest>)

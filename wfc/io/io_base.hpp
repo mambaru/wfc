@@ -85,6 +85,7 @@ public:
     return *(this->get_aspect().template get<_strand_>());
   }
 
+  // Ахтунг!!! owner только внутри strand(), т.к. нифиг не thread safe
   const owner_type& owner() const
   {
     if ( nullptr == this->get_aspect().template get<_owner_>() )
@@ -131,7 +132,38 @@ public:
 
   ::wfc::io::callback callback( std::function<void(data_ptr)> handler)
   {
-    return this->owner().wrap( [handler, this](data_ptr d)// ->callback_status 
+    auto wrp = this->strand().wrap( this->owner().wrap( [handler]( std::shared_ptr<data_ptr> dd ){
+      std::cout << "callback X " << (*dd!=nullptr) <<std::endl; 
+      handler(std::move(*dd));
+    }, [](){ std::cout << "NOT ALIVE LEVEL1" << std::endl;}));
+    
+    auto wrp_ptr = std::make_shared< decltype(wrp) >(wrp);
+    
+    return /*this->owner().wrap(*/[wrp_ptr](data_ptr d)
+    {
+      std::cout << "callback Y " << (d!=nullptr) <<std::endl; 
+      (*wrp_ptr)( std::make_shared<data_ptr>( std::move(d) ) );
+    }/*, 
+    [](){ std::cout << "NOT ALIVE LEVEL"2 << std::endl;}
+      
+    )*/;
+    /*
+    auto starnd_hanlde = this->strand().wrap([handler]( std::shared_ptr<data_ptr> dd){
+      handler( std::move(*dd));
+    });
+    
+    auto strand_ptr = std::make_shared< decltype(starnd_hanlde) >(starnd_hanlde);
+    return this->owner().wrap( [strand_ptr](data_ptr d) {
+      auto dd = std::make_shared<data_ptr>( std::move(d) );
+      (*strand_ptr)(dd);
+    },
+    this->options().not_alive
+    );
+    */
+
+    
+    /*
+    return this->owner().wrap( [handler, this](data_ptr d)
       {
         auto dd = std::make_shared<data_ptr>( std::move(d) );
         auto fun  = [dd, handler]()
@@ -139,22 +171,15 @@ public:
           handler( std::move(*dd) );
         };
         
+        std::cout << " this->get_io_service().dispatch( fun ) ; " << std::endl;
         this->get_io_service().dispatch( fun );
         
         //return callback_status::ready;
       },
       this->options().not_alive
     );
-    
-    /*
-    auto hh = t.owner.wrap( t.strand().wrap()  )
-    return [handler](data_ptr d) -> callback_status
-    {
-      auto pd = std::make_shared<data_ptr>(d);
-    }
     */
     
-    //return this->callback(*this, handler);
   }
   
   /*
@@ -294,6 +319,7 @@ protected:
       }
 
       t.get_aspect().template get<_stop_>()(t);
+      std::cout << "io_base::stop post Done!" << std::endl;
     });
   }
   

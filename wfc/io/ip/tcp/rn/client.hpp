@@ -2,6 +2,7 @@
 
 #include <wfc/io/ip/tcp/rn/client_options.hpp>
 #include <wfc/memory.hpp>
+#include <wfc/io_service.hpp>
 #include <boost/asio.hpp>
 
 
@@ -13,9 +14,9 @@ class client
 {
 public:
   typedef client_options options_type;
-  typedef boost::asio::ip::tcp::socket descriptor_type;
+  //typedef boost::asio::ip::tcp::socket descriptor_type;
   ~client();
-  client(descriptor_type&& desc, const options_type& conf, wfc::io::handler handler = nullptr);
+  client( ::wfc::io_service& io, const options_type& conf, wfc::io::handler handler = nullptr);
   wfc::io::io_id_t get_id() const;
   void start();
   void stop();

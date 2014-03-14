@@ -29,6 +29,8 @@ public:
   typedef method_list<Args...> self;
   typedef self magic;
   typedef method_list_base<Args...> super;
+  typedef typename super::target_type    target_type;
+  typedef typename super::interface_type interface_type;
 
   /*
   typedef std::function<void(incoming_holder holder)> incoming_handler_t;

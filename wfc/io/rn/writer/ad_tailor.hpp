@@ -10,6 +10,7 @@ struct ad_tailor
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
+    std::cout << "writer ad_tailor " << t.get_id() << std::endl;
     static const char* sep =  t.get_aspect().template get<_separator_>()();
     static size_t size = std::strlen( sep );
     d->reserve( d->size() + size );

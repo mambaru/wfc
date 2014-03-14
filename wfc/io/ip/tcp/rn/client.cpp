@@ -1,5 +1,4 @@
 
-
 #include <wfc/io/ip/tcp/rn/client.hpp>
 #include <wfc/io/ip/tcp/rn/client_impl.hpp>
 
@@ -12,8 +11,8 @@ client::~client()
 }
 
   
-client::client(client::descriptor_type&& desc, const client::options_type& conf, wfc::io::handler handler )
-  : _impl( std::make_unique<client_impl>(std::move(desc), conf, handler) )
+client::client(wfc::io_service& io, const options_type& conf, wfc::io::handler handler )
+  : _impl( std::make_unique<client_impl>( io, conf, handler) )
 {
   
 }

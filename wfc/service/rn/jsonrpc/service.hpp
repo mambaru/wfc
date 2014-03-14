@@ -4,8 +4,8 @@
 #include <wfc/jsonrpc/options.hpp>
 #include <wfc/jsonrpc/options_json.hpp>
 #include <wfc/jsonrpc/service.hpp>
-#include <wfc/io/ip/tcp/rn/server_options.hpp>
-
+#include <wfc/service/rn/jsonrpc/configuration.hpp>
+#include <wfc/io_service.hpp>
 #include <wfc/core/global.hpp>
 #include <list>
 
@@ -24,8 +24,9 @@ class server;
 
 namespace wfc{ namespace service{ namespace rn{ namespace jsonrpc{
 
-typedef  ::wfc::io::ip::tcp::rn::server_options tcp_options;
+//typedef  ::wfc::io::ip::tcp::rn::server_options tcp_options;
 
+/*
 struct configuration
 {
    ::wfc::jsonrpc::options jsonrpc;
@@ -43,6 +44,7 @@ struct configuration_json
     >::type
   > type;
 };
+*/
 
 struct ifactory
 {
@@ -89,7 +91,7 @@ class service
   typedef std::shared_ptr<server_tcp_type> server_tcp_ptr;
   typedef std::shared_ptr<jsonrpc_type> jsonrpc_ptr;
 public:
-  service(std::weak_ptr<  ::wfc::global > g, const configuration& conf, std::shared_ptr<ifactory> fact);
+  service(std::weak_ptr<  ::wfc::global > g, const configuration& conf/*, std::shared_ptr<ifactory> fact*/);
   
   service( ::wfc::io_service& io, const configuration& conf, std::shared_ptr<ifactory> fact);
   
@@ -104,6 +106,9 @@ public:
 private:
   void create( ::wfc::io_service& io, const configuration& conf, std::shared_ptr<ifactory> fact);
 private:
+  ::wfc::io_service& _io_service;
+  configuration _conf;
+  
   jsonrpc_ptr _jsonrpc_for_tcp;
   std::list< server_tcp_ptr > _tcp_servers;
 };

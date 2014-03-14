@@ -32,7 +32,17 @@ void connection::stop()
 {
   _impl->stop();
 }
-  
+
+const wfc::io_service::strand& connection::strand() const
+{
+  return _impl->strand();
+}
+
+wfc::io_service::strand& connection::strand()
+{
+  return _impl->strand();
+}
+
 void connection::shutdown()
 {
   
