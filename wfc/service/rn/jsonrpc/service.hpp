@@ -4,7 +4,7 @@
 #include <wfc/jsonrpc/options.hpp>
 #include <wfc/jsonrpc/options_json.hpp>
 #include <wfc/jsonrpc/service.hpp>
-#include <wfc/service/rn/jsonrpc/configuration.hpp>
+#include <wfc/service/rn/jsonrpc/service_config.hpp>
 #include <wfc/io_service.hpp>
 #include <wfc/core/global.hpp>
 #include <list>
@@ -27,20 +27,20 @@ namespace wfc{ namespace service{ namespace rn{ namespace jsonrpc{
 //typedef  ::wfc::io::ip::tcp::rn::server_options tcp_options;
 
 /*
-struct configuration
+struct service_config
 {
    ::wfc::jsonrpc::options jsonrpc;
   std::vector<tcp_options> tcp = {tcp_options()};
 };
 
-struct configuration_json
+struct service_config_json
 {
   JSON_NAME(jsonrpc)
   
   typedef ::wfc::json::object<
-    configuration,
+    service_config,
     fas::type_list_n<
-      ::wfc::json::member< n_jsonrpc, configuration, ::wfc::jsonrpc::options, &configuration::jsonrpc, ::wfc::jsonrpc::options_json::type >
+      ::wfc::json::member< n_jsonrpc, service_config, ::wfc::jsonrpc::options, &service_config::jsonrpc, ::wfc::jsonrpc::options_json::type >
     >::type
   > type;
 };
@@ -91,11 +91,11 @@ class service
   typedef std::shared_ptr<server_tcp_type> server_tcp_ptr;
   typedef std::shared_ptr<jsonrpc_type> jsonrpc_ptr;
 public:
-  service(std::weak_ptr<  ::wfc::global > g, const configuration& conf/*, std::shared_ptr<ifactory> fact*/);
+  service(std::weak_ptr<  ::wfc::global > g, const service_config& conf/*, std::shared_ptr<ifactory> fact*/);
   
-  service( ::wfc::io_service& io, const configuration& conf, std::shared_ptr<ifactory> fact);
+  service( ::wfc::io_service& io, const service_config& conf, std::shared_ptr<ifactory> fact);
   
-  void reconfigure(const configuration& conf);
+  void reconfigure(const service_config& conf);
   
   void initialize(std::shared_ptr<ifactory> fact);
   
@@ -104,10 +104,10 @@ public:
   void stop();
 
 private:
-  void create( ::wfc::io_service& io, const configuration& conf, std::shared_ptr<ifactory> fact);
+  void create( ::wfc::io_service& io, const service_config& conf, std::shared_ptr<ifactory> fact);
 private:
   ::wfc::io_service& _io_service;
-  configuration _conf;
+  service_config _conf;
   
   jsonrpc_ptr _jsonrpc_for_tcp;
   std::list< server_tcp_ptr > _tcp_servers;

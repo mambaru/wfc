@@ -54,7 +54,7 @@ int main(int argc, char* /*argv*/[])
   */
   
   server::options_type conf;
-  conf.acceptors = 1;
+  //conf.acceptors = 1;
   conf.threads = 4;
   //conf.handler = handler;
   wfc::io_service::work wrk(io_service);

@@ -10,6 +10,8 @@ struct acceptor_options
   : ::wfc::io::basic::options
 {
   connection_options connection;
+  std::string host = "0.0.0.0";
+  std::string port = "12345";
 };
   
 }}}}}

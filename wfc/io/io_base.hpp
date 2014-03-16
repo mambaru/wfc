@@ -31,7 +31,6 @@ public:
 
   ~io_base()
   {
-    std::cout << "io_base::~io_base() " << this->get_id() << std::endl;
   }
   
   io_base(io_service_type& io_service, const options_type& opt)
@@ -39,10 +38,6 @@ public:
     , _options(opt)
   {
     _id = create_id();
-    /*
-    static std::atomic<io_id_t> id_counter(0);
-    _id = ++id_counter;
-    */
   }
     
   io_id_t get_id() const { return _id;}
@@ -60,15 +55,11 @@ public:
   io_service_type& get_io_service()
   {
     return _io_service;
-    // return this->descriptor().get_io_service();
-    //return *(this->get_aspect().template get<_io_service_ptr_>());
   }
 
   const io_service_type& get_io_service() const
   {
     return _io_service;
-    // return this->descriptor().get_io_service();
-    //return *(this->get_aspect().template get<_io_service_ptr_>());
   }
   
   strand_type& strand()
@@ -133,82 +124,20 @@ public:
   ::wfc::io::callback callback( std::function<void(data_ptr)> handler)
   {
     auto wrp = this->strand().wrap( this->owner().wrap( [handler]( std::shared_ptr<data_ptr> dd ){
-      std::cout << "callback X " << (*dd!=nullptr) <<std::endl; 
+      
       handler(std::move(*dd));
-    }, [](){ std::cout << "NOT ALIVE LEVEL1" << std::endl;}));
+    }, 
+    [](){ 
+    }));
     
     auto wrp_ptr = std::make_shared< decltype(wrp) >(wrp);
     
     return /*this->owner().wrap(*/[wrp_ptr](data_ptr d)
     {
-      std::cout << "callback Y " << (d!=nullptr) <<std::endl; 
       (*wrp_ptr)( std::make_shared<data_ptr>( std::move(d) ) );
-    }/*, 
-    [](){ std::cout << "NOT ALIVE LEVEL"2 << std::endl;}
-      
-    )*/;
-    /*
-    auto starnd_hanlde = this->strand().wrap([handler]( std::shared_ptr<data_ptr> dd){
-      handler( std::move(*dd));
-    });
-    
-    auto strand_ptr = std::make_shared< decltype(starnd_hanlde) >(starnd_hanlde);
-    return this->owner().wrap( [strand_ptr](data_ptr d) {
-      auto dd = std::make_shared<data_ptr>( std::move(d) );
-      (*strand_ptr)(dd);
-    },
-    this->options().not_alive
-    );
-    */
-
-    
-    /*
-    return this->owner().wrap( [handler, this](data_ptr d)
-      {
-        auto dd = std::make_shared<data_ptr>( std::move(d) );
-        auto fun  = [dd, handler]()
-        {
-          handler( std::move(*dd) );
-        };
-        
-        std::cout << " this->get_io_service().dispatch( fun ) ; " << std::endl;
-        this->get_io_service().dispatch( fun );
-        
-        //return callback_status::ready;
-      },
-      this->options().not_alive
-    );
-    */
-    
+    };
   }
   
-  /*
-  template<typename Handler>
-  std::function<void()>
-  wrap(Handler handler)
-  {
-    return this->wrap(*this, handler);
-  }
-  */
-  
-  /*
-  startup_handler_t  startup_handler = nullptr;
-  shutdown_handler_t shutdown_handler = nullptr;
-  */
-
-  /*
-  void set_startup_handler( startup_handler_t  startup_handler )
-  {
-    this->startup_handler = startup_handler;
-  }
-
-  void set_shutdown_handler( shutdown_handler_t  shutdown_handler )
-  {
-    this->shutdown_handler = shutdown_handler;
-  }
-  */
-
-
 protected:
 
   template<typename T, typename Handler>
@@ -223,42 +152,16 @@ protected:
     this->get_aspect().template get<_post_>()(t, h);
   }
 
-  
-  /*
-  template<typename T, typename Handler>
-  //callback_wrapper<Handler, std::function<void()> > 
-  
-  std::function<void()> wrap(T& t, Handler handler)
-  {
-    return t.get_aspect().template get<_wrap_>()(t, handler);
-  }
-  
-  */
-
   template<typename T>
   void create(T& t)
   {
     t.get_aspect().template gete<_create_>()(t, _options);
   }
-  
-  /*
-  startup_handler_t startup_handler() const 
-  {
-    return this->get_aspect().template get< basic::_startup_handler_>();
-  }
-  */
 
   transfer_handler_t transfer_handler() const 
   {
     return this->get_aspect().template get< basic::_transfer_handler_ >();
   }
-
-  /*
-  shutdown_handler_t shutdown_handler() const 
-  {
-    return this->get_aspect().template get< basic::_shutdown_handler_>();
-  }
-  */
 
   template<typename T>
   void start(T& t)
@@ -266,19 +169,9 @@ protected:
     
     
     auto& sh = _options.startup_handler;
-    //auto& sh = t.startup_handler;
     
     if ( sh != nullptr )
     {
-      /*
-      typedef std::function< void(io_id_t, callback, add_shutdown_handler )> startup_handler_t;
-      typedef std::function< void( std::function< void() > ) > add_shutdown_handler;
-      typedef std::function< void(io_id_t, callback, add_shutdown_handler )> startup_handler_t;
-      typedef std::function< void(io_id_t) > shutdown_handler_t;
-      typedef std::function< void(data_ptr, io_id_t, callback )> transfer_handler_t;
-      */
-      
-      
       sh(
         _id, 
         this->transfer_handler(),
@@ -298,28 +191,19 @@ protected:
   template<typename T>
   void stop(T& t)
   {
-    std::cout << "io_base::stop..." << std::endl;
-    /*
-    for ( auto& h : _release_handlers)
-      h(t.shared_from_this());
-    _release_handlers.clear();
-    */
     t.post([&t, this]()
     {
-      std::cout << "io_base::stop post" << std::endl;
       for ( auto& h : _release_handlers2)
         h( this->_id );
       _release_handlers2.clear();
       
       auto& sh = _options.shutdown_handler;
-      //auto& sh = t.shutdown_handler;
       if ( sh!=nullptr )
       {
         sh( _id );
       }
 
       t.get_aspect().template get<_stop_>()(t);
-      std::cout << "io_base::stop post Done!" << std::endl;
     });
   }
   

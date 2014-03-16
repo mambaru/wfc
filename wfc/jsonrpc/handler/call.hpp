@@ -25,7 +25,7 @@ struct interface_ /* , std::enable_shared_from_this< interface_<I> > */
 };
 
 #define JSONRPC_METHOD_IMPL(Tg, Method)\
-  virtual void test1( call_params_ptr<Tg>::type req, std::function< void(call_result_ptr<Tg>::type) > callback)\
+  virtual void Method( call_params_ptr<Tg>::type req, std::function< void(call_result_ptr<Tg>::type) > callback)\
   {\
     if ( callback == nullptr )\
     {\
@@ -46,12 +46,12 @@ struct interface_ /* , std::enable_shared_from_this< interface_<I> > */
   }
 
 #define JSONRPC_METHOD_EMPTY(Tg, Method)\
-  virtual void test1( call_params_ptr<Tg>::type , std::function< void(call_result_ptr<Tg>::type) > )\
+  virtual void Method( call_params_ptr<Tg>::type , std::function< void(call_result_ptr<Tg>::type) > )\
   {\
   }
   
 #define JSONRPC_METHOD_IMPL_EX(Tg, Method)\
-  virtual void test1( call_params_ptr<Tg>::type req, std::function< void(call_result_ptr<Tg>::type) > callback, size_t, target_type)\
+  virtual void Method( call_params_ptr<Tg>::type req, std::function< void(call_result_ptr<Tg>::type) > callback, size_t, target_type)\
   {\
     if ( callback == nullptr )\
     {\
@@ -72,10 +72,19 @@ struct interface_ /* , std::enable_shared_from_this< interface_<I> > */
   }
 
 #define JSONRPC_METHOD_EMPTY_EX(Tg, Method)\
-  virtual void test1( call_params_ptr<Tg>::type , std::function< void(call_result_ptr<Tg>::type, size_t, target_type) > )\
+  virtual void Method( call_params_ptr<Tg>::type , std::function< void(call_result_ptr<Tg>::type, size_t, target_type) > )\
   {\
   }
 
+#define JSONRPC_STARTUP_EMPTY(Tg, Method)\
+  virtual void Method(size_t, target_type) > )\
+  {\
+  }
+
+#define JSONRPC_SHUTDOWN_EMPTY(Tg, Method)\
+  virtual void Method(size_t)\
+  {\
+  }
 
 
 template<typename JReq, typename JResp, size_t ReserveSize = 80 >
@@ -106,7 +115,7 @@ struct call
   {
     auto serializer = [](const char* name, request_ptr req, int id) -> typename T::data_ptr 
       {
-        outgoing_request<response_type> request;
+        outgoing_request<request_type> request;
         request.params = std::move(req);
         request.method = name; 
         request.id = id;

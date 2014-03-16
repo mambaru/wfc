@@ -33,6 +33,10 @@ public:
     : super( std::move(desc), opt, handler)
   {
     super::create(*this);
+    
+    boost::asio::socket_base::non_blocking_io non_blocking_io(true);
+    super::descriptor().io_control(non_blocking_io);
+
   }
 
   void start()

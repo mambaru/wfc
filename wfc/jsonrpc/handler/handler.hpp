@@ -52,13 +52,19 @@ public:
     return std::make_shared<self>(*this);
   }
 
-  virtual void process(incoming_holder holder, ::wfc::io::callback callback) const
+  virtual void process(incoming_holder holder, ::wfc::io::callback callback) 
   {
     fas::for_each_group<_method_>(*this, f_invoke( holder, callback ) );
   }
   
+  ::wfc::io::io_id_t get_id() const
+  {
+    return _id;
+  }
+  
   virtual void start(::wfc::io::io_id_t id) 
   {
+    _id = id;
     this->get_aspect().template get<_startup_>()(*this, id);
   }
   
@@ -73,6 +79,8 @@ public:
     return this->get_aspect().template get<_target_>();
   }
 
+private:
+  ::wfc::io::io_id_t _id;
 };
 
 }} // wfc

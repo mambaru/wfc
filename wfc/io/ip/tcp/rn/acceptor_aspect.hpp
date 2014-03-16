@@ -45,15 +45,11 @@ struct ad_insert
       if ( startup_handler != nullptr )
         startup_handler( id, clb, add );
       
-      std::cout << "acceptor startup handler " << id << std::endl;
-      
       add( [&t](::wfc::io::io_id_t id) 
       {
-        std::cout << "accept shutdown " << id << std::endl;
         // post костыль, может не сработать, удаляем объект во время стопа
         t.post([id,&t]()
         {
-          std::cout << "acceptor close connection id " << id << std::endl;
           auto &stg = t.get_aspect().template get<_holder_storage_>();
           auto itr = stg.find(id);
           if ( itr != stg.end() )
@@ -61,7 +57,7 @@ struct ad_insert
             auto pconn = std::make_shared<holder_ptr>( std::move(itr->second) );
             stg.erase(itr);
             (*pconn)->strand().post([pconn, id](){
-              std::cout << "smart delete " << id << std::endl;
+              // std::c1out << "smart delete " << id << std::endl;
             });
           }
           // t.get_aspect().template get<_holder_storage_>().erase(id);
@@ -95,9 +91,7 @@ struct ad_ready
   template<typename T>
   void operator()( T& t, typename T::data_ptr d)
   {
-    
     t.get_aspect().template get<_insert_>()(t, std::move(d));
-    //manager_ptr->insert(std::move(d));
   }
 };
 

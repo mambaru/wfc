@@ -65,6 +65,7 @@ struct method_test1: wfc::jsonrpc::method<
 
 */
 
+/*
 #define JSONRPC_METHOD_IMPL(Tg, Method)\
   virtual void test1( call_params_ptr<Tg>::type req, std::function< void(call_result_ptr<Tg>::type) > callback)\
   {\
@@ -85,6 +86,7 @@ struct method_test1: wfc::jsonrpc::method<
       });\
     }\
   }
+  */
 
 struct method_list: wfc::jsonrpc::method_list<
 

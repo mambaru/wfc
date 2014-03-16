@@ -9,18 +9,18 @@ namespace wfc{ namespace jsonrpc{
 struct options
   : worker_options
 {
-  struct service
+  struct worker
   {
-    struct queue
+    struct strand
     {
       int count = 1;
       std::vector<std::string> methods = {"*"};
     };
     
     int threads = 0;
-    std::vector<queue> queues = {queue()};
+    std::vector<strand> strands = {strand()};
   };
-  std::vector< service> services = { service() };
+  std::vector<worker> workers = { worker() };
 };
 
 }}

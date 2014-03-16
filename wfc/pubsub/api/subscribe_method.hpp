@@ -48,7 +48,6 @@ struct subscribe_method
     }
     else
     {
-      std::cout << "subscribe NULL" << std::endl;
       if (callback != nullptr )
         callback( nullptr, jsonrpc::server_configuration_error() );
     }

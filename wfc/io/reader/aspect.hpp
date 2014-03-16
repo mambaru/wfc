@@ -123,16 +123,6 @@ struct error_handler
   }
 };
 
-/*
-struct readed
-{
-  template<typename T>
-  void operator()(T& t, typename T::data_ptr d)
-  {
-    if ( t.get_aspect().template get<_is_started_>() )
-  }
-}
-*/
 
 template<typename TgMain, typename TgSecond>
 struct readed
@@ -163,8 +153,7 @@ struct set_transfer_handler
     {
       th = t.callback([&t](typename T::data_ptr d)
       {
-        std::cout << "transfer jandler" << std::endl;
-          t.get_aspect().template get<TgResult>()(t, std::move(d) );
+        t.get_aspect().template get<TgResult>()(t, std::move(d) );
       });
     }
   }
@@ -176,7 +165,6 @@ struct user_handler
   template<typename T>
   void operator()( T& t, typename T::data_ptr d)
   {
-    //auto handler = t.options().handler;
     auto handler = t._handler;
     if ( handler == nullptr )
     {
@@ -189,19 +177,17 @@ struct user_handler
       
       handler(
         std::move(d), 
-        //t.shared_from_this(),
         t.get_id(), 
         t.callback([&t, start](typename T::data_ptr d)
         {
-          std::cout << "user_handler " << t.get_id() << std::endl;
           t.get_aspect().template get<TgResult>()(t, std::move(d) );
+          /*
           clock_t::time_point finish = clock_t::now();
-          
           size_t ts = std::chrono::duration_cast<std::chrono::microseconds>( finish - start ).count();
           
           if ( ts > 5000 )
-            std::cout << "ts: " << ts << std::endl;
-          
+            std::c1out << "ts: " << ts << std::endl;
+          */
           
         })
       );
@@ -236,9 +222,7 @@ struct _user_handler_;
   
 struct basic_options
 {
-  // ::wfc::io::handler handler = nullptr;
   size_t input_buffer_size = 8096;
-  //std::function<callback_status()> not_alive = nullptr;
 };
 
 /*

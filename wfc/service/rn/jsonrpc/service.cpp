@@ -4,7 +4,7 @@
 #include <wfc/io/ip/tcp/rn/jsonrpc/server.hpp>
 namespace wfc{ namespace service{ namespace rn{ namespace jsonrpc{
 
-void service::create(wfc::io_service& io, const configuration& conf, std::shared_ptr<ifactory> fact)
+void service::create(wfc::io_service& io, const service_config& conf, std::shared_ptr<ifactory> fact)
 {
   _conf = conf;
   
@@ -21,14 +21,14 @@ void service::create(wfc::io_service& io, const configuration& conf, std::shared
   
 }
   
-service::service(wfc::io_service& io, const configuration& conf, std::shared_ptr<ifactory> fact)
+service::service(wfc::io_service& io, const service_config& conf, std::shared_ptr<ifactory> fact)
   : _io_service(io)
   , _conf( conf )
 {
   this->create( io, conf, fact);
 }
   
-service::service(std::weak_ptr< wfc::global > global, const configuration& conf/*, std::shared_ptr<ifactory> fact*/)
+service::service(std::weak_ptr< wfc::global > global, const service_config& conf/*, std::shared_ptr<ifactory> fact*/)
   : _io_service( *(global.lock()->io_service.lock()) )
   , _conf( conf )
 {
@@ -43,7 +43,7 @@ service::service(std::weak_ptr< wfc::global > global, const configuration& conf/
   
 }
   
-void service::reconfigure(const configuration& conf)
+void service::reconfigure(const service_config& conf)
 {
   _conf = conf;
 }
@@ -58,13 +58,11 @@ void service::start()
 {
   if (_jsonrpc_for_tcp != nullptr)
   {
-    std::cout << "!!!!!!!!!!!!!!!!!!!! _jsonrpc_for_tcp->start() !!!!!!!!!!!!!!!!!!!!!" << std::endl;
     _jsonrpc_for_tcp->start();
   }
     
   for (auto& i: _tcp_servers)
   {
-    std::cout << "!!!!!!!!!!!!!!!!!!!! TCP START !!!!!!!!!!!!!!!!!!!!!" << std::endl;
     i->start();
   }
 }

@@ -60,13 +60,13 @@ int run_client(int , char *argv[])
   
   std::string str = std::string(argv[3]) + std::string("\r\n");
   std::cout << "run_client: " << str << std::endl;
-  int sockfd, portno, n;
-  struct sockaddr_in serv_addr;
-  struct hostent *server;
+  /*int sockfd, portno, n;*/
+  //struct sockaddr_in serv_addr;
+  //struct hostent *server;
 
-  char buffer[256];
+  //char buffer[256];
 
-  portno = atoi(argv[2]);
+  //portno = atoi(argv[2]);
   
   typedef wfc::io::ip::tcp::rn::client client_type;
   typedef client_type::options_type options_type;
@@ -82,17 +82,17 @@ int run_client(int , char *argv[])
   auto finish = std::chrono::high_resolution_clock::now();
 
   
-  options.connection.startup_handler = [&]( wfc::io::io_id_t id, wfc::io::callback callback, wfc::io::add_shutdown_handler add)
+  options.connection.startup_handler = [&]( wfc::io::io_id_t /*id*/, wfc::io::callback callback, wfc::io::add_shutdown_handler add)
   {
     auto d = std::make_unique< wfc::io::data_type>( str.begin(), str.end() );
     callback( std::move(d) );
-    add([&](wfc::io::io_id_t id){
+    add([&](wfc::io::io_id_t /*id*/){
       start = std::chrono::high_resolution_clock::now();
       cliptr->start();
     });
   };
   
-  client_type client(io, options, wfc::io::simple_handler([&]( wfc::io::data_ptr d, wfc::io::callback callback){
+  client_type client(io, options, wfc::io::simple_handler([&]( wfc::io::data_ptr /*d*/, wfc::io::callback /*callback*/){
     finish = std::chrono::high_resolution_clock::now();
     stat( std::chrono::duration_cast < std::chrono::microseconds>( finish - start ).count() );
   }));

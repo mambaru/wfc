@@ -58,6 +58,7 @@ struct method: fas::type_list_n<
 #include <wfc/jsonrpc/handler/target.hpp>
 
 namespace wfc{ namespace jsonrpc{
+
 template<
   typename TgName, 
   typename JParams, 
@@ -76,18 +77,82 @@ struct invoke_method: method<
 >
 {};
 
+template<
+  typename TgName, 
+  typename JParams, 
+  typename JResult, 
+  typename Target, 
+  typename Itf, 
+  void (Target::*mem_ptr)( 
+    std::unique_ptr<typename JParams::target>, 
+    std::function< void(std::unique_ptr<typename JResult::target>) >, 
+    size_t, 
+    std::weak_ptr<Itf>
+  )
+>
+struct invoke_method_ex: method< 
+  name<TgName>,
+  invoke_mem_fun_ex< 
+    JParams,
+    JResult,
+    Target,
+    Itf, 
+    mem_ptr
+  >
+>
+{};
+
+
+
+template<
+  typename TgName, 
+  typename JParams, 
+  typename JResult, 
+  typename I, 
+  void (I::*mem_ptr)( 
+    std::unique_ptr<typename JParams::target>, 
+    std::function< void(std::unique_ptr<typename JResult::target>) > 
+  ) 
+>
+struct dual_method: method< 
+  name<TgName>,
+  invoke_mem_fun<JParams,JResult,I,mem_ptr>,
+  call<JParams, JResult>
+>
+{};
+
+
+template<
+  typename TgName, 
+  typename JParams, 
+  typename JResult, 
+  typename Target, 
+  void (Target::*mem_ptr)( 
+    std::unique_ptr<typename JParams::target>, 
+    std::function< void(std::unique_ptr<typename JResult::target>) >, 
+    size_t, 
+    std::weak_ptr<Target>
+  ) 
+>
+struct dual_method_ex: method< 
+  name<TgName>,
+  invoke_mem_fun_ex< JParams, JResult, Target, Target, mem_ptr>,
+  call<JParams, JResult>
+>
+{};
+
 
 template<
   typename Interface,
   typename Target, 
   void (Target::*mem_ptr1)( size_t, std::weak_ptr<Interface> ),
-  void (Target::*mem_ptr2)( size_t, std::weak_ptr<Interface> )
+  void (Target::*mem_ptr2)( size_t/*, std::weak_ptr<Interface>*/ )
 >
 struct interface_target_ctl: fas::type_list_n<
     interface_<Interface>, 
     target<Target>, 
-    startup< mem_fun_ctrl<Interface, Target, mem_ptr1> >, 
-    shutdown< mem_fun_ctrl<Interface, Target, mem_ptr2> >
+    startup< mem_fun_startup<Interface, Target, mem_ptr1> >, 
+    shutdown< mem_fun_shutdown< Target, mem_ptr2> >
 >::type {};
 
 }} // wfc

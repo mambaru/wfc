@@ -36,7 +36,6 @@ struct async_write_some
       t.owner().wrap(t.strand().wrap( t.owner().wrap(
         [this, &t, dd]( boost::system::error_code ec, std::size_t bytes_transferred )
         { 
-          std::cout << "async_write_some " << t.get_id() << " " << bytes_transferred << " " << ec.message() << std::endl;
           if ( ec )
           {
             t.get_aspect().template get<_status_>() = false;
@@ -44,7 +43,10 @@ struct async_write_some
           }
           t.get_aspect().template get<Tg>()(t, std::move(*dd), bytes_transferred);
         }
-      )), [](){ std::cout << "async_write_some NOT ALIVE" << std::endl;})
+      )), 
+      []()
+      { 
+      })
     );
   }
 };

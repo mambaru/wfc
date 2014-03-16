@@ -24,7 +24,7 @@ struct itest
 struct itest_ex: itest
 {
   virtual void startup(size_t id, std::weak_ptr<itest>) = 0;
-  virtual void shutdown(size_t id, std::weak_ptr<itest>) = 0;
+  virtual void shutdown(size_t id/*, std::weak_ptr<itest>*/) = 0;
 };
 class test: public itest_ex
 {
@@ -57,7 +57,7 @@ public:
     }*/
   }
   
-  virtual void shutdown(size_t , std::weak_ptr<itest>)
+  virtual void shutdown(size_t /*, std::weak_ptr<itest>*/)
   {
     
   }
@@ -120,12 +120,12 @@ int main(int argc, char* [])
   
   auto ptest = std::make_shared<test>();
   
-  wfc::service::rn::jsonrpc::configuration config;
+  wfc::service::rn::jsonrpc::service_config config;
   
-  config.jsonrpc.services[0].threads = 4;
-  config.jsonrpc.services[0].queues[0].count = 16;
+  config.jsonrpc.workers[0].threads = 4;
+  config.jsonrpc.workers[0].strands[0].count = 16;
   
-  config.tcp[0].acceptors = 4;
+  config.tcp[0].threads = 4;
   auto factory = wfc::service::rn::jsonrpc::make_factory<method_list>(ptest);
   wfc::service::rn::jsonrpc::service service( io_service, config, factory);
 

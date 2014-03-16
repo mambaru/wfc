@@ -15,28 +15,6 @@
 
 
 namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{
-/*
-// Убрать нафик (поставить handler)
-struct ad_handler
-{
-  template<typename T>
-  void operator()( T& t, typename T::data_ptr d)
-  {
-    auto handler = t.options().handler;
-    if ( handler == nullptr )
-    {
-      t.get_aspect().template get<wfc::io::_outgoing_>()(t, std::move(d) );
-    }
-    else
-    {
-      handler( std::move(d), [&t](typename T::data_ptr d)
-      {
-        t.get_aspect().template get<wfc::io::_outgoing_>()(t, std::move(d) );
-        t.descriptor().close();
-      });
-    }
-  }
-};*/
 
 struct _on_write_;
 struct _on_rn_write_;
@@ -50,20 +28,16 @@ struct ad_on_read_error
   template<typename T>
   void operator()(T& t, boost::system::error_code& ec )
   {
-    std::cout << "ad_on_read_error 1 " << ec.message() << std::endl;
     if ( !t.get_aspect().template get<_shutdown_flag_>())
     {
-      std::cout << "ad_on_read_error 2" << std::endl;
       if ( t.get_aspect().template get< wfc::io::writer::_outgoing_buffer_size_>() == 0 )
       {
-        std::cout << "ad_on_read_error 3" << std::endl;
         t.descriptor().close();
         t.stop();
       }
     }
     else if (ec == boost::asio::error::operation_aborted )
     {
-      std::cout << "ad_on_read_error 4 " << ec.message() << std::endl;
         t.descriptor().close();
         t.stop();
       
@@ -96,7 +70,6 @@ struct ad_on_rn_write
   {
     if (!t.options().keep_alive)
     {
-      //t.descriptor().shutdown(boost::asio::ip::tcp::socket::shutdown_receive);
       t.get_aspect().template get<_shutdown_flag_>() = true;
     }
   }

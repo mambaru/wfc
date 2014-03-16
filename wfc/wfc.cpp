@@ -43,7 +43,9 @@ int wfc::run(int argc, char* argv[])
       return 0;
   }
   else
-    std::cout << "no startup module" << std::endl;
+  {
+    std::cerr << "no startup module" << std::endl;
+  }
 
   if ( auto core = _global->core.lock() )
     return core->run(/*argc, argv, */_global);

@@ -6,8 +6,6 @@ namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{
 
 client::~client()
 {
-  //_impl.reset();
-  std::cout << "client::~client() " << this->get_id() << std::endl;
 }
 
   

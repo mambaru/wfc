@@ -235,7 +235,6 @@ public:
     
     add_shutdown( this->strand().wrap( [this](::wfc::io::io_id_t io_id)
     {
-      std::cout << "jsonrpc shutdown " << io_id << std::endl;
       auto itr = _io_map.find(io_id);
       if ( itr != _io_map.end() )
       {
@@ -337,11 +336,11 @@ public:
   template<typename T>
   void start_advice(T& t)
   {
-    auto services = t.options().services;
-    if (services.empty())
-      services.push_back( options::service());
+    auto workers = t.options().workers;
+    if (workers.empty())
+      workers.push_back( options::worker());
     
-    for (auto &s : services)
+    for (auto &s : workers)
     {
       // Ахтунг! вынести в мембер
       io_service_ptr io_ptr = nullptr;
@@ -362,7 +361,7 @@ public:
         io_raw = io_ptr.get();
       */
       
-      for (auto w: s.queues)
+      for (auto w: s.strands)
       {
         options_type opt = t.options();
         

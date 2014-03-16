@@ -7,8 +7,6 @@ namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{
 
 connection::~connection()
 {
-  //_impl.reset();
-  std::cout << "connection::~connection() " << this->get_id() << std::endl;
 }
 
   

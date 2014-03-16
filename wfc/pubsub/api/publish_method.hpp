@@ -55,7 +55,6 @@ struct publish_method
     {
       pb->publish( std::move(req), nullptr );
     }
-    //std::cout << "PUBLISH NOTIFY" << std::endl;
     /*
     std::reverse(req->begin(), req->end());
     callback( std::move(req), nullptr );

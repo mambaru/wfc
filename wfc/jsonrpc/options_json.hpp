@@ -12,39 +12,39 @@ namespace wfc{ namespace jsonrpc{
   //wfc::json::member<n_size, generate, size_t, &generate::size>
 struct options_json
 {
-  JSON_NAME(services)
-  JSON_NAME(queues)
+  JSON_NAME(workers)
+  JSON_NAME(strands)
   JSON_NAME(count)
   JSON_NAME(methods)
   JSON_NAME(threads)
   
   typedef ::wfc::json::object<
-    options::service::queue,
+    options::worker::strand,
     fas::type_list_n<
-      ::wfc::json::member< n_count, options::service::queue, int, &options::service::queue::count>,
-      ::wfc::json::member< n_methods, options::service::queue, std::vector<std::string>, &options::service::queue::methods,
+      ::wfc::json::member< n_count, options::worker::strand, int, &options::worker::strand::count>,
+      ::wfc::json::member< n_methods, options::worker::strand, std::vector<std::string>, &options::worker::strand::methods,
       ::wfc::json::array< std::vector< ::wfc::json::value<std::string> > >
       >
     >::type
-  > queue_json;
+  > strand_json;
   
-  typedef ::wfc::json::array< std::vector<queue_json> > vect_queue_json;
+  typedef ::wfc::json::array< std::vector<strand_json> > vect_strand_json;
 
   
   typedef ::wfc::json::object<
-    options::service,
+    options::worker,
     fas::type_list_n<
-      ::wfc::json::member< n_threads, options::service, int, &options::service::threads>,
-      ::wfc::json::member< n_queues, options::service, std::vector<options::service::queue>, &options::service::queues, vect_queue_json>
+      ::wfc::json::member< n_threads, options::worker, int, &options::worker::threads>,
+      ::wfc::json::member< n_strands, options::worker, std::vector<options::worker::strand>, &options::worker::strands, vect_strand_json>
     >::type
-  > service_json;
+  > worker_json;
   
-  typedef ::wfc::json::array< std::vector<service_json> > vect_service_json;
+  typedef ::wfc::json::array< std::vector<worker_json> > vect_worker_json;
   
   typedef ::wfc::json::object<
     options,
     fas::type_list_n<
-      ::wfc::json::member< n_services, options, std::vector<options::service> , &options::services, vect_service_json >
+      ::wfc::json::member< n_workers, options, std::vector<options::worker> , &options::workers, vect_worker_json >
     >::type
   > type;
 };
@@ -52,18 +52,18 @@ struct options_json
 struct options
   : worker_options
 {
-  struct service
+  struct worker
   {
-    struct queue
+    struct strand
     {
       int count = 1;
       std::vector<std::string> methods = {"*"};
     };
     
     int threads = 0;
-    std::vector<queue> queues = {queue()};
+    std::vector<strand> strands = {strand()};
   };
-  std::vector< service> services = { service() };
+  std::vector< worker> workers = { worker() };
 };
 */
 

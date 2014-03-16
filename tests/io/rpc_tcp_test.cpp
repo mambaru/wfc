@@ -71,15 +71,15 @@ int main(int argc, char* [])
   wfc::io_service io_service;
 
   server::options_type conf;
-  conf.acceptors = 10;
+  // conf.acceptors = 10;
   conf.threads = 2;
   wfc::io_service::work wrk(io_service);
   
   auto ptest = std::make_shared<test>();
 
   wfc::jsonrpc::options jsonrpc_options;
-  jsonrpc_options.services[0].threads = 1;
-  jsonrpc_options.services[0].queues[0].count = 16;
+  jsonrpc_options.workers[0].threads = 1;
+  jsonrpc_options.workers[0].strands[0].count = 16;
   
   auto jsonrpc = std::make_shared<wfc::jsonrpc::service>(io_service, jsonrpc_options, wfc::jsonrpc::handler<method_list>(ptest) ) ;
   auto srv = std::make_shared<server>(io_service, conf, jsonrpc );

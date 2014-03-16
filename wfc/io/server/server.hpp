@@ -20,11 +20,14 @@ struct ad_configure
   void operator()(T& t, const Conf& conf)
   {
     typedef typename T::aspect::template advice_cast<_acceptor_type_>::type acceptor_type;
+    
+    /*
     t.get_aspect().template get<_acceptor_count_>() = conf.acceptors;
     t.get_aspect().template get<_thread_count_>() = conf.threads;
+    */
     
     auto& acceptors = t.get_aspect().template get<_acceptors_>();
-    while ( acceptors.size() > conf.acceptors )
+    while ( acceptors.size() > conf.threads )
     {
       //! acceptors.back()->stop();
       acceptors.pop_back();
@@ -36,8 +39,8 @@ struct ad_configure
   
     boost::asio::ip::tcp::resolver resolver( t.get_io_service() );
     boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve({
-      "0.0.0.0", 
-      "12345"
+      t.options().host, 
+      t.options().port
     });
 
     desc.open(endpoint.protocol());
@@ -49,9 +52,9 @@ struct ad_configure
 
     auto itr = acceptors.begin();
     auto& services = t.get_aspect().template get<_io_services_>();
-    for (size_t i =0 ; i < conf.acceptors; ++i, ++itr)
+    for (size_t i =0 ; i < t.options().threads; ++i, ++itr)
     {
-      if ( acceptors.size() < conf.acceptors )
+      if ( acceptors.size() < t.options().threads )
       {
         auto io = std::make_shared<wfc::io_service>();
         typename descriptor_type::native_handle_type fd = ::dup(desc.native_handle());
@@ -133,8 +136,8 @@ struct aspect: fas::aspect
 <
   //context<>,
   fas::stub< wfc::io::_stop_>,
-  fas::value<_acceptor_count_, size_t>,
-  fas::value<_thread_count_, size_t>,
+  // fas::value<_acceptor_count_, size_t>,
+  // fas::value<_thread_count_, size_t>,
   fas::type< wfc::io::server::_acceptor_type_, Acceptor>,
   fas::value< _acceptors_, std::list< std::unique_ptr<Acceptor> > >,
   fas::value< _threads_, std::list< std::unique_ptr<std::thread> > >,
