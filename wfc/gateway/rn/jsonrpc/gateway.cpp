@@ -1,10 +1,10 @@
 
-#include <wfc/service/rn/jsonrpc/service.hpp>
+#include <wfc/gateway/rn/jsonrpc/gateway.hpp>
 #include <wfc/jsonrpc/service.hpp>
 #include <wfc/io/ip/tcp/rn/jsonrpc/server.hpp>
-namespace wfc{ namespace service{ namespace rn{ namespace jsonrpc{
+namespace wfc{ namespace gateway{ namespace rn{ namespace jsonrpc{
 
-void service::create(wfc::io_service& io, const service_config& conf, std::shared_ptr<ifactory> fact)
+void gateway::create(wfc::io_service& io, const gateway_config& conf, std::shared_ptr<ifactory> fact)
 {
   _conf = conf;
   
@@ -21,31 +21,31 @@ void service::create(wfc::io_service& io, const service_config& conf, std::share
   
 }
   
-service::service(wfc::io_service& io, const service_config& conf, std::shared_ptr<ifactory> fact)
+gateway::gateway(wfc::io_service& io, const gateway_config& conf, std::shared_ptr<ifactory> fact)
   : _io_service(io)
   , _conf( conf )
 {
   this->create( io, conf, fact);
 }
   
-service::service(std::weak_ptr< wfc::global > global, const service_config& conf/*, std::shared_ptr<ifactory> fact*/)
+gateway::gateway(std::weak_ptr< wfc::global > global, const gateway_config& conf/*, std::shared_ptr<ifactory> fact*/)
   : _io_service( *(global.lock()->io_service.lock()) )
   , _conf( conf )
 {
 }
   
-void service::reconfigure(const service_config& conf)
+void gateway::reconfigure(const gateway_config& conf)
 {
   _conf = conf;
 }
   
-void service::initialize( std::shared_ptr<ifactory> fact )
+void gateway::initialize( std::shared_ptr<ifactory> fact )
 {
   _tcp_servers.clear();
   this->create( _io_service, _conf, fact );
 }
   
-void service::start()
+void gateway::start()
 {
   if (_jsonrpc_for_tcp != nullptr)
   {
@@ -58,7 +58,7 @@ void service::start()
   }
 }
   
-void service::stop()
+void gateway::stop()
 {
   
 }

@@ -10,15 +10,15 @@
 
 namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{
 
-// Вынести основной в io::client  
 struct client_options
   : ::wfc::io::basic::options
-  /*, ::wfc::io::rn::reader::basic_options
-  , ::wfc::io::rn::writer::basic_options
-  */
 {
-  // bool keep_alive = false;connection
   connection_options connection;
+  std::string host = "0.0.0.0";
+  std::string port = "12345";
+  int threads = 1;
+  bool non_blocking_connect = false;
+  time_t reconnect_timeout;
 };
   
 }}}}}

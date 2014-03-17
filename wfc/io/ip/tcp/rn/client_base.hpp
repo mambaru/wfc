@@ -21,6 +21,7 @@ public:
   //typedef typename super::descriptor_type descriptor_type;
   
   wfc::io::handler _handler;
+  // TODO: сделать массив
   std::shared_ptr<connection_type> _connection;
   
   client_base(wfc::io_service& io, const options_type& conf, ::wfc::io::handler handler = nullptr)
@@ -33,7 +34,6 @@ public:
   void stop()
   {
     super::stop(*this);
-    //this->get_aspect().template get<_stop_>()(*this);
   }
 
   void start()
@@ -48,8 +48,8 @@ public:
   
       boost::asio::ip::tcp::resolver resolver( t.get_io_service() );
       boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve({
-        "0.0.0.0", 
-        "12345"
+        t.options().host, 
+        t.options().port
       });
       
       
@@ -68,23 +68,6 @@ public:
           abort();
         }
       });
-      
-      /*
-      boost::asio::ip::tcp::socket socket(io_service);
-      boost::asio::ip::tcp::endpoint endpoint(
-      boost::asio::ip::address::from_string("1.2.3.4"), 12345);
-      socket.async_connect(endpoint, connect_handler);
-      */
-
-
-      /*
-      desc.open(endpoint.protocol());
-      desc.set_option( boost::asio::ip::tcp::acceptor::reuse_address(true) );
-      desc.bind(endpoint);
-      desc.listen();
-      */
-      
-
     });
   }
   

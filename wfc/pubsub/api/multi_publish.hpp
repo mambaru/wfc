@@ -9,23 +9,11 @@ namespace wfc{ namespace pubsub{
 namespace request
 {
   typedef std::vector<publish> multi_publish;
-  /*
-  struct multi_publish
-    : std::vector<publish>
-  {
-    
-  };
-  */
 }
 
 namespace response
 {
-  typedef std::vector<pubsub::status> multi_publish;
-  /*struct multi_publish
-  {
-
-  };
-  */
+  typedef std::vector<publish> multi_publish;
 }
 
 }}

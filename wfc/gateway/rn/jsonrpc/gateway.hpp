@@ -4,7 +4,7 @@
 #include <wfc/jsonrpc/options.hpp>
 #include <wfc/jsonrpc/options_json.hpp>
 #include <wfc/jsonrpc/service.hpp>
-#include <wfc/service/rn/jsonrpc/service_config.hpp>
+#include <wfc/gateway/rn/jsonrpc/gateway_config.hpp>
 #include <wfc/io_service.hpp>
 #include <wfc/core/global.hpp>
 #include <list>
@@ -22,7 +22,7 @@ class server;
 }}}}}}
 
 
-namespace wfc{ namespace service{ namespace rn{ namespace jsonrpc{
+namespace wfc{ namespace gateway{ namespace rn{ namespace jsonrpc{
 
 
 struct ifactory
@@ -63,7 +63,7 @@ make_factory(typename ML::target_type target)
   return std::make_shared< factory< ML> >( target );
 }
 
-class service
+class gateway
 {
   typedef  ::wfc::jsonrpc::service jsonrpc_type;
   typedef  ::wfc::io::ip::tcp::rn::jsonrpc::server server_tcp_type;
@@ -72,11 +72,11 @@ class service
   
 public:
   
-  service(std::weak_ptr<  ::wfc::global > g, const service_config& conf);
+  gateway(std::weak_ptr<  ::wfc::global > g, const gateway_config& conf);
   
-  service( ::wfc::io_service& io, const service_config& conf, std::shared_ptr<ifactory> fact);
+  gateway( ::wfc::io_service& io, const gateway_config& conf, std::shared_ptr<ifactory> fact);
   
-  void reconfigure(const service_config& conf);
+  void reconfigure(const gateway_config& conf);
   
   void initialize(std::shared_ptr<ifactory> fact);
   
@@ -86,11 +86,11 @@ public:
 
 private:
   
-  void create( ::wfc::io_service& io, const service_config& conf, std::shared_ptr<ifactory> fact);
+  void create( ::wfc::io_service& io, const gateway_config& conf, std::shared_ptr<ifactory> fact);
   
 private:
   ::wfc::io_service& _io_service;
-  service_config _conf;
+  gateway_config _conf;
   
   jsonrpc_ptr _jsonrpc_for_tcp;
   std::list< server_tcp_ptr > _tcp_servers;

@@ -107,6 +107,70 @@ struct mem_fun_handler_ex
 };
 
 
+template<
+  typename Req, 
+  typename Resp, 
+  typename Req2, 
+  typename Resp2, 
+  typename Target, 
+  void (Target::*mem_ptr)( 
+    std::unique_ptr<Req>, 
+    std::function< void(std::unique_ptr<Resp>) >, 
+    size_t, 
+    std::function< void(
+      std::unique_ptr<Req2>, 
+      std::function< void(std::unique_ptr<Resp2>) >  
+    ) >
+  ),
+  typename Itf,
+  void (Itf::*mem_ptr2)( 
+    std::unique_ptr<Req2>, 
+    std::function< void(std::unique_ptr<Resp2>) >
+  )
+>
+struct mem_fun_handler2
+{
+  template<typename T>
+  void operator()(T& t, std::unique_ptr<Req> req, std::function< void(std::unique_ptr<Resp>, std::unique_ptr< ::wfc::jsonrpc::error>) > callback) const
+  {
+    if ( auto i = t.target().lock() )
+    {
+      std::weak_ptr<Itf> self = t.shared_from_this();
+      (i.get()->*mem_ptr)
+      (
+        std::move(req),
+        this->make_callback(callback),
+        t.get_id(),
+        [self](std::unique_ptr<Req2> req, std::function< void(std::unique_ptr<Resp2>) > callback)
+        {
+          if ( auto p = self.lock() )
+          {
+            (p.get()->*mem_ptr2)(
+              std::move(req),
+              callback
+            );
+          }
+        }
+      );
+    }
+  }
+  
+  
+  auto make_callback( std::function< void(std::unique_ptr<Resp>, std::unique_ptr< ::wfc::jsonrpc::error>) > callback) const
+    -> std::function<void(std::unique_ptr<Resp>) >
+  {
+    if (callback==nullptr)
+      return nullptr;
+    
+    return [callback]( std::unique_ptr<Resp> resp)
+    {
+      callback( std::move(resp), nullptr);
+    };
+  }
+  
+};
+
+
 }} // wfc
 
 
