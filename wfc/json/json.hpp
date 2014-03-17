@@ -506,5 +506,6 @@ struct array<C, -1>: array_r<C, fas::empty_type> {};
 #include "specialization/json_array.hpp"
 #include "specialization/json_enum.hpp"
 #include "specialization/json_set_enum.hpp"
+#include "specialization/json_quoted.hpp"
 
 
