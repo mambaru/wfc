@@ -80,13 +80,6 @@ int run_client(int , char *argv[])
     
     {
       int val = 1;
-      if ( setsockopt((int)sockfd, SOL_SOCKET, SO_REUSEPORT, (const char*)&val, sizeof(val)))
-      {
-        perror("ERROR SO_REUSEPORT");
-          exit(1);
-      }
-
-      val = 1;
       if ( setsockopt((int)sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&val, sizeof(val)))
       {
         perror("ERROR SO_REUSEADDR");
@@ -125,13 +118,6 @@ int run_client(int , char *argv[])
     
     {
       int val = 1;
-      if ( setsockopt((int)sockfd, SOL_SOCKET, SO_REUSEPORT, (const char*)&val, sizeof(val)))
-      {
-        perror("ERROR SO_REUSEPORT");
-          exit(1);
-      }
-
-      val = 1;
       if ( setsockopt((int)sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&val, sizeof(val)))
       {
         perror("ERROR SO_REUSEADDR");

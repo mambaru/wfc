@@ -7,7 +7,7 @@ namespace wfc{ namespace service{ namespace rn{ namespace jsonrpc{
 class service_list
 {
 public:
-  service_list(std::weak_ptr<::wfc::global > g, const service_list_config& conf);
+  service_list(std::weak_ptr< ::wfc::global > g, const service_list_config& conf);
   
   service_list(::wfc::io_service& io, const service_list_config& conf, std::shared_ptr<ifactory> fact);
   
