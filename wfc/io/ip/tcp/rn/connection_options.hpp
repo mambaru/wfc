@@ -16,7 +16,7 @@ struct connection_options
   , ::wfc::io::rn::reader::basic_options
   , ::wfc::io::rn::writer::basic_options
 {
-  bool keep_alive = false;
+  bool keep_alive = true;
 };
   
 }}}}}

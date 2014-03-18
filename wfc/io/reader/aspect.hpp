@@ -396,7 +396,7 @@ struct ad_log_aborted
   void operator()(T&, boost::system::error_code ec)
   {
      ::wfc::only_for_log(ec);
-    TRACE_LOG_WARNING( "READER aborted: " << ec.message() )
+     TRACE_LOG_WARNING( "READER aborted: "  << ec.value() << " " << ec.message() )
   }
 };
 
@@ -406,8 +406,11 @@ struct ad_log_error
   template<typename T>
   void operator()(T&, boost::system::error_code ec)
   {
-     ::wfc::only_for_log(ec);
-    COMMON_LOG_ERROR( "READER error: " << ec.message() )
+    ::wfc::only_for_log(ec);
+    if( ec.value() != boost::system::errc::no_such_file_or_directory )
+    {
+      COMMON_LOG_ERROR( "READER error: " << ec.value() << " " << ec.message() )
+    }
   }
 };
 
