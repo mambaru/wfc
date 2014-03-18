@@ -11,16 +11,9 @@ namespace request
   struct load
   {
     std::string channel;
-    cursor_t cursor;
-    size_t limit;
-
+    cursor_t cursor = cursor_t();
+    size_t limit = 0;
     std::string load_params;
-
-    load()
-      : cursor()
-      , limit(0)
-  {}
-
   };
 }
 
@@ -29,11 +22,7 @@ namespace response
   struct load
     : topic
   {
-    pubsub::status status;
-    load()
-      : topic()
-      , status( pubsub::status::not_impl )
-    {}
+    ::wfc::pubsub::status status = ::wfc::pubsub::status::not_support;
   };
 }
 

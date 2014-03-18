@@ -10,6 +10,7 @@
 #include <wfc/io/basic/types.hpp>
 #include <wfc/io/tags.hpp>
 #include <wfc/io/context.hpp>
+#include <wfc/io/types.hpp>
 
 #include <wfc/callback/callback_owner.hpp>
 #include <fas/aop.hpp>

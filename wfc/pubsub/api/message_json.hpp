@@ -57,7 +57,7 @@ struct message_json
   
   typedef std::unique_ptr<message> message_ptr;
   
-  typedef wfc::json::pointer<message_ptr, type> pointer;
+  typedef json::pointer<message_ptr, type> pointer;
   
 };
 

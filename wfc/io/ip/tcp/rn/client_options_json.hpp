@@ -1,12 +1,15 @@
 #pragma once
 
-namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{ namespace impl{ 
+#include <wfc/io/ip/tcp/rn/client_options.hpp>
+
+namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{ 
   
 struct client_options_json
 {
   JSON_NAME(host)
   JSON_NAME(port)
   JSON_NAME(connection)
+  JSON_NAME(threads)
   
   typedef ::wfc::json::object<
     client_options,
@@ -19,4 +22,4 @@ struct client_options_json
   > type;
 };
 
-}}}}}}
+}}}}}

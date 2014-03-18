@@ -8,6 +8,7 @@
 
 #include <wfc/pubsub/api/subscribe_json.hpp>
 #include <wfc/pubsub/api/publish_json.hpp>
+#include <wfc/jsonrpc.hpp>
 
 namespace wfc{ namespace pubsub{
 
@@ -27,7 +28,7 @@ JSONRPC_TAG(subscribe)
 JSONRPC_TAG(describe)  
 
 
-struct method_list: wfc::jsonrpc::method_list<
+struct method_list: ::wfc::jsonrpc::method_list<
 
   ::wfc::jsonrpc::target<ipubsub>,
   ::wfc::jsonrpc::interface_<ipubsub>,

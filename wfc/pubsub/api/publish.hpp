@@ -18,7 +18,7 @@ namespace response
 {
   struct publish
   {
-    pubsub::status status;
+    ::wfc::pubsub::status status = ::wfc::pubsub::status::not_support;
   };
 }
 

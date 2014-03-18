@@ -18,7 +18,7 @@ class service;
 }}
 
 namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{ namespace jsonrpc{
-class server;
+class client;
 }}}}}}
 
 
@@ -66,8 +66,8 @@ make_factory(typename ML::target_type target)
 class gateway
 {
   typedef  ::wfc::jsonrpc::service jsonrpc_type;
-  typedef  ::wfc::io::ip::tcp::rn::jsonrpc::server server_tcp_type;
-  typedef std::shared_ptr<server_tcp_type> server_tcp_ptr;
+  typedef  ::wfc::io::ip::tcp::rn::jsonrpc::client client_tcp_type;
+  typedef std::shared_ptr<client_tcp_type> client_tcp_ptr;
   typedef std::shared_ptr<jsonrpc_type> jsonrpc_ptr;
   
 public:
@@ -93,7 +93,7 @@ private:
   gateway_config _conf;
   
   jsonrpc_ptr _jsonrpc_for_tcp;
-  std::list< server_tcp_ptr > _tcp_servers;
+  std::list< client_tcp_ptr > _tcp_clients;
 };
 
 }}}}

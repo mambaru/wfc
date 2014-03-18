@@ -9,7 +9,7 @@ struct ad_post
   template<typename T, typename Callback>
   void operator()(T& t, Callback callback)
   {
-    t.strand().post(callback);
+    t.strand().post( t.owner().wrap(callback) );
     /*
     t.get_io_service().post( 
       t.strand().wrap(callback)

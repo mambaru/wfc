@@ -17,7 +17,7 @@ namespace response
 {
   struct subscribe
   {
-    pubsub::status status;
+    ::wfc::pubsub::status status = ::wfc::pubsub::status::not_support;
   };
 }
 

@@ -33,7 +33,7 @@ public:
   {
   }
   
-  io_base(io_service_type& io_service, const options_type& opt)
+  io_base(io_service_type& io_service, const options_type& opt )
     : _io_service(io_service)
     , _options(opt)
   {
@@ -233,7 +233,7 @@ public:
   typedef typename super::options_type options_type;
   typedef typename super::io_service_type io_service_type;
 
-  basic_io(io_service_type& io_service, const options_type& opt)
+  basic_io(io_service_type& io_service, const options_type& opt =  options_type() )
     : super( io_service, opt)
   {
   }

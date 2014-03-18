@@ -2,8 +2,8 @@
 
 #include <wfc/jsonrpc/options.hpp>
 #include <wfc/jsonrpc/options_json.hpp>
-#include <wfc/io/ip/tcp/rn/server_options.hpp>
-#include <wfc/io/ip/tcp/rn/server_options_json.hpp>
+#include <wfc/io/ip/tcp/rn/client_options.hpp>
+#include <wfc/io/ip/tcp/rn/client_options_json.hpp>
 #include <wfc/json/json.hpp>
 #include <wfc/json/name.hpp>
 
@@ -28,9 +28,9 @@ struct gateway_config_json
       ::wfc::json::member< 
           n_tcp, 
           gateway_config, 
-          std::vector< ::wfc::io::ip::tcp::rn::server_options >, 
+          std::vector< ::wfc::io::ip::tcp::rn::client_options >, 
           &gateway_config::tcp, 
-          ::wfc::json::array< ::wfc::io::ip::tcp::rn::server_options_json::type >
+          ::wfc::json::array< ::wfc::io::ip::tcp::rn::client_options_json::type >
       >
     >::type
   > type;
