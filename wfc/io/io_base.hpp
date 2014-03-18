@@ -193,14 +193,14 @@ protected:
   {
     t.post([&t, this]()
     {
-      for ( auto& h : _release_handlers2)
+      for ( auto& h : this->_release_handlers2)
         h( this->_id );
-      _release_handlers2.clear();
+      this->_release_handlers2.clear();
       
-      auto& sh = _options.shutdown_handler;
-      if ( sh!=nullptr )
+      auto& sh = this->_options.shutdown_handler;
+      if ( sh != nullptr )
       {
-        sh( _id );
+        sh( this->_id );
       }
 
       t.get_aspect().template get<_stop_>()(t);
