@@ -8,10 +8,22 @@ endif()
 
 message(STATUS "---!---> ${CMAKE_CXX_COMPILER_VERSION}")
 
-
 IF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
+    exec_program(
+      ${CMAKE_CXX_COMPILER}
+      ARGS -dumpversion
+      OUTPUT_VARIABLE gcc_compiler_version
+    )        
+
+    STRING(REGEX REPLACE "^([0-9]+)\\..*" "\\1" gcc_major_version "${gcc_compiler_version}")
+    STRING(REGEX REPLACE "^[0-9]+\\.([0-9]+).*" "\\1" gcc_minor_version "${gcc_compiler_version}")
+    MATH(EXPR gcc_version_number "${gcc_major_version} * 1000 + ${gcc_minor_version}" )
+
+    message(STATUS "C++ compiler version: ${gcc_compiler_version} major: ${gcc_major_version} minor: ${gcc_minor_version} number: ${gcc_version_number} [${CMAKE_CXX_COMPILER}]")
+
     SET(CMAKE_CXX_STANDARD    "-std=gnu++11")
-    if ( ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "4.8.0" )
+    #if ( ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "4.8.0" )
+    if ( NOT ${gcc_version_number} LESS 4008 )
       SET(CMAKE_CXX_STANDARD    "${CMAKE_CXX_STANDARD} -ftemplate-backtrace-limit=0")
     endif()
     SET(CMAKE_CXX_WARN_FLAGS  "-W -Wall -pedantic")

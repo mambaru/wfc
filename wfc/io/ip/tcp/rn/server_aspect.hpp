@@ -13,12 +13,12 @@ namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{
 struct server_aspect: fas::aspect
 <
   ::wfc::io::server::aspect<acceptor>,
-  fas::type<::wfc::io::_options_type_, server_options>,
-  fas::stub< wfc::io::server::_create_ >,
-  fas::stub< wfc::io::server::_configure_ >,
-  fas::stub< wfc::io::server::_reconfigure_ >,
-  fas::stub< wfc::io::server::_start_ >,
-  fas::stub< wfc::io::server::_stop_ >
+  fas::type< ::wfc::io::_options_type_, server_options>,
+  fas::stub< ::wfc::io::server::_create_ >,
+  fas::stub< ::wfc::io::server::_configure_ >,
+  fas::stub< ::wfc::io::server::_reconfigure_ >,
+  fas::stub< ::wfc::io::server::_start_ >,
+  fas::stub< ::wfc::io::server::_stop_ >
   
 >{};
   
