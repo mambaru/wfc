@@ -211,7 +211,7 @@ public:
           this->send_request( io_id, name, result_hander, serializer);
         };
         
-        _io_map.insert( 
+        this->_io_map.insert( 
           std::make_pair(
             io_id, 
             io_data(
@@ -239,7 +239,7 @@ public:
       if ( itr != _io_map.end() )
       {
         itr->second.method_handler->stop(io_id);
-        _io_map.erase(itr);
+        this->_io_map.erase(itr);
       }
     }));
  }
