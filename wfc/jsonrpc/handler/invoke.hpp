@@ -55,7 +55,25 @@ struct invoke: Handler
   {
     try
     {
-      auto req = holder.get_params<request_json>();
+      std::unique_ptr<typename request_json::target> req = nullptr;
+      try
+      {
+        req = holder.get_params<request_json>();
+      }
+      catch (const json::json_error& e)
+      {
+        typedef outgoing_error_json< error_json::type >::type json_type;
+        outgoing_error<error> error_message;
+        error_message.error = std::make_unique<error>(invalid_params());
+        error_message.id = std::move( holder.raw_id() );
+              
+        auto d = holder.detach();
+        d->clear();
+        typename json_type::serializer()(error_message, std::inserter( *d, d->end() ));
+        handler( std::move(d) );
+      }
+      
+      
       if (holder.is_notify())
       {
         Handler::operator()( t, std::move(req), nullptr);
@@ -94,10 +112,17 @@ struct invoke: Handler
         );
       }
     }
-    catch(const json::json_error& e)
+    catch(...)
     {
-      // SEND INVALID Params и перенести выше
-      //t.get_aspect().template get<_invalid_params_>()(t, id);
+        typedef outgoing_error_json< error_json::type >::type json_type;
+        outgoing_error<error> error_message;
+        error_message.error = std::make_unique<error>(server_error());
+        error_message.id = std::move( holder.raw_id() );
+              
+        auto d = holder.detach();
+        d->clear();
+        typename json_type::serializer()(error_message, std::inserter( *d, d->end() ));
+        handler( std::move(d) );
     }
   }
 };

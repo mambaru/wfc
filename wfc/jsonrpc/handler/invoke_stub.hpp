@@ -19,10 +19,17 @@ struct invoke_stub
   //template<typename T>
   //void operator()(T&, incoming_holder) const
   template<typename T>
-  void operator()(T& , incoming_holder , ::wfc::io::callback ) const
+  void operator()(T& , incoming_holder ph, ::wfc::io::callback handler) const
   {
-    // TODO: send error
-    abort();
+    // В аспект!
+    typedef outgoing_error_json< error_json::type >::type json_type;
+    outgoing_error<error> error_message;
+    error_message.error = std::make_unique<error>(method_not_impl());
+    error_message.id = std::move( ph.raw_id() );
+              
+    auto d = std::make_unique< ::wfc::io::data_type>();
+    typename json_type::serializer()(error_message, std::inserter( *d, d->end() ));
+    handler( std::move(d) );
   }
 };
 

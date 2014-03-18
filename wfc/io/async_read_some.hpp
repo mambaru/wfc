@@ -20,8 +20,9 @@ struct async_read_some
       t.strand().wrap(
         [this, &t, dd]( boost::system::error_code ec , std::size_t bytes_transferred )
         { 
-          
           (*dd)->resize(bytes_transferred);
+          std::cout << "async readed..." << std::string((*dd)->begin(), (*dd)->end() ) << std::endl;
+
           t.get_aspect().template get<Tg>()(t, std::move(*dd), ec /*, bytes_transferred*/);
         }
       )
@@ -43,6 +44,7 @@ struct async_read_some2
       t.strand().wrap(
         [this, &t, dd]( boost::system::error_code ec , std::size_t bytes_transferred )
         { 
+          std::cout << "async readed2..." << std::string((*dd)->begin(), (*dd)->end() ) << std::endl;
           if ( ec )
           {
             t.get_aspect().template get<_status_>() = false;

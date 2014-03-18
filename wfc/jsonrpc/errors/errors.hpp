@@ -27,53 +27,53 @@ struct error
 struct parse_error: error
 {
   parse_error()
-    : error(-32700, "Parse error")
+    : error(-32700, "Parse error.")
   {}
 };
 
 struct invalid_request: error
 {
   invalid_request()
-    : error(-32600, "Invalid Request")
+    : error(-32600, "Invalid Request.")
   {}
 };
 
-struct method_not_found: error
+struct procedure_not_found: error
 {
-  method_not_found()
-    : error(-32601, "Method not found")
+  procedure_not_found()
+    : error(-32601, "Procedure not found.")
   {}
 };
 
 struct invalid_params: error
 {
   invalid_params()
-    : error(-32602, "Invalid params")
+    : error(-32602, "Invalid params.")
   {}
 };
 
 struct internal_error: error
 {
   internal_error()
-    : error(-32603, "Internal error")
+    : error(-32603, "Internal error.")
   {}
 };
 
 struct method_not_impl: error
 {
   method_not_impl()
-    : error(-32001, "Method not implementation")
+    : error(-32001, "Method not implementation.")
   {}
 };
 
 struct server_error: error
 {
   server_error()
-    : error(-32000, "Server error")
+    : error(-32000, "Server error.")
   {}
 
   server_error( const std::string& what)
-    : error(-32002, std::string("Server error: ") + what )
+    : error(-32002, std::string("Server error: ") + what + ".")
   {}
 };
 
