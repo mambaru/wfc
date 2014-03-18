@@ -15,8 +15,8 @@ IF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
       OUTPUT_VARIABLE gcc_compiler_version
     )        
 
-    STRING(REGEX REPLACE "^([0-9]+)\\.[0-9]+" "\\1" gcc_major_version "${gcc_compiler_version}")
-    STRING(REGEX REPLACE "^[0-9]+\\.([0-9])+" "\\1" gcc_minor_version "${gcc_compiler_version}")
+    STRING(REGEX REPLACE "^([0-9]+)\\..*" "\\1" gcc_major_version "${gcc_compiler_version}")
+    STRING(REGEX REPLACE "^[0-9]+\\.([0-9]+).*" "\\1" gcc_minor_version "${gcc_compiler_version}")
     MATH(EXPR gcc_version_number "${gcc_major_version} * 1000 + ${gcc_minor_version}" )
 
     message(STATUS "C++ compiler version: ${gcc_compiler_version} major: ${gcc_major_version} minor: ${gcc_minor_version} number: ${gcc_version_number} [${CMAKE_CXX_COMPILER}]")
