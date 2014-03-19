@@ -17,8 +17,8 @@ struct client_options
   std::string host = "0.0.0.0";
   std::string port = "12345";
   int threads = 1;
-  bool non_blocking_connect = false;
-  time_t reconnect_timeout;
+  // bool non_blocking_connect = false;
+  time_t reconnect_timeout = 1;
 };
   
 }}}}}
