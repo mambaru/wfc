@@ -156,14 +156,14 @@ struct ad_verify
 struct ad_incoming
 {
   template<typename T>
-  void operator()( T& t, typename T::data_ptr d, /*std::weak_ptr<wfc::io::iio> iio*/ ::wfc::io::io_id_t id, ::wfc::io::callback callback)
+  void operator()( T& t, typename T::data_ptr d, ::wfc::io::io_id_t id, ::wfc::io::callback callback)
   {
     auto  handler = t._io_map.find(id)->second.method_handler;
     try
     {
       while (d != nullptr)
       {
-        incoming_holder hold(std::move(d) /*, handler*/ /*, iio, handler*/ );
+        incoming_holder hold(std::move(d) );
         d = hold.tail();
         t.get_aspect().template get<_verify_>()( t, std::move(hold), handler, callback );
       }

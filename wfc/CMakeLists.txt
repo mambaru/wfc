@@ -12,6 +12,7 @@ SET(
   logger/global_log.cpp
   pubsub/message_queue.cpp
   pubsub/topic_hub.cpp
+  pubsub/pubsub_gateway.cpp
   io/posix/rn/reader.cpp
   io/posix/rn/writer.cpp
   io/ip/tcp/rn/connection.cpp

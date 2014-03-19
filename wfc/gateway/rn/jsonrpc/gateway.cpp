@@ -29,7 +29,7 @@ gateway::gateway(wfc::io_service& io, const gateway_config& conf, std::shared_pt
 }
   
 gateway::gateway(std::weak_ptr< wfc::global > global, const gateway_config& conf/*, std::shared_ptr<ifactory> fact*/)
-  : _io_service( *(global.lock()->io_service.lock()) )
+  : _io_service( global.lock()->io_service )
   , _conf( conf )
 {
 }

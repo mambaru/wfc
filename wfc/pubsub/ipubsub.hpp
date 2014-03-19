@@ -59,9 +59,8 @@ struct ipubsub
   ///
   /// interface
   ///
-  virtual void describe( size_t subscriber_id/*, std::weak_ptr<ipubsub> subscriber*/ ) = 0;
+  virtual void describe( size_t subscriber_id ) = 0;
   
-  // virtual void subscribe(request_subscribe_ptr, subscriber_function, subscribe_callback ) = 0;
   virtual void subscribe(request_subscribe_ptr, subscribe_callback, size_t subscriber_id, publish_handler ) = 0;
 
   virtual void publish(request_publish_ptr, publish_callback) = 0;

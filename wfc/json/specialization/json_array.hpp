@@ -69,9 +69,12 @@ public:
       beg = parser::parse_space(beg, end);
       if (beg==end) throw unexpected_end_fragment();
       if (*beg==R) break;
+      
       target tg;
       beg = serializer()( tg, beg, end);
       *(bitr++) = tg;
+      
+      //beg = serializer()( *(bitr++), beg, end);
       beg = parser::parse_space(beg, end);
       if (beg==end) throw unexpected_end_fragment();
       if (*beg==R) break;

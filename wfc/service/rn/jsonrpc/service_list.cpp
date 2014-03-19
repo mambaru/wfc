@@ -18,7 +18,7 @@ service_list::service_list(wfc::io_service& io, const service_list_config& conf,
 }
   
 service_list::service_list(std::weak_ptr< wfc::global > global, const service_list_config& conf)
-  : _io_service( *(global.lock()->io_service.lock()) )
+  : _io_service( global.lock()->io_service )
   , _conf( conf )
 {
 }

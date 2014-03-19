@@ -1,0 +1,2 @@
+current release
+io_service тепрь объект ::wfc::wfc, и инициализирует global через конструктор. global::io_service теперь ссылка, а не std::weak_ptr

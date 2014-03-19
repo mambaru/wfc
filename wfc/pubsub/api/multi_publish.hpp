@@ -2,18 +2,19 @@
 
 #include <wfc/pubsub/status.hpp>
 #include <wfc/pubsub/api/publish.hpp>
+#include <wfc/memory.hpp>
 #include <vector>
 
 namespace wfc{ namespace pubsub{
 
 namespace request
 {
-  typedef std::vector<publish> multi_publish;
+  typedef std::vector< publish > multi_publish;
 }
 
 namespace response
 {
-  typedef std::vector<publish> multi_publish;
+  typedef std::vector< publish > multi_publish;
 }
 
 }}

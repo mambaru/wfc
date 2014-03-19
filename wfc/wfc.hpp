@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wfc/core/global.hpp>
+#include <wfc/io_service.hpp>
 #include <memory>
 #include <vector>
 
@@ -16,6 +17,7 @@ public:
   int run(int argc, char* argv[]);
 private:
   std::string _program_version;
+  ::wfc::io_service _io_service;
   std::shared_ptr<global> _global;
   std::shared_ptr<global::module_registry> _modules;
   std::shared_ptr<global::logger_registry> _loggers;

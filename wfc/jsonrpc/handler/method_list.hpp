@@ -23,7 +23,6 @@ class method_list
   : public handler_base
   , public method_list_base<Args...>
   , public method_list_base<Args...>::interface_type
-  //, public std::enable_shared_from_this< method_list<Args...> >
 {
 public:
   typedef method_list<Args...> self;
@@ -32,29 +31,6 @@ public:
   typedef typename super::target_type    target_type;
   typedef typename super::interface_type interface_type;
 
-  /*
-  typedef std::function<void(incoming_holder holder)> incoming_handler_t;
-
-  typedef std::function< void( wfc::io::data_ptr, incoming_handler_t) > outgoing_callback_t;
-
-  typedef std::function< void(int id, outgoing_callback_t) > outgoing_request_handler_t;
-  
-  outgoing_request_handler_t outgoing_request_handler;
-  */
- 
-  /*
-  typedef std::function< wfc::io::data_ptr(int id) > request_serializer_t;
-  typedef std::function<void(incoming_holder holder)> incoming_handler_t;
-  typedef std::function< void(incoming_handler_t, request_serializer_t) > outgoing_request_handler_t;
-  */
-  
-  // outgoing_request_handler_t outgoing_request_handler;
-  /*
-  /// wfc::io::handler handler;
-  
-  // обработчик исходящих запросов
-  std::function< void(wfc::io::data_ptr, incoming_handler_t) > outgoing_request_handler;
-  */
   template<typename PReq, typename Serializer>
   void send_request( const char* name, PReq req, Serializer ser, incoming_handler_t  clb) const
   {
@@ -65,7 +41,7 @@ public:
     outgoing_request_handler(
       name,
       std::move(clb), // обработчик ответ
-      [p, ser](const char* name, int id)-> ::wfc::io::data_ptr // сериализатор (для отложенной сериализации)
+      [p, ser](const char* name, int id)-> ::wfc::io::data_ptr
       {
         
         return ser(name, std::move(*p), id);

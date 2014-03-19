@@ -121,6 +121,8 @@ public:
     this->post(*this, h);
   }
 
+
+  
   ::wfc::io::callback callback( std::function<void(data_ptr)> handler)
   {
     auto wrp = this->strand().wrap( this->owner().wrap( [handler]( std::shared_ptr<data_ptr> dd ){

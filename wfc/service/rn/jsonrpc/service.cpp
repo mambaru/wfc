@@ -29,7 +29,7 @@ service::service(wfc::io_service& io, const service_config& conf, std::shared_pt
 }
   
 service::service(std::weak_ptr< wfc::global > global, const service_config& conf/*, std::shared_ptr<ifactory> fact*/)
-  : _io_service( *(global.lock()->io_service.lock()) )
+  : _io_service( global.lock()->io_service)
   , _conf( conf )
 {
 }

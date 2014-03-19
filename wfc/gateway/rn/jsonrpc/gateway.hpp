@@ -72,7 +72,7 @@ class gateway
   
 public:
   
-  gateway(std::weak_ptr<  ::wfc::global > g, const gateway_config& conf);
+  gateway(std::weak_ptr<::wfc::global> g, const gateway_config& conf);
   
   gateway( ::wfc::io_service& io, const gateway_config& conf, std::shared_ptr<ifactory> fact);
   

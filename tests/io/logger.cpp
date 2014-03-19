@@ -23,13 +23,14 @@ public:
 
 class test_logger
 {
+  wfc::io_service _io_service;
 public:
   test_logger()
   {
     std::cout << "test_logger()" << std::endl;
     reg = std::make_shared<wfc::registry< wfc::ilogger> >();
     log = std::make_shared<logger>();
-    global = std::make_shared<wfc::global>() ;
+    global = std::make_shared<wfc::global>(_io_service) ;
     wfc::global::static_global = global;
     global->loggers = reg;
     reg->set("common", log);
