@@ -19,7 +19,7 @@ gateway_list::gateway_list(wfc::io_service& io, const gateway_list_config& conf,
 }
   
 gateway_list::gateway_list(std::weak_ptr< wfc::global > global, const gateway_list_config& conf)
-  : _io_service( *(global.lock()->io_service.lock()) )
+  : _io_service( global.lock()->io_service )
   , _conf( conf )
 {
 }

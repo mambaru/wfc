@@ -8,6 +8,7 @@
 
 #include <wfc/pubsub/api/subscribe_json.hpp>
 #include <wfc/pubsub/api/publish_json.hpp>
+#include <wfc/pubsub/api/multi_publish_json.hpp>
 #include <wfc/jsonrpc.hpp>
 
 namespace wfc{ namespace pubsub{
@@ -45,8 +46,12 @@ struct method_list: ::wfc::jsonrpc::method_list<
 
   ::wfc::jsonrpc::dual_method<
     _mpublish_, 
-    ::wfc::json::array< std::vector<request::publish_json::type> >,
+/*    ::wfc::json::array< std::vector<request::publish_json::type> >,
     ::wfc::json::array< std::vector<response::publish_json::type> >,
+    */
+    request::multi_publish_json::type,
+    response::multi_publish_json::type,
+
     ipubsub, 
     &ipubsub::publish
   >,

@@ -9,13 +9,14 @@ namespace wfc{
 
 wfc::wfc(std::string program_version, std::initializer_list< std::pair< std::string, std::shared_ptr<imodule> > > modules )
   : _program_version(program_version)
-  , _global( std::make_shared<global>() )
   , _module_list(modules)
 {
 }
 
 int wfc::run(int argc, char* argv[])
 {
+  _global = std::make_shared<global>(_io_service);
+  global::static_global = _global;
   _modules = std::make_shared<global::module_registry>();
   _loggers = std::make_shared<global::logger_registry>();
   _pubsubs = std::make_shared<global::pubsub_registry>();

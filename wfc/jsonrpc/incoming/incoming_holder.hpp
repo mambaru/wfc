@@ -24,9 +24,8 @@ public:
   
   typedef std::chrono::high_resolution_clock clock_t;
   
-  incoming_holder(data_ptr d/*, std::weak_ptr<handler_base> method_handler*/)
-    : /*method_handler1(method_handler)
-    ,*/ _data( std::move(d) )
+  incoming_holder(data_ptr d)
+    : _data( std::move(d) )
   {
     _time_point = clock_t::now();
     _begin = ::wfc::json::parser::parse_space(_data->begin(), _data->end());
