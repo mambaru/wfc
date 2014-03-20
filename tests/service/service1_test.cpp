@@ -82,7 +82,12 @@ struct method_test2: wfc::jsonrpc::method<
 
 struct method_list: wfc::jsonrpc::method_list<
   //wfc::jsonrpc::target<itest>,
-  wfc::jsonrpc::interface_target_ctl<itest, itest_ex, &itest_ex::startup, &itest_ex::shutdown>, 
+  //wfc::jsonrpc::interface_target_ctl<itest, itest_ex, &itest_ex::startup, &itest_ex::shutdown>, 
+  wfc::jsonrpc::interface_<itest>,
+  wfc::jsonrpc::target<itest>,
+  wfc::jsonrpc::provider<itest_ex>,
+  wfc::jsonrpc::startup< wfc::jsonrpc::mem_fun_startup<itest, itest_ex, &itest_ex::startup> >,
+  wfc::jsonrpc::shutdown< wfc::jsonrpc::mem_fun_shutdown<itest_ex, &itest_ex::shutdown> >,
   wfc::jsonrpc::invoke_method<_test1_, test1_json, test1_json, itest, &itest::test1>,
   method_test2
 >
@@ -126,7 +131,7 @@ int main(int argc, char* [])
   config.jsonrpc.workers[0].strands[0].count = 16;
   
   config.tcp[0].threads = 4;
-  auto factory = wfc::service::rn::jsonrpc::make_factory<method_list>(ptest);
+  auto factory = wfc::service::rn::jsonrpc::make_factory<method_list>(ptest, ptest);
   wfc::service::rn::jsonrpc::service service( io_service, config, factory);
 
   /*

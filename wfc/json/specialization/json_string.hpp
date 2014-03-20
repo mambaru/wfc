@@ -291,14 +291,13 @@ public:
     */
   }
 
-  template< typename P>
-  P operator() ( T& ptr, P beg, P end )
+  template< typename Type, typename P>
+  P operator() ( std::unique_ptr<Type>& ptr, P beg, P end )
   {
     // Только умный
-//    #warning TODO: nullptr
     if (beg!=end && *beg!='n')
     {
-      ptr = std::make_unique<typename T::element_type>();
+      ptr = std::make_unique<Type>();
       return typename J::serializer()( *ptr, beg, end);
     }
     else
@@ -307,13 +306,23 @@ public:
       for (int i=0; beg!=end && i<4; ++i, ++beg);
     }
     return beg;
-    /*
-    v.clear();
-    P start = beg;
-    beg = parser::parse_value(beg, end);
-    std::copy( start, beg, std::back_inserter(v) );
+  }
+  
+  template< typename Type, typename P>
+  P operator() ( std::shared_ptr<Type>& ptr, P beg, P end )
+  {
+    // Только умный
+    if (beg!=end && *beg!='n')
+    {
+      ptr = std::make_shared<Type>();
+      return typename J::serializer()( *ptr, beg, end);
+    }
+    else
+    {
+      ptr=nullptr;
+      for (int i=0; beg!=end && i<4; ++i, ++beg);
+    }
     return beg;
-    */
   }
 };
 

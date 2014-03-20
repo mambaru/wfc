@@ -7,10 +7,15 @@
 #include <wfc/gateway/rn/jsonrpc/gateway_config.hpp>
 #include <wfc/io_service.hpp>
 #include <wfc/core/global.hpp>
+#include <wfc/pubsub/pubsub_gateway.hpp>
 #include <list>
 
 #include <wfc/json/json.hpp>
 #include <wfc/json/name.hpp>
+
+
+namespace wfc{ namespace gateway{ 
+}}
 
 
 namespace wfc{ namespace jsonrpc{
@@ -32,6 +37,7 @@ struct ifactory
 
   virtual ~ifactory() {}
   virtual jsonrpc_ptr create_for_tcp( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt) = 0;
+  virtual jsonrpc_ptr create_for_pubsub( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt) = 0;
 };
 
 template<typename MethodList>
@@ -51,6 +57,11 @@ public:
     return std::make_shared< jsonrpc_type >( io_service, opt,  ::wfc::jsonrpc::handler<methods_type>(_target) );
   }
 
+  virtual jsonrpc_ptr create_for_pubsub( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt)
+  {
+    return std::make_shared< jsonrpc_type >( io_service, opt,  ::wfc::jsonrpc::handler<methods_type>(_target) );
+  }
+
 private:
   target_type _target;
 };
@@ -65,14 +76,16 @@ make_factory(typename ML::target_type target)
 
 class gateway
 {
-  typedef  ::wfc::jsonrpc::service jsonrpc_type;
-  typedef  ::wfc::io::ip::tcp::rn::jsonrpc::client client_tcp_type;
+  typedef ::wfc::jsonrpc::service jsonrpc_type;
+  typedef ::wfc::io::ip::tcp::rn::jsonrpc::client client_tcp_type;
+  typedef ::wfc::pubsub::pubsub_gateway pubsub_gateway;
+  typedef std::shared_ptr<pubsub_gateway> pubsub_gateway_ptr;
   typedef std::shared_ptr<client_tcp_type> client_tcp_ptr;
   typedef std::shared_ptr<jsonrpc_type> jsonrpc_ptr;
   
 public:
   
-  gateway(std::weak_ptr<::wfc::global> g, const gateway_config& conf);
+  gateway( std::weak_ptr<::wfc::global> g, const gateway_config& conf);
   
   gateway( ::wfc::io_service& io, const gateway_config& conf, std::shared_ptr<ifactory> fact);
   
@@ -89,11 +102,14 @@ private:
   void create( ::wfc::io_service& io, const gateway_config& conf, std::shared_ptr<ifactory> fact);
   
 private:
+  std::weak_ptr<::wfc::global> _global;
   ::wfc::io_service& _io_service;
   gateway_config _conf;
   
   jsonrpc_ptr _jsonrpc_for_tcp;
+  jsonrpc_ptr _jsonrpc_for_pubsub;
   std::list< client_tcp_ptr > _tcp_clients;
+  std::list< pubsub_gateway_ptr > _pubsubs;
 };
 
 }}}}

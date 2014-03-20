@@ -11,18 +11,29 @@
 namespace wfc{ namespace jsonrpc{
   
 template<typename I>
-struct interface_ /* , std::enable_shared_from_this< interface_<I> > */
-  //: fas::advice<_interface_, I >
+struct interface_ 
 {
   typedef fas::metalist::advice metatype;
   typedef _interface_ tag;
   typedef I advice_class;
-
-  /*advice_class& get_advice() { return *this;}
-  const advice_class& get_advice() const { return *this;}
-  */
-
 };
+
+template<typename I>
+struct provider
+  : fas::value<_provider_, std::weak_ptr<I> >
+{
+};
+
+/*
+template<typename T>
+struct provider
+{
+  typedef fas::metalist::advice metatype;
+  typedef _provider_ tag;
+  typedef T advice_class;
+};
+*/
+
 
 #define JSONRPC_METHOD_IMPL(Tg, Method)\
   virtual void Method( call_params_ptr<Tg>::type req, std::function< void(call_result_ptr<Tg>::type) > callback)\

@@ -17,7 +17,7 @@ struct mem_fun_startup
   template<typename T>
   void operator()(T& t, ::wfc::io::io_id_t id) const
   {
-    if (auto trg = t.target().lock() )
+    if (auto trg = t.provider().lock() )
     {
       (trg.get()->*mem_ptr)( id, t.shared_from_this() );
       
@@ -34,7 +34,7 @@ struct mem_fun_shutdown
   template<typename T>
   void operator()(T& t, ::wfc::io::io_id_t id) const
   {
-    if (auto trg = t.target().lock() )
+    if (auto trg = t.provider().lock() )
     {
       (trg.get()->*mem_ptr)( id );
       

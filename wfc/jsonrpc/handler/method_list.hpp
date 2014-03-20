@@ -14,6 +14,7 @@ class method_list_base
 public:
   typedef fas::aspect_class< typename fas::merge_aspect< fas::aspect<Args...>, handler_aspect>::type > super;
   typedef typename super::aspect::template advice_cast<_target_>::type target_type;
+  typedef typename super::aspect::template advice_cast<_provider_>::type provider_type;
   typedef typename super::aspect::template advice_cast<_interface_>::type interface_type;
 };
 

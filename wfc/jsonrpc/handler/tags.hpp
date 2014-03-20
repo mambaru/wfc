@@ -12,6 +12,7 @@ struct _interface_;
 
 struct _startup_;
 struct _shutdown_;
+struct _provider_;
 
 }} // wfc
 

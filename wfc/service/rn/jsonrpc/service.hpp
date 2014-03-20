@@ -41,9 +41,11 @@ class factory
 public:
   typedef MethodList methods_type;
   typedef typename methods_type::target_type target_type;
+  typedef typename methods_type::provider_type provider_type;
 
-  factory(target_type target)
+  factory(target_type target, provider_type provider = provider_type())
     : _target(target)
+    , _provider(provider)
     {}
     
   virtual jsonrpc_ptr create_for_tcp( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt)
@@ -53,14 +55,15 @@ public:
 
 private:
   target_type _target;
+  provider_type _provider;
 };
 
 
 template<typename ML>
 inline std::shared_ptr<ifactory>
-make_factory(typename ML::target_type target)
+make_factory(typename ML::target_type target, typename ML::provider_type provider = typename ML::provider_type() )
 {
-  return std::make_shared< factory< ML> >( target );
+  return std::make_shared< factory< ML> >( target, provider );
 }
 
 class service

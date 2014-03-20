@@ -51,10 +51,12 @@ public:
   typedef handler<Instanse> self;
   typedef Instanse super;
   typedef typename Instanse::target_type target_type;
+  typedef typename Instanse::provider_type provider_type;
   
-  handler(target_type trg = target_type() )
+  handler(target_type trg = target_type(), provider_type prv = provider_type() )
   {
     this->get_aspect().template get<_target_>() = trg;
+    this->get_aspect().template get<_provider_>() = prv;
   }
 
   virtual std::shared_ptr<handler_base> clone(/*outgoing_request_handler_t request_handler*/) const 
@@ -98,6 +100,11 @@ public:
   target_type target() const
   {
     return this->get_aspect().template get<_target_>();
+  }
+
+  provider_type provider() const
+  {
+    return this->get_aspect().template get<_provider_>();
   }
 
 private:

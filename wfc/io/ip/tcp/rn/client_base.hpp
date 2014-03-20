@@ -38,7 +38,7 @@ public:
     {
       add([this](::wfc::io::io_id_t id) {
         DAEMON_LOG_WARNING("Connection " << id << " closed. Reconnect...")
-        this->connect();
+        this->post( std::bind( &self::connect, this) );
       });
       startup( id, clb, add);
     };
@@ -58,9 +58,10 @@ public:
     super::stop(*this);
   }
   
-  void connect(/*endpoint_type ep, socket_ptr psock*/)
+  void connect()
   {
-        boost::asio::ip::tcp::resolver resolver( this->get_io_service() );
+    TRACE_LOG_MESSAGE("void connect()")
+    boost::asio::ip::tcp::resolver resolver( this->get_io_service() );
     boost::asio::ip::tcp::endpoint ep = *resolver.resolve({
       this->options().host, 
       this->options().port
@@ -68,77 +69,37 @@ public:
 
     auto psock = std::make_shared<socket_type>( this->get_io_service() );
 
-      psock->async_connect(ep, [ep, psock, this](const boost::system::error_code& ec)
+    psock->async_connect(ep, super::strand().wrap( [ep, psock, this](const boost::system::error_code& ec)
+    {
+      if ( !ec )
       {
-        if ( !ec )
-        {
-          DAEMON_LOG_MESSAGE( "Connected!" )
+        COMMON_LOG_MESSAGE( "Client " << this->options().host << ":" << this->options().port << " connected!" )
           // TODO: для connection отдельный handler
-          this->_connection = std::make_shared<connection_type>( std::move(*psock), this->options().connection, this->_handler);
-          this->_connection->start();
-        }
-        else
+        this->_connection = std::make_shared<connection_type>( std::move(*psock), this->options().connection, this->_handler);
+        this->_connection->start();
+      }
+      else
+      {
+        DAEMON_LOG_WARNING( this->options().host << ":" << this->options().port << ": " 
+                            << ec.message() << " " << this->options().reconnect_timeout << " seconds to reconnect." )
+        
+        _reconnect_timer.expires_from_now( boost::posix_time::seconds( this->options().reconnect_timeout) );
+        _reconnect_timer.async_wait([this, ep, psock](const boost::system::error_code& ) 
         {
-          DAEMON_LOG_WARNING( ec.message() << " " << this->options().reconnect_timeout << " seconds to reconnect." )
-          _reconnect_timer.expires_from_now( boost::posix_time::seconds( this->options().reconnect_timeout) );
-          _reconnect_timer.async_wait([this, ep, psock](const boost::system::error_code& ) {
-            this->connect(/*ep, psock*/);
-          });
-          /*
-            _idle_timer->expires_at(_idle_timer->expires_at() + boost::posix_time::milliseconds(_conf.idle_timeout_ms));
-            _idle_timer->async_wait([this](const boost::system::error_code& e)
-            {
-              this->_idle();  
-            });*/
-          //abort();
-        }
-      });
-    
+           this->connect();
+        });
+      }
+    }));
   }
 
   void start()
   {
     super::start(*this);
-    this->connect();
-  /*
-    boost::asio::ip::tcp::resolver resolver( this->get_io_service() );
-    boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve({
-      this->options().host, 
-      this->options().port
-    });
-
-    auto sock = std::make_shared<socket_type>( this->get_io_service() );
-    this->connect( endpoint, sock);
-  */
     
-    /*
-    this->dispatch([this]()
+    super::dispatch([this]()
     {
-      typedef typename connection_type::descriptor_type descriptor_type;
-      descriptor_type desc( this->get_io_service() );
-  
-      boost::asio::ip::tcp::resolver resolver( this->get_io_service() );
-      boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve({
-        this->options().host, 
-        this->options().port
-      });
-      
-      
-      auto sock = std::make_shared<socket_type>( this->get_io_service() );
-      sock->async_connect(endpoint, [sock, this](const boost::system::error_code& ec)
-      {
-        if ( !ec )
-        {
-          // TODO: для connection отдельный handler
-          this->_connection = std::make_shared<connection_type>( std::move(*sock), this->options().connection, this->_handler);
-          this->_connection->start();
-        }
-        else
-        {
-          abort();
-        }
-      });
-    });*/
+      this->connect();
+    });
   }
   
 };

@@ -33,7 +33,7 @@ struct method_list: ::wfc::jsonrpc::method_list<
 
   ::wfc::jsonrpc::target<ipubsub>,
   ::wfc::jsonrpc::interface_<ipubsub>,
-  
+  ::wfc::jsonrpc::provider< ipubsub >,
   ::wfc::jsonrpc::shutdown< ::wfc::jsonrpc::mem_fun_shutdown< ipubsub, &ipubsub::describe> >, 
   
   ::wfc::jsonrpc::dual_method<
