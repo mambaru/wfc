@@ -47,31 +47,34 @@ class factory
 public:
   typedef MethodList methods_type;
   typedef typename methods_type::target_type target_type;
+  typedef typename methods_type::provider_type provider_type;
 
-  factory(target_type target)
+  factory(target_type target, provider_type provider)
     : _target(target)
+    , _provider(provider)
     {}
     
   virtual jsonrpc_ptr create_for_tcp( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt)
   {
-    return std::make_shared< jsonrpc_type >( io_service, opt,  ::wfc::jsonrpc::handler<methods_type>(_target) );
+    return std::make_shared< jsonrpc_type >( io_service, opt,  ::wfc::jsonrpc::handler<methods_type>(_target, _provider) );
   }
 
   virtual jsonrpc_ptr create_for_pubsub( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt)
   {
-    return std::make_shared< jsonrpc_type >( io_service, opt,  ::wfc::jsonrpc::handler<methods_type>(_target) );
+    return std::make_shared< jsonrpc_type >( io_service, opt,  ::wfc::jsonrpc::handler<methods_type>(_target, _provider) );
   }
 
 private:
-  target_type _target;
+  target_type   _target;
+  provider_type _provider;
 };
 
 
 template<typename ML>
 inline std::shared_ptr<ifactory>
-make_factory(typename ML::target_type target)
+make_factory(typename ML::target_type target, typename ML::provider_type provider)
 {
-  return std::make_shared< factory< ML> >( target );
+  return std::make_shared< factory< ML> >( target, provider);
 }
 
 class gateway
