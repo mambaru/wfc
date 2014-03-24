@@ -99,7 +99,7 @@ public:
   void stop();
   
   static service_config create_config(std::string type);
-  static jsonrpc_options create_jsonrpc_options();
+  // static jsonrpc_options create_jsonrpc_options();
 
 private:
   
