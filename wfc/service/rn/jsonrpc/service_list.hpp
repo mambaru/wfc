@@ -18,6 +18,8 @@ public:
   void start();
   
   void stop();
+  
+  static service_list_config create_config(std::string type);
 
 private:
   void create( ::wfc::io_service& io, const service_list_config& conf, std::shared_ptr<ifactory> fact);

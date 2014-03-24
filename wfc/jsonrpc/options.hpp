@@ -14,13 +14,27 @@ struct options
     struct strand
     {
       int count = 1;
-      std::vector<std::string> methods = {"*"};
+      std::vector<std::string> methods/* = {"*"}*/;
     };
     
     int threads = 0;
-    std::vector<strand> strands = {strand()};
+    std::vector<strand> strands/* = {strand()}*/;
   };
-  std::vector<worker> workers = { worker() };
+  std::vector<worker> workers/* = { worker() }*/;
+  
+  
+  static options create() 
+  {
+    options opt;
+    worker wrk;
+    worker::strand stn;
+    stn.count = 1;
+    stn.methods.push_back("*");
+    wrk.strands.push_back(stn);
+    wrk.threads = 1;
+    opt.workers.push_back(wrk);
+    return opt;
+  }
 };
 
 }}

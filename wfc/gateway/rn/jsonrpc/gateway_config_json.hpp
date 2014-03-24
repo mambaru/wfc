@@ -21,9 +21,12 @@ struct gateway_config_json
       ::wfc::json::member< 
           n_jsonrpc, 
           gateway_config, 
-          ::wfc::jsonrpc::options,
-          &gateway_config::jsonrpc, 
-          ::wfc::jsonrpc::options_json::type 
+          std::shared_ptr<jsonrpc_options>,
+          &gateway_config::jsonrpc,
+          ::wfc::json::pointer<
+            std::shared_ptr<jsonrpc_options>,
+            ::wfc::jsonrpc::options_json::type
+          >
       >, 
       ::wfc::json::member< 
           n_tcp, 

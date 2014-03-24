@@ -32,6 +32,7 @@ struct ifactory
 
   virtual ~ifactory() {}
   virtual jsonrpc_ptr create_for_tcp( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt) = 0;
+  virtual jsonrpc_ptr create_for_udp( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt) = 0;
 };
 
 template<typename MethodList>
@@ -50,12 +51,22 @@ public:
     
   virtual jsonrpc_ptr create_for_tcp( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt)
   {
-    return std::make_shared< jsonrpc_type >( io_service, opt,  ::wfc::jsonrpc::handler<methods_type>(_target) );
+    if ( _jsonrpc == nullptr )
+      _jsonrpc = std::make_shared< jsonrpc_type >( io_service, opt,  ::wfc::jsonrpc::handler<methods_type>(_target) );
+    return _jsonrpc;
+  }
+
+  virtual jsonrpc_ptr create_for_udp( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt)
+  {
+    if ( _jsonrpc == nullptr )
+      _jsonrpc = std::make_shared< jsonrpc_type >( io_service, opt,  ::wfc::jsonrpc::handler<methods_type>(_target) );
+    return _jsonrpc;
   }
 
 private:
   target_type _target;
   provider_type _provider;
+  jsonrpc_ptr _jsonrpc;
 };
 
 
@@ -86,6 +97,9 @@ public:
   void start();
   
   void stop();
+  
+  static service_config create_config(std::string type);
+  static jsonrpc_options create_jsonrpc_options();
 
 private:
   

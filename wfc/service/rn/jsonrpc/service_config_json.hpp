@@ -21,9 +21,12 @@ struct service_config_json
       ::wfc::json::member< 
           n_jsonrpc, 
           service_config, 
-          ::wfc::jsonrpc::options,
-          &service_config::jsonrpc, 
-          ::wfc::jsonrpc::options_json::type 
+          std::shared_ptr<jsonrpc_options>,
+          &service_config::jsonrpc,
+          ::wfc::json::pointer<
+            std::shared_ptr<jsonrpc_options>,
+            ::wfc::jsonrpc::options_json::type
+          >
       >, 
       ::wfc::json::member< 
           n_tcp, 

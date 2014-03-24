@@ -19,34 +19,46 @@ class provider
   typedef provider<interface_type> self;
   typedef std::weak_ptr<interface_type> interface_ptr;
   typedef std::map<size_t, interface_ptr> clinet_map;
+  typedef std::queue< std::function<void()> > delayed_queue;
   
 public:
+  
+  typedef std::function<void(size_t)> shudown_handler;
+  typedef std::list<shudown_handler> shudown_handler_list;
   
   provider()
     : _cli_itr(_clients.end())
   {}
   
+  // Когда вызывать, определяеться в method_list
   void startup(size_t clinet_id, interface_ptr ptr )
   {
-    std::lock_guard<mutex_type> lk(_mutex);
-    
-    std::cout << "connected! " << clinet_id << std::endl;
-    this->_clients[clinet_id] = ptr;
-    this->_cli_itr = this->_clients.begin();
-    while ( !_delayed_queue.empty() )
+    delayed_queue dq;
     {
-      _delayed_queue.front()();
-      _delayed_queue.pop();
+      std::lock_guard<mutex_type> lk(_mutex);
+      this->_clients[clinet_id] = ptr;
+      this->_cli_itr = this->_clients.begin();
+      dq.swap(_delayed_queue);
+    }
+    
+    while ( !dq.empty() )
+    {
+      dq.front()();
+      dq.pop();
     }
   }
     
+  // Когда вызывать, определяеться в method_list
   void shutdown(size_t clinet_id )
   {
     std::lock_guard<mutex_type> lk(_mutex);
     
-    std::cout << "closed! " << clinet_id << std::endl;
+    std::cout << "provider closed! " << clinet_id << std::endl;
     this->_clients.erase(clinet_id);
     this->_cli_itr = this->_clients.begin();
+    
+    for ( auto& sh: _shudown_handlers )
+      sh( clinet_id );
   }
 
   interface_ptr find(size_t client_id)
@@ -140,13 +152,16 @@ public:
     Args... args
   )
   {
+    std::cout << "privider post2 -1-" <<  std::endl;
     size_t client_id = 0;
     if (auto cli = this->get(client_id).lock() )
     {
+      std::cout << "privider post2 -2- " << client_id <<  std::endl;
       (cli.get()->*mem_ptr)( 
         std::move(req), 
         [client_id, callback](Resp resp)
         {
+          std::cout << "privider post2 -2.1-" <<  std::endl;
           callback( client_id, std::move(resp));
         }, 
         args... 
@@ -154,22 +169,25 @@ public:
     }
     else
     {
+      std::cout << "privider post2 -3-" <<  std::endl;
       std::lock_guard<mutex_type> lk(_mutex);
       auto wrp = this->wrap( mem_ptr, std::move(req), callback, std::forward<Args>(args)...);
       _delayed_queue.push( wrp );
     }
   }
   
-  void operator+= ( std::function<void(size_t)> shudown_handler )
+  void operator+= ( shudown_handler sh )
   {
-#error TODO; и в ресивере добавить обработчик на resubscribe
+    std::lock_guard<mutex_type> lk(_mutex);
+    _shudown_handlers.push_back(sh);
   }
   
 private:
   mutex_type _mutex;
   clinet_map _clients;
   typename clinet_map::iterator _cli_itr;
-  std::queue< std::function<void()> > _delayed_queue;
+  delayed_queue _delayed_queue;
+  shudown_handler_list _shudown_handlers;
 };
   
 }}

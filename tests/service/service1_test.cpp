@@ -125,10 +125,10 @@ int main(int argc, char* [])
   
   auto ptest = std::make_shared<test>();
   
-  wfc::service::rn::jsonrpc::service_config config;
+  wfc::service::rn::jsonrpc::service_config config = wfc::service::rn::jsonrpc::service::create_config("jsonrpc");
   
-  config.jsonrpc.workers[0].threads = 4;
-  config.jsonrpc.workers[0].strands[0].count = 16;
+  config.jsonrpc->workers[0].threads = 4;
+  config.jsonrpc->workers[0].strands[0].count = 16;
   
   config.tcp[0].threads = 4;
   auto factory = wfc::service::rn::jsonrpc::make_factory<method_list>(ptest, ptest);

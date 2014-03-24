@@ -8,9 +8,20 @@ void gateway::create(wfc::io_service& io, const gateway_config& conf, std::share
 {
   _conf = conf;
   
+  jsonrpc_options jopt;
+  
+  if ( conf.jsonrpc!=nullptr)
+  {
+    jopt = *(conf.jsonrpc);
+  }
+  else
+  {
+    jopt = jsonrpc_options::create();
+  }
+  
   if ( !conf.tcp.empty() )
   {
-    _jsonrpc_for_tcp = fact->create_for_tcp(io, conf.jsonrpc);
+    _jsonrpc_for_tcp = fact->create_for_tcp(io, jopt);
     for (auto& t : conf.tcp )
     {
       _tcp_clients.push_back(
@@ -21,17 +32,14 @@ void gateway::create(wfc::io_service& io, const gateway_config& conf, std::share
 
   if ( !conf.pubsub.empty() )
   {
-    _jsonrpc_for_pubsub = fact->create_for_pubsub(io, conf.jsonrpc);
+    _jsonrpc_for_pubsub = fact->create_for_pubsub(io, jopt);
     for (auto& t : conf.pubsub )
     {
-      _pubsubs.push_back(
-          //std::make_shared<pubsub_gateway>( io, t, _jsonrpc_for_pubsub )
-        std::make_shared<pubsub_gateway>( _global, t )
-      );
-      _pubsubs.back()->initialize( _jsonrpc_for_pubsub );
+      auto pg = std::make_shared<pubsub_gateway>( _global, t );
+      _pubsubs.push_back(pg);
+      pg->initialize( _jsonrpc_for_pubsub );
     }
   }
-
 }
   
 gateway::gateway(wfc::io_service& io, const gateway_config& conf, std::shared_ptr<ifactory> fact)
@@ -64,6 +72,10 @@ void gateway::start()
   if (_jsonrpc_for_tcp != nullptr)
   {
     _jsonrpc_for_tcp->start();
+  }
+  
+  if (_jsonrpc_for_pubsub != nullptr)
+  {
     _jsonrpc_for_pubsub->start();
   }
     
@@ -81,6 +93,24 @@ void gateway::start()
   
 void gateway::stop()
 {
+  
+}
+
+gateway_config gateway::create_config(std::string type)
+{
+  
+  gateway_config conf;
+  if ( type.find("jsonrpc") != std::string::npos )
+  {
+    conf.jsonrpc = std::make_shared<jsonrpc_options>( ::wfc::jsonrpc::options::create() );
+  }
+  
+  tcp_options tcp;
+  tcp.host = "0.0.0.0";
+  tcp.port = "12345";
+  conf.tcp.push_back(tcp);
+  return conf;
+
   
 }
 

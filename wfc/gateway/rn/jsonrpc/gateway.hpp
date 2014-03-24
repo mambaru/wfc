@@ -100,6 +100,8 @@ public:
   
   void stop();
 
+  static gateway_config create_config(std::string);
+  
 private:
   
   void create( ::wfc::io_service& io, const gateway_config& conf, std::shared_ptr<ifactory> fact);

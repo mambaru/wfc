@@ -16,6 +16,8 @@ namespace wfc{ namespace pubsub{
 struct pubsub_gateway_options: 
   ::wfc::io::basic::options
 {
+  std::string pubsub_name;
+  
   std::string incoming_target;
   std::string incoming_channel;
   
@@ -31,17 +33,22 @@ public:
   typedef pubsub_gateway_options options_type;
   typedef ::wfc::jsonrpc::service jsonrpc_service;
   typedef std::shared_ptr<jsonrpc_service> jsonrpc_ptr;
+  typedef std::weak_ptr< ::wfc::pubsub::ipubsub > ipubsub_ptr;
   
   virtual ~pubsub_gateway();
   pubsub_gateway( std::weak_ptr< ::wfc::global > global, const options_type& conf);
   void initialize( std::shared_ptr< ::wfc::jsonrpc::service> jsonrpc);
   void start();
-  void process( ::wfc::io::data_ptr d );
+  void process_outgoing( ::wfc::io::data_ptr d );
+private:
+  void process_outgoing_( ::wfc::io::data_ptr d );
 private:
   std::weak_ptr< ::wfc::global > _global;
   options_type _options; // вынести в аспект basic_io
   jsonrpc_ptr  _jsonrpc;
   ::wfc::io::io_id_t _io_id;
+  ipubsub_ptr _incoming_target;
+  ipubsub_ptr _outgoing_target;
 };
 
 }}

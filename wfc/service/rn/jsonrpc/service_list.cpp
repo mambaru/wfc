@@ -50,4 +50,13 @@ void service_list::stop()
   }
 }
 
+service_list_config service_list::create_config(std::string type)
+{
+  service_list_config conf;
+  conf.services.push_back(
+    service::create_config(type)
+  );
+  return conf;
+}
+
 }}}}
