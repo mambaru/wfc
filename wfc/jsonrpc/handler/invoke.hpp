@@ -71,6 +71,7 @@ struct invoke: Handler
         d->clear();
         typename json_type::serializer()(error_message, std::inserter( *d, d->end() ));
         handler( std::move(d) );
+        return;
       }
       
       
