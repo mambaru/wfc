@@ -49,7 +49,16 @@ struct message_json
         json::member<n_cursor, message, cursor_t, &message::cursor >,
         json::member<n_identity, message, identity_t, &message::identity >,
         json::member<n_key, message, key_t, &message::key >,
-        json::member<n_content, message, data_t, &message::content,  json::raw_value<data_t> >
+        json::member<
+          n_content, 
+          message, 
+          data_ptr, 
+          &message::content,  
+          json::pointer<
+            data_ptr,
+            json::raw_value<data_t> 
+          >
+        >
       >::type
     > type;
 

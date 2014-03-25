@@ -31,6 +31,7 @@ public:
   typedef method_list_base<Args...> super;
   typedef typename super::target_type    target_type;
   typedef typename super::interface_type interface_type;
+  typedef std::unique_ptr< ::wfc::jsonrpc::error> error_ptr;
 
   template<typename PReq, typename Serializer>
   void send_request( const char* name, PReq req, Serializer ser, incoming_handler_t  clb) const
@@ -69,14 +70,57 @@ public:
     typedef std::unique_ptr< ::wfc::jsonrpc::error> type;
   };
 
-  template<typename Tg, typename ReqPtr, typename Callback>
+    
+  /*
+  template<typename Tg, typename ReqPtr , typename Callback>
   void call(ReqPtr req, Callback callback) const
   {
-    
     this->get_aspect().template get<Tg>().call( *this, std::move(req), callback);
   }
+  */
 
+  template<typename Tg, typename ReqPtr>
+  void call(ReqPtr req, std::function<void(typename call_result_ptr<Tg>::type, typename call_error_ptr<Tg>::type)> callback) const
+  {
+    this->get_aspect().template get<Tg>().call( *this, std::move(req), callback);
+  }
   
+  template<typename Tg, typename ReqPtr>
+  void call(
+    ReqPtr req, 
+    std::function<void(typename call_result_ptr<Tg>::type)> callback,
+    std::function<void(typename call_error_ptr<Tg>::type)> error_callback
+  ) const
+  {
+    this->get_aspect().template get<Tg>().call( 
+      *this, 
+      std::move(req), 
+      [callback, error_callback](
+        typename call_result_ptr<Tg>::type resp, 
+        typename call_error_ptr<Tg>::type err
+      )
+      {
+        if ( resp!=nullptr )
+        {
+          if (callback!=nullptr)
+          {
+            callback( std::move(resp) );
+          }
+        }
+        else if ( err!=nullptr )
+        {
+          if (error_callback!=nullptr)
+          {
+            error_callback( std::move(err) );
+          }
+        }
+        else if (callback!=nullptr)
+        {
+          callback(nullptr);
+        }
+      }
+    );
+  }
   
 };
 

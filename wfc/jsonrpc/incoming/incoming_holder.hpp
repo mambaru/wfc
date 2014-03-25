@@ -43,6 +43,14 @@ public:
     return std::move(_data);
   }
   
+  data_ptr acquire_params()
+  {
+    std::move( _incoming.params.first, _incoming.params.second, _data->begin() );
+    _data->resize( std::distance(_incoming.params.first, _incoming.params.second) );
+    _incoming = incoming();
+    return std::move(_data);
+  }
+  
   data_ptr tail() const
   {
     if ( _data == nullptr )

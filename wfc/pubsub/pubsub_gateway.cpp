@@ -66,7 +66,13 @@ void pubsub_gateway::process_outgoing_( ::wfc::io::data_ptr d )
   }
   else if ( holder.is_notify() )
   {
-    // TODO: publish to outgoing_target
+    if ( auto t = _outgoing_target.lock() )
+    {
+      auto ntf = std::make_unique< request::publish >();
+      ntf->channel = _options.outgoing_channel + holder.method();
+      ntf->content = std::move(holder.acquire_params());
+      t->publish( std::move(ntf), nullptr );
+    }
   }
   
 }

@@ -90,8 +90,6 @@ struct ad_process_method
   template<typename T>
   void operator()( T& t, incoming_holder holder, std::weak_ptr<handler_base> hb, ::wfc::io::callback callback)
   {
-    // t.tmp_worker->operator()( std::move(holder) );
-    
     t.push_advice(t, std::move( holder ), hb, callback );
   }
 };
@@ -99,9 +97,9 @@ struct ad_process_method
 struct ad_process_error
 {
   template<typename T>
-  void operator()( T&, incoming_holder, ::wfc::io::callback)
+  void operator()( T& t, incoming_holder holder, ::wfc::io::callback callback)
   {
-    
+    t.process_result(t, std::move(holder), callback);
   }
 };
 

@@ -10,21 +10,10 @@
 #include <wfc/io_service.hpp>
 #include <wfc/io/io_base.hpp>
 #include <wfc/jsonrpc/service.hpp>
+#include <wfc/pubsub/pubsub_gateway_options.hpp>
 
 namespace wfc{ namespace pubsub{
   
-struct pubsub_gateway_options: 
-  ::wfc::io::basic::options
-{
-  std::string pubsub_name;
-  
-  std::string incoming_target;
-  std::string incoming_channel;
-  
-  std::string outgoing_target;
-  std::string outgoing_channel;
-};
-
 class pubsub_gateway
   : ::wfc::io::basic_io<>
 {

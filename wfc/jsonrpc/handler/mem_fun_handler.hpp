@@ -50,7 +50,6 @@ template<
 >
 struct mem_fun_handler
 {
-  
   template<typename T>
   void operator()(T& t, std::unique_ptr<Req> req, std::function< void(std::unique_ptr<Resp>, std::unique_ptr< ::wfc::jsonrpc::error>) > callback) const
   {
@@ -67,6 +66,10 @@ struct mem_fun_handler
           callback( std::move(resp), nullptr);
         });
       }
+    }
+    else if (callback!=nullptr)
+    {
+      callback( nullptr, std::make_unique< ::wfc::jsonrpc::error >( ::wfc::jsonrpc::service_unavailable() ) );
     }
   }
 };
@@ -85,7 +88,6 @@ template<
 >
 struct mem_fun_handler_ex
 {
-  
   template<typename T>
   void operator()(T& t, std::unique_ptr<Req> req, std::function< void(std::unique_ptr<Resp>, std::unique_ptr< ::wfc::jsonrpc::error>) > callback) const
   {
@@ -102,6 +104,10 @@ struct mem_fun_handler_ex
           callback( std::move(resp), nullptr);
         }, t.get_id(), t.shared_from_this() );
       }
+    }
+    else if (callback!=nullptr)
+    {
+      callback( nullptr, std::make_unique< ::wfc::jsonrpc::error >( ::wfc::jsonrpc::service_unavailable() ) );
     }
   }
 };
@@ -152,6 +158,10 @@ struct mem_fun_handler2
           }
         }
       );
+    }
+    else if (callback!=nullptr)
+    {
+      callback( nullptr, std::make_unique< ::wfc::jsonrpc::error >( ::wfc::jsonrpc::service_unavailable() ) );
     }
   }
   

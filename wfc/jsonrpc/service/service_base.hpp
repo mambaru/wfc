@@ -37,6 +37,15 @@ struct io_data
 {
   std::shared_ptr<handler_base> method_handler;
   ::wfc::io::callback writer;
+  
+  io_data( std::shared_ptr<handler_base> method_handler, ::wfc::io::callback writer)
+    : method_handler(method_handler)
+    , writer(writer)
+  {}
+  
+  typedef std::function<void(incoming_holder holder)> response_handler;
+  typedef std::map<int, response_handler> response_map;
+  response_map response;
 };
 /*
 
@@ -63,12 +72,14 @@ public:
   typedef typename super::data_ptr data_ptr;
   typedef typename super::aspect::template advice_cast<_worker_type_>::type worker_type;
 
+  
+  int _call_id_counter;
+  
   std::shared_ptr<handler_base> _handler_prototype;
   
   service_base(io_service_type& io_service, const options_type& opt, const handler_base& handler )
     : super( io_service, opt)
-    //, handler(std::bind( &self::operator(), this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3) )
-    //, tmp_worker(io_service, opt)
+    , _call_id_counter(0)
   {
     super::create(*this);
     _handler_prototype = handler.clone();
@@ -80,7 +91,29 @@ public:
   template<typename T>
   void process_result( T& , incoming_holder holder, ::wfc::io::callback)
   {
-    _tmp_response_handler( std::move(holder) );
+    int call_id = holder.get_id<int>();
+    auto itr = this->_call_io_map.find(call_id);
+    if ( itr!=this->_call_io_map.end() )
+    {
+      auto itr2 = this->_io_map.find(itr->second);
+      if ( itr2!=this->_io_map.end() )
+      {
+        auto itr3 = itr2->second.response.find(call_id);
+        if ( itr3 != itr2->second.response.end() )
+        {
+          itr3->second( std::move(holder) );
+        }
+      }
+      else
+      {
+        
+      }
+    }
+    else
+    {
+      // TODO: в лог
+      std::cout << "ID NOT FOUND" << std::endl;
+    }
   }
   
   
@@ -99,9 +132,10 @@ public:
         auto itr = _io_map.find(io_id);
         if (itr!=_io_map.end())
         {
-          int id = 333;
+          int id = ++_call_id_counter;
           auto writer = itr->second.writer;
-          _tmp_response_handler = response_handler;
+          itr->second.response[id] = response_handler;
+          _call_io_map[id] = io_id;
           wrk->dispatch([writer, name, id, serializer](){
             auto d = serializer(name, id);
             writer( std::move(d) );
@@ -183,6 +217,8 @@ public:
   // По сути реестр connections
   typedef std::map< ::wfc::io::io_id_t, io_data > io_map;
   io_map _io_map;
+  typedef std::map< int, ::wfc::io::io_id_t> call_io_map;
+  call_io_map _call_io_map;
   
   
   
@@ -214,11 +250,7 @@ public:
         this->_io_map.insert( 
           std::make_pair(
             io_id, 
-            io_data(
-            { 
-              handler, 
-              writer 
-            })
+            io_data(handler, writer)
           )  
         );
         
@@ -239,6 +271,10 @@ public:
       if ( itr != _io_map.end() )
       {
         itr->second.method_handler->stop(io_id);
+        for ( auto& r : itr->second.response )
+        {
+          this->_call_io_map.erase(r.first);
+        }
         this->_io_map.erase(itr);
       }
     }));

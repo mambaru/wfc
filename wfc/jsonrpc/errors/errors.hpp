@@ -66,6 +66,23 @@ struct method_not_impl: error
   {}
 };
 
+// сетевая ошибка
+struct bad_gateway: error
+{
+  bad_gateway()
+    : error(-32002, "Bad Gateway.")
+  {}
+};
+
+// ошибка конфигурации
+struct service_unavailable: error
+{
+  service_unavailable()
+    : error(-32003, "Service Unavailable.")
+  {}
+};
+
+
 struct server_error: error
 {
   server_error()
