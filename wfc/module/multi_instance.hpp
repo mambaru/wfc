@@ -68,7 +68,9 @@ public:
   virtual bool parse_config(const std::string& confstr)
   {
     module_config conf;
+    std::cout << "===> {" << std::string(confstr.begin(), confstr.end()) << std::endl;
     module_config_json::serializer()(conf, confstr.begin(), confstr.end());
+    std::cout << "} <=== " << std::endl;
     for(auto s : conf)
     {
       auto jsonbeg = s.second.begin();
@@ -77,7 +79,9 @@ public:
       {
         jsonbeg = json::parser::parse_space(jsonbeg, jsonend);
         instance_config cong;
+        
         typename instance_config_json::serializer()(cong, jsonbeg, jsonend);
+        
       }
       catch(const json::json_error& e)
       {

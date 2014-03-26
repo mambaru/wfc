@@ -49,6 +49,7 @@ public:
   template<typename P>
   P operator()( target_container& t,  P beg, P end)
   {
+    
     t.clear();
 
     if ( parser::is_null(beg, end) )
