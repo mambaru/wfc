@@ -109,6 +109,16 @@ gateway_config gateway::create_config(std::string type)
   tcp.host = "0.0.0.0";
   tcp.port = "12345";
   conf.tcp.push_back(tcp);
+  
+  pubsub_options pb;
+
+  pb.pubsub_name="pubsub-gateway";
+  pb.incoming_target="hub1";
+  pb.incoming_channel="demo1";
+  
+  pb.outgoing_target="hub1";
+  pb.outgoing_channel="demo1";
+  conf.pubsub.push_back(pb);
   return conf;
 
   

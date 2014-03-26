@@ -15,7 +15,7 @@
 namespace wfc{ namespace pubsub{
   
 class pubsub_gateway
-  : ::wfc::io::basic_io<>
+  : public ::wfc::io::basic_io<>
 {
 public:
   typedef ::wfc::io::basic_io<> super;

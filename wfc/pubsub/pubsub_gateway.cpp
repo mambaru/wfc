@@ -12,6 +12,7 @@ pubsub_gateway::pubsub_gateway( std::weak_ptr< wfc::global > global, const optio
   , _global(global)
   , _options(conf)
 {
+  super::create(*this);
 }
 
 void pubsub_gateway::initialize( std::shared_ptr< ::wfc::jsonrpc::service> jsonrpc)
@@ -31,11 +32,7 @@ void pubsub_gateway::initialize( std::shared_ptr< ::wfc::jsonrpc::service> jsonr
   _jsonrpc->startup_handler
   (
     super::get_id(),
-    std::bind(&pubsub_gateway::process_outgoing, this, std::placeholders::_1)
-    /*[](wfc::io::data_ptr d)
-    {
-      
-    }*/,
+    std::bind(&pubsub_gateway::process_outgoing, this, std::placeholders::_1),
     []( std::function< void(wfc::io::io_id_t)>)
     {
       
@@ -58,6 +55,8 @@ void pubsub_gateway::process_outgoing( ::wfc::io::data_ptr d)
 
 void pubsub_gateway::process_outgoing_( ::wfc::io::data_ptr d )
 {
+  std::cout <<  "void pubsub_gateway::process_outgoing_( ::wfc::io::data_ptr d )" <<  std::endl;
+  std::cout << std::string(d->begin(), d->end());
   ::wfc::jsonrpc::incoming_holder holder( std::move(d) );
   
   if ( holder.is_request() )
@@ -66,8 +65,10 @@ void pubsub_gateway::process_outgoing_( ::wfc::io::data_ptr d )
   }
   else if ( holder.is_notify() )
   {
+    std::cout << "...notify" << std::endl;
     if ( auto t = _outgoing_target.lock() )
     {
+      std::cout << "...notify send ..." << std::endl;
       auto ntf = std::make_unique< request::publish >();
       ntf->channel = _options.outgoing_channel + holder.method();
       ntf->content = std::move(holder.acquire_params());
