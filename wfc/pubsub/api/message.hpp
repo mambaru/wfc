@@ -23,33 +23,42 @@ enum class actions
 /** @brief Сообщение */
 struct message
 {
-  actions action = actions::publish;
+  actions action /*= actions::publish*/;
 
-  size_t limit = 0;
+  size_t limit /*= 0*/;
 
   /** Время регистрации. устанавлявается сервером в момент поступления события */
-  mutable time_t birthtime = 0;
+  mutable time_t birthtime /*= 0*/;
 
   /** Время жизни в секундах или время смерти в unix timespan
     */
-  time_t lifetime = 0;
+  time_t lifetime /*= 0*/;
 
   /** некоторое числовое значение, по которому может выгружаться информация из канала 
    *  (выгружаются все у которых cursor >= заданного значения ) 
    *  а также сортировка
    */
-  cursor_t cursor = 1;
+  cursor_t cursor /*= 1*/;
 
   /** Некоторый идентификатор по которому происходит обновление или удаление сообщения из канала. */
-  identity_t identity = "";
+  identity_t identity /*= ""*/;
 
   /** контент сообщения. */
-  data_ptr content = nullptr;
+  data_ptr content /*= nullptr*/;
 
   /** ключ доступа для client-side*/
-  key_t key = 0;
+  key_t key /*= 0*/;
   
-  message() {};
+  message()    
+    : action(actions::publish)
+    , limit(0)
+    , birthtime(0)
+    , lifetime(0)
+    , cursor(1)
+    , identity("")
+    , content(nullptr)
+    , key("")
+ {};
 
   message(const message& other)
     : action( other.action )

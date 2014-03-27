@@ -12,8 +12,10 @@ public:
   typedef ::wfc::io::data_ptr  data_ptr;
   
   typedef std::function< ::wfc::io::data_ptr(const char* name, int id)   > request_serializer_t;
-  typedef std::function< void(incoming_holder holder)  > incoming_handler_t;
+  typedef std::function< ::wfc::io::data_ptr(const char* name)   > notify_serializer_t;
+  typedef std::function< void(incoming_holder holder)  > incoming_handler_t; // TODO: result handler
   typedef std::function< void(const char* name, incoming_handler_t, request_serializer_t) > outgoing_request_handler_t;
+  typedef std::function< void(const char* name, notify_serializer_t) > outgoing_notify_handler_t;
 
   
   virtual ~handler_base() {}
@@ -27,6 +29,7 @@ public:
   
   
   outgoing_request_handler_t outgoing_request_handler = nullptr;
+  outgoing_notify_handler_t  outgoing_notify_handler = nullptr;
 };
 
 }} // wfc

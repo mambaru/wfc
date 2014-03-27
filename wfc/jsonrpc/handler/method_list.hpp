@@ -36,7 +36,6 @@ public:
   template<typename PReq, typename Serializer>
   void send_request( const char* name, PReq req, Serializer ser, incoming_handler_t  clb) const
   {
-    
     std::shared_ptr<PReq> p = nullptr;
     if (req!=nullptr)
       p = std::make_shared<PReq>( std::move(req) );
@@ -45,12 +44,25 @@ public:
       std::move(clb), // обработчик ответ
       [p, ser](const char* name, int id)-> ::wfc::io::data_ptr
       {
-        
         return ser(name, std::move(*p), id);
       }
     );
   }
   
+  template<typename PReq, typename Serializer>
+  void send_notify( const char* name, PReq req, Serializer ser) const
+  {
+    std::shared_ptr<PReq> p = nullptr;
+    if (req!=nullptr)
+      p = std::make_shared<PReq>( std::move(req) );
+    outgoing_notify_handler(
+      name,
+      [p, ser](const char* name)-> ::wfc::io::data_ptr
+      {
+        return ser(name, std::move(*p));
+      }
+    );
+  }
   
   template<typename Tg>
   struct call_params_ptr
@@ -92,33 +104,41 @@ public:
     std::function<void(typename call_error_ptr<Tg>::type)> error_callback
   ) const
   {
+    std::function<void(typename call_result_ptr<Tg>::type, typename call_error_ptr<Tg>::type)> rpc_callback = nullptr;
+    
+    if ( callback!=nullptr || error_callback!=nullptr )
+    {
+      rpc_callback = [callback, error_callback]
+        (
+          typename call_result_ptr<Tg>::type resp, 
+          typename call_error_ptr<Tg>::type err
+        )
+        {
+          if ( resp!=nullptr )
+          {
+            if (callback!=nullptr)
+            {
+              callback( std::move(resp) );
+            }
+          }
+          else if ( err!=nullptr )
+          {
+            if (error_callback!=nullptr)
+            {
+              error_callback( std::move(err) );
+            }
+          }
+          else if (callback!=nullptr)
+          {
+            callback(nullptr);
+          }
+        };
+    }
+    
     this->get_aspect().template get<Tg>().call( 
       *this, 
-      std::move(req), 
-      [callback, error_callback](
-        typename call_result_ptr<Tg>::type resp, 
-        typename call_error_ptr<Tg>::type err
-      )
-      {
-        if ( resp!=nullptr )
-        {
-          if (callback!=nullptr)
-          {
-            callback( std::move(resp) );
-          }
-        }
-        else if ( err!=nullptr )
-        {
-          if (error_callback!=nullptr)
-          {
-            error_callback( std::move(err) );
-          }
-        }
-        else if (callback!=nullptr)
-        {
-          callback(nullptr);
-        }
-      }
+      std::move(req),
+      rpc_callback
     );
   }
   

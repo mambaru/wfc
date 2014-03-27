@@ -117,6 +117,29 @@ public:
   }
   
   
+  void send_notify(
+    ::wfc::io::io_id_t io_id,
+    const char* name,
+    handler_base::notify_serializer_t serializer
+  )
+  {
+    this->dispatch([this, io_id, name, serializer]()
+    {
+      if ( auto wrk = this->get_worker(name) )
+      {
+        auto itr = _io_map.find(io_id);
+        if (itr!=_io_map.end())
+        {
+          auto writer = itr->second.writer;
+          wrk->dispatch([writer, name, serializer](){
+            auto d = serializer(name);
+            writer( std::move(d) );
+          });
+        }
+      }
+    });
+  };
+  
   
   void send_request(
     ::wfc::io::io_id_t io_id,
@@ -142,18 +165,7 @@ public:
           });
         }
       }
-      /*
-      auto itr = _io_map.find(io_id);
-      if ( itr != _io_map.end() )
-      {
-        itr->second
-      }
-      */
     });
-    /*
-    _tmp_response_handler = response_handler;
-    auto data = serializer(333);
-    */
   };
   
   /*
@@ -232,7 +244,7 @@ public:
       return;
     }
     
-    this->post([this, io_id, writer/*, add_shutdown*/]()
+    this->post([this, io_id, writer]()
     {
       
       auto itr = _io_map.find(io_id);
@@ -245,6 +257,11 @@ public:
         handler->outgoing_request_handler = [io_id, this](const char* name, handler_base::incoming_handler_t result_hander, handler_base::request_serializer_t serializer)
         {
           this->send_request( io_id, name, result_hander, serializer);
+        };
+        
+        handler->outgoing_notify_handler = [io_id, this](const char* name, handler_base::notify_serializer_t serializer)
+        {
+          this->send_notify( io_id, name, serializer);
         };
         
         this->_io_map.insert( 

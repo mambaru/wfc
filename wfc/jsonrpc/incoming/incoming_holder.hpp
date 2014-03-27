@@ -107,7 +107,7 @@ public:
   
   std::string method() const
   {
-    return std::string( _incoming.method.first, _incoming.method.second);
+    return std::string( _incoming.method.first+1, _incoming.method.second-1);
   }
 
   

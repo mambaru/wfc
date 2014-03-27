@@ -55,12 +55,13 @@ void pubsub_gateway::process_outgoing( ::wfc::io::data_ptr d)
 
 void pubsub_gateway::process_outgoing_( ::wfc::io::data_ptr d )
 {
-  std::cout <<  "void pubsub_gateway::process_outgoing_( ::wfc::io::data_ptr d )" <<  std::endl;
-  std::cout << std::string(d->begin(), d->end());
+  std::cout <<  "void pubsub_gateway::process_outgoing_( ::wfc::io::data_ptr d ) " << d->size() <<  std::endl;
+  std::cout << std::string(d->begin(), d->end()) << std::endl;
   ::wfc::jsonrpc::incoming_holder holder( std::move(d) );
   
   if ( holder.is_request() )
   {
+    std::cout << "...query" << std::endl;
     // TODO: custom_request он же query
   }
   else if ( holder.is_notify() )
@@ -69,12 +70,28 @@ void pubsub_gateway::process_outgoing_( ::wfc::io::data_ptr d )
     if ( auto t = _outgoing_target.lock() )
     {
       std::cout << "...notify send ..." << std::endl;
-      auto ntf = std::make_unique< request::publish >();
-      ntf->channel = _options.outgoing_channel + holder.method();
+      request::publish tmp;
+      std::cout << "...notify send 2 ..." << std::endl;
+      auto ntf = std::make_unique< request::publish >(tmp);
+      std::cout << "...notify send 3 ..." << std::endl;
+      
+      //auto ntf = std::unique_ptr<request::publish>( new request::publish() );
+      auto method = holder.method();
+      if ( method.empty() )
+      {
+        ntf->channel = _options.outgoing_channel;
+      }
+      else
+      {
+        ntf->channel = _options.outgoing_channel + "." + std::move(method);
+      }
+      
       ntf->content = std::move(holder.acquire_params());
       t->publish( std::move(ntf), nullptr );
     }
   }
+  else
+    std::cout << "...other" << std::endl;
   
 }
   

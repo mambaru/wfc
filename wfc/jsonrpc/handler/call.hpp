@@ -5,6 +5,8 @@
 #include <wfc/jsonrpc/outgoing/outgoing_error_json.hpp>
 #include <wfc/jsonrpc/outgoing/outgoing_request.hpp>
 #include <wfc/jsonrpc/outgoing/outgoing_request_json.hpp>
+#include <wfc/jsonrpc/outgoing/outgoing_notify.hpp>
+#include <wfc/jsonrpc/outgoing/outgoing_notify_json.hpp>
 #include <wfc/callback/callback_status.hpp>
 #include <memory>
 
@@ -149,7 +151,22 @@ struct call
     std::function< void (response_ptr, error_ptr)> callback
   ) const
   {
-    auto serializer = [](const char* name, request_ptr req, int id) -> typename T::data_ptr 
+    if ( callback!=nullptr )
+      this->request_(t, tt, std::move(req), callback);
+    else
+      this->notify_(t, tt, std::move(req));
+  }
+private:
+  
+  template<typename T, typename TT>
+  void request_(
+    T& t, 
+    TT& tt, 
+    request_ptr req, 
+    std::function< void (response_ptr, error_ptr)> callback
+  ) const
+  {
+        auto serializer = [](const char* name, request_ptr req, int id) -> typename T::data_ptr 
       {
         outgoing_request<request_type> request;
         request.params = std::move(req);
@@ -198,6 +215,35 @@ struct call
       std::move(result_handler)
     );
   }
+  
+  template<typename T, typename TT>
+  void notify_(
+    T& t, 
+    TT& tt, 
+    request_ptr req
+  ) const
+  {
+      auto serializer = [](const char* name, request_ptr req) -> typename T::data_ptr 
+      {
+        outgoing_notify<request_type> notify;
+        notify.params = std::move(req);
+        notify.method = name; 
+        auto d = std::make_unique< ::wfc::io::data_type>();
+        d->reserve(ReserveSize); 
+        typedef outgoing_notify_json<request_json> send_json;
+        typename send_json::serializer()(notify, std::inserter( *d, d->end() ));
+        return std::move(d);
+      };
+      
+    t.send_notify( 
+      tt.name(), 
+      std::move(req),
+      std::move(serializer)
+    );
+
+  }
+
+  
 };
 
 }} // wfc
