@@ -304,6 +304,8 @@ public:
     for ( ++beg; beg!=end && *beg!='}'; )
     {
       beg = parse_space(beg, end);
+      if ( *beg=='}' )
+        break;
       beg = parse_member(beg, end);
       beg = parse_space(beg, end);
       if (beg == end || ( *beg!=',' && *beg!='}' ) )
@@ -326,6 +328,9 @@ public:
     for ( ++beg; beg!=end && *beg!=']'; )
     {
       beg = parse_space(beg, end);
+      if ( *beg==']' )
+        break;
+
       beg = parse_value(beg, end);
       beg = parse_space(beg, end);
       if (beg == end || ( *beg!=',' && *beg!=']' ) ) 

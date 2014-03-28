@@ -12,7 +12,7 @@
 #include <functional>
 #include <memory>
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 struct ipubsub
 {
@@ -46,21 +46,22 @@ struct ipubsub
   /// callback functions
   ///
 
-  typedef std::function< callback_status(response_subscribe_ptr) > subscribe_callback;
-  typedef std::function< callback_status(response_publish_ptr) > publish_callback;
-  typedef std::function< callback_status(response_multi_publish_ptr) > multi_publish_callback;
-  typedef std::function< callback_status(response_load_ptr) > load_callback;
-  typedef std::function< callback_status(request_multi_load_ptr) > multi_load_callback;
-  typedef std::function< callback_status(response_query_ptr) > query_callback;
-  typedef std::function< callback_status(response_notify_ptr) > notify_callback;
+  typedef std::function< void(response_subscribe_ptr) > subscribe_callback;
+  typedef std::function< void(response_publish_ptr) > publish_callback;
+  typedef std::function< void(response_multi_publish_ptr) > multi_publish_callback;
+  typedef std::function< void(response_load_ptr) > load_callback;
+  typedef std::function< void(request_multi_load_ptr) > multi_load_callback;
+  typedef std::function< void(response_query_ptr) > query_callback;
+  typedef std::function< void(response_notify_ptr) > notify_callback;
   
-  typedef std::function< callback_status(request_publish_ptr, publish_callback) > subscriber_function;
+  typedef std::function< void(request_publish_ptr, publish_callback) > publish_handler;
 
   ///
   /// interface
   ///
-
-  virtual void subscribe(request_subscribe_ptr, subscriber_function, subscribe_callback ) = 0;
+  virtual void describe( size_t subscriber_id ) = 0;
+  
+  virtual void subscribe(request_subscribe_ptr, subscribe_callback, size_t subscriber_id, publish_handler ) = 0;
 
   virtual void publish(request_publish_ptr, publish_callback) = 0;
 
@@ -75,10 +76,12 @@ struct ipubsub
   virtual void notify(request_notify_ptr, notify_callback ) = 0;
 };
 
+/*
 class pubsub: public ipubsub
 {
   // TODO:
   // дефолтная имплементация ipubsub status::not_supported
 };
+*/
 
-}
+}}

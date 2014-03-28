@@ -5,6 +5,7 @@
 #include <algorithm>
 
 using namespace ::wfc;
+using namespace ::wfc::pubsub;
 
 int test1()
 {

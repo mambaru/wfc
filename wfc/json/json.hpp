@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wfc/memory.hpp>
+#include <wfc/json/name.hpp>
 #include <fas/type_list.hpp>
 #include <fas/integral/int_.hpp>
 #include <fas/typemanip/empty_type.hpp>
@@ -36,8 +37,11 @@ struct object;
 template<typename C, typename R>
 struct array_reserve;
 
-template<typename C, typename R = fas::empty_type>
+template<typename C, int R = -1>
 struct array;
+
+template<typename C, typename R = fas::empty_type>
+struct array_r;
 
 template<typename K, typename V>
 struct pair;
@@ -339,7 +343,7 @@ struct array_base< std::vector<J>, R>
   typedef J json_value;
   typedef typename json_value::target target;
   typedef std::vector<target> target_container;
-  typedef serializerT< array< json_container, R> > serializer;
+  typedef serializerT< array_r< json_container, R> > serializer;
   typedef std::back_insert_iterator<target_container> inserter_iterator;
   static inserter_iterator inserter(target_container& t) { return std::back_inserter(t); }
 };
@@ -351,7 +355,7 @@ struct array_base< J[N], R>
   typedef J json_value;
   typedef typename json_value::target target;
   typedef target target_container[N];
-  typedef serializerT< array< json_container, R > > serializer;
+  typedef serializerT< array_r< json_container, R > > serializer;
 };
 
 template<typename J, typename R>
@@ -361,7 +365,7 @@ struct array_base< std::set<J>, R>
   typedef J json_value;
   typedef typename json_value::target target;
   typedef std::set<target> target_container;
-  typedef serializerT< array< json_container, R > > serializer;
+  typedef serializerT< array_r< json_container, R > > serializer;
 
   typedef std::insert_iterator<target_container> inserter_iterator;
   static inserter_iterator inserter(target_container& t) { return std::inserter(t, t.begin()); }
@@ -374,7 +378,7 @@ struct array_base< std::multiset<J>, R>
   typedef J json_value;
   typedef typename json_value::target target;
   typedef std::multiset<target> target_container;
-  typedef serializerT< array< json_container, R > > serializer;
+  typedef serializerT< array_r< json_container, R > > serializer;
   typedef std::insert_iterator<target_container> inserter_iterator;
   static inserter_iterator inserter(target_container& t) { return std::inserter(t, t.begin()); }
 };
@@ -391,7 +395,7 @@ struct array_base< std::unordered_map<JK, JV>, R>
   typedef pair< JK , JV > json_value;
   typedef typename json_value::target target;
   typedef std::unordered_map< key, value > target_container;
-  typedef serializerA< array< json_container, R >, '{', '}' > serializer;
+  typedef serializerA< array_r< json_container, R >, '{', '}' > serializer;
 
   typedef std::insert_iterator<target_container> inserter_iterator;
   static inserter_iterator inserter(target_container& t) { return std::inserter(t, t.begin()); }
@@ -409,7 +413,7 @@ struct array_base< std::map<JK, JV>, R >
   typedef pair< JK , JV > json_value;
   typedef typename json_value::target target;
   typedef std::map< key, value > target_container;
-  typedef serializerA< array< json_container, R >, '{', '}' > serializer;
+  typedef serializerA< array_r< json_container, R >, '{', '}' > serializer;
 
   typedef std::insert_iterator<target_container> inserter_iterator;
   static inserter_iterator inserter(target_container& t) { return std::inserter(t, t.begin()); }
@@ -436,7 +440,7 @@ struct array_base< std::multimap<JK, JV>, R>
   typedef typename json_value::target target;
   typedef std::map< key, value > target_container;
 
-  typedef serializerT< array< json_container, R> > serializer;
+  typedef serializerT< array_r< json_container, R> > serializer;
 
   typedef std::insert_iterator<target_container> inserter_iterator;
   static inserter_iterator inserter(target_container& t) { return std::inserter(t, t.begin()); }
@@ -467,21 +471,28 @@ struct array_reserve<C, fas::empty_type>
 
 
 template<typename C, typename R>
-struct array
+struct array_r
   : public array_base<C, R>
   , public array_reserve<C, R>
 {
   typedef array_base<C, R> base;
   typedef typename base::target_container target;
-  typedef /*serializerT< array<C> >*/ typename base::serializer serializer;
+  typedef typename base::serializer serializer;
 
 };
 
 template< typename T, typename L, typename R>
-struct array< object<T, L>, R>
-  : array< std::vector< object<T, L> >, R>
+struct array_r< object<T, L>, R>
+  : array_r< std::vector< object<T, L> >, R>
 {
 };
+
+template<typename C, int R>
+struct array: array_r<C, fas::int_<R> > {};
+
+template<typename C>
+struct array<C, -1>: array_r<C, fas::empty_type> {};
+
 
 /// //////////////////////////////////////////////////////////////////////////////
 
@@ -495,5 +506,6 @@ struct array< object<T, L>, R>
 #include "specialization/json_array.hpp"
 #include "specialization/json_enum.hpp"
 #include "specialization/json_set_enum.hpp"
+#include "specialization/json_quoted.hpp"
 
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <wfc/jsonrpc/errors/error.hpp>
-#include <wfc/json/name.hpp>
 #include <wfc/json/json.hpp>
+#include <fas/type_list.hpp>
+
 
 namespace wfc{ namespace jsonrpc{
 
@@ -21,5 +21,5 @@ struct error_json
 
   typedef type::serializer serializer;
 };
-
+  
 }}

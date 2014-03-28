@@ -49,7 +49,8 @@ public:
   template<typename P>
   P operator()( T& t, P beg, P end)
   {
-
+    
+    
     if ( parser::is_null(beg, end) )
     {
       t = T();
@@ -66,6 +67,7 @@ public:
     if ( beg==end ) 
       throw unexpected_end_fragment();
 
+    
     if ( *beg != '}')
     {
        beg = unserialize_members(t, beg, end, L() );
@@ -100,7 +102,7 @@ private:
   }
 
   template<typename P>
-  P serialize_members( const T& t, P end, fas::empty_list )
+  P serialize_members( const T& /*t*/, P end, fas::empty_list )
   {
     return end;
   }

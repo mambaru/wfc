@@ -12,6 +12,19 @@ SET(
   logger/global_log.cpp
   pubsub/message_queue.cpp
   pubsub/topic_hub.cpp
+  pubsub/pubsub_gateway.cpp
+  io/posix/rn/reader.cpp
+  io/posix/rn/writer.cpp
+  io/ip/tcp/rn/connection.cpp
+  io/ip/tcp/rn/server.cpp
+  io/ip/tcp/rn/acceptor.cpp
+  io/ip/tcp/rn/client.cpp
+  io/ip/tcp/rn/jsonrpc/server.cpp
+  io/ip/tcp/rn/jsonrpc/client.cpp
+  service/rn/jsonrpc/service.cpp
+  service/rn/jsonrpc/service_list.cpp
+  gateway/rn/jsonrpc/gateway.cpp
+  gateway/rn/jsonrpc/gateway_list.cpp
 )
 
 add_library(

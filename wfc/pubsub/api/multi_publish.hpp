@@ -1,31 +1,20 @@
 #pragma once
 
-#include <wfc/pubsub/pubsub_status.hpp>
+#include <wfc/pubsub/status.hpp>
 #include <wfc/pubsub/api/publish.hpp>
+#include <wfc/memory.hpp>
 #include <vector>
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 namespace request
 {
-  typedef std::vector<publish> multi_publish;
-  /*
-  struct multi_publish
-    : std::vector<publish>
-  {
-    
-  };
-  */
+  typedef std::vector< publish > multi_publish;
 }
 
 namespace response
 {
-  typedef std::vector<pubsub_status> multi_publish;
-  /*struct multi_publish
-  {
-
-  };
-  */
+  typedef std::vector< publish > multi_publish;
 }
 
-}
+}}
