@@ -144,21 +144,25 @@ public:
   void send_request(
     ::wfc::io::io_id_t io_id,
     const char* name,
-    handler_base::incoming_handler_t response_handler,
+    handler_base::incoming_handler_t result_handler,
     handler_base::request_serializer_t serializer
   )
   {
-    this->dispatch([this, io_id, name, response_handler, serializer]()
+    this->dispatch([this, io_id, name, result_handler, serializer]()
     {
       if ( auto wrk = this->get_worker(name) )
       {
-        auto itr = _io_map.find(io_id);
-        if (itr!=_io_map.end())
+        auto itr = this->_io_map.find(io_id);
+        if (itr!=this->_io_map.end())
         {
-          int id = ++_call_id_counter;
+          int id = ++this->_call_id_counter;
           auto writer = itr->second.writer;
-          itr->second.response[id] = response_handler;
-          _call_io_map[id] = io_id;
+          
+          // itr->second.response[id]= io_id;
+          itr->second.response.insert( std::make_pair(id, result_handler));
+          //itr->second.response[id] = result_handler;
+          
+          this->_call_io_map[id] = io_id;
           wrk->dispatch([writer, name, id, serializer](){
             auto d = serializer(name, id);
             writer( std::move(d) );

@@ -47,7 +47,7 @@ void pubsub_gateway::start()
 
 void pubsub_gateway::process_outgoing( ::wfc::io::data_ptr d)
 {
-  auto pd = std::make_shared<::wfc::io::data_ptr>( std::move(d) );
+  auto pd = std::make_shared< ::wfc::io::data_ptr>( std::move(d) );
   super::post([this,pd](){
     this->process_outgoing_( std::move(*pd) );
   });

@@ -83,8 +83,8 @@ public:
         DAEMON_LOG_WARNING( this->options().host << ":" << this->options().port << ": " 
                             << ec.message() << " " << this->options().reconnect_timeout << " seconds to reconnect." )
         
-        _reconnect_timer.expires_from_now( boost::posix_time::seconds( this->options().reconnect_timeout) );
-        _reconnect_timer.async_wait([this, ep, psock](const boost::system::error_code& ) 
+        this->_reconnect_timer.expires_from_now( boost::posix_time::seconds( this->options().reconnect_timeout) );
+        this->_reconnect_timer.async_wait([this, ep, psock](const boost::system::error_code& ) 
         {
            this->connect();
         });
