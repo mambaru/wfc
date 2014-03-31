@@ -7,6 +7,30 @@
 
 namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{ 
 
+template<typename T>
+inline typename T::options_type update_options(T* self, typename T::options_type conf)
+{
+    auto startup = conf.connection.startup_handler;
+    conf.connection.startup_handler = [self, startup]( ::wfc::io::io_id_t id, ::wfc::io::callback clb, ::wfc::io::add_shutdown_handler add)
+    {
+      auto add_handler = [self](::wfc::io::io_id_t id) 
+      {
+        DAEMON_LOG_WARNING("Connection " << id << " closed. Reconnect...")
+        //std::bind( &self::connect, self)
+        self->post( [self](){
+          self->connect();
+        } );
+        //self->post( std::bind( &self::connect, self) );
+      };
+      
+      add(add_handler);
+      startup( id, clb, add);
+    };
+    return conf;
+
+  return conf;
+}
+  
 template<typename A = fas::aspect<> >
 class client_base
   : public ::wfc::io::basic_io< typename fas::merge_aspect<A, client_aspect>::type >
@@ -31,6 +55,8 @@ public:
   // TODO: сделать массив
   std::shared_ptr<connection_type> _connection;
   
+  
+  /*
   options_type init_options(options_type conf)
   {
     auto startup = conf.connection.startup_handler;
@@ -47,9 +73,10 @@ public:
     };
     return conf;
   }
+  */
   
   client_base(wfc::io_service& io, const options_type& conf, ::wfc::io::handler handler = nullptr)
-    : super( io, init_options(conf))
+    : super( io, update_options(this, conf))
     , _reconnect_timer(io)
     , _handler( handler )
   {
