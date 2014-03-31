@@ -36,10 +36,13 @@ public:
     auto startup = conf.connection.startup_handler;
     conf.connection.startup_handler = [this, startup]( ::wfc::io::io_id_t id, ::wfc::io::callback clb, ::wfc::io::add_shutdown_handler add)
     {
-      add([this](::wfc::io::io_id_t id) {
+      auto add_handler = [this](::wfc::io::io_id_t id) 
+      {
         DAEMON_LOG_WARNING("Connection " << id << " closed. Reconnect...")
         this->post( std::bind( &self::connect, this) );
-      });
+      };
+      
+      add(add_handler);
       startup( id, clb, add);
     };
     return conf;

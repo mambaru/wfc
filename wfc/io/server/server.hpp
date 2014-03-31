@@ -27,7 +27,7 @@ struct ad_configure
     */
     
     auto& acceptors = t.get_aspect().template get<_acceptors_>();
-    while ( acceptors.size() > conf.threads) )
+    while ( acceptors.size() > static_cast<size_t>(conf.threads) )
     {
       //! acceptors.back()->stop();
       acceptors.pop_back();
@@ -55,7 +55,7 @@ struct ad_configure
     auto& services = t.get_aspect().template get<_io_services_>();
     for (size_t i = 0 ; i < static_cast<size_t>(t.options().threads); ++i, ++itr)
     {
-      if ( acceptors.size() < static_cast<size_t>(t.options().threads) )
+      if ( acceptors.size() <  static_cast<size_t>(t.options().threads) )
       {
         auto io = std::make_shared<wfc::io_service>();
         typename descriptor_type::native_handle_type fd = ::dup(desc.native_handle());
