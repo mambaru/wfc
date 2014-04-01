@@ -3,6 +3,7 @@
 #include <map>
 #include <mutex>
 #include <queue>
+#include <list>
 #include <wfc/thread/rwlock.hpp>
 #include <wfc/thread/spinlock.hpp>
 #include <wfc/memory.hpp>
