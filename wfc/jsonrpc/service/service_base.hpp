@@ -450,6 +450,12 @@ public:
       }
     }
   }
+  
+  std::vector<std::string> get_methods() const
+  {
+    return _handler_prototype->get_methods();
+  }
+  
   void start_no_tf()
   {
     

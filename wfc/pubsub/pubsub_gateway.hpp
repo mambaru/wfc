@@ -16,6 +16,8 @@ namespace wfc{ namespace pubsub{
   
 class pubsub_gateway
   : public ::wfc::io::basic_io<>
+  , public std::enable_shared_from_this< pubsub_gateway >
+  , public ipubsub
 {
 public:
   typedef ::wfc::io::basic_io<> super;
@@ -28,7 +30,28 @@ public:
   pubsub_gateway( std::weak_ptr< ::wfc::global > global, const options_type& conf);
   void initialize( std::shared_ptr< ::wfc::jsonrpc::service> jsonrpc);
   void start();
+  void stop();
   void process_outgoing( ::wfc::io::data_ptr d );
+  
+  ///
+  /// interface
+  ///
+  virtual void describe( size_t subscriber_id );
+  
+  virtual void subscribe(request_subscribe_ptr, subscribe_callback, size_t subscriber_id, publish_handler );
+
+  virtual void publish(request_publish_ptr, publish_callback);
+
+  virtual void publish(request_multi_publish_ptr, multi_publish_callback);
+  
+  virtual void load(request_load_ptr, load_callback );
+
+  virtual void load(request_multi_load_ptr, multi_load_callback );
+
+  virtual void query(request_query_ptr, query_callback );
+  
+  virtual void notify(request_notify_ptr, notify_callback );
+
 private:
   void process_outgoing_( ::wfc::io::data_ptr d );
 private:

@@ -21,6 +21,7 @@ public:
   virtual ~handler_base() {}
   virtual std::shared_ptr<handler_base> clone( /*outgoing_request_handler_t request_handler*/ ) const= 0;
   virtual void process(incoming_holder holder, ::wfc::io::callback callback) = 0;
+  virtual std::vector<std::string> get_methods() const = 0;
   
   virtual void start(::wfc::io::io_id_t id) = 0;
   virtual void stop(::wfc::io::io_id_t id) = 0;

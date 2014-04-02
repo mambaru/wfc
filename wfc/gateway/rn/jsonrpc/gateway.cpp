@@ -64,6 +64,7 @@ void gateway::reconfigure(const gateway_config& conf)
 void gateway::initialize( std::shared_ptr<ifactory> fact )
 {
   _tcp_clients.clear();
+  _pubsubs.clear();
   this->create( _io_service, _conf, fact );
 }
   

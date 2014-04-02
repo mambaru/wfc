@@ -18,6 +18,7 @@ struct pubsub_gateway_options:
   
   std::string incoming_target;
   std::string incoming_channel;
+  std::string subscribe_suffix;
   
   std::string outgoing_target;
   std::string outgoing_channel;

@@ -65,6 +65,10 @@ public:
     _impl->operator ()( std::move(d), id, callback);
   }
 
+  std::vector<std::string> get_methods() const
+  {
+    return _impl->get_methods();
+  }
   
   void start()
   {

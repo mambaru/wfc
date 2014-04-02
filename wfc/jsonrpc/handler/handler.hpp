@@ -42,6 +42,18 @@ struct f_invoke
   }
 };
 
+struct f_get_methods
+{
+  std::vector<std::string> result;
+  
+  template<typename T, typename Tg>
+  void operator()(T& t, fas::tag<Tg> )
+  {
+    result.push_back( t.get_aspect().template get<Tg>().name() );
+  }
+};
+
+
 template<typename Instanse>
 class handler
   : public Instanse
@@ -62,6 +74,11 @@ public:
   virtual std::shared_ptr<handler_base> clone(/*outgoing_request_handler_t request_handler*/) const 
   {
     return std::make_shared<self>(*this);
+  }
+  
+  virtual std::vector<std::string> get_methods() const
+  {
+    return fas::for_each_group<_method_>(*this, f_get_methods() ).result;
   }
 
   virtual void process(incoming_holder holder, ::wfc::io::callback callback) 

@@ -106,7 +106,8 @@ public:
   {
     std::function<void(typename call_result_ptr<Tg>::type, typename call_error_ptr<Tg>::type)> rpc_callback = nullptr;
     
-    if ( callback!=nullptr || error_callback!=nullptr )
+    // if callback==nullptr then error_callback ignored
+    if ( callback!=nullptr && error_callback!=nullptr )
     {
       rpc_callback = [callback, error_callback]
         (
