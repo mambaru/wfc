@@ -180,6 +180,52 @@ struct mem_fun_handler2
   
 };
 
+template<
+  typename Req, 
+  typename Resp, 
+  typename Target, 
+  void (Target::*mem_ptr)( 
+    std::unique_ptr<Req>, 
+    std::function< void(std::unique_ptr<Resp>) >, 
+    size_t
+  )
+>
+struct mem_fun_handler3
+{
+  template<typename T>
+  void operator()(T& t, std::unique_ptr<Req> req, std::function< void(std::unique_ptr<Resp>, std::unique_ptr< ::wfc::jsonrpc::error>) > callback) const
+  {
+    if ( auto i = t.target().lock() )
+    {
+      
+      (i.get()->*mem_ptr)
+      (
+        std::move(req),
+        this->make_callback(callback),
+        t.get_id()
+      );
+    }
+    else if (callback!=nullptr)
+    {
+      callback( nullptr, std::make_unique< ::wfc::jsonrpc::error >( ::wfc::jsonrpc::service_unavailable() ) );
+    }
+  }
+  
+  
+  auto make_callback( std::function< void(std::unique_ptr<Resp>, std::unique_ptr< ::wfc::jsonrpc::error>) > callback) const
+    -> std::function<void(std::unique_ptr<Resp>) >
+  {
+    if (callback==nullptr)
+      return nullptr;
+    
+    return [callback]( std::unique_ptr<Resp> resp)
+    {
+      callback( std::move(resp), nullptr);
+    };
+  }
+  
+};
+
 
 }} // wfc
 

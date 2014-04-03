@@ -5,6 +5,7 @@
 #include <wfc/pubsub/api/load.hpp>
 #include <wfc/pubsub/api/multi_load.hpp>
 #include <wfc/pubsub/api/subscribe.hpp>
+#include <wfc/pubsub/api/describe.hpp>
 #include <wfc/pubsub/api/query.hpp>
 #include <wfc/pubsub/api/notify.hpp>
 #include <wfc/callback/callback_status.hpp>
@@ -36,6 +37,10 @@ struct ipubsub
   typedef std::unique_ptr<request::subscribe>  request_subscribe_ptr;
   typedef std::unique_ptr<response::subscribe> response_subscribe_ptr;
 
+  typedef std::unique_ptr<request::describe>  request_describe_ptr;
+  typedef std::unique_ptr<response::describe> response_describe_ptr;
+
+  
   typedef std::unique_ptr<request::query>  request_query_ptr;
   typedef std::unique_ptr<response::query> response_query_ptr;
 
@@ -47,10 +52,11 @@ struct ipubsub
   ///
 
   typedef std::function< void(response_subscribe_ptr) > subscribe_callback;
+  typedef std::function< void(response_describe_ptr) > describe_callback;
   typedef std::function< void(response_publish_ptr) > publish_callback;
   typedef std::function< void(response_multi_publish_ptr) > multi_publish_callback;
   typedef std::function< void(response_load_ptr) > load_callback;
-  typedef std::function< void(request_multi_load_ptr) > multi_load_callback;
+  typedef std::function< void(response_multi_load_ptr) > multi_load_callback;
   typedef std::function< void(response_query_ptr) > query_callback;
   typedef std::function< void(response_notify_ptr) > notify_callback;
   
@@ -62,6 +68,8 @@ struct ipubsub
   virtual void describe( size_t subscriber_id ) = 0;
   
   virtual void subscribe(request_subscribe_ptr, subscribe_callback, size_t subscriber_id, publish_handler ) = 0;
+  
+  virtual void describe(request_describe_ptr, describe_callback, size_t subscriber_id) = 0;
 
   virtual void publish(request_publish_ptr, publish_callback) = 0;
 

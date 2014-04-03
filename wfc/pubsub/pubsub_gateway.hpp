@@ -39,6 +39,8 @@ public:
   virtual void describe( size_t subscriber_id );
   
   virtual void subscribe(request_subscribe_ptr, subscribe_callback, size_t subscriber_id, publish_handler );
+  
+  virtual void describe(request_describe_ptr, describe_callback, size_t subscriber_id);
 
   virtual void publish(request_publish_ptr, publish_callback);
 

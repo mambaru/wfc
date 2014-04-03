@@ -142,7 +142,7 @@ struct dual_method_ex: method<
 {};
 
 
-// TODO: сделать invoke_method2
+
 template<
   typename TgName, 
   typename JReq, 
@@ -168,6 +168,24 @@ template<
 struct dual_method2: method< 
   name<TgName>,
   invoke_mem_fun2< JReq, JResp, Req2, Resp2, Target, mem_ptr, Itf, mem_ptr2>,
+  call<JReq, JResp>
+>
+{};
+
+template<
+  typename TgName, 
+  typename JReq, 
+  typename JResp, 
+  typename Target, 
+  void (Target::*mem_ptr)( 
+    std::unique_ptr<typename JReq::target>, 
+    std::function< void(std::unique_ptr<typename JResp::target>) >, 
+    size_t
+  )
+>
+struct dual_method3: method< 
+  name<TgName>,
+  invoke_mem_fun3< JReq, JResp, Target, mem_ptr>,
   call<JReq, JResp>
 >
 {};
@@ -198,6 +216,23 @@ template<
 struct invoke_method2: method< 
   name<TgName>,
   invoke_mem_fun2< JReq, JResp, Req2, Resp2, Target, mem_ptr, Itf, mem_ptr2>
+>
+{};
+
+template<
+  typename TgName, 
+  typename JReq, 
+  typename JResp, 
+  typename Target, 
+  void (Target::*mem_ptr)( 
+    std::unique_ptr<typename JReq::target>, 
+    std::function< void(std::unique_ptr<typename JResp::target>) >, 
+    size_t
+  )
+>
+struct invoke_method3: method< 
+  name<TgName>,
+  invoke_mem_fun3< JReq, JResp, Target, mem_ptr>
 >
 {};
 

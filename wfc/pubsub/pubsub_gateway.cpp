@@ -56,7 +56,7 @@ void pubsub_gateway::start()
     {
       std::cout << n << std::endl;
       auto req = std::make_unique<request::subscribe>();
-      req->channel = _options.outgoing_channel + "." + n;
+      req->channel = _options.outgoing_channel + "." + n + _options.subscribe_suffix;
       //auto callback = std::bind( &pubsub_gateway::publish, this, std::placeholders::_1, std::placeholders::_2 );
       t->subscribe(std::move(req), nullptr, super::get_id(), [this](request_publish_ptr req, publish_callback cb)
       {
@@ -135,6 +135,11 @@ void pubsub_gateway::subscribe(request_subscribe_ptr, subscribe_callback, size_t
   
 }
 
+void pubsub_gateway::describe(request_describe_ptr, describe_callback, size_t)
+{
+  
+}
+
 void pubsub_gateway::publish(request_publish_ptr req, publish_callback cb)
 {
   std::cout << "PUBLISH!!! " << std::string(req->content->begin(), req->content->end()) << " callback=" << (cb!=nullptr) << std::endl;
@@ -157,29 +162,44 @@ void pubsub_gateway::publish(request_publish_ptr req, publish_callback cb)
     return;
   }
   
-  std::cout << "-2-" << std::endl;
-  if ( cb == nullptr )
+  wfc::io::callback io_cb = nullptr;
+  
+  if ( cb != nullptr ) io_cb = [cb](wfc::io::data_ptr d)
   {
-    ::wfc::jsonrpc::outgoing_notify< ::wfc::io::data_type> notify;
-    if ( req->content!=nullptr )
+    ::wfc::jsonrpc::incoming_holder holder( std::move(d) );
+    auto resp = std::make_unique<response::publish>();
+    if ( holder.is_response() )
     {
-      notify.params = std::move( req->content );
+      resp->status = status::ready;
     }
-    std::cout << "-3-" << std::endl;
-    typedef ::wfc::jsonrpc::outgoing_notify_json< 
-      ::wfc::json::raw_value< ::wfc::io::data_type> 
-    >::serializer serializer;
-    auto data = std::make_unique< ::wfc::io::data_type >();
-    if ( notify.params!=nullptr )
+    else
     {
-      data->reserve(notify.params->size() + 200 );
+      resp->status = status::internal_error;
     }
-    notify.method.assign(req->channel.begin() + _options.incoming_channel.size() + 1, req->channel.end());
-    std::cout << "-4-" << std::endl;
-    serializer()( notify, std::inserter(*data, data->end() ) );
-    std::cout << "convert to: " << std::string(data->begin(), data->end()) << std::endl;
-    (*_jsonrpc)( std::move(data), super::get_id(), nullptr );
+    cb( std::move(resp) );
+  };
+  
+  std::cout << "-2-" << std::endl;
+  ::wfc::jsonrpc::outgoing_notify< ::wfc::io::data_type> notify;
+  if ( req->content!=nullptr )
+  {
+    notify.params = std::move( req->content );
   }
+  std::cout << "-3-" << std::endl;
+  typedef ::wfc::jsonrpc::outgoing_notify_json< 
+    ::wfc::json::raw_value< ::wfc::io::data_type> 
+  >::serializer serializer;
+  auto data = std::make_unique< ::wfc::io::data_type >();
+  if ( notify.params!=nullptr )
+  {
+    data->reserve(notify.params->size() + 200 );
+  }
+  notify.method.assign(req->channel.begin() + _options.incoming_channel.size() + 1, req->channel.end());
+  std::cout << "-4-" << std::endl;
+  serializer()( notify, std::inserter(*data, data->end() ) );
+  std::cout << "convert to: " << std::string(data->begin(), data->end()) << std::endl;
+  (*_jsonrpc)( std::move(data), super::get_id(), io_cb );
+  
   //std::cout << "PUBLISH!!! " << std::string(req->content->begin(), req->content->end()) << " callback=" << (cb!=nullptr) << std::endl;
 }
 

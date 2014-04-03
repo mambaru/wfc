@@ -8,6 +8,7 @@
 
 #include <wfc/pubsub/api/subscribe_json.hpp>
 #include <wfc/pubsub/api/publish_json.hpp>
+#include <wfc/pubsub/api/describe_json.hpp>
 #include <wfc/pubsub/api/multi_publish_json.hpp>
 #include <wfc/jsonrpc.hpp>
 
@@ -23,13 +24,17 @@ struct method_test2: wfc::jsonrpc::method<
 JSONRPC_METHOD_IMPL( _test2_, test1 )
 */
 
+
+
 JSONRPC_TAG(publish)
 JSONRPC_TAG(mpublish)  
 JSONRPC_TAG(subscribe)  
 JSONRPC_TAG(describe)  
 
 
-struct method_list: ::wfc::jsonrpc::method_list<
+
+
+struct basic_method_list: ::wfc::jsonrpc::method_list<
 
   ::wfc::jsonrpc::target<ipubsub>,
   ::wfc::jsonrpc::interface_<ipubsub>,
@@ -66,7 +71,31 @@ struct method_list: ::wfc::jsonrpc::method_list<
     &ipubsub::subscribe,
     ipubsub, 
     &ipubsub::publish
+  >,
+
+  ::wfc::jsonrpc::dual_method3<
+    _describe_, 
+    request::describe_json::type,
+    response::describe_json::type,
+    ipubsub, 
+    &ipubsub::describe
   >
+  
+  /*
+  ::wfc::jsonrpc::method<
+    ::wfc::jsonrpc::name< ::wfc::pubsub::_describe_>,
+    ::wfc::jsonrpc::call<
+      ::wfc::pubsub::request::describe_json::type,
+      ::wfc::pubsub::response::describe_json::type
+    >,
+    ::wfc::jsonrpc::invoke_mem_fun<
+      ::wfc::pubsub::request::describe_json::type,
+      ::wfc::pubsub::response::describe_json::type,
+      ipubsub,
+      &ipubsub::subscribe
+    >
+  >
+*/
 
     /*, 
   
@@ -79,11 +108,33 @@ struct method_list: ::wfc::jsonrpc::method_list<
   >
   */
 >
+{};
+
+struct method_list: basic_method_list
 {
+  typedef basic_method_list super;
+  
   JSONRPC_SHUTDOWN_EMPTY(_describe_, describe)
   JSONRPC_METHOD_IMPL2(_subscribe_, subscribe, _publish_)
   JSONRPC_METHOD_IMPL(_publish_, publish)
   JSONRPC_METHOD_IMPL(_mpublish_, publish)
+  
+  
+  virtual void describe(request_describe_ptr req, describe_callback callback, size_t )
+  {
+    this->call< ::wfc::pubsub::_describe_ >( 
+      std::move( req ), 
+      callback, 
+      [callback]( super::error_ptr)
+      {
+        auto resp = std::make_unique< ::wfc::pubsub::response::describe >();
+        resp->status = ::wfc::pubsub::status::bad_gateway;
+        if ( callback!=nullptr )
+          callback( std::move(resp));
+      }
+    );
+  }
+
   
   //virtual void subscribe(request_subscribe_ptr, subscribe_callback, size_t , publish_handler ) {}
   //virtual void publish( ipubsub::request_multi_publish_ptr, ipubsub::multi_publish_callback) {}
