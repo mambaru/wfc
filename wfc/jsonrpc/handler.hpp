@@ -9,5 +9,4 @@
 #include <wfc/jsonrpc/handler/method_list.hpp>
 #include <wfc/jsonrpc/handler/name.hpp>
 #include <wfc/jsonrpc/handler/target.hpp>
-
 #include <wfc/jsonrpc/handler/call.hpp>

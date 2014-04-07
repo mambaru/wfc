@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wfc/io/ip/tcp/rn/client_options.hpp>
+#include <wfc/io/ip/tcp/rn/connection_options_json.hpp>
 
 namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{ 
   
