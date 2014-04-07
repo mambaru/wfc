@@ -8,6 +8,7 @@ void service::create(wfc::io_service& io, const service_config& conf, std::share
 {
   _conf = conf;
   
+  return;
   if ( !conf.tcp.empty() )
   {
     jsonrpc_options jopt;
@@ -99,6 +100,21 @@ service_config service::create_config(std::string type)
   
 void service::stop()
 {
+  for (auto& i: _tcp_servers)
+  {
+    std::cout << "service tcp stop..." << std::endl;
+    i->stop();
+    i.reset();
+    std::cout << "...service tcp stop" << std::endl;
+  }
+  
+  if (_jsonrpc_for_tcp != nullptr)
+  {
+    std::cout << "service jsonrpc_for_tcp stop..." << std::endl;
+    _jsonrpc_for_tcp->stop();
+    _jsonrpc_for_tcp.reset();
+    std::cout << "...service jsonrpc_for_tcp stop" << std::endl;
+  }
   
 }
 

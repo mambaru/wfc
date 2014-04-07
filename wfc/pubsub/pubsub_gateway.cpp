@@ -7,6 +7,7 @@ namespace wfc{ namespace pubsub{
   
 pubsub_gateway::~pubsub_gateway()
 {
+  DEBUG_LOG_MESSAGE("pubsub_gateway::~pubsub_gateway()")
 }
 
 pubsub_gateway::pubsub_gateway( std::weak_ptr< wfc::global > global, const options_type& conf)
@@ -68,10 +69,16 @@ void pubsub_gateway::start()
 
 void pubsub_gateway::stop()
 {
+  DEBUG_LOG_BEGIN("pubsub_gateway::stop()")
   if ( auto t = _incoming_target.lock() )
   {
+    DEBUG_LOG_MESSAGE("pubsub_gateway::stop() describe")
     t->describe(super::get_id());
   }
+  
+  _jsonrpc.reset();
+  DEBUG_LOG_END("pubsub_gateway::stop()")
+  
 }
 
 

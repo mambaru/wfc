@@ -89,12 +89,46 @@ void gateway::start()
   {
     i->start();
   }
-
 }
   
 void gateway::stop()
 {
   
+  for (auto& i: _tcp_clients)
+  {
+    DEBUG_LOG_BEGIN("gateway::stop() tcp client")
+    i->stop();
+    i.reset();
+    DEBUG_LOG_END("gateway::stop() tcp client")
+  }
+  _tcp_clients.clear();
+
+  for (auto& i: _pubsubs)
+  {
+    DEBUG_LOG_BEGIN("gateway::stop() pubsub client")
+    i->stop();
+    i.reset();
+    DEBUG_LOG_END("gateway::stop() pubsub client")
+  }
+  _pubsubs.clear();
+  
+  if (_jsonrpc_for_tcp != nullptr)
+  {
+    DEBUG_LOG_BEGIN("gateway::stop() jsonrpc for tcp")
+    _jsonrpc_for_tcp->stop();
+    _jsonrpc_for_tcp.reset();
+    DEBUG_LOG_END("gateway::stop() jsonrpc for tcp")
+  }
+
+
+  if (_jsonrpc_for_pubsub != nullptr)
+  {
+    DEBUG_LOG_BEGIN("gateway::stop() jsonrpc for pubsub")
+    _jsonrpc_for_pubsub->stop();
+    _jsonrpc_for_pubsub.reset();
+    DEBUG_LOG_END("gateway::stop() jsonrpc for pubsub")
+  }
+
 }
 
 gateway_config gateway::create_config(std::string type)

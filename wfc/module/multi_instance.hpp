@@ -170,11 +170,13 @@ public:
   
   virtual void stop()
   {
-    for (const auto &n : _instance_map)
+    for (auto &n : _instance_map)
     {
       CONFIG_LOG_MESSAGE("module '" << _name << "': stop instance '" << n.first << "'...")
       n.second->stop();
+      n.second.reset();
     }
+    _instance_map.clear();
   }
 
 private:

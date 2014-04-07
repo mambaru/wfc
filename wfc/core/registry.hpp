@@ -47,6 +47,12 @@ public:
       f( a.first, a.second );
   }
   
+  void clear()
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    _registry_map.clear();
+  }
+  
 private:
   registry_map _registry_map;
   mutable mutex_type _mutex;

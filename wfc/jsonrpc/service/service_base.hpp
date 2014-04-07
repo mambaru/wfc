@@ -1,5 +1,8 @@
 #pragma once
 #include <iostream>
+#include <mutex>
+#include <condition_variable>
+#include <thread>
 
 #include <wfc/jsonrpc/service/service_aspect.hpp>
 
@@ -230,11 +233,6 @@ public:
   }
   
   
-  // По сути реестр connections
-  typedef std::map< ::wfc::io::io_id_t, io_data > io_map;
-  io_map _io_map;
-  typedef std::map< int, ::wfc::io::io_id_t> call_io_map;
-  call_io_map _call_io_map;
   
   
   
@@ -342,6 +340,13 @@ public:
   worker_list _workers;
   service_list _services;
   thread_list _threads;
+  
+  // По сути реестр connections
+  typedef std::map< ::wfc::io::io_id_t, io_data > io_map;
+  io_map _io_map;
+  typedef std::map< int, ::wfc::io::io_id_t> call_io_map;
+  call_io_map _call_io_map;
+
   
   
   
@@ -477,9 +482,44 @@ public:
   
   void stop()
   {
+    DEBUG_LOG_BEGIN("jsonrpc::stop()")
+    
+    /*
+    std::mutex mtx;
+    std::condition_variable cv;
+    bool ready = false;
+    */
+
     // TODO: dispatch
-    super::stop(*this);
+    //super::stop(*this);
+    //this->dispatch([this, &mtx, &cv, &ready]()
+    {
+      DEBUG_LOG_BEGIN("jsonrpc::stop() dispatch")
+      for (auto& s: this->_services)
+        s->stop();
+      
+      for (auto& t: this->_threads)
+        t.join();
+      
+      this->_workers.clear();
+      this->_threads.clear();
+      this->_method_map.clear();
+      this->_services.clear();
+      this->_io_map.clear();
+      this->_call_io_map.clear();
+      
+      //std::unique_lock<std::mutex> lck(mtx);
+      //ready = true;
+      //cv.notify_all();
+      DEBUG_LOG_END("jsonrpc::stop() dispatch")
+    }/*);*/
+    
+    //std::unique_lock<std::mutex> lck(mtx);
+    //while (!ready) cv.wait(lck);
+
+    DEBUG_LOG_END("jsonrpc::stop()")
   }
+  
 
   //::wfc::io::handler handler;
   

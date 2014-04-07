@@ -8,9 +8,13 @@
 #include <wfc/jsonrpc/outgoing/outgoing_notify.hpp>
 #include <wfc/jsonrpc/outgoing/outgoing_notify_json.hpp>
 #include <wfc/callback/callback_status.hpp>
+#include <wfc/jsonrpc/handler/target.hpp>
+
+#include <fas/type_list.hpp>
 #include <memory>
 
 namespace wfc{ namespace jsonrpc{
+  
   
 template<typename I>
 struct interface_ 
@@ -25,6 +29,21 @@ struct provider
   : fas::value<_provider_, std::weak_ptr<I> >
 {
 };
+
+
+template<typename I, typename P >
+struct dual_interface: 
+  fas::type_list_n<
+    target<I>,
+    provider< P >,
+    interface_<I>,
+    shutdown< mem_fun_shutdown< P, &P::shutdown> >,
+    startup< mem_fun_startup< I, P, &P::startup> >
+  >::type 
+{
+};
+
+
 
 /*
 template<typename T>
@@ -242,8 +261,6 @@ private:
     );
 
   }
-
-  
 };
 
 }} // wfc

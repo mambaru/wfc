@@ -77,7 +77,7 @@ public:
 
   void stop()
   {
-    _impl->start();
+    _impl->stop();
   }
 
 private:

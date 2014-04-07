@@ -47,7 +47,9 @@ void service_list::stop()
   for (auto& i: _service_list)
   {
     i->stop();
+    i.reset();
   }
+  _service_list.clear();
 }
 
 service_list_config service_list::create_config(std::string type)
