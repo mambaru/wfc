@@ -37,6 +37,10 @@ struct service_config_json
       >
     >::type
   > type;
+
+  typedef type::target     target;
+  typedef type::serializer serializer;
+
 };
 
 struct service_list_config_json
@@ -46,8 +50,12 @@ struct service_list_config_json
       service_list_config, 
       service_list_config::service_list_type, 
       &service_list_config::services, 
-      ::wfc::json::array< std::vector<service_config_json::type > >
+      ::wfc::json::array< std::vector<service_config_json > >
   > type;
+  
+  typedef type::target     target;
+  typedef type::serializer serializer;
+
 
   /*
   typedef ::wfc::json::array< std::vector<service_config_json::type > > service_list_config_json;

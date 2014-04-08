@@ -33,7 +33,6 @@ void pubsub_gateway::initialize( std::shared_ptr< ::wfc::jsonrpc::service> jsonr
     }
   }
   
-  
   _jsonrpc->startup_handler
   (
     super::get_id(),
@@ -43,24 +42,46 @@ void pubsub_gateway::initialize( std::shared_ptr< ::wfc::jsonrpc::service> jsonr
       
     }
   );
-  
 }
 
 void pubsub_gateway::start()
 {
-  /// std::bind(&pubsub_gateway::process_outgoing, this, std::placeholders::_1),
   if ( auto t = _incoming_target.lock() )
   {
-    std::cout << "void pubsub_gateway::start()" << std::cout;
     auto names = _jsonrpc->get_methods();
     for (auto &n : names)
     {
       std::cout << n << std::endl;
       auto req = std::make_unique<request::subscribe>();
-      req->channel = _options.outgoing_channel + "." + n + _options.subscribe_suffix;
+      req->channel = _options.incoming_channel + "." + n + _options.subscribe_suffix;
       //auto callback = std::bind( &pubsub_gateway::publish, this, std::placeholders::_1, std::placeholders::_2 );
       t->subscribe(std::move(req), nullptr, super::get_id(), [this](request_publish_ptr req, publish_callback cb)
       {
+        if ( req==nullptr )
+        {
+          this->publish(nullptr, cb);
+          return;
+        }
+        
+        size_t channel_len = req->channel.size();
+        size_t suffix_len = this->_options.subscribe_suffix.size();
+        
+        if ( suffix_len!=0 && suffix_len < channel_len )
+        {
+          if ( 0 == req->channel.compare( channel_len - suffix_len, suffix_len, this->_options.subscribe_suffix ) )
+          {
+            req->channel.resize( channel_len - suffix_len );
+          }
+        }
+        
+        if ( req!=nullptr && req->content!=nullptr)  
+        {
+          TRACE_LOG_MESSAGE("pubsub_gateway::publish: -subscribe- [[" << std::string( req->content->begin(), req->content->end() ) << "]" << req->channel << ", " << suffix_len)
+        }
+        else
+        {
+          TRACE_LOG_MESSAGE("pubsub_gateway::publish: -subscribe- [[null]")
+        }
         this->publish(std::move(req), cb);
       } );
     }
@@ -92,27 +113,21 @@ void pubsub_gateway::process_outgoing( ::wfc::io::data_ptr d)
 
 void pubsub_gateway::process_outgoing_( ::wfc::io::data_ptr d )
 {
-  std::cout <<  "void pubsub_gateway::process_outgoing_( ::wfc::io::data_ptr d ) " << d->size() <<  std::endl;
-  std::cout << std::string(d->begin(), d->end()) << std::endl;
+  TRACE_LOG_MESSAGE("wfc::pubsub::gateway process outgoing: [[" << std::string( d->begin(), d->end() ) << "]");
   ::wfc::jsonrpc::incoming_holder holder( std::move(d) );
   
   if ( holder.is_request() )
   {
-    std::cout << "...query" << std::endl;
     // TODO: custom_request он же query
+    abort();
   }
   else if ( holder.is_notify() )
   {
-    std::cout << "...notify" << std::endl;
+    
     if ( auto t = _outgoing_target.lock() )
     {
-      std::cout << "...notify send ..." << std::endl;
       request::publish tmp;
-      std::cout << "...notify send 2 ..." << std::endl;
       auto ntf = std::make_unique< request::publish >(tmp);
-      std::cout << "...notify send 3 ..." << std::endl;
-      
-      //auto ntf = std::unique_ptr<request::publish>( new request::publish() );
       auto method = holder.method();
       if ( method.empty() )
       {
@@ -128,7 +143,9 @@ void pubsub_gateway::process_outgoing_( ::wfc::io::data_ptr d )
     }
   }
   else
-    std::cout << "...other" << std::endl;
+  {
+    /// "...other" << std::endl;
+  }
   
 }
 
@@ -149,22 +166,21 @@ void pubsub_gateway::describe(request_describe_ptr, describe_callback, size_t)
 
 void pubsub_gateway::publish(request_publish_ptr req, publish_callback cb)
 {
-  std::cout << "PUBLISH!!! " << std::string(req->content->begin(), req->content->end()) << " callback=" << (cb!=nullptr) << std::endl;
+  if ( req!=nullptr && req->content!=nullptr)  
+  {
+    TRACE_LOG_MESSAGE("pubsub_gateway::publish: [[" << std::string( req->content->begin(), req->content->end() ) << "]")
+  }
   
   bool allow = (_options.incoming_channel.size() <= req->channel.size());
   allow = allow && (0 == req->channel.compare(0, _options.incoming_channel.size(), _options.incoming_channel ));
-  std::cout << "-1-" << allow<< std::endl;
   if ( !allow )
   {
-    std::cout << "-1.1-" << std::endl;
     if ( cb!=nullptr )
     {
       auto resp = std::make_unique<response::publish>();
       resp->status = status::forbidden;
       cb( std::move(resp) );
-      std::cout << "-1.2-" << std::endl;
     }
-    std::cout << "-1.3-" << std::endl;
     // TODO: LOG
     return;
   }
@@ -186,13 +202,12 @@ void pubsub_gateway::publish(request_publish_ptr req, publish_callback cb)
     cb( std::move(resp) );
   };
   
-  std::cout << "-2-" << std::endl;
   ::wfc::jsonrpc::outgoing_notify< ::wfc::io::data_type> notify;
   if ( req->content!=nullptr )
   {
     notify.params = std::move( req->content );
   }
-  std::cout << "-3-" << std::endl;
+  
   typedef ::wfc::jsonrpc::outgoing_notify_json< 
     ::wfc::json::raw_value< ::wfc::io::data_type> 
   >::serializer serializer;
@@ -202,12 +217,11 @@ void pubsub_gateway::publish(request_publish_ptr req, publish_callback cb)
     data->reserve(notify.params->size() + 200 );
   }
   notify.method.assign(req->channel.begin() + _options.incoming_channel.size() + 1, req->channel.end());
-  std::cout << "-4-" << std::endl;
-  serializer()( notify, std::inserter(*data, data->end() ) );
-  std::cout << "convert to: " << std::string(data->begin(), data->end()) << std::endl;
-  (*_jsonrpc)( std::move(data), super::get_id(), io_cb );
   
-  //std::cout << "PUBLISH!!! " << std::string(req->content->begin(), req->content->end()) << " callback=" << (cb!=nullptr) << std::endl;
+  serializer()( notify, std::inserter(*data, data->end() ) );
+  
+  TRACE_LOG_MESSAGE("pubsub_gateway::publish process incoming: [[" << std::string( data->begin(), data->end() ) << "]");
+  (*_jsonrpc)( std::move(data), super::get_id(), io_cb );
 }
 
 void pubsub_gateway::publish(request_multi_publish_ptr, multi_publish_callback)

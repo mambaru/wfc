@@ -49,6 +49,10 @@ struct gateway_config_json
       >
     >::type
   > type;
+  
+  typedef type::target     target;
+  typedef type::serializer serializer;
+
 };
 
 struct gateway_list_config_json
@@ -58,8 +62,12 @@ struct gateway_list_config_json
       gateway_list_config, 
       gateway_list_config::gateway_list_type, 
       &gateway_list_config::gateways, 
-      ::wfc::json::array< std::vector<gateway_config_json::type > >
+      ::wfc::json::array< std::vector<gateway_config_json > >
   > type;
+  
+  typedef type::target     target;
+  typedef type::serializer serializer;
+
 };
 
 }}}}

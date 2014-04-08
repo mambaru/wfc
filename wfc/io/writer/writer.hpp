@@ -27,8 +27,10 @@ struct async_write_some
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
-    std::cout << "async write..." << std::string(d->begin(), d->end() ) << std::endl;
+    //std::cout << "async write..." << std::string(d->begin(), d->end() ) << std::endl;
     //tmp.assign(d->begin(), d->begin()+1);
+    
+    TRACE_LOG_MESSAGE( "ASYNC WRITE [[" << std::string(d->begin(), d->end() ) << "]]..." )
     auto dd = std::make_shared<typename T::data_ptr>( std::move(d) );
     t.descriptor().async_write_some
     (

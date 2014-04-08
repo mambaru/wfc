@@ -8,6 +8,9 @@ namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{ namespac
 server::~server()
 {
   //_impl.reset();
+  std::cout << "server::~server()..." << std::endl;
+  _server.reset();
+  std::cout << "...server::~server()..." << std::endl;
 }
 
   

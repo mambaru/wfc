@@ -109,13 +109,12 @@ public:
       }
       else
       {
-        
+        COMMON_LOG_WARNING("jsonrpc::service: io id=" << itr->second << " not found");
       }
     }
     else
     {
-      // TODO: в лог
-      std::cout << "ID NOT FOUND" << std::endl;
+      COMMON_LOG_WARNING("jsonrpc::service: jsonrpc id=" << call_id << " not found");
     }
   }
   
@@ -175,37 +174,7 @@ public:
     });
   };
   
-  /*
-  typedef std::function< ::wfc::io::data_ptr(int id) > request_serializer_t;
-  typedef std::function<void(incoming_holder holder)> incoming_handler_t;
-  typedef std::function< void(incoming_handler_t, request_serializer_t) > outgoing_request_handler_t;
   
-  outgoing_request_handler_t outgoing_request_handler;
-  */
-
-  
-  /*
-  typedef std::function< void(io_id_t, callback, add_shutdown_handler )> startup_handler_t;
-  */
-  
-  // TODO: сделать связку с method-handler
-  // TODO: убрать
-  /*
-  typedef std::map< ::wfc::io::io_id_t, ::wfc::io::callback> io_map_t;
-  io_map_t _io_map;
-  */
-  
-  /*
-  std::weak_ptr<handler_base> get_handler(::wfc::io::io_id_t io_id)
-  {
-    auto itr = _io_map.find( io_id );
-    if ( itr != _io_map.end() )
-    {
-      return itr->second.method_handler; 
-    }
-    return std::weak_ptr<handler_base>;
-  }
-  */
 
   // Для тестирования (и клиента)
   // !!! до запуска

@@ -53,8 +53,6 @@ public:
   void shutdown(size_t clinet_id )
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    
-    std::cout << "provider closed! " << clinet_id << std::endl;
     this->_clients.erase(clinet_id);
     this->_cli_itr = this->_clients.begin();
     
@@ -153,16 +151,13 @@ public:
     Args... args
   )
   {
-    std::cout << "privider post2 -1-" <<  std::endl;
     size_t client_id = 0;
     if (auto cli = this->get(client_id).lock() )
     {
-      std::cout << "privider post2 -2- " << client_id <<  std::endl;
       (cli.get()->*mem_ptr)( 
         std::move(req), 
         [client_id, callback](Resp resp)
         {
-          std::cout << "privider post2 -2.1-" <<  std::endl;
           callback( client_id, std::move(resp));
         }, 
         args... 
@@ -170,7 +165,6 @@ public:
     }
     else
     {
-      std::cout << "privider post2 -3-" <<  std::endl;
       std::lock_guard<mutex_type> lk(_mutex);
       auto wrp = this->wrap( mem_ptr, std::move(req), callback, std::forward<Args>(args)...);
       _delayed_queue.push( wrp );

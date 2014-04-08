@@ -7,7 +7,12 @@ namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{
 
 server::~server()
 {
-  //_impl.reset();
+  
+  std::cout << "server::~server()..." << std::endl;
+  if ( _impl!=nullptr )
+    _impl->stop();
+  _impl.reset();
+  std::cout << "...server::~server()" << std::endl;
 }
 
   

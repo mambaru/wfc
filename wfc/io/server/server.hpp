@@ -198,6 +198,21 @@ public:
   void stop()
   {
     super::stop(*this);
+    
+    auto& services = super::get_aspect().template get<_io_services_>();
+    for (auto& s : services)
+    {
+      s->stop();
+    }
+    services.clear();
+    
+    auto& threads   = super::get_aspect().template get<_threads_>();
+    for (auto& t : threads)
+    {
+      t->join();
+    }
+    threads.clear();
+
     //this->get_aspect().template get<_stop_>()(*this);
   }
   
