@@ -52,6 +52,11 @@ void service_list::stop()
   _service_list.clear();
 }
 
+void service_list::shutdown()
+{
+  this->stop();
+}
+
 service_list_config service_list::create_config(std::string type)
 {
   service_list_config conf;

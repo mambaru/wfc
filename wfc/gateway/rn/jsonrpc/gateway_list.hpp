@@ -19,6 +19,8 @@ public:
   
   void stop();
   
+  void shutdown();
+  
   static gateway_list_config create_config(std::string);
 
 private:

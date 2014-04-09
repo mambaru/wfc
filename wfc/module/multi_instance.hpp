@@ -178,6 +178,17 @@ public:
     }
     _instance_map.clear();
   }
+  
+  virtual void shutdown()
+  {
+    for (auto &n : _instance_map)
+    {
+      CONFIG_LOG_MESSAGE("module '" << _name << "': shutdown instance '" << n.first << "'...")
+      n.second->shutdown();
+      n.second.reset();
+    }
+    _instance_map.clear();
+  }
 
 private:
   std::string _name;

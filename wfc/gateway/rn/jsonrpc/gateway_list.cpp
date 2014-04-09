@@ -68,6 +68,11 @@ void gateway_list::stop()
   _gateway_list.clear();
 }
 
+void gateway_list::shutdown()
+{
+  this->stop();
+}
+
 gateway_list_config gateway_list::create_config(std::string type)
 {
   gateway_list_config conf;

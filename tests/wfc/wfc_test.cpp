@@ -80,6 +80,12 @@ public:
   {
     
   }
+  
+    virtual void shutdown()
+  {
+
+  }
+
 
   virtual void idle()
   {
@@ -133,6 +139,11 @@ public:
   }
 
   virtual void stop()
+  {
+
+  }
+
+  virtual void shutdown()
   {
 
   }

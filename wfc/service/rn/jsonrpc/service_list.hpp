@@ -19,6 +19,8 @@ public:
   
   void stop();
   
+  void shutdown();
+  
   static service_list_config create_config(std::string type);
 
 private:

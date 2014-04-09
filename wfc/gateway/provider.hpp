@@ -91,13 +91,12 @@ public:
   template<
     typename Req, 
     typename Resp,
-    typename Callback, 
     typename... Args
   >
   std::function<void()> wrap( 
     void (interface_type::*mem_ptr)(Req, std::function<void(Resp)>, Args... args), 
     Req req, 
-    Callback callback, 
+    std::function<void(Resp)> callback, 
     Args... args
   )
   {
@@ -107,11 +106,42 @@ public:
       [this](
         void (interface_type::*mem_ptr)(Req, std::function<void(Resp)>, Args... args), 
         std::shared_ptr<Req> preq, 
-        Callback callback, 
+        std::function<void(Resp)> callback, 
         Args... args
       )
       {
         this->post(mem_ptr, std::move(*preq), callback, args...);
+      }, 
+      mem_ptr, 
+      preq, 
+      callback, 
+      std::forward<Args>(args)...
+    );
+  }
+
+  template<
+    typename Req, 
+    typename Resp,
+    typename... Args
+  >
+  std::function<void()> wrap2( 
+    void (interface_type::*mem_ptr)(Req, std::function<void(Resp)>, Args... args), 
+    Req req, 
+    std::function<void(size_t, Resp)> callback, 
+    Args... args
+  )
+  {
+    auto preq = std::make_shared<Req>( std::move(req) );
+    // обход бага завата Args...
+    return std::bind(
+      [this](
+        void (interface_type::*mem_ptr)(Req, std::function<void(Resp)>, Args... args), 
+        std::shared_ptr<Req> preq, 
+        std::function<void(size_t, Resp)> callback, 
+        Args... args
+      )
+      {
+        this->post2(mem_ptr, std::move(*preq), callback, args...);
       }, 
       mem_ptr, 
       preq, 
@@ -144,7 +174,7 @@ public:
   /* для переопределенного callback с id клиента*/
   
   template<typename Req, typename Resp, typename... Args>
-  void post( 
+  void post2( 
     void (interface_type::*mem_ptr)(Req, std::function<void(Resp)>, Args... args), 
     Req req, 
     std::function<void(size_t, Resp)> callback, 
@@ -166,7 +196,7 @@ public:
     else
     {
       std::lock_guard<mutex_type> lk(_mutex);
-      auto wrp = this->wrap( mem_ptr, std::move(req), callback, std::forward<Args>(args)...);
+      auto wrp = this->wrap2( mem_ptr, std::move(req), callback, std::forward<Args>(args)...);
       _delayed_queue.push( wrp );
     }
   }
