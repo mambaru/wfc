@@ -21,6 +21,9 @@ struct client_options_json
       ::wfc::json::member< n_connection, client_options, connection_options, &client_options::connection, connection_options_json::type>
     >::type
   > type;
+  
+  typedef type::target     target;
+  typedef type::serializer serializer;
 };
 
 }}}}}

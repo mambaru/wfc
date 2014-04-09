@@ -17,6 +17,10 @@ struct server_options_json
       ::wfc::json::base< acceptor_options_json::type >
     >::type
   > type;
+  
+  typedef type::target     target;
+  typedef type::serializer serializer;
+
 };
 
 }}}}}

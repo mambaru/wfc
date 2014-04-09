@@ -12,7 +12,6 @@ namespace wfc{ namespace gateway{
   
 template<typename Itf>
 class provider
-  // : public Itf
 {
   typedef ::wfc::spinlock basic_mutex_type;
   typedef ::wfc::rwlock<basic_mutex_type> mutex_type;
@@ -28,12 +27,71 @@ public:
   typedef std::list<shudown_handler> shudown_handler_list;
   
   provider()
-    : _cli_itr(_clients.end())
+    : _sequence_mode(false)
+    , _cli_itr(_clients.end())
   {}
   
+  void sequence_mode(bool value) 
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    _sequence_mode = value;
+  }
+
+  void sequence_mode() const
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    return _sequence_mode;
+  }
+  
+  void process_sequence_queue(std::unique_lock<mutex_type>& lk)
+  {
+    auto fn = _delayed_queue.front();
+    _delayed_queue.front() = nullptr;
+    lk.unlock();
+    fn();
+  }
+
+  void process_non_sequence_queue(std::unique_lock<mutex_type>& lk)
+  {
+    delayed_queue dq;
+    dq.swap(_delayed_queue);
+    lk.unlock();
+    
+    while ( !dq.empty() )
+    {
+      dq.front()();
+      dq.pop();
+    }
+
+  }
+
+  void process_queue()
+  {
+    std::unique_lock<mutex_type> lk(_mutex);
+    
+    if ( _delayed_queue.empty() )
+      return;
+    
+    if ( _sequence_mode )
+    {
+      this->process_sequence_queue(lk);
+    }
+    else
+    {
+      this->process_non_sequence_queue(lk);  
+    }
+  }
+
   // Когда вызывать, определяеться в method_list
   void startup(size_t clinet_id, interface_ptr ptr )
   {
+    std::unique_lock<mutex_type> lk(_mutex);
+    this->_clients[clinet_id] = ptr;
+    this->_cli_itr = this->_clients.begin();
+    lk.unlock();
+    this->process_queue();
+
+    /*
     delayed_queue dq;
     {
       std::lock_guard<mutex_type> lk(_mutex);
@@ -47,10 +105,11 @@ public:
       dq.front()();
       dq.pop();
     }
+    */
   }
     
   // Когда вызывать, определяеться в method_list
-  void shutdown(size_t clinet_id )
+  void shutdown(size_t clinet_id)
   {
     std::lock_guard<mutex_type> lk(_mutex);
     this->_clients.erase(clinet_id);
@@ -87,6 +146,48 @@ public:
     size_t client_id = 0;
     return this->get(client_id);
   }
+  
+  
+  
+  template<typename Resp>
+  std::function<void(Resp)> wrap_callback(std::function<void(Resp)>&& callback) 
+  {
+    if ( callback==nullptr)
+      return nullptr;
+    
+    if (_sequence_mode)
+    {
+      return [this, callback](Resp req)
+      {
+        callback( std::move(req) );
+        this->process_queue();
+      };
+    }
+    else
+    {
+      return std::move(callback);
+    }
+  }
+
+  template<typename Resp>
+  std::function<void(size_t, Resp)> wrap_callback2(std::function<void(size_t, Resp)>&& callback) 
+  {
+    if ( callback==nullptr)
+      return nullptr;
+    
+    if (_sequence_mode)
+    {
+      return [this, callback](size_t io_id, Resp req)
+      {
+        callback( io_id, std::move(req) );
+        this->process_queue();
+      };
+    }
+    else
+    {
+      return std::move(callback);
+    }
+  }
 
   template<
     typename Req, 
@@ -114,7 +215,7 @@ public:
       }, 
       mem_ptr, 
       preq, 
-      callback, 
+      this->wrap_callback( std::move(callback) ), 
       std::forward<Args>(args)...
     );
   }
@@ -145,7 +246,7 @@ public:
       }, 
       mem_ptr, 
       preq, 
-      callback, 
+      this->wrap_callback2( std::move(callback) ), 
       std::forward<Args>(args)...
     );
   }
@@ -208,6 +309,7 @@ public:
   }
   
 private:
+  bool _sequence_mode;
   mutex_type _mutex;
   clinet_map _clients;
   typename clinet_map::iterator _cli_itr;

@@ -54,7 +54,7 @@ void pubsub_gateway::start()
       std::cout << n << std::endl;
       auto req = std::make_unique<request::subscribe>();
       req->channel = _options.incoming_channel + "." + n + _options.subscribe_suffix;
-      //auto callback = std::bind( &pubsub_gateway::publish, this, std::placeholders::_1, std::placeholders::_2 );
+      
       t->subscribe(std::move(req), nullptr, super::get_id(), [this](request_publish_ptr req, publish_callback cb)
       {
         if ( req==nullptr )

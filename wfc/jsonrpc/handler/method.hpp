@@ -77,6 +77,24 @@ struct invoke_method: method<
 >
 {};
 
+
+template<
+  typename TgName, 
+  typename JParams, 
+  typename JResult, 
+  typename I, 
+  void (I::*mem_ptr)( std::unique_ptr<typename JParams::target>, std::function< void(std::unique_ptr<typename JResult::target>) > ) 
+>
+struct invoke_method_basic: method_impl< 
+  name<TgName>,
+  invoke_mem_fun< 
+    JParams,
+    JResult,
+    I,
+    mem_ptr
+  >
+>
+{};
 template<
   typename TgName, 
   typename JParams, 
@@ -121,6 +139,31 @@ struct dual_method: method<
 >
 {};
 
+template<
+  typename TgName, 
+  typename JParams, 
+  typename JResult, 
+  typename I, 
+  void (I::*mem_ptr)( 
+    std::unique_ptr<typename JParams::target>, 
+    std::function< void(std::unique_ptr<typename JResult::target>) > 
+  ) 
+>
+struct dual_method_basic: method_impl< 
+  name<TgName>,
+  invoke_mem_fun<JParams,JResult,I,mem_ptr>,
+  call<JParams, JResult>
+>
+{};
+
+
+/*
+template<typename Method>
+struct add_method: fas::type_list_n<
+  Method,
+  fas::group<_method_, typename Method::tag>
+>::type {};
+*/
 
 template<
   typename TgName, 

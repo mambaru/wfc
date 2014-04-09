@@ -21,6 +21,10 @@ struct acceptor_options_json
       ::wfc::json::member< n_connection, acceptor_options, connection_options, &acceptor_options::connection, connection_options_json::type>
     >::type
   > type;
+  
+  typedef type::target     target;
+  typedef type::serializer serializer;
+
 };
 
 }}}}}
