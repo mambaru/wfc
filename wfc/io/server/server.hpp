@@ -197,11 +197,21 @@ public:
   
   void stop()
   {
+    std::cout << "io::server::stop -1-" << std::endl;
     super::stop(*this);
+
+    auto& acceptors = super::get_aspect().template get<_acceptors_>();
+    for (auto& a : acceptors)
+    {
+      std::cout << "io::server::stop -1.1-" << std::endl;
+      a->stop();
+    }
+    acceptors.clear();
     
     auto& services = super::get_aspect().template get<_io_services_>();
     for (auto& s : services)
     {
+      std::cout << "io::server::stop -2-" << std::endl;
       s->stop();
     }
     services.clear();
@@ -209,10 +219,11 @@ public:
     auto& threads   = super::get_aspect().template get<_threads_>();
     for (auto& t : threads)
     {
+      std::cout << "io::server::stop -3-" << std::endl;
       t->join();
     }
     threads.clear();
-
+    std::cout << "io::server::stop -4-" << std::endl;
     //this->get_aspect().template get<_stop_>()(*this);
   }
   

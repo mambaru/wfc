@@ -25,6 +25,9 @@ void acceptor::start()
 void acceptor::stop()
 {
   _impl->stop();
+  std::cout << "void acceptor::stop() reset..." << std::endl;
+  _impl.reset();
+  std::cout << "...void acceptor::stop()" << std::endl;
 }
   
 void acceptor::shutdown()

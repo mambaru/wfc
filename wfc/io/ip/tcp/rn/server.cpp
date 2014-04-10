@@ -8,11 +8,12 @@ namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{
 server::~server()
 {
   
-  std::cout << "server::~server()..." << std::endl;
+  std::cout << "tcp::rn::server::~server()..." << std::endl;
   if ( _impl!=nullptr )
     _impl->stop();
+  std::cout << "tcp::rn::server::~server() reset.." << std::endl;
   _impl.reset();
-  std::cout << "...server::~server()" << std::endl;
+  std::cout << "...tcp::rn::server::~server()" << std::endl;
 }
 
   
@@ -30,6 +31,9 @@ void server::start()
 void server::stop()
 {
   _impl->stop();
+  std::cout << "tcp::rn::server::server() _impl.reset().." << std::endl;
+  _impl.reset();
+  std::cout << "...tcp::rn::server::server() _impl.reset()" << std::endl;
 }
   
 void server::shutdown()

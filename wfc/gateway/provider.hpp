@@ -28,8 +28,14 @@ public:
   
   provider()
     : _sequence_mode(false)
+    , _enabled(true) // TDOD: false
     , _cli_itr(_clients.end())
   {}
+  
+  bool enabled() const
+  {
+    return _enabled;
+  }
   
   void sequence_mode(bool value) 
   {
@@ -309,7 +315,8 @@ public:
   }
   
 private:
-  bool _sequence_mode;
+  std::atomic<bool> _sequence_mode;
+  std::atomic<bool> _enabled;
   mutex_type _mutex;
   clinet_map _clients;
   typename clinet_map::iterator _cli_itr;

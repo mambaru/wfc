@@ -36,7 +36,11 @@ void server::start()
 
 void server::stop()
 {
+  std::cout << "rn::jsonrpc::server::stop()..." << std::endl;
   _server->stop();
+  std::cout << "rn::jsonrpc::server::stop() reset..." << std::endl;
+  _server.reset();
+  std::cout << "...rn::jsonrpc::server::stop()" << std::endl;
 }
   
 void server::shutdown()
