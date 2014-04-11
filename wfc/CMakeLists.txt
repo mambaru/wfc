@@ -36,3 +36,5 @@ add_library(
 target_link_libraries(wfc ${HAVE_boost_system-mt} ${CMAKE_THREAD_LIBS_INIT} )
 
 build_info(wfc wfc)
+
+install(TARGETS wfc DESTINATION ${CMAKE_INSTALL_PREFIX})

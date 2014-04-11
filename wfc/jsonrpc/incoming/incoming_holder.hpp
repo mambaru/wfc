@@ -153,6 +153,11 @@ public:
     return std::move(result);
   }
   
+  std::string params_error_message(const json::json_error& e) const
+  {
+    return e.message(_incoming.params.first, _incoming.params.second);
+  }
+  
   template<typename J>
   std::unique_ptr<typename J::target> get_error() const
   {
