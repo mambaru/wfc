@@ -2,6 +2,8 @@
 #include <wfc/jsonrpc/incoming/incoming_holder.hpp>
 #include <wfc/jsonrpc/outgoing/outgoing_notify.hpp>
 #include <wfc/jsonrpc/outgoing/outgoing_notify_json.hpp>
+#include <wfc/jsonrpc/outgoing/outgoing_request.hpp>
+#include <wfc/jsonrpc/outgoing/outgoing_request_json.hpp>
 
 namespace wfc{ namespace pubsub{
   
@@ -14,6 +16,7 @@ pubsub_gateway::pubsub_gateway( std::weak_ptr< wfc::global > global, const optio
   : super(global.lock()->io_service, conf)
   , _global(global)
   , _options(conf)
+  , _method_id_counter(0)
 {
   super::create(*this);
 }
@@ -189,6 +192,7 @@ void pubsub_gateway::publish(request_publish_ptr req, publish_callback cb)
   
   if ( cb != nullptr ) io_cb = [cb](wfc::io::data_ptr d)
   {
+    std::cout << "response[" << std::string(d->begin(), d->end() ) << std::endl;
     ::wfc::jsonrpc::incoming_holder holder( std::move(d) );
     auto resp = std::make_unique<response::publish>();
     if ( holder.is_response() )
@@ -202,23 +206,49 @@ void pubsub_gateway::publish(request_publish_ptr req, publish_callback cb)
     cb( std::move(resp) );
   };
   
-  ::wfc::jsonrpc::outgoing_notify< ::wfc::io::data_type> notify;
-  if ( req->content!=nullptr )
-  {
-    notify.params = std::move( req->content );
-  }
-  
-  typedef ::wfc::jsonrpc::outgoing_notify_json< 
-    ::wfc::json::raw_value< ::wfc::io::data_type> 
-  >::serializer serializer;
   auto data = std::make_unique< ::wfc::io::data_type >();
-  if ( notify.params!=nullptr )
-  {
-    data->reserve(notify.params->size() + 200 );
-  }
-  notify.method.assign(req->channel.begin() + _options.incoming_channel.size() + 1, req->channel.end());
   
-  serializer()( notify, std::inserter(*data, data->end() ) );
+  if ( io_cb == nullptr )
+  {
+    ::wfc::jsonrpc::outgoing_notify< ::wfc::io::data_type> notify;
+    if ( req->content!=nullptr )
+    {
+      notify.params = std::move( req->content );
+    }
+  
+    typedef ::wfc::jsonrpc::outgoing_notify_json< 
+      ::wfc::json::raw_value< ::wfc::io::data_type> 
+    >::serializer serializer;
+  
+    if ( notify.params!=nullptr )
+    {
+      data->reserve(notify.params->size() + 200 );
+    }
+    notify.method.assign(req->channel.begin() + _options.incoming_channel.size() + 1, req->channel.end());
+  
+    serializer()( notify, std::inserter(*data, data->end() ) );
+  }
+  else
+  {
+    ::wfc::jsonrpc::outgoing_request< ::wfc::io::data_type> request;
+    if ( req->content!=nullptr )
+    {
+      request.params = std::move( req->content );
+    }
+  
+    typedef ::wfc::jsonrpc::outgoing_request_json< 
+      ::wfc::json::raw_value< ::wfc::io::data_type> 
+    >::serializer serializer;
+  
+    if ( request.params!=nullptr )
+    {
+      data->reserve(request.params->size() + 200 );
+    }
+    request.id = ++_method_id_counter;
+    request.method.assign(req->channel.begin() + _options.incoming_channel.size() + 1, req->channel.end());
+  
+    serializer()( request, std::inserter(*data, data->end() ) );
+  }
   
   TRACE_LOG_MESSAGE("pubsub_gateway::publish process incoming: [[" << std::string( data->begin(), data->end() ) << "]");
   (*_jsonrpc)( std::move(data), super::get_id(), io_cb );

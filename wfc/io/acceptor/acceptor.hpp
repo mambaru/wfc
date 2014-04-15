@@ -43,6 +43,7 @@ public:
   
   void stop()
   {
+    super::descriptor().cancel();
     super::descriptor().close();
     super::stop(*this);
   }
