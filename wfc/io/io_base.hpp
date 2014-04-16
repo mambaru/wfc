@@ -193,20 +193,35 @@ protected:
   template<typename T>
   void stop(T& t)
   {
+    std::cout << "io_base::stop -0- id=" << this->_id << std::endl;
     t.post([&t, this]()
     {
+      std::cout << "io_base::stop post -1- id=" << this->_id << std::endl;
       for ( auto& h : this->_release_handlers2)
+      {
+        std::cout << "io_base::stop post -1.1- id=" << this->_id << std::endl;
         h( this->_id );
+      }
+      std::cout << "io_base::stop post -2-" << std::endl;
       this->_release_handlers2.clear();
-      
+      std::cout << "io_base::stop post -3-" << std::endl;
       auto& sh = this->_options.shutdown_handler;
+      std::cout << "io_base::stop post -4-" << std::endl;
       if ( sh != nullptr )
       {
+        std::cout << "io_base::stop post -5-" << std::endl;
         sh( this->_id );
       }
 
+      std::cout << "io_base::stop post -6-" << std::endl;
       t.get_aspect().template get<_stop_>()(t);
+      std::cout << "io_base::stop post -7-" << std::endl;
     });
+    std::cout << "io_base::stop -2- id=" << this->_id << std::endl;
+    _io_service.poll();
+    std::cout << "io_base::stop -3-" << std::endl;
+    t.get_aspect().template get<_strand_>().reset();
+    std::cout << "io_base::stop -4-" << std::endl;
   }
   
 private:

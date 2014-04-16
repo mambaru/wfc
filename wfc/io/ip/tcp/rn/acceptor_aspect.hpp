@@ -47,21 +47,37 @@ struct ad_insert
       
       add( [&t](::wfc::io::io_id_t id) 
       {
+        std::cout << "connection stop handler -1- ----------------------------------- id=" << id << std::endl;
         // post костыль, может не сработать, удаляем объект во время стопа
         t.post([id,&t]()
         {
+          std::cout << "connection stop handler -1.1-" << std::endl;
           auto &stg = t.get_aspect().template get<_holder_storage_>();
+          std::cout << "connection stop handler -1.1.1-" << std::endl;
           auto itr = stg.find(id);
+          std::cout << "connection stop handler -1.1.2-" << std::endl;
           if ( itr != stg.end() )
           {
+            std::cout << "connection stop handler -1.2-0-" << std::endl;
             auto pconn = std::make_shared<holder_ptr>( std::move(itr->second) );
+            std::cout << "connection stop handler -1.2-1-" << std::endl;
             stg.erase(itr);
-            (*pconn)->strand().post([pconn, id](){
+            std::cout << "connection stop handler -1.2- stg.size="<< stg.size() << std::endl;
+            /*(*pconn)->strand().post([pconn, id](){
+              std::cout << "connection stop handler -1.2.1-" << std::endl;
               // std::c1out << "smart delete " << id << std::endl;
-            });
+            });*/
+            std::cout << "connection stop handler -1.3-" << std::endl;
+            (*pconn)->stop();
+            std::cout << "connection stop handler -1.4-" << std::endl;
+            (*pconn).reset();
+            std::cout << "connection stop handler -1.5-" << std::endl;
           }
           // t.get_aspect().template get<_holder_storage_>().erase(id);
         });
+        std::cout << "connection stop handler -2-" << std::endl;
+        // t.get_io_service().poll();
+        // std::cout << "connection stop handler -3-" << std::endl;
       });
     };
     

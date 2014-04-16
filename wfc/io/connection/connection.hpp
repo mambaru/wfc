@@ -24,6 +24,11 @@ public:
   typedef typename super::options_type options_type;
   
 public:
+  
+  ~connection()
+  {
+    std::cout << "~connection() " << size_t(this) << std::endl;
+  }
 
   connection(const connection& ) = delete;
   void operator = (const connection& conf) = delete;
@@ -46,9 +51,9 @@ public:
   
   void stop()
   {
-    super::descriptor().cancel();
-    super::descriptor().close();
+    std::cout << "void connection::stop() -1- " << size_t(this) << std::endl;
     super::stop(*this);
+    std::cout << "void connection::stop() -2- Done" << std::endl;
   }
   
   bool status() const

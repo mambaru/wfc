@@ -65,6 +65,16 @@ public:
     return this->get_aspect().template get< ::wfc::io::_error_code_>();
   }
   
+  template<typename T>
+  void stop(T& t)
+  {
+    std::cout << "descriptor_holder -1-" << std::endl;
+    super::stop(t);
+    std::cout << "descriptor_holder -2-" << std::endl;
+    this->descriptor().close();
+    std::cout << "descriptor_holder -3-" << std::endl;
+  }
+
 private:
   
   descriptor_type _descriptor;

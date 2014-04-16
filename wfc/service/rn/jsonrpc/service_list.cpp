@@ -46,10 +46,14 @@ void service_list::stop()
 {
   for (auto& i: _service_list)
   {
+    std::cout << "service_list:: 1 ------------------------------" << std::endl;
     i->stop();
+    std::cout << "service_list:: 2 ------------------------------" << std::endl;
     i.reset();
+    std::cout << "service_list:: 3 ------------------------------" << std::endl;
   }
   _service_list.clear();
+  std::cout << "service_list:: 4 ------------------------------ done" << std::endl;
 }
 
 void service_list::shutdown()
