@@ -4,10 +4,14 @@
 #include <wfc/io/tags.hpp>
 #include <wfc/io/basic/tags.hpp>
 #include <wfc/io/types.hpp>
+#include <wfc/io_service.hpp>
 
 #include <wfc/callback/callback_owner.hpp>
 #include <fas/aop.hpp>
 #include <functional>
+
+#include <mutex>              
+#include <condition_variable>
 
 namespace wfc{ namespace io{ 
   
@@ -36,6 +40,7 @@ public:
   io_base(io_service_type& io_service, const options_type& opt )
     : _io_service(io_service)
     , _options(opt)
+    , _stop_flag(ATOMIC_FLAG_INIT)
   {
     _id = create_id();
   }
@@ -103,10 +108,12 @@ public:
 
 ///  //////////////////////////////////////////////
 
+/*
   void add_release_handler( release_handler handler)
   {
     _release_handlers.push_back(handler);
   }
+  */
 
 
   template<typename Handler>
@@ -168,7 +175,7 @@ protected:
   template<typename T>
   void start(T& t)
   {
-    
+    _stop_flag.clear();
     
     auto& sh = _options.startup_handler;
     
@@ -193,35 +200,66 @@ protected:
   template<typename T>
   void stop(T& t)
   {
-    std::cout << "io_base::stop -0- id=" << this->_id << std::endl;
-    t.post([&t, this]()
+    std::cout << "io_base::stop()" << std::endl;
+    if ( !_stop_flag.test_and_set() )
     {
-      std::cout << "io_base::stop post -1- id=" << this->_id << std::endl;
-      for ( auto& h : this->_release_handlers2)
-      {
-        std::cout << "io_base::stop post -1.1- id=" << this->_id << std::endl;
-        h( this->_id );
-      }
-      std::cout << "io_base::stop post -2-" << std::endl;
-      this->_release_handlers2.clear();
-      std::cout << "io_base::stop post -3-" << std::endl;
-      auto& sh = this->_options.shutdown_handler;
-      std::cout << "io_base::stop post -4-" << std::endl;
-      if ( sh != nullptr )
-      {
-        std::cout << "io_base::stop post -5-" << std::endl;
-        sh( this->_id );
-      }
+      std::cout << "io_base::stop() ready for stop" << std::endl;
+      std::mutex mtx;
+      std::atomic<bool> ready(false);
+      std::condition_variable cv;
+      
+      ::wfc::io_service::work wrk(_io_service);
 
-      std::cout << "io_base::stop post -6-" << std::endl;
-      t.get_aspect().template get<_stop_>()(t);
-      std::cout << "io_base::stop post -7-" << std::endl;
-    });
-    std::cout << "io_base::stop -2- id=" << this->_id << std::endl;
-    _io_service.poll();
-    std::cout << "io_base::stop -3-" << std::endl;
-    t.get_aspect().template get<_strand_>().reset();
-    std::cout << "io_base::stop -4-" << std::endl;
+      _io_service.poll();
+      t.post([&t, this, &mtx, &cv, &ready]()
+      {
+        t.get_aspect().template gete<_before_stop_>()(t);
+        std::cout << "io_base::stop() post" << std::endl;
+        for ( auto& h : this->_release_handlers2)
+        {
+          h( this->_id );
+        }
+        this->_release_handlers2.clear();
+        auto& sh = this->_options.shutdown_handler;
+        if ( sh != nullptr )
+        {
+          std::cout << "io_base::stop() post shutdown {" << std::endl;
+          sh( this->_id );
+          std::cout << "} io_base::stop() post shutdown" << std::endl;
+        }
+        //t.get_aspect().template get<_stop_>()(t); // Удалить
+        t.get_aspect().template gete<_after_stop_>()(t);
+        t.get_aspect().template get<_strand_>().reset();
+        ready = true;
+        cv.notify_all();
+        std::cout << "io_base::stop() post Done!" << std::endl;
+      });
+      
+      std::cout << "io_base::stop() -1-" << std::endl;
+      if ( 0 != _io_service.poll() || !ready)
+      {
+        std::cout << "io_base::stop() -1.1-" << std::endl;
+        while ( 0 != _io_service.poll() || !ready) 
+        {
+          std::cout << "io_base::stop() -1.1.1-" << std::endl;
+        }
+        std::cout << "io_base::stop() -1.2-" << std::endl;
+        std::unique_lock<std::mutex> lck(mtx);
+        std::cout << "io_base::stop() -1.3-" << std::endl;
+        while (!ready) 
+        { 
+          std::cout << "io_base::stop() -1.3.1-" << std::endl;
+          cv.wait(lck);
+        }
+        std::cout << "io_base::stop() -1.4- End" << std::endl;
+      }
+      std::cout << "io_base::stop() -2- End" << std::endl;
+    }
+    else
+    {
+      std::cout << "Уже остановлен" << std::endl;
+    }
+    std::cout << "io_base::stop() Done" << std::endl;
   }
   
 private:
@@ -231,6 +269,7 @@ private:
   std::list<std::function<void(io_id_t id)> > _release_handlers2;
   
   io_id_t _id;
+  std::atomic_flag _stop_flag;
 };
 
 }}

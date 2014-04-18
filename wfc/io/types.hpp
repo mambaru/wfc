@@ -15,7 +15,7 @@ typedef std::function<void(std::weak_ptr<iio>)> release_handler;
 struct iio
 {
   virtual ~iio() {}
-  virtual void add_release_handler( release_handler ) = 0;
+  //virtual void add_release_handler( release_handler ) = 0;
 };
   
 typedef std::vector<char> data_type;

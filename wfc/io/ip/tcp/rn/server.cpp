@@ -30,10 +30,11 @@ void server::start()
 
 void server::stop()
 {
+  std::cout << "server::stop()" << std::endl;
   _impl->stop();
-  std::cout << "tcp::rn::server::server() _impl.reset().." << std::endl;
+  std::cout << "server::stop() _impl.reset() {" << std::endl;
   _impl.reset();
-  std::cout << "...tcp::rn::server::server() _impl.reset()" << std::endl;
+  std::cout << "} server::stop() _impl.reset()" << std::endl;
 }
   
 void server::shutdown()

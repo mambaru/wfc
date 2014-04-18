@@ -7,7 +7,9 @@
 
 void test(wfc::io_service& io_service)
 {
-  io_service.stop();
+  std::cout << "run" << std::endl;
+  io_service.run();
+  std::cout << "done" << std::endl;
 }
 
 typedef wfc::io::ip::tcp::rn::server server;
@@ -54,15 +56,14 @@ int main(int argc, char* /*argv*/[])
   */
   
   server::options_type conf;
+  conf.host = "0.0.0.0";
+  conf.port = "12345";
   //conf.acceptors = 1;
   conf.threads = 4;
   //conf.handler = handler;
   wfc::io_service::work wrk(io_service);
   
   server srv(io_service, conf, wfc::io::simple_handler(handler) );
-  
-  // srv.configure(conf);
-  // srv.initialize(handler);
   
   srv.start();
   
@@ -71,11 +72,15 @@ int main(int argc, char* /*argv*/[])
   if (argc == 1)
     th = std::thread( std::bind(test, std::ref(io_service) ) );
   
-  std::cout << "run" << std::endl;
-  io_service.run();
-  std::cout << "done" << std::endl;
+  ::sleep(1);
+  //io_service.run();
   
+  
+  std::cout << "stop..." << std::endl;
   srv.stop();
+  std::cout << "stop io_service" << std::endl;
+  io_service.stop();
+  std::cout << "...stop Done" << std::endl;
   
   if (argc == 1)
     th.join();

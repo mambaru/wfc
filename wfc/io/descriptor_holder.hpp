@@ -68,11 +68,19 @@ public:
   template<typename T>
   void stop(T& t)
   {
+    /*
+    if ( !this->get_aspect().template get< ::wfc::io::_status_>() )
+      return;
+    this->get_aspect().template get< ::wfc::io::_status_>() = false;
+    */
     std::cout << "descriptor_holder -1-" << std::endl;
     super::stop(t);
     std::cout << "descriptor_holder -2-" << std::endl;
     this->descriptor().close();
     std::cout << "descriptor_holder -3-" << std::endl;
+    // Закрываем в конце, чтоб не вылетел io_service из-за пустого poll 
+    this->descriptor().close();
+    
   }
 
 private:

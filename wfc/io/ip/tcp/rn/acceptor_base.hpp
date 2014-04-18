@@ -20,9 +20,16 @@ public:
   {
   }
   
+  ~acceptor_base()
+  {
+    std::cout << "void acceptor_base::~acceptor_base()" << std::endl;
+  }
+  
   void stop()
   {
     std::cout << "void acceptor_base::stop() -1-" << std::endl;
+    /*
+     Не нужно, сам все подчистит
     super::post([this](){
       std::cout << "void acceptor_base::stop() post" << std::endl;
       auto &stg = this->get_aspect().template get<_holder_storage_>();
@@ -37,6 +44,7 @@ public:
       stg.clear();
       std::cout << "void acceptor_base::stop() post -3-" << std::endl;
     });
+    */
     //super::get_io_service().poll();
     std::cout << "void acceptor_base::stop() -2-" << std::endl;
     super::stop();
