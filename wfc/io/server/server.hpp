@@ -144,25 +144,26 @@ struct ad_before_stop
   {
     std::cout << "-- wfc::io::server::ad_before_stop--" << std::endl;
     
+    std::cout << "  -- stop acceptors --" << std::endl;
     auto& acceptors = t.get_aspect().template get<_acceptors_>();
     for (auto& a : acceptors)
     {
       std::cout << "server::ad_before_stop -1.1-" << std::endl;
       a->stop();
     }
-    std::cout << "server::ad_before_stop -1.1*-" << std::endl;
-    acceptors.clear();
+    std::cout << "  ^^ stop acceptors ^^" << std::endl;
 
+    std::cout << "  -- stop services --" << std::endl;
     auto& services = t.get_aspect().template get<_io_services_>();
     for (auto& s : services)
     {
       std::cout << "server::ad_before_stop -5-" << std::endl;
       s->stop();
     }
-    std::cout << "server::ad_before_stop -6-" << std::endl;
-    services.clear();
-
     
+    std::cout << "  ^^ stop services ^^" << std::endl;
+    
+    std::cout << "  -- join threads --" << std::endl;
     auto& threads   = t.get_aspect().template get<_threads_>();
     for (auto& t : threads)
     {
@@ -170,11 +171,16 @@ struct ad_before_stop
       t->join();
       std::cout << "server::ad_before_stop -3.2-" << std::endl;
     }
-    std::cout << "server::ad_before_stop -3.3-" << std::endl;
+    std::cout << "  ^^ join threads ^^" << std::endl;
+    
+    std::cout << "clear acceptors..." << std::endl;
+    acceptors.clear();
+    std::cout << "clear threads..." << std::endl;
     threads.clear();
-    std::cout << "server::ad_before_stop -4-" << std::endl;
+    std::cout << "clear services..." << std::endl;
+    services.clear();
 
-    std::cout << "server::ad_before_stop -1-" << std::endl;
+    std::cout << "^^ wfc::io::server::ad_before_stop ^^" << std::endl;
   }
 };
   

@@ -210,7 +210,17 @@ protected:
       
       ::wfc::io_service::work wrk(_io_service);
 
-      _io_service.poll();
+      if ( int tmp = _io_service.poll() )
+      {
+        std::cout << "_io_service.poll()=" << tmp << std::endl;
+      }
+      
+      if ( _io_service.stopped() )
+      {
+        std::cout << "is _io_service.stopped()" << std::endl;
+        _io_service.reset();
+      }
+      
       t.post([&t, this, &mtx, &cv, &ready]()
       {
         t.get_aspect().template gete<_before_stop_>()(t);
@@ -242,6 +252,7 @@ protected:
         while ( 0 != _io_service.poll() || !ready) 
         {
           std::cout << "io_base::stop() -1.1.1-" << std::endl;
+          //sleep(1);
         }
         std::cout << "io_base::stop() -1.2-" << std::endl;
         std::unique_lock<std::mutex> lck(mtx);
