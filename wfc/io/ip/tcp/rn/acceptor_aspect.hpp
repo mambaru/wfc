@@ -67,17 +67,18 @@ struct ad_insert
             std::cout << "after erase stg.size()=" << stg.size() << std::endl;
             std::cout << "connection stop handler -1.2- stg.size="<< stg.size() << std::endl;
             /*(*pconn)->strand()*/
-            /*t.post([pconn, id](){
+            t.post([pconn, id](){
               std::cout << "connection stop handler -1.2.1-" << std::endl;
               std::cout << "smart delete " << id << std::endl;
             });
-            */
-            std::cout << "connection stop handler -1.3-" << std::endl;
+            
+            /*std::cout << "connection stop handler -1.3-" << std::endl;
             (*pconn)->stop([pconn, id](){
               std::cout << "connection stop handler -1.2.1-" << std::endl;
               std::cout << "smart delete " << id << std::endl;
               pconn->reset();
             });
+            */
             std::cout << "connection stop handler -1.4-" << std::endl;
             //(*pconn).reset();
             //std::cout << "connection stop handler -1.5-" << std::endl;
