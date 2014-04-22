@@ -17,10 +17,10 @@ public:
   {
   }
   
-  void stop()
+  void stop(std::function<void()> finalize)
   {
     std::cout << "--------- connection_impl::stop ---------" << std::endl; 
-    super::stop();
+    super::stop(finalize);
     std::cout << "^^^^^^^^^ connection_impl::stop ^^^^^^^^^" << std::endl; 
   }
 };

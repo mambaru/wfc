@@ -22,10 +22,10 @@ void acceptor::start()
   _impl->start();
 }
 
-void acceptor::stop()
+void acceptor::stop(std::function<void()> finalize)
 {
   std::cout << "---- void acceptor::stop() ---" << std::endl;
-  _impl->stop();
+  _impl->stop(finalize);
   std::cout << "void acceptor::stop() 1" << std::endl;
   _impl.reset();
   std::cout << "void acceptor::stop() Done" << std::endl;

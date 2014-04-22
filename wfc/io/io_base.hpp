@@ -35,6 +35,7 @@ public:
 
   ~io_base()
   {
+    std::cout << "~io_base() " << size_t(this) << std::endl;
   }
   
   io_base(io_service_type& io_service, const options_type& opt )
@@ -69,31 +70,62 @@ public:
   
   strand_type& strand()
   {
+    if ( auto ptr = this->get_aspect().template get<_strand_>() )
+    {
+      return *(ptr.get());
+    }
+    abort();
+    /*
     if ( nullptr == this->get_aspect().template get<_strand_>() )
       abort();
     return *(this->get_aspect().template get<_strand_>());
+    */
   }
 
   const strand_type& strand() const
   {
+    /*
     if ( nullptr == this->get_aspect().template get<_strand_>() )
       abort();
     return *(this->get_aspect().template get<_strand_>());
+    */
+    if ( auto ptr = this->get_aspect().template get<_strand_>() )
+    {
+      return *(ptr.get());
+    }
+    abort();
+
   }
 
   // Ахтунг!!! owner только внутри strand(), т.к. нифиг не thread safe
   const owner_type& owner() const
   {
+    /*
     if ( nullptr == this->get_aspect().template get<_owner_>() )
       abort();
     return *(this->get_aspect().template get<_owner_>());
+    */
+    if ( auto ptr = this->get_aspect().template get<_owner_>() )
+    {
+      return *(ptr.get());
+    }
+    abort();
+
   }
 
   owner_type& owner()
   {
+    /*
     if ( nullptr == this->get_aspect().template get<_owner_>() )
       abort();
     return *(this->get_aspect().template get<_owner_>());
+    */
+    if ( auto ptr = this->get_aspect().template get<_owner_>() )
+    {
+      return *(ptr.get());
+    }
+    abort();
+
   }
 
   const options_type& options() const
@@ -164,6 +196,7 @@ protected:
   template<typename T>
   void create(T& t)
   {
+    std::cout << "io_base::create(t)" << std::endl;
     t.get_aspect().template gete<_create_>()(t, _options);
   }
 
@@ -198,7 +231,7 @@ protected:
   }
   
   template<typename T>
-  void stop(T& t)
+  void stop(T& t, std::function<void()> finalize)
   {
     std::cout << "io_base::stop()" << std::endl;
     if ( !_stop_flag.test_and_set() )
@@ -208,21 +241,31 @@ protected:
       std::atomic<bool> ready(false);
       std::condition_variable cv;
       
+      
       ::wfc::io_service::work wrk(_io_service);
 
-      if ( int tmp = _io_service.poll() )
+      /*if ( int tmp = _io_service.poll() )
       {
         std::cout << "_io_service.poll()=" << tmp << std::endl;
-      }
+      }*/
       
       if ( _io_service.stopped() )
       {
         std::cout << "is _io_service.stopped()" << std::endl;
-        _io_service.reset();
+        //_io_service.reset();
       }
       
-      t.post([&t, this, &mtx, &cv, &ready]()
+      ///
+      /// this->post() в данном контексте не работает. т.е. this->strand().post() не дает эффекта (видимо при из-за рекурсивного вызова?)
+      ///
+      
+      //t.post([&t, this, &mtx, &cv, &ready]()
+      _io_service.post( this->strand().wrap( [&t, this, &mtx, &cv, &ready]()
+      //this->strand().post( this->owner().wrap( [&t, this, &mtx, &cv, &ready]()
       {
+        std::cout << "io_base::stop() POST" << std::endl;
+        try{
+        
         t.get_aspect().template gete<_before_stop_>()(t);
         std::cout << "io_base::stop() post" << std::endl;
         for ( auto& h : this->_release_handlers2)
@@ -243,16 +286,30 @@ protected:
         ready = true;
         cv.notify_all();
         std::cout << "io_base::stop() post Done!" << std::endl;
-      });
+        }
+        catch(...)
+        {
+          abort();
+        }
+      }));
       
       std::cout << "io_base::stop() -1-" << std::endl;
       if ( 0 != _io_service.poll() || !ready)
       {
         std::cout << "io_base::stop() -1.1-" << std::endl;
-        while ( 0 != _io_service.poll() || !ready) 
+        //while ( 0 != _io_service.poll() || !ready)
+        while ( !ready) 
         {
-          std::cout << "io_base::stop() -1.1.1-" << std::endl;
-          //sleep(1);
+          int polled = _io_service.poll();
+          std::cout << "io_base::stop() -1.1.1- polled = " << polled << " this=" << size_t(this) << std::endl;
+          
+          if ( _io_service.stopped() )
+          {
+            std::cout << "is _io_service.stopped()" << std::endl;
+            _io_service.reset();
+          }
+
+          // sleep(1);
         }
         std::cout << "io_base::stop() -1.2-" << std::endl;
         std::unique_lock<std::mutex> lck(mtx);
@@ -270,6 +327,13 @@ protected:
     {
       std::cout << "Уже остановлен" << std::endl;
     }
+    
+    if ( finalize!=nullptr )
+    {
+      std::cout << "io_base::stop() finalize..." << std::endl;
+      finalize();
+      std::cout << "...io_base::stop() finalize" << std::endl;
+    }
     std::cout << "io_base::stop() Done" << std::endl;
   }
   
@@ -281,6 +345,7 @@ private:
   
   io_id_t _id;
   std::atomic_flag _stop_flag;
+  
 };
 
 }}

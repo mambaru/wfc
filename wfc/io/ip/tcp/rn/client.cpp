@@ -25,9 +25,9 @@ void client::start()
   _impl->start();
 }
 
-void client::stop()
+void client::stop(std::function<void()> finalize)
 {
-  _impl->stop();
+  _impl->stop(finalize);
 }
   
 void client::shutdown()

@@ -149,7 +149,7 @@ struct ad_before_stop
     for (auto& a : acceptors)
     {
       std::cout << "server::ad_before_stop -1.1-" << std::endl;
-      a->stop();
+      a->stop(nullptr);
     }
     std::cout << "  ^^ stop acceptors ^^" << std::endl;
 
@@ -249,7 +249,7 @@ public:
   }
   
   
-  void stop()
+  void stop(std::function<void()> finalize)
   {
     /*
     auto& acceptors = super::get_aspect().template get<_acceptors_>();
@@ -284,7 +284,7 @@ public:
 
     std::cout << "io::server::stop -1-" << std::endl;
     */
-    super::stop(*this);
+    super::stop(*this, finalize);
 
     //this->get_aspect().template get<_stop_>()(*this);
   }

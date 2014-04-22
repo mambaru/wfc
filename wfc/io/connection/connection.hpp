@@ -49,10 +49,10 @@ public:
     super::start(*this);
   }
   
-  void stop()
+  void stop(std::function<void()> finalize)
   {
     std::cout << "void connection::stop() -1- " << size_t(this) << std::endl;
-    super::stop(*this);
+    super::stop(*this, finalize);
     std::cout << "void connection::stop() -2- Done" << std::endl;
   }
   

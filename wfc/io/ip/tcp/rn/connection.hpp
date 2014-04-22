@@ -19,7 +19,7 @@ public:
   connection(descriptor_type&& desc, const options_type& conf, wfc::io::handler handler = nullptr);
   wfc::io::io_id_t get_id() const;
   void start();
-  void stop();
+  void stop(std::function<void()> finalize);
   void shutdown();
   
   const ::wfc::io_service::strand& strand() const;

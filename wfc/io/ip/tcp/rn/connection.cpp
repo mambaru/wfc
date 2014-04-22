@@ -26,9 +26,9 @@ void connection::start()
   _impl->start();
 }
 
-void connection::stop()
+void connection::stop(std::function<void()> finalize)
 {
-  _impl->stop();
+  _impl->stop(finalize);
 }
 
 const wfc::io_service::strand& connection::strand() const

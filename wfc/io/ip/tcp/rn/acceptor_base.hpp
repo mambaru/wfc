@@ -25,7 +25,7 @@ public:
     std::cout << "void acceptor_base::~acceptor_base()" << std::endl;
   }
   
-  void stop()
+  void stop(std::function<void()> finalize)
   {
     std::cout << "void acceptor_base::stop() -1-" << std::endl;
     /*
@@ -47,7 +47,7 @@ public:
     */
     //super::get_io_service().poll();
     std::cout << "void acceptor_base::stop() -2-" << std::endl;
-    super::stop();
+    super::stop(finalize);
     std::cout << "void acceptor_base::stop() -3-" << std::endl;
     
     /*

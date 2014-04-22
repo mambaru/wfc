@@ -97,7 +97,7 @@ void gateway::stop()
   for (auto& i: _tcp_clients)
   {
     DEBUG_LOG_BEGIN("gateway::stop() tcp client")
-    i->stop();
+    i->stop(nullptr);
     i.reset();
     DEBUG_LOG_END("gateway::stop() tcp client")
   }

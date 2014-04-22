@@ -83,9 +83,9 @@ public:
     super::create(*this);
   }
   
-  void stop()
+  void stop(std::function<void()> finalize)
   {
-    super::stop(*this);
+    super::stop(*this, finalize);
   }
   
   void connect()

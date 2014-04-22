@@ -21,9 +21,9 @@ void reader::start()
   _impl->start();
 }
 
-void reader::stop()
+void reader::stop(std::function<void()> finalize)
 {
-  _impl->stop();
+  _impl->stop(finalize);
 }
 
 bool reader::status() const

@@ -10,7 +10,7 @@ server::~server()
   
   std::cout << "tcp::rn::server::~server()..." << std::endl;
   if ( _impl!=nullptr )
-    _impl->stop();
+    _impl->stop(nullptr);
   std::cout << "tcp::rn::server::~server() reset.." << std::endl;
   _impl.reset();
   std::cout << "...tcp::rn::server::~server()" << std::endl;
@@ -31,7 +31,7 @@ void server::start()
 void server::stop()
 {
   std::cout << "server::stop()" << std::endl;
-  _impl->stop();
+  _impl->stop(nullptr);
   std::cout << "server::stop() _impl.reset() {" << std::endl;
   _impl.reset();
   std::cout << "} server::stop() _impl.reset()" << std::endl;

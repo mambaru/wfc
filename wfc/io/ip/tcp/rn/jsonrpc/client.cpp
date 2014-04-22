@@ -31,9 +31,9 @@ void client::start()
   _client->start();
 }
 
-void client::stop()
+void client::stop(std::function<void()> finalize)
 {
-  _client->stop();
+  _client->stop(finalize);
 }
   
 void client::shutdown()

@@ -41,9 +41,9 @@ public:
     super::start(*this);
   }
   
-  void stop()
+  void stop(std::function<void()> finalize)
   {
-    super::stop(*this);
+    super::stop(*this, finalize);
   }
   
   template<typename Handler>

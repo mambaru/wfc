@@ -17,7 +17,7 @@ public:
   ~reader();
   reader(descriptor_type&& desc, const options_type& conf, wfc::io::handler handler = nullptr);
   void start();
-  void stop();
+  void stop(std::function<void()> finalize);
   void shutdown();
   
   bool status() const;
