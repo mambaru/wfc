@@ -60,6 +60,13 @@ struct ad_insert
               std::cout << "connection stop handler -1.2.1-" << std::endl;
               std::cout << "smart delete " << id << std::endl;
             });
+            /*std::cout << "connection stop handler -1.3-" << std::endl;
+            (*pconn)->stop([pconn, id](){
+              std::cout << "connection stop handler -1.2.1-" << std::endl;
+              std::cout << "smart delete " << id << std::endl;
+              pconn->reset();
+            });
+            */
           }
           else
           {
