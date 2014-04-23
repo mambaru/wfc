@@ -44,6 +44,7 @@ public:
   void stop(std::function<void()> finalize)
   {
     super::stop(*this, finalize);
+    while ( 0!=super::get_io_service().poll() );
   }
   
   template<typename Handler>

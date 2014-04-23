@@ -33,17 +33,14 @@ struct ad_on_read_error
       if ( t.get_aspect().template get< wfc::io::writer::_outgoing_buffer_size_>() == 0 )
       {
         // t.descriptor().close();
-        std::cout << "ad_on_read_error stop..." << std::endl; 
-        t.stop(nullptr);
-        std::cout << "... ad_on_read_error stop Done!" << std::endl;
+        
+        t.self_stop(t, nullptr);
       }
     }
     else if (ec == boost::asio::error::operation_aborted )
     {
         //t.descriptor().close();
-        std::cout << "ad_on_read_error ABORTED stop..." << std::endl; 
-        t.stop(nullptr);
-        std::cout << "... ad_on_read_error ABORTED stop Done!" << std::endl;
+        t.self_stop(t, nullptr);
       
     }
       

@@ -66,27 +66,18 @@ int wfc::run(int argc, char* argv[])
     status = core->run(_global);
   
   std::cout << "wfc::run finalize ... " << std::endl;
-  /*
+  
   _pubsubs->clear();
   _pubsubs.reset();
   
   _loggers.reset();
   
   _module_list.clear();
-  _modules->for_each([this](const std::string& name, std::weak_ptr<imodule> module)
-  {
-    if (auto m = module.lock())
-    {
-      std::cout << m.use_count() << std::endl;;
-    }
-  });
-
   _modules->clear();
   _modules.reset();
   
   global::static_global.reset();
   _global.reset();
-  */
   std::cout << "...wfc::run finalize" << std::endl;
   return status;
 }

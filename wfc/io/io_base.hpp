@@ -35,7 +35,6 @@ public:
 
   ~io_base()
   {
-    std::cout << "~io_base() " << size_t(this) << std::endl;
   }
   
   io_base(io_service_type& io_service, const options_type& opt )
@@ -196,7 +195,6 @@ protected:
   template<typename T>
   void create(T& t)
   {
-    std::cout << "io_base::create(t)" << std::endl;
     t.get_aspect().template gete<_create_>()(t, _options);
   }
 
@@ -231,111 +229,43 @@ protected:
   }
   
   template<typename T>
-  void stop(T& t, std::function<void()> finalize)
+  void self_stop(T& t, std::function<void()> finalize)
   {
-    std::cout << "io_base::stop()" << std::endl;
     if ( !_stop_flag.test_and_set() )
     {
-      std::cout << "io_base::stop() ready for stop" << std::endl;
-      std::mutex mtx;
-      std::atomic<bool> ready(false);
-      std::condition_variable cv;
+      t.get_aspect().template gete<_before_stop_>()(t);
       
-      
-      ::wfc::io_service::work wrk(_io_service);
-
-      /*if ( int tmp = _io_service.poll() )
+      for ( auto& h : this->_release_handlers2)
       {
-        std::cout << "_io_service.poll()=" << tmp << std::endl;
-      }*/
-      
-      if ( _io_service.stopped() )
-      {
-        std::cout << "is _io_service.stopped()" << std::endl;
-        //_io_service.reset();
+        h( this->_id );
       }
       
-      ///
-      /// this->post() в данном контексте не работает. т.е. this->strand().post() не дает эффекта (видимо при из-за рекурсивного вызова?)
-      ///
+      this->_release_handlers2.clear();
       
-      //t.post([&t, this, &mtx, &cv, &ready]()
-      _io_service.post( this->strand().wrap( [&t, this, &mtx, &cv, &ready]()
-      //this->strand().post( this->owner().wrap( [&t, this, &mtx, &cv, &ready]()
+      auto& sh = this->_options.shutdown_handler;
+      if ( sh != nullptr )
       {
-        std::cout << "io_base::stop() POST" << std::endl;
-        try{
+        sh( this->_id );
+      }
         
-        t.get_aspect().template gete<_before_stop_>()(t);
-        std::cout << "io_base::stop() post" << std::endl;
-        for ( auto& h : this->_release_handlers2)
-        {
-          h( this->_id );
-        }
-        this->_release_handlers2.clear();
-        auto& sh = this->_options.shutdown_handler;
-        if ( sh != nullptr )
-        {
-          std::cout << "io_base::stop() post shutdown {" << std::endl;
-          sh( this->_id );
-          std::cout << "} io_base::stop() post shutdown" << std::endl;
-        }
-        //t.get_aspect().template get<_stop_>()(t); // Удалить
-        t.get_aspect().template gete<_after_stop_>()(t);
-        t.get_aspect().template get<_strand_>().reset();
-        ready = true;
-        cv.notify_all();
-        std::cout << "io_base::stop() post Done!" << std::endl;
-        }
-        catch(...)
-        {
-          abort();
-        }
-      }));
+      t.get_aspect().template gete<_after_stop_>()(t);
       
-      std::cout << "io_base::stop() -1-" << std::endl;
-      if ( 0 != _io_service.poll() || !ready)
+      if ( finalize!=nullptr )
       {
-        std::cout << "io_base::stop() -1.1-" << std::endl;
-        //while ( 0 != _io_service.poll() || !ready)
-        while ( !ready) 
-        {
-          int polled = _io_service.poll();
-          std::cout << "io_base::stop() -1.1.1- polled = " << polled << " this=" << size_t(this) << std::endl;
-          
-          if ( _io_service.stopped() )
-          {
-            std::cout << "is _io_service.stopped()" << std::endl;
-            _io_service.reset();
-          }
-
-          // sleep(1);
-        }
-        std::cout << "io_base::stop() -1.2-" << std::endl;
-        std::unique_lock<std::mutex> lck(mtx);
-        std::cout << "io_base::stop() -1.3-" << std::endl;
-        while (!ready) 
-        { 
-          std::cout << "io_base::stop() -1.3.1-" << std::endl;
-          cv.wait(lck);
-        }
-        std::cout << "io_base::stop() -1.4- End" << std::endl;
+        finalize();
       }
-      std::cout << "io_base::stop() -2- End" << std::endl;
     }
-    else
-    {
-      std::cout << "Уже остановлен" << std::endl;
-    }
-    
-    if ( finalize!=nullptr )
-    {
-      std::cout << "io_base::stop() finalize..." << std::endl;
-      finalize();
-      std::cout << "...io_base::stop() finalize" << std::endl;
-    }
-    std::cout << "io_base::stop() Done" << std::endl;
   }
+  
+  template<typename T>
+  void stop(T& t, std::function<void()> finalize)
+  {
+    _io_service.post( this->strand().wrap([&t, finalize]()
+    {
+      t.self_stop(t, finalize);
+    }));
+  }
+  
   
 private:
   io_service_type& _io_service;

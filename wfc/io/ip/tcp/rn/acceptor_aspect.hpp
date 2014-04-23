@@ -42,57 +42,31 @@ struct ad_insert
     holder_options.startup_handler = 
       [&t, startup_handler]( ::wfc::io::io_id_t id, ::wfc::io::callback clb, ::wfc::io::add_shutdown_handler add )
     {
-      std::cout << "NEW CONNECTON" << std::endl;
       if ( startup_handler != nullptr )
         startup_handler( id, clb, add );
-      std::cout << "NEW CONNECTON 2" << std::endl;
       
       add( [&t](::wfc::io::io_id_t id) 
       {
-        std::cout << "connection stop handler -1- ----------------------------------- id=" << id << std::endl;
         // post костыль, может не сработать, удаляем объект во время стопа
         t.post([id,&t]()
         {
-          std::cout << "connection stop handler -1.1-" << std::endl;
           auto &stg = t.get_aspect().template get<_holder_storage_>();
-          std::cout << "connection stop handler -1.1.1-" << std::endl;
           auto itr = stg.find(id);
-          std::cout << "connection stop handler -1.1.2-" << std::endl;
           if ( itr != stg.end() )
           {
-            std::cout << "connection stop handler -1.2-0-" << std::endl;
             auto pconn = std::make_shared<holder_ptr>( std::move(itr->second) );
-            std::cout << "connection stop handler -1.2-1-" << std::endl;
             stg.erase(itr);
-            std::cout << "after erase stg.size()=" << stg.size() << std::endl;
-            std::cout << "connection stop handler -1.2- stg.size="<< stg.size() << std::endl;
-            /*(*pconn)->strand()*/
-            /*t.post([pconn, id](){
+            t.post([pconn, id](){
               std::cout << "connection stop handler -1.2.1-" << std::endl;
               std::cout << "smart delete " << id << std::endl;
             });
-            */
-            std::cout << "connection stop handler -1.3-" << std::endl;
-            (*pconn)->stop([pconn, id](){
-              std::cout << "connection stop handler -1.2.1-" << std::endl;
-              std::cout << "smart delete " << id << std::endl;
-              pconn->reset();
-            });
-            std::cout << "connection stop handler -1.4-" << std::endl;
-            //(*pconn).reset();
-            //std::cout << "connection stop handler -1.5-" << std::endl;
           }
           else
           {
             std::cout << "ERROR not found io_id=" << id << std::endl; 
           }
-          // t.get_aspect().template get<_holder_storage_>().erase(id);
         });
-        std::cout << "connection stop handler -2-" << std::endl;
-        //t.get_io_service().poll();
-        // std::cout << "connection stop handler -3-" << std::endl;
       });
-      std::cout << "NEW CONNECTON 3" << std::endl;
     };
     
     auto holder = std::make_unique<holder_type>( std::move(*d), holder_options, t._handler );

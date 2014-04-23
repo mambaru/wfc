@@ -58,17 +58,14 @@ struct invoke: Handler
       std::unique_ptr<typename request_json::target> req = nullptr;
       try
       {
-        std::cout << "holder get_params" << std::endl;
         req = holder.get_params<request_json>();
       }
       catch (const json::json_error& e)
       {
-        std::cout << holder.params_error_message(e) << std::endl;
         typedef outgoing_error_json< error_json::type >::type json_type;
         outgoing_error<error> error_message;
         error_message.error = std::make_unique<error>(invalid_params());
         error_message.id = std::move( holder.raw_id() );
-              
         auto d = holder.detach();
         d->clear();
         typename json_type::serializer()(error_message, std::inserter( *d, d->end() ));

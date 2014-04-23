@@ -45,7 +45,7 @@ struct async_read_some2
       t.strand().wrap(
         [this, &t, dd]( boost::system::error_code ec , std::size_t bytes_transferred )
         { 
-          //std::cout << "async readed2..." << std::string((*dd)->begin(), (*dd)->end() ) << std::endl;
+          
           TRACE_LOG_MESSAGE( "READ [[" << std::string((*dd)->begin(), (*dd)->end() ) << "]]" )
           if ( ec )
           {

@@ -16,13 +16,13 @@ public:
     : super( std::move(desc), conf, handler)
   {
   }
-  
+
+  /*
   void stop(std::function<void()> finalize)
   {
-    std::cout << "--------- connection_impl::stop ---------" << std::endl; 
     super::stop(finalize);
-    std::cout << "^^^^^^^^^ connection_impl::stop ^^^^^^^^^" << std::endl; 
   }
+  */
 };
   
 }}}}}

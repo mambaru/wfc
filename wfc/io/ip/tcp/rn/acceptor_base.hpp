@@ -22,52 +22,27 @@ public:
   
   ~acceptor_base()
   {
-    std::cout << "void acceptor_base::~acceptor_base()" << std::endl;
   }
   
   void stop(std::function<void()> finalize)
   {
-    std::cout << "void acceptor_base::stop() -1-" << std::endl;
-    /*
-     Не нужно, сам все подчистит
-    super::post([this](){
-      std::cout << "void acceptor_base::stop() post" << std::endl;
-      auto &stg = this->get_aspect().template get<_holder_storage_>();
-      for(auto& conn : stg)
-      {
-        std::cout << "void acceptor_base::stop() post -1- --------------------------------- connection stop" << std::endl;
-        conn.second->stop();
-        std::cout << "void acceptor_base::stop() post -1.s-" << std::endl;
-        conn.second.reset();
-      }
-      std::cout << "void acceptor_base::stop() post -2-" << std::endl;
-      stg.clear();
-      std::cout << "void acceptor_base::stop() post -3-" << std::endl;
-    });
-    */
-    //super::get_io_service().poll();
-    std::cout << "void acceptor_base::stop() -2-" << std::endl;
-    super::stop(finalize);
-    std::cout << "void acceptor_base::stop() -3-" << std::endl;
+    // TODO: post
+    super::get_io_service().reset();
+    super::descriptor().close();
     
-    /*
-    std::cout << "void acceptor_base::stop() ------ " << std::endl;
-    _impl->stop();
-    std::cout << "void acceptor::stop() reset..." << std::endl;
-    auto &stg = _impl->get_aspect().get<_holder_storage_>();
+    auto &stg = super::get_aspect().template get<_holder_storage_>();
     for(auto& conn : stg)
     {
-      std::cout << "void acceptor::stop() -1- --------------------------------- connection stop" << std::endl;
-      conn.second->stop();
-      std::cout << "void acceptor::stop() -1.s-" << std::endl;
-      conn.second.reset();
+      conn.second->stop(nullptr);
     }
-    std::cout << "void acceptor::stop() -2-" << std::endl;
-    stg.clear();
-    std::cout << "void acceptor::stop() -3-" << std::endl;
-    _impl.reset();
-    std::cout << "...void acceptor::stop()" << std::endl;
-    */
+    
+    super::stop(finalize);
+    
+    while ( !stg.empty() )
+    {
+      int tmp = super::get_io_service().poll();
+      usleep(100);
+    }
 
   }
 };

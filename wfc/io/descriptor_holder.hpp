@@ -64,23 +64,19 @@ public:
   {
     return this->get_aspect().template get< ::wfc::io::_error_code_>();
   }
-  
+
+  template<typename T>
+  void self_stop(T& t, std::function<void()> finalize)
+  {
+    this->descriptor().close();
+    super::self_stop(t, finalize);
+  }
+
   template<typename T>
   void stop(T& t, std::function<void()> finalize)
   {
-    /*
-    if ( !this->get_aspect().template get< ::wfc::io::_status_>() )
-      return;
-    this->get_aspect().template get< ::wfc::io::_status_>() = false;
-    */
-    std::cout << "descriptor_holder -1-" << std::endl;
-    super::stop(t, finalize);
-    std::cout << "descriptor_holder -2-" << std::endl;
     this->descriptor().close();
-    std::cout << "descriptor_holder -3-" << std::endl;
-    // Закрываем в конце, чтоб не вылетел io_service из-за пустого poll 
-    //this->descriptor().close();
-    
+    super::stop(t, finalize);
   }
 
 private:

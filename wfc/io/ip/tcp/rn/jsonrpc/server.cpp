@@ -7,10 +7,6 @@ namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{ namespac
 
 server::~server()
 {
-  //_impl.reset();
-  std::cout << "server::~server()..." << std::endl;
-  _server.reset();
-  std::cout << "...server::~server()..." << std::endl;
 }
 
   
@@ -36,11 +32,8 @@ void server::start()
 
 void server::stop()
 {
-  std::cout << "rn::jsonrpc::server::stop()..." << std::endl;
   _server->stop();
-  std::cout << "rn::jsonrpc::server::stop() reset {" << std::endl;
   _server.reset();
-  std::cout << "} rn::jsonrpc::server::stop() reset" << std::endl;
 }
   
 void server::shutdown()

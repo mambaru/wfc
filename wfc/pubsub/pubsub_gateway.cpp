@@ -54,7 +54,6 @@ void pubsub_gateway::start()
     auto names = _jsonrpc->get_methods();
     for (auto &n : names)
     {
-      std::cout << n << std::endl;
       auto req = std::make_unique<request::subscribe>();
       req->channel = _options.incoming_channel + "." + n + _options.subscribe_suffix;
       
@@ -192,7 +191,7 @@ void pubsub_gateway::publish(request_publish_ptr req, publish_callback cb)
   
   if ( cb != nullptr ) io_cb = [cb](wfc::io::data_ptr d)
   {
-    std::cout << "response[" << std::string(d->begin(), d->end() ) << std::endl;
+    
     ::wfc::jsonrpc::incoming_holder holder( std::move(d) );
     auto resp = std::make_unique<response::publish>();
     if ( holder.is_response() )

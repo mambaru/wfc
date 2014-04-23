@@ -96,9 +96,7 @@ struct ad_start
       for (auto s : services)
       {
         threads.push_back( std::make_unique<std::thread>( [&t, s](){ 
-          std::cout << "server_thread start..." << std::endl;
           s->run();
-          std::cout << "...server_thread start" << std::endl;
         }));
       }
     });
@@ -142,45 +140,25 @@ struct ad_before_stop
   template<typename T>
   void operator()(T& t)
   {
-    std::cout << "-- wfc::io::server::ad_before_stop--" << std::endl;
-    
-    std::cout << "  -- stop acceptors --" << std::endl;
     auto& acceptors = t.get_aspect().template get<_acceptors_>();
     for (auto& a : acceptors)
     {
-      std::cout << "server::ad_before_stop -1.1-" << std::endl;
       a->stop(nullptr);
     }
-    std::cout << "  ^^ stop acceptors ^^" << std::endl;
-
-    std::cout << "  -- stop services --" << std::endl;
     auto& services = t.get_aspect().template get<_io_services_>();
     for (auto& s : services)
     {
-      std::cout << "server::ad_before_stop -5-" << std::endl;
       s->stop();
     }
     
-    std::cout << "  ^^ stop services ^^" << std::endl;
-    
-    std::cout << "  -- join threads --" << std::endl;
     auto& threads   = t.get_aspect().template get<_threads_>();
     for (auto& t : threads)
     {
-      std::cout << "server::ad_before_stop -3.1-" << std::endl;
       t->join();
-      std::cout << "server::ad_before_stop -3.2-" << std::endl;
     }
-    std::cout << "  ^^ join threads ^^" << std::endl;
-    
-    std::cout << "clear acceptors..." << std::endl;
     acceptors.clear();
-    std::cout << "clear threads..." << std::endl;
     threads.clear();
-    std::cout << "clear services..." << std::endl;
     services.clear();
-
-    std::cout << "^^ wfc::io::server::ad_before_stop ^^" << std::endl;
   }
 };
   
@@ -251,42 +229,9 @@ public:
   
   void stop(std::function<void()> finalize)
   {
-    /*
-    auto& acceptors = super::get_aspect().template get<_acceptors_>();
-    for (auto& a : acceptors)
-    {
-      std::cout << "io::server::stop -1.1-" << std::endl;
-      a->stop();
-    }
-    std::cout << "io::server::stop -1.1*-" << std::endl;
-    acceptors.clear();
-
-    auto& services = super::get_aspect().template get<_io_services_>();
-    for (auto& s : services)
-    {
-      std::cout << "io::server::stop -5-" << std::endl;
-      s->stop();
-    }
-    std::cout << "io::server::stop -6-" << std::endl;
-    services.clear();
-
-    
-    auto& threads   = super::get_aspect().template get<_threads_>();
-    for (auto& t : threads)
-    {
-      std::cout << "io::server::stop -3.1-" << std::endl;
-      t->join();
-      std::cout << "io::server::stop -3.2-" << std::endl;
-    }
-    std::cout << "io::server::stop -3.3-" << std::endl;
-    threads.clear();
-    std::cout << "io::server::stop -4-" << std::endl;
-
-    std::cout << "io::server::stop -1-" << std::endl;
-    */
+    super::get_io_service().reset();
     super::stop(*this, finalize);
-
-    //this->get_aspect().template get<_stop_>()(*this);
+    while ( 0!=super::get_io_service().poll() );
   }
   
   void start()
