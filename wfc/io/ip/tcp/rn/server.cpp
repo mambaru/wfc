@@ -7,7 +7,7 @@ namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{
 
 server::~server()
 {
-  this->stop();
+  //this->stop();
 }
 
   

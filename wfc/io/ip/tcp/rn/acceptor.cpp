@@ -22,6 +22,12 @@ void acceptor::start()
   _impl->start();
 }
 
+void acceptor::close()
+{
+  if ( _impl->descriptor().is_open() )
+    _impl->descriptor().close();
+}
+
 void acceptor::stop(std::function<void()> finalize)
 {
   _impl->stop(finalize);

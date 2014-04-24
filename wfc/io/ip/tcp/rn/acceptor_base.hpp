@@ -26,9 +26,35 @@ public:
   
   void stop(std::function<void()> finalize)
   {
-    // TODO: post
+    super::stop([this, finalize](){
+      std::cout << "acceptor_base::stop" << std::endl;
+      this->get_io_service().reset();
+      auto &stg = this->get_aspect().template get<_holder_storage_>();
+      for(auto& conn : stg)
+      {
+        std::cout << "acceptor_base::stop connection stop..." << std::endl;
+        conn.second->stop(nullptr);
+        std::cout << "acceptor_base::stop connection stop... Done" << std::endl;
+      }
+      
+      while ( !stg.empty() )
+      {
+        std::cout << "acceptor_base::stop wait empty " << stg.size() << std::endl;
+        this->get_io_service().poll();
+        usleep(1000000);
+      }
+      
+      if (finalize!=nullptr)
+      {
+        finalize();
+      }
+      std::cout << "acceptor_base::stop Done" << std::endl;
+    });
+    /*
+    std::cout << "acceptor_base::stop" << std::endl;
+    
     super::get_io_service().reset();
-    super::descriptor().close();
+    super::descriptor().cancel();
     
     auto &stg = super::get_aspect().template get<_holder_storage_>();
     for(auto& conn : stg)
@@ -40,9 +66,12 @@ public:
     
     while ( !stg.empty() )
     {
-      int tmp = super::get_io_service().poll();
+      super::get_io_service().poll();
       usleep(100);
     }
+    
+    std::cout << "acceptor_base::stop Done" << std::endl;
+    */
 
   }
 };

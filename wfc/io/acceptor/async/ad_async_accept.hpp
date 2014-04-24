@@ -20,10 +20,11 @@ struct ad_async_accept
       t.strand().wrap(
         [this, &t, dd]( boost::system::error_code ec )
         { 
-          
+          std::cout << "accept READY : " << ec.message() << std::endl;
           if ( !t.descriptor().is_open() )
             return;
           
+          std::cout << "accept READY : NEXT!" << std::endl;
           t.get_aspect().template get< _outgoing_>()(t, std::move(*dd), ec);
         }
       )

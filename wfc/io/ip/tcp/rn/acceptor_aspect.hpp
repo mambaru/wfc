@@ -47,9 +47,11 @@ struct ad_insert
       
       add( [&t](::wfc::io::io_id_t id) 
       {
+        std::cout << "acceptor connection shutdown_handler" << std::endl;
         // post костыль, может не сработать, удаляем объект во время стопа
         t.post([id,&t]()
         {
+          std::cout << "acceptor connection shutdown_handler post" << std::endl;
           auto &stg = t.get_aspect().template get<_holder_storage_>();
           auto itr = stg.find(id);
           if ( itr != stg.end() )

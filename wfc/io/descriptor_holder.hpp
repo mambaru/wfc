@@ -68,14 +68,20 @@ public:
   template<typename T>
   void self_stop(T& t, std::function<void()> finalize)
   {
-    this->descriptor().close();
+    std::cout << "descriptor_holder::self_stop() this->descriptor().close()..." << std::endl;
+    if ( this->descriptor().is_open() )
+      this->descriptor().close();
+    std::cout << "descriptor_holder::self_stop() this->descriptor().close() Done" << std::endl;
     super::self_stop(t, finalize);
   }
 
   template<typename T>
   void stop(T& t, std::function<void()> finalize)
   {
-    this->descriptor().close();
+    std::cout << "descriptor_holder::stop() this->descriptor().close()..." << std::endl;
+    if ( this->descriptor().is_open() )
+      this->descriptor().close();
+    std::cout << "descriptor_holder::stop() this->descriptor().close() Done" << std::endl;
     super::stop(t, finalize);
   }
 

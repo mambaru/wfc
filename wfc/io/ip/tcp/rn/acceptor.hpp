@@ -17,6 +17,7 @@ public:
   ~acceptor();
   acceptor(descriptor_type&& desc, const options_type& conf, wfc::io::handler handler = nullptr);
   void start();
+  void close();
   void stop(std::function<void()> finalize);
   void shutdown();
 private:

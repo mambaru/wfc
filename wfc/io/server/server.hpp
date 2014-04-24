@@ -141,8 +141,16 @@ struct ad_before_stop
   void operator()(T& t)
   {
     auto& acceptors = t.get_aspect().template get<_acceptors_>();
+    
     for (auto& a : acceptors)
     {
+      // сначала закрываем, чтоб реконнект на другой ассептор не прошел 
+      a->close();
+    }
+
+    for (auto& a : acceptors)
+    {
+      // stop - снихронная операция
       a->stop(nullptr);
     }
     auto& services = t.get_aspect().template get<_io_services_>();
