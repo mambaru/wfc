@@ -45,23 +45,30 @@ struct ad_insert
       if ( startup_handler != nullptr )
         startup_handler( id, clb, add );
       
-      add( [&t](::wfc::io::io_id_t id) 
+      std::cout << "startup_handler io_id = "<< id << std::endl;
+      add( /*t.strand().wrap(*/ [&t](::wfc::io::io_id_t id) 
       {
-        std::cout << "acceptor connection shutdown_handler" << std::endl;
+        std::cout << " === acceptor connection shutdown_handler === " << size_t(&t) << std::endl;
         // post костыль, может не сработать, удаляем объект во время стопа
-        t.post([id,&t]()
+        //t.post([id,&t]()
+        
+        t.get_io_service().post( t.strand().wrap([](){
+          std::cout << "----test---" << std::endl;
+        }));
+        
+        t.get_io_service().post( t.strand().wrap( [id,&t]()
         {
-          std::cout << "acceptor connection shutdown_handler post" << std::endl;
+          std::cout << " === acceptor connection shutdown_handler post == " << std::endl;
           auto &stg = t.get_aspect().template get<_holder_storage_>();
           auto itr = stg.find(id);
           if ( itr != stg.end() )
           {
             auto pconn = std::make_shared<holder_ptr>( std::move(itr->second) );
             stg.erase(itr);
-            t.post([pconn, id](){
+            t.get_io_service().post( t.strand().wrap([pconn, id](){
               std::cout << "connection stop handler -1.2.1-" << std::endl;
               std::cout << "smart delete " << id << std::endl;
-            });
+            }));
             /*std::cout << "connection stop handler -1.3-" << std::endl;
             (*pconn)->stop([pconn, id](){
               std::cout << "connection stop handler -1.2.1-" << std::endl;
@@ -74,7 +81,7 @@ struct ad_insert
           {
             std::cout << "ERROR not found io_id=" << id << std::endl; 
           }
-        });
+        }));
       });
     };
     

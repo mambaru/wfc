@@ -59,6 +59,7 @@ struct callback_wrapper2
     {
       return _handler(std::forward<Args>(args)...);
     }
+    std::cout << "NOT ALIVE 2 !!!" << std::endl;
     return decltype( _handler(std::forward<Args>(args)...))();
   }
 private:
@@ -132,6 +133,7 @@ public:
       {
         return f(std::forward<Args>(args)...);
       }
+      std::cout << "NOT ALIVE 3 !!!" << std::endl;
       return R();
     };
   }
