@@ -17,10 +17,15 @@ struct mem_fun_startup
   template<typename T>
   void operator()(T& t, ::wfc::io::io_id_t id) const
   {
+    std::cout << "1 mem_fun_startup id=" << id << std::endl;
     if (auto trg = t.provider().lock() )
     {
+      std::cout << "2 mem_fun_startup id=" << id << std::endl;
       (trg.get()->*mem_ptr)( id, t.shared_from_this() );
-      
+    }
+    else
+    {
+      std::cout << "3 mem_fun_startup id=" << id << std::endl;
     }
   }
 };
@@ -34,10 +39,15 @@ struct mem_fun_shutdown
   template<typename T>
   void operator()(T& t, ::wfc::io::io_id_t id) const
   {
+    std::cout << "1 mem_fun_shutdown id=" << id << std::endl;
     if (auto trg = t.provider().lock() )
     {
+      std::cout << "2 mem_fun_shutdown id=" << id << std::endl;
       (trg.get()->*mem_ptr)( id );
-      
+    }
+    else
+    {
+      std::cout << "3 mem_fun_shutdown id=" << id << " NOT FOUND!" << std::endl;
     }
   }
 };

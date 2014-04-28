@@ -80,9 +80,16 @@ public:
   {
     std::cout << "descriptor_holder::stop() this->descriptor().close()..." << std::endl;
     if ( this->descriptor().is_open() )
+    {
+      // std::cout << "descriptor_holder::stop() this->descriptor().close() cancel" << std::endl;
+      // this->descriptor().cancel();
+      std::cout << "descriptor_holder::stop() this->descriptor().close() opened" << std::endl;
       this->descriptor().close();
-    std::cout << "descriptor_holder::stop() this->descriptor().close() Done" << std::endl;
+    }
+    
+    std::cout << "descriptor_holder::stop() this->descriptor().close() super::stop(t, finalize)" << std::endl;
     super::stop(t, finalize);
+    std::cout << "descriptor_holder::stop() this->descriptor().close() Done" << std::endl;
   }
 
 private:

@@ -28,21 +28,33 @@ struct ad_on_read_error
   template<typename T>
   void operator()(T& t, boost::system::error_code& ec )
   {
+    std::cout << "connection aspect ad_on_read_error: " << ec.message() << std::endl;
+    if (ec != boost::asio::error::operation_aborted )
+    {
+      if ( !t.get_aspect().template get<_shutdown_flag_>())
+      {
+        if ( t.get_aspect().template get< wfc::io::writer::_outgoing_buffer_size_>() == 0 )
+        {
+          t.self_stop(t, nullptr);
+        }
+      }
+    }
+    /*
     if ( !t.get_aspect().template get<_shutdown_flag_>())
     {
       if ( t.get_aspect().template get< wfc::io::writer::_outgoing_buffer_size_>() == 0 )
       {
         // t.descriptor().close();
-        
+        //std::cout << "wfc::io::ip::tcp::rn: " << ec.message() << std::endl;
         t.self_stop(t, nullptr);
       }
     }
     else if (ec == boost::asio::error::operation_aborted )
     {
-        //t.descriptor().close();
-        t.self_stop(t, nullptr);
-      
+        // t.descriptor().close();
+        // t.self_stop(t, nullptr);
     }
+    */
       
   }
 };

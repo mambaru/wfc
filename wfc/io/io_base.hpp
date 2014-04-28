@@ -250,22 +250,37 @@ protected:
         sh( this->_id );
       }
         
-      t.get_aspect().template gete<_after_stop_>()(t);
-      
       if ( finalize!=nullptr )
       {
         finalize();
       }
+      
+      t.get_aspect().template gete<_after_stop_>()(t);
     }
   }
   
   template<typename T>
   void stop(T& t, std::function<void()> finalize)
   {
+    if ( !_stop_flag.test_and_set() )
+    {
+      t.get_aspect().template gete<_before_stop_>()(t);
+
+      if ( finalize!=nullptr )
+      {
+        finalize();
+      }
+
+      t.get_aspect().template gete<_after_stop_>()(t);
+
+    }
+
+    /*
     _io_service.post( this->strand().wrap([&t, finalize]()
     {
       t.self_stop(t, finalize);
     }));
+    */
   }
   
   

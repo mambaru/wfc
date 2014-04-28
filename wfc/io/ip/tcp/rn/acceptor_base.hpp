@@ -38,6 +38,10 @@ public:
         std::cout << "acceptor_base::stop connection stop... Done" << std::endl;
       }
       
+      stg.clear();
+      
+    
+      /*
       bool tmp = false;
       std::thread th([&tmp, this](){
         wfc::io_service::strand& strand = this->strand();
@@ -55,9 +59,9 @@ public:
       while ( !stg.empty() )
       {
         int c = ++counter;
-        this->get_io_service().post( /*this->strand().wrap(*/[c](){
+        this->get_io_service().post( this->strand().wrap([c](){
           std::cout << "----wait test--- " << c << std::endl;
-        }/*)*/);
+        }));
         std::cout << "acceptor_base::stop wait empty " << stg.size() << " this="<< size_t(this) << std::endl;
         this->get_io_service().reset();
         this->get_io_service().poll();
@@ -66,6 +70,7 @@ public:
       
       tmp = true;
       th.join();
+      */
       
       if (finalize!=nullptr)
       {
