@@ -2,7 +2,8 @@
 
 #include <wfc/jsonrpc/handler/handler_base.hpp>
 #include <wfc/jsonrpc/handler/handler_aspect.hpp>
-#include <wfc/jsonrpc/handler/tags.hpp>
+#include <wfc/jsonrpc/handler/aspect/tags.hpp>
+#include <wfc/jsonrpc/method/aspect/tags.hpp>
 #include <fas/aop.hpp>
 
 namespace wfc{ namespace jsonrpc{

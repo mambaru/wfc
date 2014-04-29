@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <wfc/jsonrpc/handler/tags.hpp>
+#include <wfc/jsonrpc/handler/aspect/tags.hpp>
 #include <fas/aop.hpp>
 #include <fas/type_list.hpp>
 

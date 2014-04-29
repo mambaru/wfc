@@ -1,6 +1,7 @@
 #include <wfc/io/ip/tcp/rn/jsonrpc/server.hpp>
 #include <wfc/jsonrpc/service.hpp>
 #include <wfc/jsonrpc/handler.hpp>
+#include <wfc/jsonrpc/method.hpp>
 #include <wfc/io_service.hpp>
 #include <wfc/io/types.hpp>
 #include <boost/asio.hpp>

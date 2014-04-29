@@ -5,33 +5,9 @@
 #include <wfc/jsonrpc/outgoing/outgoing_error_json.hpp>
 #include <wfc/jsonrpc/outgoing/outgoing_result.hpp>
 #include <wfc/jsonrpc/outgoing/outgoing_result_json.hpp>
-#include <wfc/callback/callback_status.hpp>
 #include <memory>
 
 namespace wfc{ namespace jsonrpc{
-
-
-template<typename Handler>
-struct startup:
-  fas::advice<_startup_, Handler>
-{};
-
-
-template<typename Handler>
-struct shutdown:
-  fas::advice<_shutdown_, Handler>
-{};
-
-
-  /*: public 
-{
-  typedef fas::metalist::advice metatype;
-  typedef _startup_ tag;
-  typedef startup advice_class;
-
-  advice_class& get_advice() { return *this;}
-  const advice_class& get_advice() const { return *this;}
-};*/
 
   
 template<typename JReq, typename JResp, typename Handler>

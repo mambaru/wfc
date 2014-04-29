@@ -2,7 +2,7 @@
 
 
 #include <wfc/jsonrpc/handler/handler_base.hpp>
-#include <wfc/jsonrpc/handler/tags.hpp>
+#include <wfc/jsonrpc/handler/aspect/tags.hpp>
 #include <wfc/jsonrpc/errors.hpp>
 #include <wfc/jsonrpc/incoming/incoming_holder.hpp>
 #include <wfc/jsonrpc/outgoing/outgoing_error_json.hpp>

@@ -1,7 +1,9 @@
 #pragma once
 
-#include <wfc/jsonrpc/handler/tags.hpp>
-#include <wfc/jsonrpc/handler/target.hpp>
+#include <wfc/jsonrpc/handler/aspect/tags.hpp>
+#include <wfc/jsonrpc/handler/aspect/target.hpp>
+#include <wfc/jsonrpc/handler/aspect/interface_.hpp>
+#include <wfc/jsonrpc/handler/aspect/provider.hpp>
 
 #include <fas/aop.hpp>
 
