@@ -42,10 +42,12 @@ public:
 };
 
 template< typename... Args>
-struct method: fas::type_list_n<
+struct method: fas::type_list<
   method_impl<Args...>,
-  fas::group<_method_, typename method_impl<Args...>::tag>
->::type {};
+  fas::type_list<
+    fas::group<_method_, typename method_impl<Args...>::tag>
+  >
+> {};
 }}
 
 #include <wfc/jsonrpc/handler/name.hpp>
@@ -95,6 +97,7 @@ struct invoke_method_basic: method_impl<
   >
 >
 {};
+
 template<
   typename TgName, 
   typename JParams, 
@@ -279,12 +282,12 @@ struct invoke_method3: method<
 >
 {};
 
-
+/*
 template<
   typename Interface,
   typename Target, 
   void (Target::*mem_ptr1)( size_t, std::weak_ptr<Interface> ),
-  void (Target::*mem_ptr2)( size_t/*, std::weak_ptr<Interface>*/ )
+  void (Target::*mem_ptr2)( size_t)
 >
 struct interface_target_ctl: fas::type_list_n<
     interface_<Interface>, 
@@ -292,6 +295,7 @@ struct interface_target_ctl: fas::type_list_n<
     startup< mem_fun_startup<Interface, Target, mem_ptr1> >, 
     shutdown< mem_fun_shutdown< Target, mem_ptr2> >
 >::type {};
+*/
 
 }} // wfc
 

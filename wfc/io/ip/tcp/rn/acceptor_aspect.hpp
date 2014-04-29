@@ -33,9 +33,16 @@ struct ad_insert
     // TODO: Вынести в аспект и инициализировать на этапе старта 
     holder_options_type holder_options = t.options().connection;
     
-    /*if ( holder_options.startup_handler != nullptr )
-      abort();
-      */
+    if ( holder_options.startup_handler != nullptr )
+    {
+      std::cout << "connection startup_handler orig != null"<< std::endl;
+      //abort();
+    }
+    else
+    {
+      std::cout << "connection startup_handler orig == null"<< std::endl;
+    }
+      
     
     auto startup_handler = holder_options.startup_handler;
     
@@ -43,7 +50,13 @@ struct ad_insert
       [&t, startup_handler]( ::wfc::io::io_id_t id, ::wfc::io::callback clb, ::wfc::io::add_shutdown_handler add )
     {
       if ( startup_handler != nullptr )
+      {
+        std::cout << "startup_handler orig != null"<< std::endl;
         startup_handler( id, clb, add );
+      }
+      else
+        std::cout << "startup_handler orig = null"<< std::endl;
+        
       
       std::cout << "startup_handler io_id = "<< id << std::endl;
       add( /*t.strand().wrap(*/ [&t](::wfc::io::io_id_t id) 

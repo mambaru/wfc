@@ -28,6 +28,10 @@ template<typename I>
 struct provider
   : fas::value<_provider_, std::weak_ptr<I> >
 {
+  ~provider()
+  {
+    std::cout << "~provider() " << std::endl;
+  }
 };
 
 

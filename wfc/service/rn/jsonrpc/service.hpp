@@ -52,14 +52,14 @@ public:
   virtual jsonrpc_ptr create_for_tcp( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt)
   {
     if ( _jsonrpc == nullptr )
-      _jsonrpc = std::make_shared< jsonrpc_type >( io_service, opt,  ::wfc::jsonrpc::handler<methods_type>(_target) );
+      _jsonrpc = std::make_shared< jsonrpc_type >( io_service, opt,  ::wfc::jsonrpc::handler<methods_type>(_target, _provider) );
     return _jsonrpc;
   }
 
   virtual jsonrpc_ptr create_for_udp( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt)
   {
     if ( _jsonrpc == nullptr )
-      _jsonrpc = std::make_shared< jsonrpc_type >( io_service, opt,  ::wfc::jsonrpc::handler<methods_type>(_target) );
+      _jsonrpc = std::make_shared< jsonrpc_type >( io_service, opt,  ::wfc::jsonrpc::handler<methods_type>(_target, _provider) );
     return _jsonrpc;
   }
 

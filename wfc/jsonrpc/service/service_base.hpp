@@ -208,9 +208,10 @@ public:
   // Новый коннект
   void startup_handler(::wfc::io::io_id_t io_id, ::wfc::io::callback writer, ::wfc::io::add_shutdown_handler add_shutdown )
   {
-    
+    std::cout << "jsonrpc::service_base::startup_handler" << std::endl;
     if ( writer == nullptr)
     {
+      std::cout << "jsonrpc::service_base::startup_handler writer == nullptr " << std::endl;
       // Костыль (из конфига прут аккцепторы)
       return;
     }
