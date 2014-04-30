@@ -20,7 +20,7 @@ struct invoke_stub
   //template<typename T>
   //void operator()(T&, incoming_holder) const
   template<typename T>
-  void operator()(T& , incoming_holder ph, ::wfc::io::callback handler) const
+  void operator()(T& , incoming_holder ph, ::wfc::io::outgoing_handler_t handler) const
   {
     // В аспект!
     typedef outgoing_error_json< error_json::type >::type json_type;

@@ -39,9 +39,9 @@ worker_list _workers;
 struct io_data
 {
   std::shared_ptr<handler_base> method_handler;
-  ::wfc::io::callback writer;
+  ::wfc::io::outgoing_handler_t writer;
   
-  io_data( std::shared_ptr<handler_base> method_handler, ::wfc::io::callback writer)
+  io_data( std::shared_ptr<handler_base> method_handler, ::wfc::io::outgoing_handler_t writer)
     : method_handler(method_handler)
     , writer(writer)
   {}
@@ -92,8 +92,9 @@ public:
 
   // 
   template<typename T>
-  void process_result( T& , incoming_holder holder, ::wfc::io::callback)
+  void process_result( T& , incoming_holder holder, ::wfc::io::outgoing_handler_t)
   {
+    std::cout << "process_result..." << std::endl;
     int call_id = holder.get_id<int>();
     auto itr = this->_call_io_map.find(call_id);
     if ( itr!=this->_call_io_map.end() )
@@ -116,6 +117,7 @@ public:
     {
       COMMON_LOG_WARNING("jsonrpc::service: jsonrpc id=" << call_id << " not found");
     }
+    std::cout << "...process_result Done!" << std::endl;
   }
   
   
@@ -150,16 +152,18 @@ public:
     handler_base::request_serializer_t serializer
   )
   {
+    std::cout << "send_request io_id=" << io_id << " name=" << name << std::endl;
     this->dispatch([this, io_id, name, result_handler, serializer]()
     {
       if ( auto wrk = this->get_worker(name) )
       {
+        std::cout << "ready send_request io_id=" << io_id << " name=" << name << std::endl;
         auto itr = this->_io_map.find(io_id);
         if (itr!=this->_io_map.end())
         {
           int id = ++this->_call_id_counter;
           auto writer = itr->second.writer;
-          
+          std::cout << "ready2 send_request io_id=" << io_id << " name=" << name << " id=" << id << std::endl;
           // itr->second.response[id]= io_id;
           itr->second.response.insert( std::make_pair(id, result_handler));
           //itr->second.response[id] = result_handler;
@@ -178,7 +182,7 @@ public:
 
   // Для тестирования (и клиента)
   // !!! до запуска
-  void attach_handler(::wfc::io::io_id_t io_id, std::shared_ptr<handler_base> handler, ::wfc::io::callback writer)
+  void attach_handler(::wfc::io::io_id_t io_id, std::shared_ptr<handler_base> handler, ::wfc::io::outgoing_handler_t writer)
   {
     //this->dispatch([this, io_id, writer, handler]()
     {
@@ -206,7 +210,7 @@ public:
   
   
   // Новый коннект
-  void startup_handler(::wfc::io::io_id_t io_id, ::wfc::io::callback writer, ::wfc::io::add_shutdown_handler add_shutdown )
+  void startup_handler(::wfc::io::io_id_t io_id, ::wfc::io::outgoing_handler_t writer, ::wfc::io::add_shutdown_handler_t add_shutdown )
   {
     std::cout << "jsonrpc::service_base::startup_handler" << std::endl;
     if ( writer == nullptr)
@@ -272,12 +276,13 @@ public:
 
   //typedef std::function<void(data_ptr, io_id_t, callback )> handler;
   /// Для входящих запросов
-  void operator()( data_ptr d, ::wfc::io::io_id_t id, ::wfc::io::callback callback)
+  void operator()( data_ptr d, ::wfc::io::io_id_t id, ::wfc::io::outgoing_handler_t callback)
   {
+    std::cout << "jsonrpc service incoming [[" << std::string(d->begin(), d->end()) << "]" << std::endl;
     typedef std::chrono::high_resolution_clock clock_t;
     clock_t::time_point now = clock_t::now();
     
-    ::wfc::io::callback tp_callback = [now, callback]( ::wfc::io::data_ptr d)
+    ::wfc::io::outgoing_handler_t tp_callback = [now, callback]( ::wfc::io::data_ptr d)
     {
       callback( std::move(d) );
     };
@@ -340,7 +345,7 @@ public:
   }
 
   template<typename T>
-  void push_advice(T& , incoming_holder holder, std::weak_ptr<handler_base> hb, ::wfc::io::callback callback)
+  void push_advice(T& , incoming_holder holder, std::weak_ptr<handler_base> hb, ::wfc::io::outgoing_handler_t callback)
   {
     if ( holder.has_method() )
     {
@@ -360,6 +365,10 @@ public:
         // Отдаем воркеру
         (*(itr->second.second))->operator()( std::move(holder), hb, callback );
         ++(itr->second.second);
+      }
+      else
+      {
+        COMMON_LOG_WARNING("jsonrpc method not allowed: " << holder.method() )
       }
     }
   } 

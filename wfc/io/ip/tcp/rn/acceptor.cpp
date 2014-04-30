@@ -11,8 +11,8 @@ acceptor::~acceptor()
 }
 
   
-acceptor::acceptor(acceptor::descriptor_type&& desc, const acceptor::options_type& conf, wfc::io::handler handler )
-  : _impl( std::make_unique<acceptor_impl>(std::move(desc), conf, handler) )
+acceptor::acceptor(acceptor::descriptor_type&& desc, const acceptor::options_type& conf/*, wfc::io::incoming_handler handler*/ )
+  : _impl( std::make_unique<acceptor_impl>(std::move(desc), conf/*, handler*/) )
 {
   
 }

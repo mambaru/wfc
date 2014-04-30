@@ -47,7 +47,7 @@ struct ad_insert
     auto startup_handler = holder_options.startup_handler;
     
     holder_options.startup_handler = 
-      [&t, startup_handler]( ::wfc::io::io_id_t id, ::wfc::io::callback clb, ::wfc::io::add_shutdown_handler add )
+      [&t, startup_handler]( ::wfc::io::io_id_t id, ::wfc::io::outgoing_handler_t clb, ::wfc::io::add_shutdown_handler_t add )
     {
       if ( startup_handler != nullptr )
       {
@@ -98,7 +98,9 @@ struct ad_insert
       });
     };
     
-    auto holder = std::make_unique<holder_type>( std::move(*d), holder_options, t._handler );
+//#warning возможно holder_options.incoming_handler = opt.incoming_handler
+    holder_options.incoming_handler = t._handler;
+    auto holder = std::make_unique<holder_type>( std::move(*d), holder_options );
     auto id = holder->get_id();
     auto res = t.get_aspect().template get<_holder_storage_>().insert( std::make_pair( id, std::move(holder) ) );
     if ( res.second )

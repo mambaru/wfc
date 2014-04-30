@@ -148,6 +148,7 @@ struct set_transfer_handler
   template<typename T, typename Tmp>
   void operator()( T& t, const Tmp&)
   {
+    
     auto& th = t.get_aspect().template get<  ::wfc::io::basic::_transfer_handler_>();
     if ( th == nullptr )
     {
@@ -156,6 +157,7 @@ struct set_transfer_handler
         t.get_aspect().template get<TgResult>()(t, std::move(d) );
       });
     }
+    
   }
 };
 
@@ -165,7 +167,7 @@ struct user_handler
   template<typename T>
   void operator()( T& t, typename T::data_ptr d)
   {
-    auto handler = t._handler;
+    auto handler = t.options().incoming_handler;
     if ( handler == nullptr )
     {
       t.get_aspect().template get<TgResult>()(t, std::move(d) );
@@ -270,7 +272,7 @@ struct options
 };
 
 typedef std::list<  ::wfc::io::data_ptr> data_list;
-typedef std::list<  ::wfc::io::callback> callback_list;
+typedef std::list<  ::wfc::io::outgoing_handler_t> callback_list;
 struct _sync_read_some_;
 struct _sync_read_more_;
 struct _read_incoming_;
@@ -342,7 +344,7 @@ template<typename TgAsyncReadMore>
 struct async_read
 {
   template<typename T>
-  void operator()(T& t,  ::wfc::io::callback handler)
+  void operator()(T& t,  ::wfc::io::outgoing_handler_t handler)
   {
     if ( !t.status() )
     {

@@ -18,7 +18,7 @@ namespace wfc{ namespace io{
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class io_base
   : public AspectClass<A>
-  , public iio
+  // , public iio
 {
 public:
   
@@ -161,7 +161,7 @@ public:
 
 
   
-  ::wfc::io::callback callback( std::function<void(data_ptr)> handler)
+  ::wfc::io::outgoing_handler_t callback( std::function<void(data_ptr)> handler)
   {
     auto wrp = this->strand().wrap( this->owner().wrap( [handler]( std::shared_ptr<data_ptr> dd ){
       
@@ -198,10 +198,12 @@ protected:
     t.get_aspect().template gete<_create_>()(t, _options);
   }
 
-  transfer_handler_t transfer_handler() const 
+  
+  outgoing_handler_t transfer_handler() const 
   {
     return this->get_aspect().template get< basic::_transfer_handler_ >();
   }
+  
 
   template<typename T>
   void start(T& t)
@@ -215,6 +217,7 @@ protected:
       sh(
         _id, 
         this->transfer_handler(),
+        //this->options().outgoing_handler,
         [&t, this]( std::function<void(io_id_t id)> release_fun ) 
         {
           t.dispatch( [this, release_fun]()
@@ -224,6 +227,7 @@ protected:
         }
       );
     }
+    
     // Сначала запускаем startup_handler (иначе в mt данные могут прийти раньше )
     t.get_aspect().template get<_start_>()(t);
   }
@@ -287,7 +291,7 @@ protected:
 private:
   io_service_type& _io_service;
   options_type _options;
-  std::list<release_handler> _release_handlers;
+  //std::list<release_handler> _release_handlers;
   std::list<std::function<void(io_id_t id)> > _release_handlers2;
   
   io_id_t _id;

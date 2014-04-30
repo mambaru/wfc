@@ -14,7 +14,7 @@ void test(wfc::io_service& io_service)
 
 typedef wfc::io::ip::tcp::rn::server server;
 
-void handler( wfc::io::data_ptr d, wfc::io::callback callback)
+void handler( wfc::io::data_ptr d, wfc::io::outgoing_handler_t callback)
 {
   std::reverse( d->begin(), d->end() );
   callback( std::move(d) );
@@ -62,8 +62,8 @@ int main(int argc, char* /*argv*/[])
   conf.threads = 4;
   //conf.handler = handler;
   wfc::io_service::work wrk(io_service);
-  
-  server srv(io_service, conf, wfc::io::simple_handler(handler) );
+  conf.incoming_handler = wfc::io::simple_handler(handler);
+  server srv(io_service, conf);
   
   srv.start();
   

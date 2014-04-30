@@ -18,9 +18,9 @@ public:
   
   service( ::wfc::io_service& io_service, const options_type& opt, const handler_base& handler);
   
-  void startup_handler( ::wfc::io::io_id_t io_id,  ::wfc::io::callback writer,  ::wfc::io::add_shutdown_handler add_shutdown );
+  void startup_handler( ::wfc::io::io_id_t io_id,  ::wfc::io::outgoing_handler_t writer,  ::wfc::io::add_shutdown_handler_t add_shutdown );
 
-  void operator()(  ::wfc::io::data_ptr d,  ::wfc::io::io_id_t id,  ::wfc::io::callback callback);
+  void operator()(  ::wfc::io::data_ptr d,  ::wfc::io::io_id_t id,  ::wfc::io::outgoing_handler_t callback);
 
   std::vector<std::string> get_methods() const;
   

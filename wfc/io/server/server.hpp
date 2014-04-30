@@ -62,7 +62,7 @@ struct ad_configure
         descriptor_type descriptor( *io, boost::asio::ip::tcp::v4(), fd);
         
         //descriptor_type descriptor( t.get_io_service(), boost::asio::ip::tcp::v4(), fd);
-        acceptors.push_back( std::make_unique<acceptor_type>( std::move(descriptor), conf, t._handler) );
+        acceptors.push_back( std::make_unique<acceptor_type>( std::move(descriptor), conf/*, t._handler*/) );
         services.push_back(io);
       }
       else
@@ -213,9 +213,9 @@ public:
   */
   
   
-  server(wfc::io_service& io, const options_type& conf, wfc::io::handler handler = nullptr)
+  server(wfc::io_service& io, const options_type& conf/*, wfc::io::incoming_handler handler = nullptr*/)
     : super(io, conf)
-    , _handler(handler)
+    , _handler(conf.incoming_handler) // TODO: убрать
   {
     super::create(*this);
     //this->get_aspect().template get<_create_>()(*this);
@@ -257,7 +257,7 @@ public:
   */
   
   //wfc::io_service& io_service;
-  wfc::io::handler _handler;
+  wfc::io::incoming_handler_t _handler;
   
 };
   

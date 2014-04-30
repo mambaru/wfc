@@ -13,10 +13,10 @@ namespace wfc{ namespace jsonrpc{
 struct f_invoke
 {
   incoming_holder& holder;
-  ::wfc::io::callback& callback;
+  ::wfc::io::outgoing_handler_t& callback;
   bool founded;
   
-  f_invoke(incoming_holder& holder, ::wfc::io::callback& callback)
+  f_invoke(incoming_holder& holder, ::wfc::io::outgoing_handler_t& callback)
     : holder( holder )
     , callback(callback)
     , founded(false)
@@ -106,7 +106,7 @@ public:
     return fas::for_each_group<_method_>(*this, f_get_methods() ).result;
   }
 
-  virtual void process(incoming_holder holder, ::wfc::io::callback callback) 
+  virtual void process(incoming_holder holder, ::wfc::io::outgoing_handler_t callback) 
   {
     if ( !fas::for_each_group<_method_>(*this, f_invoke( holder, callback ) ) )
     {

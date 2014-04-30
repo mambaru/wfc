@@ -38,10 +38,11 @@ public:
   typedef typename super::options_type options_type;
   
 
-  descriptor_holder(descriptor_type&& desc, const options_type& conf, ::wfc::io::handler handler = nullptr)
+  descriptor_holder(descriptor_type&& desc, const options_type& conf/*, ::wfc::io::incoming_handler handler = nullptr*/)
     : super( desc.get_io_service(), conf)
     , _descriptor( std::move(desc) )
-    , _handler(handler)
+    // , _handler(handler)
+    , _handler(conf.incoming_handler)
   {
   }
   
@@ -98,7 +99,8 @@ private:
 
 public:
   // TODO: в аспект
-  ::wfc::io::handler _handler;
+  ::wfc::io::incoming_handler_t _handler;
+  
 
 };
 

@@ -34,8 +34,8 @@ public:
   void operator = (const connection& conf) = delete;
 
   
-  connection(descriptor_type&& desc, const options_type& opt, wfc::io::handler handler = nullptr)
-    : super( std::move(desc), opt, handler)
+  connection(descriptor_type&& desc, const options_type& opt/*, wfc::io::incoming_handler handler = nullptr*/)
+    : super( std::move(desc), opt/*, handler*/)
   {
     super::create(*this);
     

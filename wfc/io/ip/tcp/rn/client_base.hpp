@@ -11,7 +11,7 @@ template<typename T>
 inline typename T::options_type update_options(T* self, typename T::options_type conf)
 {
     auto startup = conf.connection.startup_handler;
-    conf.connection.startup_handler = [self, startup]( ::wfc::io::io_id_t id, ::wfc::io::callback clb, ::wfc::io::add_shutdown_handler add)
+    conf.connection.startup_handler = [self, startup]( ::wfc::io::io_id_t id, ::wfc::io::outgoing_handler_t clb, ::wfc::io::add_shutdown_handler_t add)
     {
       auto add_handler = [self](::wfc::io::io_id_t id) 
       {
@@ -50,7 +50,7 @@ public:
   
   typedef boost::asio::deadline_timer reconnect_timer;
   reconnect_timer _reconnect_timer;
-  wfc::io::handler _handler;
+  wfc::io::incoming_handler_t _handler;
 
   // TODO: сделать массив
   std::shared_ptr<connection_type> _connection;
@@ -75,10 +75,10 @@ public:
   }
   */
   
-  client_base(wfc::io_service& io, const options_type& conf, ::wfc::io::handler handler = nullptr)
+  client_base(wfc::io_service& io, const options_type& conf/*, ::wfc::io::incoming_handler handler = nullptr*/)
     : super( io, update_options(this, conf))
     , _reconnect_timer(io)
-    , _handler( handler )
+    , _handler( conf.incoming_handler ) // TODO: убрать 
   {
     super::create(*this);
   }
@@ -105,7 +105,9 @@ public:
       {
         COMMON_LOG_MESSAGE( "Client " << this->options().host << ":" << this->options().port << " connected!" )
           // TODO: для connection отдельный handler
-        this->_connection = std::make_shared<connection_type>( std::move(*psock), this->options().connection, this->_handler);
+        auto opt = this->options().connection;
+        //opt.incoming_handler = this->_handler;
+        this->_connection = std::make_shared<connection_type>( std::move(*psock), opt);
         this->_connection->start();
       }
       else

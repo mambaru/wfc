@@ -187,7 +187,7 @@ void pubsub_gateway::publish(request_publish_ptr req, publish_callback cb)
     return;
   }
   
-  wfc::io::callback io_cb = nullptr;
+  wfc::io::outgoing_handler_t io_cb = nullptr;
   
   if ( cb != nullptr ) io_cb = [cb](wfc::io::data_ptr d)
   {
