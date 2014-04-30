@@ -5,7 +5,6 @@
 
 namespace wfc{ namespace jsonrpc{
 
-
 template<typename Handler>
 struct startup:
   fas::advice<_startup_, Handler>

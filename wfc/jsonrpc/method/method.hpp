@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wfc/jsonrpc/incoming/incoming_holder.hpp>
-#include <wfc/jsonrpc/method/method_aspect.hpp>
+#include <wfc/jsonrpc/method/aspect_method.hpp>
 
 #include <fas/aop.hpp>
 
@@ -9,12 +9,12 @@ namespace wfc{ namespace jsonrpc{
 
 template< typename... Args >
 class method_basic
-  : public fas::aspect_class< typename fas::merge_aspect<fas::aspect<Args...>, method_aspect>::type >
+  : public fas::aspect_class< typename fas::merge_aspect<fas::aspect<Args...>, aspect_method>::type >
 {
 public:
   
   typedef method_basic<Args...> self;
-  typedef fas::aspect_class< typename fas::merge_aspect<fas::aspect<Args...>, method_aspect>::type > super;
+  typedef fas::aspect_class< typename fas::merge_aspect<fas::aspect<Args...>, aspect_method>::type > super;
   
   typedef fas::metalist::advice metatype;
   typedef typename super::aspect::template advice_cast<_name_>::type::name_type tag;

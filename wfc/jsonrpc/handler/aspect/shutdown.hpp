@@ -5,7 +5,6 @@
 
 namespace wfc{ namespace jsonrpc{
 
-
 template<typename Handler>
 struct shutdown:
   fas::advice<_shutdown_, Handler>

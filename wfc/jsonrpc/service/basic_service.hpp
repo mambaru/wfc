@@ -2,15 +2,11 @@
 
 #include <iostream>
 
-
 #include <wfc/jsonrpc/service/service_base.hpp>
 #include <wfc/jsonrpc/service/service_aspect.hpp>
 #include <fas/aop.hpp>
 
-
-
 namespace wfc{ namespace jsonrpc{
-  
 
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class basic_service:

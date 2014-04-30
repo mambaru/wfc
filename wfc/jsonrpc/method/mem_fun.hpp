@@ -1,5 +1,15 @@
 #pragma once
 
+#include <wfc/jsonrpc/method/mem_fun/dual_method.hpp>
+#include <wfc/jsonrpc/method/mem_fun/dual_method1.hpp>
+#include <wfc/jsonrpc/method/mem_fun/dual_method2.hpp>
+#include <wfc/jsonrpc/method/mem_fun/dual_method3.hpp>
+
+#include <wfc/jsonrpc/method/mem_fun/invoke_method.hpp>
+#include <wfc/jsonrpc/method/mem_fun/invoke_method1.hpp>
+#include <wfc/jsonrpc/method/mem_fun/invoke_method2.hpp>
+#include <wfc/jsonrpc/method/mem_fun/invoke_method3.hpp>
+
 #include <wfc/jsonrpc/method/mem_fun/invoke_mem_fun.hpp>
 #include <wfc/jsonrpc/method/mem_fun/invoke_mem_fun1.hpp>
 #include <wfc/jsonrpc/method/mem_fun/invoke_mem_fun2.hpp>
