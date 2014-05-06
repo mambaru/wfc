@@ -117,38 +117,47 @@ void pubsub_gateway::process_outgoing_( ::wfc::io::data_ptr d )
 {
   TRACE_LOG_MESSAGE("wfc::pubsub::gateway process outgoing: [[" << std::string( d->begin(), d->end() ) << "]");
   ::wfc::jsonrpc::incoming_holder holder( std::move(d) );
-  
+  std::cout << "pubsub::gateway process outgoing -1-" << std::endl;
   if ( holder.is_request() )
   {
+    std::cout << "pubsub::gateway process outgoing -abort-" << std::endl;
     // TODO: custom_request он же query
     abort();
   }
   else if ( holder.is_notify() )
   {
-    
+    std::cout << "pubsub::gateway process outgoing -2-" << std::endl;
     if ( auto t = _outgoing_target.lock() )
     {
+      std::cout << "pubsub::gateway process outgoing -2.1-" << std::endl;
       request::publish tmp;
       auto ntf = std::make_unique< request::publish >(tmp);
+      std::cout << "pubsub::gateway process outgoing -2.2-" << std::endl;
       auto method = holder.method();
+      std::cout << "pubsub::gateway process outgoing -2.3-" << std::endl;
       if ( method.empty() )
       {
+        std::cout << "pubsub::gateway process outgoing -2.3.1-" << std::endl;
         ntf->channel = _options.outgoing_channel;
       }
       else
       {
+        std::cout << "pubsub::gateway process outgoing -2.3.2-" << std::endl;
         ntf->channel = _options.outgoing_channel + "." + std::move(method);
       }
-      
+      std::cout << "pubsub::gateway process outgoing -2.4-" << std::endl;
       ntf->content = std::move(holder.acquire_params());
+      std::cout << "pubsub::gateway process outgoing -2.5-" << std::endl;
       t->publish( std::move(ntf), nullptr );
+      std::cout << "pubsub::gateway process outgoing -2.6-" << std::endl;
     }
   }
   else
   {
+    std::cout << "pubsub::gateway process outgoing -1.1- OTHRER" << std::endl;
     /// "...other" << std::endl;
   }
-  
+  std::cout << "pubsub::gateway process outgoing DONE" << std::endl;
 }
 
 void pubsub_gateway::describe( size_t )

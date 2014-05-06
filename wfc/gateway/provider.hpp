@@ -51,6 +51,7 @@ public:
   
   void process_sequence_queue(std::unique_lock<mutex_type>& lk)
   {
+    std::cout << "provider startup process_queue() process_sequence_queue" << std::endl;
     auto fn = _delayed_queue.front();
     _delayed_queue.front() = nullptr;
     lk.unlock();
@@ -59,6 +60,7 @@ public:
 
   void process_non_sequence_queue(std::unique_lock<mutex_type>& lk)
   {
+    std::cout << "provider startup process_queue() process_non_sequence_queue" << std::endl;
     delayed_queue dq;
     dq.swap(_delayed_queue);
     lk.unlock();
@@ -74,7 +76,7 @@ public:
   void process_queue()
   {
     std::unique_lock<mutex_type> lk(_mutex);
-    
+    std::cout << "provider startup process_queue() " << std::endl;
     if ( _delayed_queue.empty() )
       return;
     
@@ -92,6 +94,7 @@ public:
   void startup(size_t clinet_id, interface_ptr ptr )
   {
     std::unique_lock<mutex_type> lk(_mutex);
+    std::cout << "provider startup" << std::endl;
     this->_clients[clinet_id] = ptr;
     this->_cli_itr = this->_clients.begin();
     lk.unlock();
@@ -118,6 +121,7 @@ public:
   void shutdown(size_t clinet_id)
   {
     std::lock_guard<mutex_type> lk(_mutex);
+    std::cout << "provider shutdown" << std::endl;
     this->_clients.erase(clinet_id);
     this->_cli_itr = this->_clients.begin();
     
