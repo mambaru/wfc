@@ -43,6 +43,7 @@ public:
     , _stop_flag(ATOMIC_FLAG_INIT)
   {
     _id = create_id();
+    this->get_aspect().template get< basic::_transfer_handler_ >() = opt.outgoing_handler;
   }
     
   io_id_t get_id() const { return _id;}
@@ -199,9 +200,25 @@ protected:
   }
 
   
-  outgoing_handler_t transfer_handler() const 
+  outgoing_handler_t outgoing_handler() const 
   {
-    return this->get_aspect().template get< basic::_transfer_handler_ >();
+    const auto& handler = this->get_aspect().template get< basic::_transfer_handler_ >();
+    if (handler == nullptr)
+    {
+      //std::function<void(data_ptr)> tmp = [](data_ptr)->void {};
+      // ахтунг! self::data_type!= ::wfc::io::data_type;
+      return nullptr;
+    }
+    return handler;
+  }
+  
+  void outgoing_handler(outgoing_handler_t handler) 
+  {
+    if ( handler == nullptr )
+      return;
+      
+    auto& prev = this->get_aspect().template get< basic::_transfer_handler_ >();
+    prev = handler;
   }
   
 
@@ -216,7 +233,7 @@ protected:
     {
       sh(
         _id, 
-        this->transfer_handler(),
+        this->outgoing_handler(),
         //this->options().outgoing_handler,
         [&t, this]( std::function<void(io_id_t id)> release_fun ) 
         {
