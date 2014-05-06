@@ -79,6 +79,7 @@ public:
   template<typename T>
   void stop(T& t, std::function<void()> finalize)
   {
+    this->descriptor().cancel();
     std::cout << "descriptor_holder::stop() this->descriptor().close()..." << std::endl;
     if ( this->descriptor().is_open() )
     {

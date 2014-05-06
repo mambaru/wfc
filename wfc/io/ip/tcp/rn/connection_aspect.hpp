@@ -28,17 +28,52 @@ struct ad_on_read_error
   template<typename T>
   void operator()(T& t, boost::system::error_code& ec )
   {
+    if (ec != boost::asio::error::operation_aborted )
+    {
+      auto outgoing_buffer_size = t.get_aspect().template get< wfc::io::writer::_outgoing_buffer_size_>();
+      if ( !t.get_aspect().template get<_shutdown_flag_>())
+      {
+        if ( outgoing_buffer_size!=0 )
+        {
+          COMMON_LOG_WARNING("connection closed with outgoing_buffer_size" << outgoing_buffer_size)
+        }
+        t.self_stop(t, nullptr);
+      }
+      else
+      {
+        DAEMON_LOG_ERROR("io shutdown not impl. outgoing_buffer_size" << outgoing_buffer_size)
+        t.self_stop(t, nullptr); // TODO: shutdown
+      }
+    }
+    else
+    {
+      DEBUG_LOG_MESSAGE("ad_on_read_error: boost::asio::error::operation_aborted")
+    }
+    /*
     std::cout << "connection aspect ad_on_read_error: " << ec.message() << std::endl;
     if (ec != boost::asio::error::operation_aborted )
     {
+      std::cout << "connection aspect ad_on_read_error: -1-" << std::endl;
       if ( !t.get_aspect().template get<_shutdown_flag_>())
       {
+        std::cout << "connection aspect ad_on_read_error: -2-" << std::endl;
         if ( t.get_aspect().template get< wfc::io::writer::_outgoing_buffer_size_>() == 0 )
         {
+          std::cout << "connection aspect ad_on_read_error: -3-" << std::endl;
           t.self_stop(t, nullptr);
         }
+        else
+        {
+          std::cout << "connection aspect ad_on_read_error: -2- else" << std::endl;
+        }
+      }
+      else
+      {
+        std::cout << "connection aspect ad_on_read_error: -1- else" << std::endl;
       }
     }
+    */
+    
     /*
     if ( !t.get_aspect().template get<_shutdown_flag_>())
     {

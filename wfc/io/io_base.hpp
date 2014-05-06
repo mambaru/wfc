@@ -164,12 +164,13 @@ public:
   
   ::wfc::io::outgoing_handler_t callback( std::function<void(data_ptr)> handler)
   {
-    auto wrp = this->strand().wrap( this->owner().wrap( [handler]( std::shared_ptr<data_ptr> dd ){
+    auto wrp = this->owner().wrap( this->strand().wrap( [handler]( std::shared_ptr<data_ptr> dd ){
       
       handler(std::move(*dd));
-    }, 
+    }), 
     [](){ 
-    }));
+    }
+    );
     
     auto wrp_ptr = std::make_shared< decltype(wrp) >(wrp);
     

@@ -20,9 +20,7 @@ client::client(wfc::io_service& io, const client::options_type& conf, std::share
   
   opt.connection.startup_handler = std::bind( &wfc::jsonrpc::service::startup_handler, _service, _1, _2, _3 );
   opt.connection.incoming_handler = std::bind( &wfc::jsonrpc::service::operator(), _service, _1, _2, _3 );
-  _client = std::make_shared<wfc::io::ip::tcp::rn::client>(
-    io, opt
-  );
+  _client = std::make_shared<wfc::io::ip::tcp::rn::client>(io, opt);
 }
 
 void client::start()
