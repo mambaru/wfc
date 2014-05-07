@@ -23,7 +23,7 @@ template<typename Tg>
 struct async_write_some
 {
 
-   ::wfc::io::data_type tmp;
+   // ::wfc::io::data_type tmp;
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {

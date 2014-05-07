@@ -69,7 +69,7 @@ struct ad_insert
           std::cout << "----test---" << std::endl;
         }));
         
-        t.get_io_service().post( t.strand().wrap( [id,&t]()
+        t.get_io_service().post( t.owner().wrap( t.strand().wrap( [id,&t]()
         {
           std::cout << " === acceptor connection shutdown_handler post == " << std::endl;
           auto &stg = t.get_aspect().template get<_holder_storage_>();
@@ -94,7 +94,7 @@ struct ad_insert
           {
             std::cout << "ERROR not found io_id=" << id << std::endl; 
           }
-        }));
+        })));
       });
     };
     
