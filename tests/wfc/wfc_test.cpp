@@ -1,4 +1,5 @@
 #include <wfc/wfc.hpp>
+#include <wfc/json/json.hpp>
 #include <wfc/core/icore.hpp>
 #include <wfc/module/imodule.hpp>
 #include <wfc/core/global.hpp>
@@ -79,6 +80,12 @@ public:
   {
     
   }
+  
+    virtual void shutdown()
+  {
+
+  }
+
 
   virtual void idle()
   {
@@ -136,6 +143,11 @@ public:
 
   }
 
+  virtual void shutdown()
+  {
+
+  }
+
   virtual void idle()
   {
 
@@ -144,6 +156,7 @@ public:
 
 int main(int argc, char* argv[])
 {
+  
   wfc::wfc( "",  {
     {"core", std::make_shared<core_module_moke>()},
     {"module1", std::make_shared<module_moke>()},

@@ -49,9 +49,12 @@ public:
   template<typename P>
   P operator()( target_container& t,  P beg, P end)
   {
+    
+    t.clear();
+
     if ( parser::is_null(beg, end) )
     {
-      t = target_container();
+      // t = target_container();
       return parser::parse_null(beg, end);
     }
 
@@ -67,9 +70,12 @@ public:
       beg = parser::parse_space(beg, end);
       if (beg==end) throw unexpected_end_fragment();
       if (*beg==R) break;
+      
       target tg;
       beg = serializer()( tg, beg, end);
       *(bitr++) = tg;
+      
+      //beg = serializer()( *(bitr++), beg, end);
       beg = parser::parse_space(beg, end);
       if (beg==end) throw unexpected_end_fragment();
       if (*beg==R) break;
@@ -99,16 +105,16 @@ public:
 };
 
 template< typename T, typename RR >
-class serializerT< array<T, RR> >
-  : public serializerA< array<T, RR>, '[', ']'>
+class serializerT< array_r<T, RR> >
+  : public serializerA< array_r<T, RR>, '[', ']'>
 {
 };
 
 
 template< typename J, int N, typename RR, char L, char R >
-class serializerA< array< J[N], RR>, L, R >
+class serializerA< array_r< J[N], RR>, L, R >
 {
-  typedef array< J[N], RR> array_type;
+  typedef array_r< J[N], RR> array_type;
   typedef typename array_type::target_container target_container;
   typedef typename array_type::json_value json_value;
   typedef typename json_value::serializer serializer;

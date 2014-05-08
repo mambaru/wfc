@@ -37,6 +37,7 @@ struct imodule
   virtual void initialize() = 0;
   virtual void start() = 0;
   virtual void stop() = 0;
+  virtual void shutdown() = 0;
 
   // virtual void idle() = 0;
 };

@@ -1,5 +1,3 @@
-
-
 #include <wfc/core/global.hpp>
 #include "global_log.hpp"
 

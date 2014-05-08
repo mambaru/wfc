@@ -2,6 +2,14 @@
 
 #include <wfc/logger/global_log.hpp>
 
+namespace wfc{
+  
+template<typename ...Args>
+inline void only_for_log( Args&& ... ){}
+
+}
+
+
 #define WRITE_LOG(C, E, X) ::wfc::global_log(C, E) << X << std::endl;
 
 #define COMMON_LOG_PROGRESS( X ) ::wfc::global_log("common", "progress") << X << "\r";

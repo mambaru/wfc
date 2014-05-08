@@ -116,7 +116,7 @@ inline void autoup(time_t timeout, std::function<void(bool, int)> f = nullptr)
     f(restart, status);
     kill(pid, SIGKILL);
     if ( !restart )
-      break;
+      exit(0);
   }
 }
 

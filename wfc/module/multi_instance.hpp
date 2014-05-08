@@ -52,10 +52,10 @@ public:
     return std::string();
   }
   
-  virtual std::string generate(const std::string& /*type*/) const
+  virtual std::string generate(const std::string& type) const
   {
     std::string strconf;  
-    instance_config conf;
+    instance_config conf = instance_type::create_config(type);
     typename instance_config_json::serializer()(conf, std::back_inserter(strconf));
 
     module_config module_conf;
@@ -64,33 +64,6 @@ public:
     module_config_json::serializer()(module_conf, std::back_inserter(module_strconf));
     return module_strconf;
   }
-/*
-          try
-        {
-          jsonbeg = json::parser::parse_space(jsonbeg, jsonend);
-          if ( !m->parse_config( std::string(jsonbeg, jsonend)) )
-          {
-            std::stringstream ss;
-            ss << "Invalid json configuration from '" << source << "' for module '"<< mconf.first << "':" << std::endl;
-            ss << "Configuration is not valid! see documentation for module";
-            throw config_error(ss.str());
-          }
-        }
-        catch(const json::json_error& e)
-        {
-          std::stringstream ss;
-          ss << "Invalid json configuration from '" << source << "' for module '"<< mconf.first << "':" << std::endl;
-          ss << e.message( jsonbeg, jsonend );
-          throw config_error(ss.str());
-        }
-        catch(const std::exception& e)
-        {
-          std::stringstream ss;
-          ss << "Invalid json configuration from '" << source << "' for module '"<< mconf.first << "':" << std::endl;
-          ss << e.what();
-          throw config_error(ss.str());
-        }
-*/
 
   virtual bool parse_config(const std::string& confstr)
   {
@@ -104,7 +77,9 @@ public:
       {
         jsonbeg = json::parser::parse_space(jsonbeg, jsonend);
         instance_config cong;
+        
         typename instance_config_json::serializer()(cong, jsonbeg, jsonend);
+        
       }
       catch(const json::json_error& e)
       {
@@ -173,10 +148,6 @@ public:
         itr->second->reconfigure( conf );
       }
     }
-
-    /*for (const auto &n : _instance_map)
-      n.second->start();
-      */
   }
   
   virtual void initialize()
@@ -199,11 +170,24 @@ public:
   
   virtual void stop()
   {
-    for (const auto &n : _instance_map)
+    for (auto &n : _instance_map)
     {
       CONFIG_LOG_MESSAGE("module '" << _name << "': stop instance '" << n.first << "'...")
       n.second->stop();
+      n.second.reset();
     }
+    _instance_map.clear();
+  }
+  
+  virtual void shutdown()
+  {
+    for (auto &n : _instance_map)
+    {
+      CONFIG_LOG_MESSAGE("module '" << _name << "': shutdown instance '" << n.first << "'...")
+      n.second->shutdown();
+      n.second.reset();
+    }
+    _instance_map.clear();
   }
 
 private:

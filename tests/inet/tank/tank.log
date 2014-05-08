@@ -1,0 +1,40 @@
+2014-02-13 16:31:32,530 [DEBUG] Tank.ConsoleWorker Failed to get lock: Traceback (most recent call last):
+  File "/home/migashko/prj/yandex-tank/Tank/ConsoleWorker.py", line 142, in configure
+    self.core.get_lock(self.options.ignore_lock)
+  File "/home/migashko/prj/yandex-tank/tankcore.py", line 501, in get_lock
+    if not force and self.__there_is_locks():
+  File "/home/migashko/prj/yandex-tank/tankcore.py", line 517, in __there_is_locks
+    for filename in os.listdir(self.LOCK_DIR):
+OSError: [Errno 2] No such file or directory: './lock'
+
+2014-02-13 16:31:32,530 [INFO] Tank.ConsoleWorker Waiting 5s for retry...
+2014-02-13 16:31:37,536 [DEBUG] Tank.ConsoleWorker Failed to get lock: Traceback (most recent call last):
+  File "/home/migashko/prj/yandex-tank/Tank/ConsoleWorker.py", line 142, in configure
+    self.core.get_lock(self.options.ignore_lock)
+  File "/home/migashko/prj/yandex-tank/tankcore.py", line 501, in get_lock
+    if not force and self.__there_is_locks():
+  File "/home/migashko/prj/yandex-tank/tankcore.py", line 517, in __there_is_locks
+    for filename in os.listdir(self.LOCK_DIR):
+OSError: [Errno 2] No such file or directory: './lock'
+
+2014-02-13 16:31:37,536 [INFO] Tank.ConsoleWorker Waiting 5s for retry...
+2014-02-13 16:31:44,708 [DEBUG] Tank.ConsoleWorker Failed to get lock: Traceback (most recent call last):
+  File "/home/migashko/prj/yandex-tank/Tank/ConsoleWorker.py", line 142, in configure
+    self.core.get_lock(self.options.ignore_lock)
+  File "/home/migashko/prj/yandex-tank/tankcore.py", line 501, in get_lock
+    if not force and self.__there_is_locks():
+  File "/home/migashko/prj/yandex-tank/tankcore.py", line 517, in __there_is_locks
+    for filename in os.listdir(self.LOCK_DIR):
+OSError: [Errno 2] No such file or directory: './lock'
+
+2014-02-13 16:31:44,708 [INFO] Tank.ConsoleWorker Waiting 5s for retry...
+2014-02-13 16:31:49,713 [DEBUG] Tank.ConsoleWorker Failed to get lock: Traceback (most recent call last):
+  File "/home/migashko/prj/yandex-tank/Tank/ConsoleWorker.py", line 142, in configure
+    self.core.get_lock(self.options.ignore_lock)
+  File "/home/migashko/prj/yandex-tank/tankcore.py", line 501, in get_lock
+    if not force and self.__there_is_locks():
+  File "/home/migashko/prj/yandex-tank/tankcore.py", line 517, in __there_is_locks
+    for filename in os.listdir(self.LOCK_DIR):
+OSError: [Errno 2] No such file or directory: './lock'
+
+2014-02-13 16:31:49,714 [INFO] Tank.ConsoleWorker Waiting 5s for retry...

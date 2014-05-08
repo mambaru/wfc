@@ -18,7 +18,7 @@
 #include <iostream>
 
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 struct f_deathtime_less
 {
@@ -348,6 +348,6 @@ void message_queue::_replace(time_t now, message_ptr m )
   _publish(now, std::move(m) );
 }
 
-}
+}}
 
 

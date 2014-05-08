@@ -50,7 +50,8 @@ public:
   template<typename P>
   P operator()( T& t, P beg, P end)
   {
-
+    
+    
     if ( parser::is_null(beg, end) )
     {
       t = T();
@@ -67,6 +68,7 @@ public:
     if ( beg==end ) 
       throw unexpected_end_fragment();
 
+    
     if ( *beg != '}')
     {
        beg = unserialize_members(t, beg, end, L() );

@@ -1,16 +1,15 @@
 #pragma once
 
-#include <wfc/pubsub/pubsub_status.hpp>
+#include <wfc/pubsub/status.hpp>
 #include <string>
 
-namespace wfc{
+namespace wfc{ namespace pubsub{
 
 namespace request
 {
   struct subscribe
   {
     std::string channel;
-    
   };
 }
 
@@ -18,8 +17,8 @@ namespace response
 {
   struct subscribe
   {
-    pubsub_status status;
+    ::wfc::pubsub::status status = ::wfc::pubsub::status::not_support;
   };
 }
 
-}
+}}

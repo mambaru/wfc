@@ -22,7 +22,6 @@ public:
     auto itr = _registry_map.find(name);
     if ( itr == _registry_map.end() )
     {
-      std::cout << (size_t)(this) << " registry not found " << name << " : " <<  _registry_map.size() << std::endl;
       return std::weak_ptr<I>(); 
     }
     return itr->second;
@@ -32,13 +31,6 @@ public:
   {
     std::lock_guard<mutex_type> lk(_mutex);
     _registry_map[name] = item;
-    std::cout  << (size_t)(this) << " registry set " << name << " : " <<  _registry_map.size() << " " << item.lock().get() <<  std::endl;
-    /*auto itr = _registry_map.find(name);
-    if ( itr != _registry_map.end() )
-      _registry_map.erase(name);
-    _registry_map.insert( std::make_pair(name, item) );
-    return true;
-    */
   }
 
   void erase(const std::string& name)
@@ -53,6 +45,12 @@ public:
     
     for (const auto& a : _registry_map)
       f( a.first, a.second );
+  }
+  
+  void clear()
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    _registry_map.clear();
   }
   
 private:
