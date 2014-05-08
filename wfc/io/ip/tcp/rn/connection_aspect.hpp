@@ -49,48 +49,6 @@ struct ad_on_read_error
     {
       DEBUG_LOG_MESSAGE("ad_on_read_error: boost::asio::error::operation_aborted")
     }
-    /*
-    std::cout << "connection aspect ad_on_read_error: " << ec.message() << std::endl;
-    if (ec != boost::asio::error::operation_aborted )
-    {
-      std::cout << "connection aspect ad_on_read_error: -1-" << std::endl;
-      if ( !t.get_aspect().template get<_shutdown_flag_>())
-      {
-        std::cout << "connection aspect ad_on_read_error: -2-" << std::endl;
-        if ( t.get_aspect().template get< wfc::io::writer::_outgoing_buffer_size_>() == 0 )
-        {
-          std::cout << "connection aspect ad_on_read_error: -3-" << std::endl;
-          t.self_stop(t, nullptr);
-        }
-        else
-        {
-          std::cout << "connection aspect ad_on_read_error: -2- else" << std::endl;
-        }
-      }
-      else
-      {
-        std::cout << "connection aspect ad_on_read_error: -1- else" << std::endl;
-      }
-    }
-    */
-    
-    /*
-    if ( !t.get_aspect().template get<_shutdown_flag_>())
-    {
-      if ( t.get_aspect().template get< wfc::io::writer::_outgoing_buffer_size_>() == 0 )
-      {
-        // t.descriptor().close();
-        //std::cout << "wfc::io::ip::tcp::rn: " << ec.message() << std::endl;
-        t.self_stop(t, nullptr);
-      }
-    }
-    else if (ec == boost::asio::error::operation_aborted )
-    {
-        // t.descriptor().close();
-        // t.self_stop(t, nullptr);
-    }
-    */
-      
   }
 };
 

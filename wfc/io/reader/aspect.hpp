@@ -91,17 +91,6 @@ struct result_handler
   void operator()(T& t, typename T::data_ptr d)
   {
     bool status = t.get_aspect().template get< ::wfc::io::_status_>();
-/*#warning
-    if ( d != nullptr )
-    {
-      std::string tmp(d->begin(), d->end());
-      std::cout << "result_handler: " << tmp << std::endl;
-    }
-    else
-    {
-      std::cout << "result_handler: " << " tmp" << std::endl;
-    }
-    */
     
     if (status)
     {

@@ -74,27 +74,27 @@ public:
       auto ptr = this->get_aspect().template get<_provider_>();
       if (auto p = ptr.lock() )
       {
-        std::cout << "PROVIDER READY" << std::endl;
+        
       }
       else
       {
-        std::cout << "PROVIDER NOT READY" << std::endl;
+        
       }
     }
   }
 
   virtual std::shared_ptr<handler_base> clone(/*outgoing_request_handler_t request_handler*/) const 
   {
-    std::cout << "handler::clone()" << std::endl;
+    
     {
       auto ptr = this->get_aspect().template get<_provider_>();
       if (auto p = ptr.lock() )
       {
-        std::cout << "PROVIDER READY" << std::endl;
+        
       }
       else
       {
-        std::cout << "PROVIDER NOT READY" << std::endl;
+        
       }
     }
     

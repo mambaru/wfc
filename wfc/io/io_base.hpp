@@ -255,12 +255,11 @@ protected:
   {
     if ( !_stop_flag.test_and_set() )
     {
-      std::cout << "_stop_flag.test_and_set() " << size_t(&t)<< std::endl;
+      
       t.get_aspect().template gete<_before_stop_>()(t);
       
       for ( auto& h : this->_release_handlers2)
       {
-        std::cout << "_release_handlers2 ..." << size_t(&t)<< std::endl;
         h( this->_id );
       }
       

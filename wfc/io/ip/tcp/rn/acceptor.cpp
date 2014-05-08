@@ -24,14 +24,11 @@ void acceptor::start()
 
 void acceptor::close()
 {
-  std::cout << "void acceptor::close()... " << std::endl;
+  
   if ( _impl->descriptor().is_open() )
   {
-    std::cout << "void acceptor::close() is_open()" << std::endl;
     _impl->descriptor().close();
   }
-  std::cout << "void acceptor::close() Done " << std::endl;
-  
 }
 
 void acceptor::stop(std::function<void()> finalize)

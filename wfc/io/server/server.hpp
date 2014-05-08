@@ -37,7 +37,7 @@ struct ad_configure
   
     descriptor_type desc( t.get_io_service() );
   
-    //std::cout << t.options().host << ":" << t.options().port << std::endl;
+    
     boost::asio::ip::tcp::resolver resolver( t.get_io_service() );
     boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve({
       t.options().host, 

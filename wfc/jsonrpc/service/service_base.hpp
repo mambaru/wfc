@@ -94,7 +94,7 @@ public:
   template<typename T>
   void process_result( T& , incoming_holder holder, ::wfc::io::outgoing_handler_t)
   {
-    std::cout << "process_result..." << std::endl;
+    
     int call_id = holder.get_id<int>();
     auto itr = this->_call_io_map.find(call_id);
     if ( itr!=this->_call_io_map.end() )
@@ -117,7 +117,7 @@ public:
     {
       COMMON_LOG_WARNING("jsonrpc::service: jsonrpc id=" << call_id << " not found");
     }
-    std::cout << "...process_result Done!" << std::endl;
+    
   }
   
   
@@ -152,18 +152,18 @@ public:
     handler_base::request_serializer_t serializer
   )
   {
-    std::cout << "send_request io_id=" << io_id << " name=" << name << std::endl;
+    
     this->dispatch([this, io_id, name, result_handler, serializer]()
     {
       if ( auto wrk = this->get_worker(name) )
       {
-        std::cout << "ready send_request io_id=" << io_id << " name=" << name << std::endl;
+        
         auto itr = this->_io_map.find(io_id);
         if (itr!=this->_io_map.end())
         {
           int id = ++this->_call_id_counter;
           auto writer = itr->second.writer;
-          std::cout << "ready2 send_request io_id=" << io_id << " name=" << name << " id=" << id << std::endl;
+          
           // itr->second.response[id]= io_id;
           itr->second.response.insert( std::make_pair(id, result_handler));
           //itr->second.response[id] = result_handler;
@@ -212,10 +212,10 @@ public:
   // Новый коннект
   void startup_handler(::wfc::io::io_id_t io_id, ::wfc::io::outgoing_handler_t writer, ::wfc::io::add_shutdown_handler_t add_shutdown )
   {
-    std::cout << "jsonrpc::service_base::startup_handler" << std::endl;
+    
     if ( writer == nullptr)
     {
-      std::cout << "jsonrpc::service_base::startup_handler writer == nullptr " << std::endl;
+      
       // Костыль (из конфига прут аккцепторы)
       return;
     }
@@ -278,7 +278,7 @@ public:
   /// Для входящих запросов
   void operator()( data_ptr d, ::wfc::io::io_id_t id, ::wfc::io::outgoing_handler_t callback)
   {
-    std::cout << "jsonrpc service incoming [[" << std::string(d->begin(), d->end()) << "]" << std::endl;
+    
     typedef std::chrono::high_resolution_clock clock_t;
     clock_t::time_point now = clock_t::now();
     
