@@ -90,7 +90,19 @@ struct ad_process_method
   template<typename T>
   void operator()( T& t, incoming_holder holder, std::weak_ptr<handler_base> hb, ::wfc::io::outgoing_handler_t callback)
   {
-    t.push_advice(t, std::move( holder ), hb, callback );
+    //t.push_advice(t, std::move( holder ), hb, callback );
+    /*if ( holder.has_method() )
+    {*/
+      if ( auto wrk = t.get_worker( holder.method() ) )
+      {
+        wrk->operator()( std::move(holder), hb, callback );
+      }
+      else
+      {
+        COMMON_LOG_WARNING("jsonrpc method not allowed: " << holder.method() )
+      }
+    //}
+      
   }
 };
 
