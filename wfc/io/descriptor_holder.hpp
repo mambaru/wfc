@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wfc/io/tags.hpp>
-#include <wfc/io/io_base.hpp>
+#include <wfc/io/basic_io.hpp>
 #include <fas/aop.hpp>
 #include <functional>
 #include <boost/asio.hpp>

@@ -259,17 +259,14 @@ public:
   // Новый коннект
   void startup_handler(::wfc::io::io_id_t io_id, ::wfc::io::outgoing_handler_t writer, ::wfc::io::add_shutdown_handler_t add_shutdown )
   {
-    
     if ( writer == nullptr)
     {
-      
       // Костыль (из конфига прут аккцепторы)
       return;
     }
     
     this->post([this, io_id, writer]()
     {
-      
       auto itr = _io_map.find(io_id);
       if ( itr == _io_map.end() )
       {
@@ -295,14 +292,11 @@ public:
         );
         
         handler->start(io_id);
-
       }
       else
       {
         abort();
       }
-      
-      
     });
     
     add_shutdown( this->strand().wrap( [this](::wfc::io::io_id_t io_id)

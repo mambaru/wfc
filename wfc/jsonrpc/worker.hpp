@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include <wfc/io/tags.hpp>
-#include <wfc/io/io_base.hpp>
+#include <wfc/io/strand.hpp>
 #include <wfc/io_service.hpp>
 #include <wfc/json/json.hpp>
 #include <string>
@@ -52,6 +52,7 @@ public:
   // TODO: вынести method_handler из incoming_holder
   // TODO: вместо handler_base std::functional
   // или вообще убрать worker и оставить io_base
+  /*
   void operator()(incoming_holder holder, std::weak_ptr<handler_base> wh, ::wfc::io::outgoing_handler_t callback)
   {
 
@@ -67,6 +68,7 @@ public:
       }
     }); // dispatch
   }
+  */
 
 private:
   
