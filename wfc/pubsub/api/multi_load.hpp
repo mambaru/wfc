@@ -1,23 +1,20 @@
 #pragma once
 
 #include <wfc/pubsub/status.hpp>
+#include <wfc/pubsub/api/load.hpp>
+#include <wfc/memory.hpp>
+#include <vector>
 
 namespace wfc{ namespace pubsub{
 
 namespace request
 {
-  struct multi_load
-  {
-    
-  };
+  typedef std::vector< load > multi_load;
 }
 
 namespace response
 {
-  struct multi_load
-  {
-
-  };
+  typedef std::vector< load > multi_load;
 }
 
 }}

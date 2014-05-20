@@ -1,23 +1,28 @@
 #pragma once
 
-#include <wfc/pubsub/pubsub_status.hpp>
-#include <wfc/pubsub/api/publish.hpp>
-#include <wfc/pubsub/api/message_json.hpp>
+#include <wfc/pubsub/status.hpp>
+#include <wfc/pubsub/api/load.hpp>
+#include <wfc/pubsub/api/topic_json.hpp>
 #include <wfc/pubsub/api/pubsub_status_json.hpp>
 
 namespace wfc{ namespace pubsub{
 
 namespace request
 {
-  struct publish_json
+  struct load_json
   {
     FAS_NAME(channel)
+    FAS_NAME(cursor)
+    FAS_NAME(limit)
+    FAS_NAME(load_params)
     typedef
       json::object<
-        publish,
+        load,
         fas::type_list_n<
-          json::member<n_channel, publish, std::string, &publish::channel>, 
-          json::base< message_json::type >
+          json::member<n_channel, load, std::string, &load::channel>,
+          json::member<n_cursor, load, cursor_t, &load::cursor>,
+          json::member<n_limit, load, size_t, &load::limit>,
+          json::member<n_load_params, load, std::string, &load::load_params>
         >::type
     > type;
 
@@ -27,16 +32,18 @@ namespace request
 
 namespace response
 {
-  struct publish_json
+  struct load_json
   {
-    typedef json::member_value<
-      publish,
-      publish, 
-      pubsub::status, 
-      &publish::status, 
-      pubsub_status_json::type
+    FAS_NAME(status)
+    typedef
+      json::object<
+        load,
+        fas::type_list_n<
+          json::member<n_status, load, ::wfc::pubsub::status, &load::status, pubsub_status_json>,
+          json::base< topic_json::type >
+        >::type
     > type;
-    
+
     typedef type::serializer serializer;
   };
 }

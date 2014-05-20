@@ -36,7 +36,7 @@ namespace response
       json::object<
         notify,
         fas::type_list_n<
-          json::member<n_status, notify, ::wfc::pubsub::status, &notify::status>,
+          json::member<n_status, notify, ::wfc::pubsub::status, &notify::status, pubsub_status_json>,
           json::member<n_channel, notify, std::string, &notify::channel>
         >::type
     > type;
