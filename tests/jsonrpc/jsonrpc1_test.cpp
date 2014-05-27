@@ -115,8 +115,8 @@ int main()
   reader.async_read([&](wfc::io::data_ptr d)
   {
     std::cout << "Done! " << std::string(d->begin(), d->end() ) << std::endl;
-    io_service.stop();
   });
+  io_service.stop();
   th.join();
   
   
@@ -138,5 +138,7 @@ int main()
   
   reader_options.handler = jsonrpc.handler;
   */
+
+  return 0;
 }
 
