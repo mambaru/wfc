@@ -20,7 +20,7 @@ public:
   typedef std::chrono::high_resolution_clock clock_t;
   
   incoming_holder(data_ptr d)
-    : _data( std::move(d) )
+   : _data(std::move(d))
   {
     _time_point = clock_t::now();
     _begin = ::wfc::json::parser::parse_space(_data->begin(), _data->end());
@@ -101,7 +101,10 @@ public:
   
   std::string method() const
   {
-    return std::string( _incoming.method.first+1, _incoming.method.second-1);
+    if ( std::distance(_incoming.method.first, _incoming.method.second ) > 2 )
+      return std::string( _incoming.method.first+1, _incoming.method.second-1);
+    else
+      return std::string();
   }
 
   
@@ -125,6 +128,7 @@ public:
   template<typename J>
   std::unique_ptr<typename J::target> get_result() const
   {
+    
     if ( !this->has_result() )
       return nullptr;
     if ( 'n'==*_incoming.result.first)

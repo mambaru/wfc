@@ -38,19 +38,131 @@ worker_list _workers;
 
 struct io_data
 {
-  std::shared_ptr<handler_base> method_handler;
-  ::wfc::io::outgoing_handler_t writer;
+  typedef handler_base::incoming_handler_t response_handler;
+  typedef std::map<int, response_handler>  response_map;
   
   io_data( std::shared_ptr<handler_base> method_handler, ::wfc::io::outgoing_handler_t writer)
     : method_handler(method_handler)
     , writer(writer)
   {}
+
+  std::shared_ptr<handler_base> method_handler;
+  ::wfc::io::outgoing_handler_t writer;
   
-  //typedef std::function<void(incoming_holder holder)> response_handler;
-  typedef handler_base::incoming_handler_t response_handler;
-  typedef std::map<int, response_handler> response_map;
+  
   response_map response;
 };
+
+
+class io_registry
+{
+  typedef std::shared_ptr<handler_base> handler_base_ptr;
+  typedef std::map< ::wfc::io::io_id_t, io_data > io_map_t;
+  typedef std::map< int, ::wfc::io::io_id_t     > call_io_map_t;
+  
+public:
+  
+  io_registry()
+    : _call_id_counter(0)
+  {}
+  
+  void set_io(io::io_id_t io_id, handler_base_ptr handler, io::outgoing_handler_t outgoing_handler)
+  {
+    auto result = _io_map.insert( std::make_pair( io_id, io_data(handler, outgoing_handler) ) );
+    if ( !result.second )
+    {
+      DAEMON_LOG_FATAL("jsonrpc::io_registry::set_io io_id=" << io_id << " exists");
+      abort();
+    }
+  }
+  
+  handler_base_ptr erase_io( io::io_id_t io_id )
+  {
+    handler_base_ptr result;
+    auto itr = _io_map.find(io_id);
+    if ( itr != _io_map.end() )
+    {
+      // itr->second.method_handler->stop(io_id); // Не забыть остановить!!!
+      //result = itr->second.method_handler->stop(io_id);
+      for ( auto& r : itr->second.response )
+      {
+        this->_call_io_map.erase(r.first);
+      }
+      this->_io_map.erase(itr);
+    }
+    return result;
+  }
+  
+  std::pair<int, io::outgoing_handler_t>
+  add_result_handler(io::io_id_t io_id, handler_base::incoming_handler_t result_handler)
+  {
+    std::pair<int, io::outgoing_handler_t> result(-1, nullptr);
+  
+    auto itr = this->_io_map.find(io_id);
+    if (itr!=this->_io_map.end())
+    {
+      result.first = ++this->_call_id_counter;
+      result.second = itr->second.writer;
+      itr->second.response.insert( std::make_pair(result.first, result_handler));
+      this->_call_io_map[result.first] = io_id;
+    }
+    return result;
+  }
+
+  handler_base::incoming_handler_t get_result_handler(int call_id) const
+  {
+    auto itr = _call_io_map.find(call_id);
+    if ( itr != _call_io_map.end() )
+    {
+      auto itr2 = _io_map.find(itr->second);
+      if ( itr2 != _io_map.end() )
+      {
+        auto itr3 = itr2->second.response.find(call_id);
+        if ( itr3 != itr2->second.response.end() )
+        {
+          return itr3->second;
+        }
+        else
+        {
+          DAEMON_LOG_ERROR("jsonrpc::service: jsonrpc id=" << call_id << " not found in response list");
+        }
+      }
+      else
+      {
+        COMMON_LOG_WARNING("jsonrpc::service: io id=" << itr->second << " not found");
+      }
+    }
+    else
+    {
+      COMMON_LOG_WARNING("jsonrpc::service: jsonrpc id=" << call_id << " not found");
+    }
+    return nullptr;
+  }
+  
+  handler_base_ptr get_method_handler(io::io_id_t io_id) const
+  {
+    auto itr = _io_map.find(io_id);
+    
+    return itr != _io_map.end() 
+      ? itr->second.method_handler
+      : nullptr;
+  }
+  
+  io::outgoing_handler_t get_outgoing_handler(io::io_id_t io_id) const
+  {
+    auto itr = _io_map.find(io_id);
+    
+    return itr != _io_map.end() 
+      ? itr->second.writer
+      : nullptr;
+  }
+
+private:
+  int _call_id_counter;
+  io_map_t _io_map;
+  call_io_map_t _call_io_map;
+};
+
 /*
 
 struct io_data_by_id
@@ -90,7 +202,10 @@ public:
   typedef std::map< ::wfc::io::io_id_t, io_data > io_map;
   typedef std::map< int, ::wfc::io::io_id_t> call_io_map;
 
-  
+  virtual ~service_base()
+  {
+    this->stop();
+  }
   
   service_base(io_service_type& io_service, const options_type& opt, const handler_base& handler )
     : super( io_service, opt)
@@ -100,9 +215,7 @@ public:
     _handler_prototype = handler.clone();
   }
   
-  //std::function<void(incoming_holder holder)> _tmp_response_handler;
-
-  handler_base::incoming_handler_t handler_by_call_id(int call_id) const
+   handler_base::incoming_handler_t handler_by_call_id(int call_id) const
   {
     auto itr = this->_call_io_map.find(call_id);
     if ( itr!=this->_call_io_map.end() )
@@ -136,36 +249,10 @@ public:
   template<typename T>
   void process_result( T& , incoming_holder holder, ::wfc::io::outgoing_handler_t)
   {
-    
     if ( auto handler = this->handler_by_call_id( holder.get_id<int>() ) )
     {
       handler( std::move(holder) );
     }
-    
-    /*
-    int call_id = holder.get_id<int>();
-    auto itr = this->_call_io_map.find(call_id);
-    if ( itr!=this->_call_io_map.end() )
-    {
-      auto itr2 = this->_io_map.find(itr->second);
-      if ( itr2!=this->_io_map.end() )
-      {
-        auto itr3 = itr2->second.response.find(call_id);
-        if ( itr3 != itr2->second.response.end() )
-        {
-          itr3->second( std::move(holder) );
-        }
-      }
-      else
-      {
-        COMMON_LOG_WARNING("jsonrpc::service: io id=" << itr->second << " not found");
-      }
-    }
-    else
-    {
-      COMMON_LOG_WARNING("jsonrpc::service: jsonrpc id=" << call_id << " not found");
-    }
-    */
   }
   
   
@@ -224,38 +311,6 @@ public:
   };
   
   
-
-  // Для тестирования (и клиента)
-  // !!! до запуска
-  /*
-  void attach_handler(::wfc::io::io_id_t io_id, std::shared_ptr<handler_base> handler, ::wfc::io::outgoing_handler_t writer)
-  {
-    //this->dispatch([this, io_id, writer, handler]()
-    {
-        handler->outgoing_request_handler = [io_id, this](const char* name, handler_base::incoming_handler_t result_hander, handler_base::request_serializer_t serializer)
-        {
-          this->send_request( io_id, name, result_hander, serializer);
-        };
-      
-        // TODO: проверка на существование id
-        _io_map.insert( 
-          std::make_pair(
-            io_id, 
-            io_data(
-            { 
-              handler, 
-              writer 
-            })
-          )  
-        );
-    }//);
-  }
-  */
-  
-  
-  
-  
-  
   // Новый коннект
   void startup_handler(::wfc::io::io_id_t io_id, ::wfc::io::outgoing_handler_t writer, ::wfc::io::add_shutdown_handler_t add_shutdown )
   {
@@ -305,7 +360,7 @@ public:
       auto itr = _io_map.find(io_id);
       if ( itr != _io_map.end() )
       {
-        itr->second.method_handler->stop(io_id);
+        itr->second.method_handler->stop(io_id); // Не забыть остановить!!!
         for ( auto& r : itr->second.response )
         {
           this->_call_io_map.erase(r.first);
@@ -333,6 +388,7 @@ public:
     auto dd = std::make_shared<data_ptr>( std::move(d) );
     this->post([this, dd, /*iio*/id, tp_callback]()
     {
+      
       this->get_aspect().template get<_incoming_>()( *this, std::move(*dd), /*iio*/id, std::move(tp_callback) );
     });
   }
@@ -447,11 +503,11 @@ public:
       
       for (auto w: s.strands)
       {
-        options_type opt = t.options();
+        auto opt = static_cast< typename worker_type::options_type >(t.options());
         
         for (int i = 0; i < w.count; ++i)
         {
-          auto wrk = std::make_shared<worker_type>( io_ref, t.options() );
+          auto wrk = std::make_shared<worker_type>( io_ref, opt/*t.options()*/ );
           _workers.push_back( wrk );
           for (auto& s : w.methods)
           {
@@ -485,10 +541,8 @@ public:
   
   void start_no_tf()
   {
-    
     super::start(*this);
     start_advice(*this);
-    
   }
   
   void start()

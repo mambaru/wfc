@@ -3,7 +3,6 @@
 #include <wfc/jsonrpc/service.hpp>
 
 namespace wfc{ namespace jsonrpc{
-  
 
 service::service( ::wfc::io_service& io_service, const options_type& opt, const handler_base& handler)
   : _impl( std::make_shared<service_impl>(io_service, opt, handler) )

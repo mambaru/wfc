@@ -18,49 +18,12 @@
 
 #include <wfc/jsonrpc/errors.hpp>
 #include <wfc/jsonrpc/outgoing/outgoing_error_json.hpp>
-
+#include <wfc/jsonrpc/incoming/incoming_holder.hpp>
 #include <wfc/jsonrpc/service/aspect/aspect.hpp>
 
 namespace wfc{ namespace jsonrpc{
   
-
-
-
-
-struct ad_process_method
-{
-  template<typename T>
-  void operator()( T& t, incoming_holder holder, std::weak_ptr<handler_base> hb, ::wfc::io::outgoing_handler_t callback)
-  {
-    if ( auto wrk = t.get_worker( holder.method() ) )
-    {
-      /*
-      wrk->operator()( std::move(holder), hb, callback );
-      */
-      
-      auto ph = std::make_shared<incoming_holder>(std::move(holder) );
-      wrk->post(  
-        [this, ph, hb, callback]()
-        {
-          if ( auto h = hb.lock() )
-          {
-            h->process( std::move(*ph), callback );
-          }
-          else
-          {
-          }
-        }
-      );
-      
-    }
-    else
-    {
-      COMMON_LOG_WARNING("jsonrpc method not allowed: " << holder.method() )
-    }
-  }
-};
-
-struct ad_process_error
+struct ad_error_handler
 {
   template<typename T>
   void operator()( T& t, incoming_holder holder, ::wfc::io::outgoing_handler_t callback)
@@ -69,7 +32,7 @@ struct ad_process_error
   }
 };
 
-struct ad_process_result
+struct ad_result_handler
 {
   template<typename T>
   void operator()( T& t, incoming_holder holder, ::wfc::io::outgoing_handler_t callback)
@@ -79,22 +42,22 @@ struct ad_process_result
 };
 
 
-struct ad_process
+struct ad_handler_switch
 {
   template<typename T>
   void operator()( T& t, incoming_holder holder, std::weak_ptr<handler_base> hb, ::wfc::io::outgoing_handler_t handler)
   {
     if ( holder.has_method() )
     {
-      t.get_aspect().template get<_process_method_>()(t, std::move(holder), hb, handler );
+      t.get_aspect().template get<_method_handler_>()(t, std::move(holder), hb, handler );
     }
     else if ( holder.has_result() )
     {
-      t.get_aspect().template get<_process_result_>()(t, std::move(holder), handler );
+      t.get_aspect().template get<_result_handler_>()(t, std::move(holder), handler );
     }
     else if ( holder.has_error() )
     {
-      t.get_aspect().template get<_process_error_>()(t, std::move(holder), handler );
+      t.get_aspect().template get<_error_handler_>()(t, std::move(holder), handler );
     }
   }
 };
@@ -108,7 +71,7 @@ struct ad_verify
   {
     if ( holder.is_valid() )
     {
-      t.get_aspect().template get<_process_>()(t, std::move(holder), hb, handler );
+      t.get_aspect().template get<_handler_switch_>()(t, std::move(holder), hb, handler );
     }
     else
     {
@@ -122,31 +85,43 @@ struct ad_incoming
   template<typename T>
   void operator()( T& t, typename T::data_ptr d, ::wfc::io::io_id_t id, ::wfc::io::outgoing_handler_t callback)
   {
-    auto  handler = t._io_map.find(id)->second.method_handler;
+    std::weak_ptr<handler_base> handler;
+    
+    auto itr = t._io_map.find(id);
+    
+    if ( itr != t._io_map.end() )
+    {
+      handler = itr->second.method_handler;
+    }
+    else
+    {
+      handler = t._handler_prototype;
+    }
+    
     try
     {
       while (d != nullptr)
       {
-        incoming_holder hold(std::move(d) );
+        ::wfc::jsonrpc::incoming_holder hold(std::move(d) );
         d = hold.tail();
         t.get_aspect().template get<_verify_>()( t, std::move(hold), handler, callback );
       }
     }
     catch(const json::json_error& er)
     {
+      COMMON_LOG_WARNING( "jsonrpc::service parse error: " << er.what() )
       t.get_aspect().template get<_callback_error_>()(t, parse_error(), callback );
     }
     catch(const std::exception& ex)
     {
-      // TODO; сделать логгирование 
+      DAEMON_LOG_ERROR( "jsonrpc::service parse error: " << ex.what() )
       t.get_aspect().template get<_callback_error_>()(t, server_error(ex.what() ), callback);
     }
     catch(...)
     {
-      // TODO; сделать логгирование 
+      DAEMON_LOG_ERROR( "jsonrpc::service server error: " << "unhandler exception" );
       t.get_aspect().template get<_callback_error_>()(t, server_error(), callback);
     }
-    
   }
 };
 
@@ -158,12 +133,12 @@ struct ad_incoming
 struct service_basic_aspect: fas::aspect<
   fas::advice<_incoming_, ad_incoming>,
   fas::advice<_verify_,ad_verify>,
-  fas::advice<_process_,ad_process>,
+  fas::advice<_handler_switch_,ad_handler_switch>,
   fas::advice<_callback_json_,  ad_callback_json>,
   fas::advice<_callback_error_, ad_callback_error>,
-  fas::advice<_process_error_,  ad_process_error>,
-  fas::advice<_process_method_, ad_process_method>,
-  fas::advice<_process_result_, ad_process_result>
+  fas::advice<_error_handler_,  ad_error_handler>,
+  fas::advice<_method_handler_, ad_method_handler>,
+  fas::advice<_result_handler_, ad_result_handler>
 >{};
 
 struct service_aspect: fas::aspect<

@@ -28,6 +28,5 @@ struct ad_callback_error
     t.get_aspect().template get<_callback_json_>()(t, json_type(), std::move(error_message), callback );
   }
 };
-
   
 }} // wfc

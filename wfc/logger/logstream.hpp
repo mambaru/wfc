@@ -16,7 +16,7 @@ public:
     if (_logger)
       _logger->write(_name, _ident, _ss.str());
     else
-      std::cerr << "~logstream() not write to " << _name << std::endl;
+      std::cerr << _name << _ident << _ss.str() << std::endl;
   }
   
   logstream(const logstream& ll)
@@ -34,8 +34,8 @@ public:
   {
     if ( _logger )
       _logger->initialize(_name, _ss);
-    else
-      std::cerr <<  "logger not found " << _name <<   std::endl;
+    /*else
+      std::cerr <<  "logger not found " << _name <<   std::endl;*/
   }
   
   std::string str() const
