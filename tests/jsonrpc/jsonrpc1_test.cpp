@@ -3,7 +3,7 @@
 #include <wfc/memory.hpp>
 #include <wfc/io/types.hpp>
 std::string requests[][2] = {
-  /*{ 
+  { 
     "{\"method\":\"test1\",\"params\":[1,2,3,4,5],\"id\":1}",
     "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32601,\"message\":\"Procedure not found.\"},\"id\":1}"
   },
@@ -14,7 +14,7 @@ std::string requests[][2] = {
   {
     "{\"method\":\"test3\",\"params\":{1,2,3,4,5},\"id\":1}",
     "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32700,\"message\":\"Parse error.\"},\"id\":null}"
-  },*/
+  },
   {
     "{\"method\":\"test4\",\"params\":{1,2,3",
     "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32700,\"message\":\"Parse error.\"},\"id\":null}"

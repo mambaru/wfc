@@ -16,7 +16,7 @@ public:
     if (_logger)
       _logger->write(_name, _ident, _ss.str());
     else
-      std::cerr << _name << _ident << _ss.str() << std::endl;
+      std::cerr << _name << " " << _ident << " " << _ss.str();
   }
   
   logstream(const logstream& ll)

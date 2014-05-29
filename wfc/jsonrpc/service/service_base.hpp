@@ -57,6 +57,7 @@ struct io_data
 class io_registry
 {
   typedef std::shared_ptr<handler_base> handler_base_ptr;
+  typedef std::weak_ptr<handler_base> handler_base_wkptr;
   typedef std::map< ::wfc::io::io_id_t, io_data > io_map_t;
   typedef std::map< int, ::wfc::io::io_id_t     > call_io_map_t;
   
@@ -83,7 +84,7 @@ public:
     if ( itr != _io_map.end() )
     {
       // itr->second.method_handler->stop(io_id); // Не забыть остановить!!!
-      //result = itr->second.method_handler->stop(io_id);
+      result = itr->second.method_handler;
       for ( auto& r : itr->second.response )
       {
         this->_call_io_map.erase(r.first);
@@ -139,7 +140,7 @@ public:
     return nullptr;
   }
   
-  handler_base_ptr get_method_handler(io::io_id_t io_id) const
+  handler_base_wkptr get_method_handler(io::io_id_t io_id) const
   {
     auto itr = _io_map.find(io_id);
     
@@ -155,6 +156,12 @@ public:
     return itr != _io_map.end() 
       ? itr->second.writer
       : nullptr;
+  }
+  
+  void clear()
+  {
+    _io_map.clear();
+    _call_io_map.clear();
   }
 
 private:
@@ -215,8 +222,10 @@ public:
     _handler_prototype = handler.clone();
   }
   
-   handler_base::incoming_handler_t handler_by_call_id(int call_id) const
+  handler_base::incoming_handler_t handler_by_call_id(int call_id) const
   {
+    return this->_io_reg.get_result_handler(call_id);
+    /*
     auto itr = this->_call_io_map.find(call_id);
     if ( itr!=this->_call_io_map.end() )
     {
@@ -243,6 +252,7 @@ public:
       COMMON_LOG_WARNING("jsonrpc::service: jsonrpc id=" << call_id << " not found");
     }
     return nullptr;
+    */
   }
   
   // 
@@ -266,6 +276,13 @@ public:
     {
       if ( auto wrk = this->get_worker(name) )
       {
+        auto writer = this->_io_reg.get_outgoing_handler( io_id );
+        wrk->dispatch([writer, name, serializer](){
+          auto d = serializer(name);
+          writer( std::move(d) );
+        });
+        
+        /*
         auto itr = _io_map.find(io_id);
         if (itr!=_io_map.end())
         {
@@ -275,6 +292,7 @@ public:
             writer( std::move(d) );
           });
         }
+        */
       }
     });
   };
@@ -291,7 +309,15 @@ public:
     {
       if ( auto wrk = this->get_worker(name) )
       {
+        auto requester = this->_io_reg.add_result_handler( io_id, result_handler );
         
+        wrk->post([requester, name,  serializer]()
+        {
+          auto d = serializer(name, requester.first);
+          requester.second( std::move(d) );
+        });
+        
+        /*
         auto itr = this->_io_map.find(io_id);
         if (itr!=this->_io_map.end())
         {
@@ -305,7 +331,7 @@ public:
             auto d = serializer(name, id);
             writer( std::move(d) );
           });
-        }
+        }*/
       }
     });
   };
@@ -322,9 +348,9 @@ public:
     
     this->post([this, io_id, writer]()
     {
-      auto itr = _io_map.find(io_id);
-      if ( itr == _io_map.end() )
-      {
+      //auto itr = _io_map.find(io_id);
+      //if ( itr == _io_map.end() )
+      //{
         auto handler = _handler_prototype->clone();
         
         //typedef std::function< void(incoming_handler_t, request_serializer_t) > outgoing_request_handler_t;
@@ -339,24 +365,34 @@ public:
           this->send_notify( io_id, name, serializer);
         };
         
+        this->_io_reg.set_io(io_id, handler, writer);
+        /*
         this->_io_map.insert( 
           std::make_pair(
             io_id, 
             io_data(handler, writer)
           )  
         );
+        */
         
         handler->start(io_id);
-      }
+      /*}
       else
       {
         abort();
-      }
+      }*/
     });
     
     add_shutdown( this->strand().wrap( [this](::wfc::io::io_id_t io_id)
     {
       // TODO: Сейчас dispatch, сделать post, иначе может выполниться раньше поста выше
+      
+      if ( auto handler = this->_io_reg.erase_io(io_id) )
+      {
+        handler->stop(io_id);
+      }
+      
+      /*
       auto itr = _io_map.find(io_id);
       if ( itr != _io_map.end() )
       {
@@ -367,6 +403,7 @@ public:
         }
         this->_io_map.erase(itr);
       }
+      */
     }));
  }
   
@@ -402,11 +439,6 @@ public:
   }
   */
 
-  
-  
-
-  
-  
   worker_ptr get_worker(const std::string& name)
   {
     return this->get_worker(name.c_str());
@@ -558,8 +590,6 @@ public:
   
   void stop()
   {
-    DEBUG_LOG_BEGIN("jsonrpc::stop()")
-    
     /*
     std::mutex mtx;
     std::condition_variable cv;
@@ -570,7 +600,7 @@ public:
     //super::stop(*this);
     //this->dispatch([this, &mtx, &cv, &ready]()
     {
-      DEBUG_LOG_BEGIN("jsonrpc::stop() dispatch")
+      
       for (auto& s: this->_services)
         s->stop();
       
@@ -581,10 +611,13 @@ public:
       this->_threads.clear();
       this->_method_map.clear();
       this->_services.clear();
+      
+      this->_io_reg.clear();
+      /*
       this->_io_map.clear();
       this->_call_io_map.clear();
+      */
       
-      DEBUG_LOG_END("jsonrpc::stop() dispatch")
     }/*);*/
     
 
@@ -604,8 +637,11 @@ public:
   thread_list _threads;
   
   // Эту в outgoing manager (менеджер исходящих запросов)
+  io_registry _io_reg;
+  /*
   io_map _io_map;
   call_io_map _call_io_map;
+  */
   
 };
 

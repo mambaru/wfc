@@ -83,10 +83,18 @@ struct ad_verify
 struct ad_incoming
 {
   template<typename T>
-  void operator()( T& t, typename T::data_ptr d, ::wfc::io::io_id_t id, ::wfc::io::outgoing_handler_t callback)
+  void operator()( T& t, typename T::data_ptr d, ::wfc::io::io_id_t io_id, ::wfc::io::outgoing_handler_t callback)
   {
     std::weak_ptr<handler_base> handler;
     
+    handler = t._io_reg.get_method_handler(io_id);
+    
+    if ( handler.lock() == nullptr )
+    {
+      handler = t._handler_prototype;
+    };
+    
+    /*
     auto itr = t._io_map.find(id);
     
     if ( itr != t._io_map.end() )
@@ -97,6 +105,7 @@ struct ad_incoming
     {
       handler = t._handler_prototype;
     }
+    */
     
     try
     {

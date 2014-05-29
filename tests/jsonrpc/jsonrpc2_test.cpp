@@ -9,11 +9,15 @@ std::string requests[][2] = {
     "{\"jsonrpc\":\"2.0\",\"result\":[5,4,3,2,1],\"id\":1}"
   },
   { 
-    "{\"method\":\"test2\",\"params\":[1,2,3,4,5]}",
-    "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32601,\"message\":\"Procedure not found.\"},\"id\":null}"
+    "{\"method\":\"test2\",\"params\":[1,2,3,4,5],\"id\":2}",
+    "{\"jsonrpc\":\"2.0\",\"result\":[5,4,3,2,1],\"id\":2}"
   },
   {
-    "{\"method\":\"test3\",\"params\":{1,2,3,4,5},\"id\":1}",
+    "{\"method\":\"test1\",\"params\":{1,2,3,4,5},\"id\":3}",
+    "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32700,\"message\":\"Parse error.\"},\"id\":null}"
+  },
+  {
+    "{\"method\":\"test3\",\"params\":{1,2,3,4,5}}",
     "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32700,\"message\":\"Parse error.\"},\"id\":null}"
   },
   {
@@ -106,7 +110,7 @@ int main()
   }
   ios.poll();
   
-  if ( test_count!=7 )
+  if ( test_count!=8 )
   {
     std::cout << "ERROR. invalid test count " << test_count << std::endl;
     exit(-1);
