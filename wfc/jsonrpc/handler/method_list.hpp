@@ -35,14 +35,17 @@ public:
   typedef std::unique_ptr< ::wfc::jsonrpc::error> error_ptr;
 
   template<typename PReq, typename Serializer>
-  void send_request( const char* name, PReq req, Serializer ser, incoming_handler_t  clb) const
+  void send_request( const char* name, PReq req, Serializer ser, result_handler_t  result_handler) const
   {
     std::shared_ptr<PReq> p = nullptr;
     if (req!=nullptr)
+    {
       p = std::make_shared<PReq>( std::move(req) );
-    outgoing_request_handler(
+    }
+    
+    handler_base::send_request(
       name,
-      std::move(clb), // обработчик ответ
+      std::move(result_handler), 
       [p, ser](const char* name, int id)-> ::wfc::io::data_ptr
       {
         return ser(name, std::move(*p), id);
@@ -54,9 +57,13 @@ public:
   void send_notify( const char* name, PReq req, Serializer ser) const
   {
     std::shared_ptr<PReq> p = nullptr;
+    
     if (req!=nullptr)
+    {
       p = std::make_shared<PReq>( std::move(req) );
-    outgoing_notify_handler(
+    }
+    
+    handler_base::send_notify(
       name,
       [p, ser](const char* name)-> ::wfc::io::data_ptr
       {
@@ -83,15 +90,6 @@ public:
     typedef std::unique_ptr< ::wfc::jsonrpc::error> type;
   };
 
-    
-  /*
-  template<typename Tg, typename ReqPtr , typename Callback>
-  void call(ReqPtr req, Callback callback) const
-  {
-    this->get_aspect().template get<Tg>().call( *this, std::move(req), callback);
-  }
-  */
-
   template<typename Tg, typename ReqPtr>
   void call(ReqPtr req, std::function<void(typename call_result_ptr<Tg>::type, typename call_error_ptr<Tg>::type)> callback) const
   {
@@ -107,7 +105,6 @@ public:
   {
     std::function<void(typename call_result_ptr<Tg>::type, typename call_error_ptr<Tg>::type)> rpc_callback = nullptr;
     
-    // if callback==nullptr then error_callback ignored
     if ( callback!=nullptr && error_callback!=nullptr )
     {
       rpc_callback = [callback, error_callback]

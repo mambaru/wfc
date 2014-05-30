@@ -57,13 +57,16 @@ void service::initialize( std::shared_ptr<ifactory> fact )
   
 void service::start()
 {
+  DEBUG_LOG_MESSAGE("void service::start()")
   if (_jsonrpc_for_tcp != nullptr)
   {
+    DEBUG_LOG_MESSAGE("void service::start() _jsonrpc_for_tcp->start();")
     _jsonrpc_for_tcp->start();
   }
     
   for (auto& i: _tcp_servers)
   {
+    DEBUG_LOG_MESSAGE("void service::start() i->start();")
     i->start();
   }
 }

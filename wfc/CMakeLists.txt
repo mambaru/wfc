@@ -17,6 +17,8 @@ SET(
   pubsub/topic_hub.cpp
   pubsub/pubsub_gateway.cpp
   jsonrpc/service.cpp
+  jsonrpc/service/io_registry.cpp
+  jsonrpc/service/worker_manager.cpp
   io/posix/rn/reader.cpp
   io/posix/rn/writer.cpp
   io/ip/tcp/rn/connection.cpp

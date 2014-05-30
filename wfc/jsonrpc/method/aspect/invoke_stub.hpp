@@ -17,8 +17,6 @@ struct invoke_stub
   advice_class& get_advice() { return *this;}
   const advice_class& get_advice() const { return *this;}
   
-  //template<typename T>
-  //void operator()(T&, incoming_holder) const
   template<typename T>
   void operator()(T& , incoming_holder ph, ::wfc::io::outgoing_handler_t handler) const
   {

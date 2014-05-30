@@ -2,8 +2,9 @@
 #pragma once
 
 namespace wfc{ namespace jsonrpc{
-  
-struct _incoming_;
+
+struct _input_;  
+struct _incoming_parser_;
 struct _callback_json_;
 struct _callback_error_;
 struct _error_handler_;

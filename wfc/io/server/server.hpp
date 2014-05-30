@@ -48,6 +48,8 @@ struct ad_configure
     desc.set_option( boost::asio::ip::tcp::acceptor::reuse_address(true) );
     desc.bind(endpoint);
     desc.listen();
+    
+    COMMON_LOG_MESSAGE("listen " << t.options().host << ":" << t.options().port)
 
     
 

@@ -32,6 +32,7 @@ struct invoke: Handler
     try
     {
       std::unique_ptr<typename request_json::target> req = nullptr;
+
       try
       {
         req = holder.get_params<request_json>();
@@ -48,7 +49,6 @@ struct invoke: Handler
         handler( std::move(d) );
         return;
       }
-      
       
       if (holder.is_notify())
       {
@@ -70,7 +70,6 @@ struct invoke: Handler
               auto d = ph->detach();
               d->clear();
               typename json_type::serializer()(error_message, std::inserter( *d, d->end() ));
-              // ph->handler( std::move(d) );
               handler( std::move(d) );
             }
             else

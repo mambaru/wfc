@@ -106,7 +106,7 @@ public:
     return fas::for_each_group<_method_>(*this, f_get_methods() ).result;
   }
 
-  virtual void process(incoming_holder holder, ::wfc::io::outgoing_handler_t callback) 
+  virtual void process(incoming_holder holder, io::outgoing_handler_t callback) 
   {
     if ( !fas::for_each_group<_method_>(*this, f_invoke( holder, callback ) ) )
     {
@@ -116,24 +116,24 @@ public:
       error_message.error = std::make_unique<error>(procedure_not_found());
       error_message.id = std::move( holder.raw_id() );
               
-      auto d = std::make_unique< ::wfc::io::data_type>();
+      auto d = std::make_unique< io::data_type>();
       typename json_type::serializer()(error_message, std::inserter( *d, d->end() ));
       callback( std::move(d) );
     };
   }
   
-  ::wfc::io::io_id_t get_id() const
+  io::io_id_t get_id() const
   {
     return _id;
   }
   
-  virtual void start(::wfc::io::io_id_t id) 
+  virtual void start( io::io_id_t id ) 
   {
     _id = id;
     this->get_aspect().template get<_startup_>()(*this, id);
   }
   
-  virtual void stop(::wfc::io::io_id_t id)
+  virtual void stop( io::io_id_t id)
   {
     this->get_aspect().template get<_shutdown_>()(*this, id);
   }
@@ -150,7 +150,9 @@ public:
   }
 
 private:
-  ::wfc::io::io_id_t _id;
+  
+  io::io_id_t _id;
+  
 };
 
 }} // wfc

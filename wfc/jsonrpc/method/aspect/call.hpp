@@ -53,18 +53,18 @@ private:
     std::function< void (response_ptr, error_ptr)> callback
   ) const
   {
-        auto serializer = [](const char* name, request_ptr req, int id) -> typename T::data_ptr 
-      {
-        outgoing_request<request_type> request;
-        request.params = std::move(req);
-        request.method = name; 
-        request.id = id;
-        auto d = std::make_unique< ::wfc::io::data_type>();
-        d->reserve(ReserveSize); 
-        typedef outgoing_request_json<request_json> send_json;
-        typename send_json::serializer()(request, std::inserter( *d, d->end() ));
-        return std::move(d);
-      };
+    auto serializer = [](const char* name, request_ptr req, int id) -> typename T::data_ptr 
+    {
+      outgoing_request<request_type> request;
+      request.params = std::move(req);
+      request.method = name; 
+      request.id = id;
+      auto d = std::make_unique< ::wfc::io::data_type>();
+      d->reserve(ReserveSize); 
+      typedef outgoing_request_json<request_json> send_json;
+      typename send_json::serializer()(request, std::inserter( *d, d->end() ));
+      return std::move(d);
+    };
       
     std::function<void(incoming_holder holder)> result_handler = nullptr;
     

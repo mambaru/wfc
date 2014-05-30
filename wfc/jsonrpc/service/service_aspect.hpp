@@ -23,6 +23,7 @@
 
 namespace wfc{ namespace jsonrpc{
   
+  /*
 struct ad_error_handler
 {
   template<typename T>
@@ -94,19 +95,6 @@ struct ad_incoming
       handler = t._handler_prototype;
     };
     
-    /*
-    auto itr = t._io_map.find(id);
-    
-    if ( itr != t._io_map.end() )
-    {
-      handler = itr->second.method_handler;
-    }
-    else
-    {
-      handler = t._handler_prototype;
-    }
-    */
-    
     try
     {
       while (d != nullptr)
@@ -133,14 +121,15 @@ struct ad_incoming
     }
   }
 };
-
+*/
 
 /// /////////////////////////////////////////
 
 
 
 struct service_basic_aspect: fas::aspect<
-  fas::advice<_incoming_, ad_incoming>,
+  fas::advice<_input_, ad_input>,
+  fas::advice<_incoming_parser_, ad_incoming_parser>,
   fas::advice<_verify_,ad_verify>,
   fas::advice<_handler_switch_,ad_handler_switch>,
   fas::advice<_callback_json_,  ad_callback_json>,

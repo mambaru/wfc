@@ -14,9 +14,9 @@ void service::startup_handler( ::wfc::io::io_id_t io_id,  ::wfc::io::outgoing_ha
   _impl->startup_handler(io_id, writer, add_shutdown);
 }
 
-void service::operator()(  ::wfc::io::data_ptr d,  ::wfc::io::io_id_t id,  ::wfc::io::outgoing_handler_t callback)
+void service::operator()(  io::data_ptr d,  io::io_id_t io_id,  ::wfc::io::outgoing_handler_t outgoing_handler)
 {
-  _impl->operator ()( std::move(d), id, callback);
+  _impl->operator ()( std::move(d), io_id, outgoing_handler);
 }
 
 std::vector<std::string> service::get_methods() const

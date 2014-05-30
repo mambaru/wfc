@@ -11,26 +11,30 @@ public:
   typedef ::wfc::io::data_type data_type;
   typedef ::wfc::io::data_ptr  data_ptr;
   
-  typedef std::function< ::wfc::io::data_ptr(const char* name, int id)   > request_serializer_t;
-  typedef std::function< ::wfc::io::data_ptr(const char* name)   > notify_serializer_t;
-  typedef std::function< void(incoming_holder holder)  > incoming_handler_t; // TODO: result handler
-  typedef std::function< void(const char* name, incoming_handler_t, request_serializer_t) > outgoing_request_handler_t;
-  typedef std::function< void(const char* name, notify_serializer_t) > outgoing_notify_handler_t;
-
-  
+ 
   virtual ~handler_base() {}
-  virtual std::shared_ptr<handler_base> clone( /*outgoing_request_handler_t request_handler*/ ) const= 0;
-  virtual void process(incoming_holder holder, ::wfc::io::outgoing_handler_t callback) = 0;
+  
+  virtual std::shared_ptr<handler_base> clone( ) const= 0;
+  
+  virtual void process(incoming_holder holder, io::outgoing_handler_t outgoing_handler) = 0;
+  
   virtual std::vector<std::string> get_methods() const = 0;
   
-  virtual void start(::wfc::io::io_id_t id) = 0;
-  virtual void stop(::wfc::io::io_id_t id) = 0;
-  // ???
-  std::function< void( ::wfc::io::data_ptr /*d*/, ::wfc::io::data_ptr /*id*/, std::shared_ptr<handler_base>) > outgoing = nullptr;
+  virtual void start(io::io_id_t io_id) = 0;
   
+  virtual void stop(io::io_id_t io_id) = 0;
   
-  outgoing_request_handler_t outgoing_request_handler = nullptr;
-  outgoing_notify_handler_t  outgoing_notify_handler = nullptr;
+
+  typedef std::function< data_ptr(const char* name, int id)   > request_serializer_t;
+  typedef std::function< data_ptr(const char* name)   > notify_serializer_t;
+  typedef std::function< void(incoming_holder)  > result_handler_t;
+  
+  typedef std::function< void(const char* name, result_handler_t, request_serializer_t) > send_request_t;
+  typedef std::function< void(const char* name, notify_serializer_t) > send_notify_t;
+  
+    
+  send_request_t send_request = nullptr;
+  send_notify_t  send_notify = nullptr;
 };
 
 }} // wfc
