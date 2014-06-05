@@ -14,24 +14,14 @@ struct ad_incoming_parser
   template<typename T>
   void operator()( T& t, typename T::data_ptr d, io::io_id_t io_id, io::outgoing_handler_t outgoing_handler)
   {
-    /*
-    std::weak_ptr<handler_base> jsonrpc_handler;
-    
-    jsonrpc_handler = t.registry().get_jsonrpc_handler(io_id);
-    
-    if ( jsonrpc_handler.lock() == nullptr )
-    {
-      jsonrpc_handler = t.get_prototype();
-    };
-    */
-    
     try
     {
       while (d != nullptr)
       {
-        incoming_holder hold(std::move(d) );
-        d = hold.tail();
-        t.get_aspect().template get<_verify_>()( t,  std::move(hold), io_id,/*jsonrpc_handler,*/ outgoing_handler );
+        incoming_holder hold(std::move(d));
+        d = hold.parse();
+        //d = hold.tail();
+        t.get_aspect().template get<_verify_>()( t,  std::move(hold), io_id, outgoing_handler );
       }
     }
     catch(const json::json_error& er)

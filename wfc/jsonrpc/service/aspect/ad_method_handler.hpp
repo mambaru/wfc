@@ -10,7 +10,7 @@ namespace wfc{ namespace jsonrpc{
 struct ad_method_handler
 {
   template<typename T>
-  void operator()( T& t, incoming_holder holder, io::io_id_t io_id, /*std::weak_ptr<handler_base> hb,*/ ::wfc::io::outgoing_handler_t outgoing_handler)
+  void operator()( T& t, incoming_holder holder, io::io_id_t io_id, ::wfc::io::outgoing_handler_t outgoing_handler)
   {
     std::weak_ptr<handler_base> jsonrpc_handler;
     

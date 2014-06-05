@@ -23,11 +23,10 @@ public:
   virtual void start(io::io_id_t io_id) = 0;
   
   virtual void stop(io::io_id_t io_id) = 0;
-  
 
-  typedef std::function< data_ptr(const char* name, int id)   > request_serializer_t;
-  typedef std::function< data_ptr(const char* name)   > notify_serializer_t;
-  typedef std::function< void(incoming_holder)  > result_handler_t;
+  typedef std::function< data_ptr(const char* name, int id) > request_serializer_t;
+  typedef std::function< data_ptr(const char* name) > notify_serializer_t;
+  typedef std::function< void(incoming_holder) > result_handler_t;
   
   typedef std::function< void(const char* name, result_handler_t, request_serializer_t) > send_request_t;
   typedef std::function< void(const char* name, notify_serializer_t) > send_notify_t;

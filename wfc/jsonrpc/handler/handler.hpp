@@ -6,6 +6,7 @@
 #include <wfc/jsonrpc/errors.hpp>
 #include <wfc/jsonrpc/incoming/incoming_holder.hpp>
 #include <wfc/jsonrpc/outgoing/outgoing_error_json.hpp>
+#include <wfc/jsonrpc/types.hpp>
 #include <fas/aop.hpp>
 
 namespace wfc{ namespace jsonrpc{
@@ -31,9 +32,9 @@ struct f_invoke
   template<typename T, typename Tg>
   void operator()(T& t, fas::tag<Tg> )
   {
-    if ( !founded && holder.$() )
+    if ( !founded && holder )
     {
-      if ( holder.method( t.get_aspect().template get<Tg>().name() ) )
+      if ( holder.method_equal_to( t.get_aspect().template get<Tg>().name() ) )
       {
         t.get_aspect().template get<Tg>()(t, std::move(holder), callback );
         founded = true;
@@ -62,8 +63,8 @@ class handler
 public:
   typedef handler<Instanse> self;
   typedef Instanse super;
-  typedef typename Instanse::target_type target_type;
-  typedef typename Instanse::provider_type provider_type;
+  typedef typename super::target_type target_type;
+  typedef typename super::provider_type provider_type;
   
   handler(target_type trg = target_type(), provider_type prv = provider_type() )
   {
@@ -114,7 +115,12 @@ public:
       typedef outgoing_error_json< error_json::type >::type json_type;
       outgoing_error<error> error_message;
       error_message.error = std::make_unique<error>(procedure_not_found());
-      error_message.id = std::move( holder.raw_id() );
+
+            // error_message.id = std::move( holder.raw_id() );
+
+      auto id_range = holder.raw_id();
+      error_message.id = std::make_unique<typename super::data_type>( id_range.first, id_range.second );
+      
               
       auto d = std::make_unique< io::data_type>();
       typename json_type::serializer()(error_message, std::inserter( *d, d->end() ));
@@ -122,18 +128,18 @@ public:
     };
   }
   
-  io::io_id_t get_id() const
+  io_id_t get_io_id() const
   {
     return _id;
   }
   
-  virtual void start( io::io_id_t id ) 
+  virtual void start( io_id_t id ) 
   {
     _id = id;
     this->get_aspect().template get<_startup_>()(*this, id);
   }
   
-  virtual void stop( io::io_id_t id)
+  virtual void stop( io_id_t id)
   {
     this->get_aspect().template get<_shutdown_>()(*this, id);
   }

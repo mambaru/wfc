@@ -9,7 +9,7 @@ template<typename T>
 struct outgoing_error: outgoing
 {
   std::unique_ptr<T> error;
-  std::unique_ptr< ::wfc::io::data_type> id;
+  std::unique_ptr< ::wfc::io::data_type > id;
   outgoing_error()
     : outgoing()
     , id(nullptr)

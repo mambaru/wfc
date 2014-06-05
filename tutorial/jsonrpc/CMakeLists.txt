@@ -1,0 +1,2 @@
+add_executable(incoming_holder incoming_holder.cpp)
+target_link_libraries(incoming_holder wfc boost_system pthread)

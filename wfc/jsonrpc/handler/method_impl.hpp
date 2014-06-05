@@ -3,6 +3,7 @@
 #include <memory>
 #include <functional>
 
+// TODO: убрать 
 
 #define JSONRPC_METHOD_IMPL(Tg, Method)\
   virtual void Method( call_params_ptr<Tg>::type req, std::function< void(call_result_ptr<Tg>::type) > callback)\

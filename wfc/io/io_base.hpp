@@ -18,8 +18,8 @@ namespace wfc{ namespace io{
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class io_base
   : public AspectClass<A>
-  // , public iio
 {
+  
 public:
   
   typedef io_base<A, AspectClass> self;
@@ -75,20 +75,10 @@ public:
       return *(ptr.get());
     }
     abort();
-    /*
-    if ( nullptr == this->get_aspect().template get<_strand_>() )
-      abort();
-    return *(this->get_aspect().template get<_strand_>());
-    */
   }
 
   const strand_type& strand() const
   {
-    /*
-    if ( nullptr == this->get_aspect().template get<_strand_>() )
-      abort();
-    return *(this->get_aspect().template get<_strand_>());
-    */
     if ( auto ptr = this->get_aspect().template get<_strand_>() )
     {
       return *(ptr.get());
@@ -100,11 +90,6 @@ public:
   // Ахтунг!!! owner только внутри strand(), т.к. нифиг не thread safe
   const owner_type& owner() const
   {
-    /*
-    if ( nullptr == this->get_aspect().template get<_owner_>() )
-      abort();
-    return *(this->get_aspect().template get<_owner_>());
-    */
     if ( auto ptr = this->get_aspect().template get<_owner_>() )
     {
       return *(ptr.get());
@@ -115,17 +100,11 @@ public:
 
   owner_type& owner()
   {
-    /*
-    if ( nullptr == this->get_aspect().template get<_owner_>() )
-      abort();
-    return *(this->get_aspect().template get<_owner_>());
-    */
     if ( auto ptr = this->get_aspect().template get<_owner_>() )
     {
       return *(ptr.get());
     }
     abort();
-
   }
 
   const options_type& options() const
@@ -140,14 +119,6 @@ public:
 
 ///  //////////////////////////////////////////////
 
-/*
-  void add_release_handler( release_handler handler)
-  {
-    _release_handlers.push_back(handler);
-  }
-  */
-
-
   template<typename Handler>
   void dispatch(Handler h)
   {
@@ -159,8 +130,6 @@ public:
   {
     this->post(*this, h);
   }
-
-
   
   ::wfc::io::outgoing_handler_t callback( std::function<void(data_ptr)> handler)
   {
@@ -174,7 +143,7 @@ public:
     
     auto wrp_ptr = std::make_shared< decltype(wrp) >(wrp);
     
-    return /*this->owner().wrap(*/[wrp_ptr](data_ptr d)
+    return [wrp_ptr](data_ptr d)
     {
       (*wrp_ptr)( std::make_shared<data_ptr>( std::move(d) ) );
     };

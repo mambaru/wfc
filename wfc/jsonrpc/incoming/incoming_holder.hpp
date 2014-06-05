@@ -11,55 +11,19 @@ namespace wfc{ namespace jsonrpc{
 
 class incoming_holder
 {
+public:
   typedef ::wfc::io::data_type data_type;
   typedef ::wfc::io::data_ptr  data_ptr;
-  typedef data_type::iterator iterator;
-  
-public:
-  
+  typedef data_type::iterator  iterator;
+  typedef std::pair< iterator, iterator> raw_t;
   typedef std::chrono::high_resolution_clock clock_t;
   
-  incoming_holder(data_ptr d)
-   : _data(std::move(d))
-  {
-    _time_point = clock_t::now();
-    _begin = ::wfc::json::parser::parse_space(_data->begin(), _data->end());
-    _end = incoming_json::serializer()( _incoming, _begin, _data->end());
-  }
+  incoming_holder(data_ptr d );
   
-  clock_t::time_point time_point() const 
-  {
-    return _time_point;
-  }
+  data_ptr parse();
   
-  data_ptr detach()
-  {
-    _incoming = incoming();
-    return std::move(_data);
-  }
-  
-  data_ptr acquire_params()
-  {
-    std::move( _incoming.params.first, _incoming.params.second, _data->begin() );
-    _data->resize( std::distance(_incoming.params.first, _incoming.params.second) );
-    _incoming = incoming();
-    return std::move(_data);
-  }
-  
-  data_ptr tail() const
-  {
-    if ( _data == nullptr )
-      return nullptr;
-    
-    iterator beg = ::wfc::json::parser::parse_space( _end, _data->end());
-    if ( beg == _data->end() )
-      return nullptr;
-    
-    return std::make_unique<data_type>(beg, _data->end());
-  }
-  
+  operator bool () const{ return $();}
   bool empty() const { return !$();}
-  bool $() const{ return _data != nullptr;}
   
   bool has_method() const { return $() && _incoming.method.first!=_incoming.method.second; }
   bool has_result() const { return $() && _incoming.result.first!=_incoming.result.second; }
@@ -71,8 +35,8 @@ public:
   bool is_response() const      { return this->has_result() && this->has_id();   }
   bool is_notify() const        { return this->has_method() && !this->has_id();  }
   bool is_error() const         { return this->has_error();                      }
+  bool is_request_error() const { return this->has_error() && this->has_id() && 'n'!=*_incoming.params.first;}
   bool is_other_error() const   { return this->has_error() && !this->has_id();   }
-  bool is_request_error() const { return this->has_error() && this->has_id();    }
   
   bool is_valid() const 
   {
@@ -81,32 +45,14 @@ public:
       || this->is_notify()
       || this->is_error();
   }
-    
-  bool method(const char* ch)
-  {
-    incoming::iterator beg = _incoming.method.first;
-    incoming::iterator end = _incoming.method.second;
-    if (beg++==end) return false;
-    if (beg==end--) return false;
-    for (; beg != end && *beg==*ch; ++beg, ++ch);
-    return beg==end && *ch=='\0';
-  }
   
-  std::pair< incoming::iterator, incoming::iterator>
-  raw_method() const 
-  {
-    return std::make_pair( _incoming.method.first, _incoming.method.second );
-  }
+  bool method_equal_to(const char* name) const;
   
+  std::string method() const;
   
-  std::string method() const
-  {
-    if ( std::distance(_incoming.method.first, _incoming.method.second ) > 2 )
-      return std::string( _incoming.method.first+1, _incoming.method.second-1);
-    else
-      return std::string();
-  }
+  raw_t raw_method() const;
 
+  raw_t raw_id() const;
   
   template<typename V, typename J = json::value<V> >
   V get_id() const
@@ -117,18 +63,9 @@ public:
     return id;
   }
   
-  data_ptr raw_id() const
-  {
-    if ( this->has_id() )
-      return std::make_unique<data_type>(_incoming.id.first, _incoming.id.second);
-    else
-      return nullptr;
-  }
-  
   template<typename J>
   std::unique_ptr<typename J::target> get_result() const
   {
-    
     if ( !this->has_result() )
       return nullptr;
     if ( 'n'==*_incoming.result.first)
@@ -137,7 +74,6 @@ public:
     typename J::serializer()(*result, _incoming.result.first, _incoming.result.second);
     return std::move(result);
   }
-
   
   template<typename J>
   std::unique_ptr<typename J::target> get_params() const
@@ -151,11 +87,6 @@ public:
     return std::move(result);
   }
   
-  std::string params_error_message(const json::json_error& e) const
-  {
-    return e.message(_incoming.params.first, _incoming.params.second);
-  }
-  
   template<typename J>
   std::unique_ptr<typename J::target> get_error() const
   {
@@ -167,11 +98,28 @@ public:
     typename J::serializer()(*result, _incoming.error.first, _incoming.error.second);
     return std::move(result);
   }
+
+  std::string error_message(const json::json_error& e) const;
   
-  const incoming& get()  const 
-  {
-    return _incoming;
-  }
+  std::string params_error_message(const json::json_error& e) const;
+
+  std::string result_error_message(const json::json_error& e) const;
+
+  std::string error_error_message(const json::json_error& e) const;
+  
+  std::string id_error_message(const json::json_error& e) const;
+
+  const incoming& get()  const ;
+  
+  clock_t::time_point time_point() const ;
+  
+  data_ptr detach();
+  
+  data_ptr acquire_params();
+
+private:
+  
+  bool $() const{ return _data != nullptr;}
   
 private:
   

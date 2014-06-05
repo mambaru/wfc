@@ -16,6 +16,7 @@ SET(
   pubsub/message_queue.cpp
   pubsub/topic_hub.cpp
   pubsub/pubsub_gateway.cpp
+  jsonrpc/incoming/incoming_holder.cpp
   jsonrpc/service.cpp
   jsonrpc/service/io_registry.cpp
   jsonrpc/service/worker_manager.cpp

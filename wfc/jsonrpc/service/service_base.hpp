@@ -65,29 +65,6 @@ public:
   {
     return this->_io_reg;
   }
-  /*
-  handler_base::result_handler_t get_result_handler(int call_id) const
-  {
-    return this->_io_reg.get_result_handler(call_id);
-  }
-  
-  std::weak_ptr<handler_base> get_jsonrpc_handler(io::io_id_t io_id) const 
-  {
-    return this->_io_reg.get_jsonrpc_handler(io_id);
-  }
-  */
-  
-  // 
-  /*
-  template<typename T>
-  void process_result( T& , incoming_holder holder, ::wfc::io::outgoing_handler_t)
-  {
-    if ( auto handler = this->registry().get_result_handler( holder.get_id<int>() ) )
-    {
-      handler( std::move(holder) );
-    }
-  }
-  */
   
   void send_notify(
     ::wfc::io::io_id_t io_id,
@@ -107,7 +84,6 @@ public:
       }
     });
   };
-  
   
   void send_request(
     ::wfc::io::io_id_t io_id,
@@ -137,7 +113,6 @@ public:
   {
     if ( outgoing_handler == nullptr)
     {
-      // Костыль (из конфига прут аккцепторы)
       return;
     }
     
@@ -172,7 +147,6 @@ public:
  }
   
 
-  //typedef std::function<void(data_ptr, io_id_t, callback )> handler;
   /// Для входящих запросов
   void operator()( data_ptr d, io::io_id_t io_id, ::wfc::io::outgoing_handler_t outgoing_handler)
   {

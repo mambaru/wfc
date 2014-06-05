@@ -14,7 +14,7 @@ namespace wfc{ namespace jsonrpc{
 
 struct io_info
 {
-  typedef handler_base::result_handler_t result_handler_t;
+  typedef handler_base::result_handler_t   result_handler_t;
   typedef std::map<int, result_handler_t>  result_map_t;
 
   std::shared_ptr<handler_base> jsonrpc_handler;
@@ -32,7 +32,6 @@ struct io_info
 
 class io_registry
 {
-  
   typedef io_info::result_handler_t result_handler_t;
   typedef std::map< io::io_id_t, io_info > io_map_t;
   typedef std::map< int, io::io_id_t     > call_io_map_t;
@@ -63,8 +62,5 @@ private:
   call_io_map_t _call_io_map;
 };
 
-
-
 }} // wfc
-
 

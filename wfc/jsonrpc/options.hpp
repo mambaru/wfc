@@ -1,13 +1,13 @@
 #pragma once
 
-#include <wfc/jsonrpc/worker_options.hpp>
 #include <vector>
 #include <string>
+#include <wfc/io/basic/aspect.hpp>
 
 namespace wfc{ namespace jsonrpc{
 
-struct options
-  : worker_options
+struct options: 
+  ::wfc::io::basic::options
 {
   struct worker
   {

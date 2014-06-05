@@ -25,6 +25,7 @@ struct invoke: Handler
   typedef typename request_json::target  request_type;
   typedef typename response_json::target response_type;
   
+  // TODO: Упростить ошибки
   
   template<typename T>
   void operator()(T& t, incoming_holder holder, ::wfc::io::outgoing_handler_t handler) const
@@ -42,7 +43,10 @@ struct invoke: Handler
         typedef outgoing_error_json< error_json::type >::type json_type;
         outgoing_error<error> error_message;
         error_message.error = std::make_unique<error>(invalid_params());
-        error_message.id = std::move( holder.raw_id() );
+        auto id_range = holder.raw_id();
+        error_message.id = std::make_unique<typename T::data_type>( id_range.first, id_range.second );
+
+        //error_message.id = std::move( holder.raw_id() );
         auto d = holder.detach();
         d->clear();
         typename json_type::serializer()(error_message, std::inserter( *d, d->end() ));
@@ -65,7 +69,8 @@ struct invoke: Handler
               typedef outgoing_error_json< error_json::type >::type json_type;
               outgoing_error<error> error_message;
               error_message.error = std::move(err);
-              error_message.id = std::move( ph->raw_id() );
+              //error_message.id = std::move( ph->raw_id() );
+
               
               auto d = ph->detach();
               d->clear();
@@ -74,13 +79,16 @@ struct invoke: Handler
             }
             else
             {
-              outgoing_result<response_type> result;
-              result.result = std::move(params);
-              result.id = ph->raw_id();
+              outgoing_result<response_type> error_message;
+              error_message.result = std::move(params);
+              //result.id = ph->raw_id();
+              auto id_range = ph->raw_id();
+              error_message.id = std::make_unique<typename T::data_type>( id_range.first, id_range.second );
+
               auto d = ph->detach();
               d->clear();
               typedef outgoing_result_json<response_json> result_json;
-              typename result_json::serializer()(result, std::inserter( *d, d->end() ));
+              typename result_json::serializer()(error_message, std::inserter( *d, d->end() ));
               handler( std::move(d) );
             }
           } // callback 
@@ -92,7 +100,10 @@ struct invoke: Handler
         typedef outgoing_error_json< error_json::type >::type json_type;
         outgoing_error<error> error_message;
         error_message.error = std::make_unique<error>(server_error());
-        error_message.id = std::move( holder.raw_id() );
+        //error_message.id = std::move( holder.raw_id() );
+        auto id_range = holder.raw_id();
+        error_message.id = std::make_unique<typename T::data_type>( id_range.first, id_range.second );
+
               
         auto d = holder.detach();
         d->clear();

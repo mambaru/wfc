@@ -11,11 +11,11 @@ namespace wfc{ namespace jsonrpc{
 struct ad_verify
 {
   template<typename T>
-  void operator()( T& t,  incoming_holder holder, io::io_id_t io_id, /*std::weak_ptr<handler_base> hb,*/ io::outgoing_handler_t handler)
+  void operator()( T& t,  incoming_holder holder, io::io_id_t io_id, io::outgoing_handler_t handler)
   {
     if ( holder.is_valid() )
     {
-      t.get_aspect().template get<_handler_switch_>()(t,  std::move(holder), io_id,/*hb,*/ handler );
+      t.get_aspect().template get<_handler_switch_>()(t,  std::move(holder), io_id, handler );
     }
     else
     {
