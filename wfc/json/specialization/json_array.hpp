@@ -110,6 +110,69 @@ class serializerT< array_r<T, RR> >
 {
 };
 
+template< typename J, int N, typename RR, char L, char R >
+class serializerA< array_r< std::array<J,N>, RR>, L, R >
+{
+  typedef array_r<std::array<J,N>, RR> array_type;
+  typedef typename array_type::target_container target_container;
+  typedef typename array_type::json_value json_value;
+  typedef typename json_value::serializer serializer;
+  typedef typename json_value::target target;
+
+
+public:
+  template<typename P>
+  P operator()( target_container& t,  P beg, P end)
+  {
+    if ( parser::is_null(beg, end) )
+    {
+      for (int i = 0; i < N ; ++i)
+        t[i] = target();
+      return parser::parse_null(beg, end);
+    }
+
+    target* bitr = &t[0];
+    target* eitr = bitr + N;
+
+    if (beg==end) throw unexpected_end_fragment();
+    if (*beg!=L) throw expected_of( std::string(1, L), std::distance(beg, end) );
+    ++beg;
+    for (;beg!=end && bitr!=eitr;)
+    {
+      beg = parser::parse_space(beg, end);
+      if (beg==end) throw unexpected_end_fragment();
+      if (*beg==R) break;
+      target tg;
+      beg = serializer()( tg, beg, end);
+      *(bitr++) = tg;
+      beg = parser::parse_space(beg, end);
+      if (beg==end) throw unexpected_end_fragment();
+      if (*beg==R) break;
+      if (*beg!=',') throw expected_of(",", std::distance(beg, end));
+      ++beg;
+    }
+    if (beg==end) throw unexpected_end_fragment();
+    if (*beg!=R) throw expected_of(std::string(1, R), std::distance(beg, end));
+    ++beg;
+    return beg;
+  }
+
+  template<typename P>
+  P operator()( const target_container& t, P end)
+  {
+    *(end++)=L;
+    const target* itr = &t[0];
+    const target* iend = itr + N;
+    for (;itr!=iend;)
+    {
+      end = serializer()(*itr, end);
+      ++itr;
+      if (itr!=iend) *(end++)=',';
+    }
+    *(end++)=R;
+    return end;
+  }
+};
 
 template< typename J, int N, typename RR, char L, char R >
 class serializerA< array_r< J[N], RR>, L, R >

@@ -348,6 +348,8 @@ struct array_base< std::vector<J>, R>
   static inserter_iterator inserter(target_container& t) { return std::back_inserter(t); }
 };
 
+
+
 template<typename J, int N, typename R>
 struct array_base< J[N], R>
 {
@@ -399,6 +401,16 @@ struct array_base< std::unordered_map<JK, JV>, R>
 
   typedef std::insert_iterator<target_container> inserter_iterator;
   static inserter_iterator inserter(target_container& t) { return std::inserter(t, t.begin()); }
+};
+
+template<typename J, int N, typename R>
+struct array_base< std::array<J, N>, R>
+{
+  typedef std::array<J, N> json_container;
+  typedef J json_value;
+  typedef typename json_value::target target;
+  typedef std::array<target, N> target_container;
+  typedef serializerT< array_r< json_container, R> > serializer;
 };
 #endif
 
