@@ -26,7 +26,7 @@ struct mem_fun_handler3
   {
     if ( auto i = t.target().lock() )
     {
-      (i.get()->*mem_ptr)( std::move(req), mem_fun_make_callback( std::move(cb)), t.get_id() );
+      (i.get()->*mem_ptr)( std::move(req), mem_fun_make_callback( std::move(cb)), t.get_io_id() );
     }
     else 
     {

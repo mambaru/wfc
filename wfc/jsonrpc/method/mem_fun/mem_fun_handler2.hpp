@@ -44,7 +44,7 @@ struct mem_fun_handler2
       (i.get()->*mem_ptr)( 
         std::move(req), 
         mem_fun_make_callback( std::move(cb)),
-        t.get_id(),
+        t.get_io_id(),
         [self](request2_ptr req, std::function< void(responce2_ptr) > callback)
         {
           if ( auto p = self.lock() )

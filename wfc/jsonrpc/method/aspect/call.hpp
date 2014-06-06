@@ -6,6 +6,9 @@
 #include <wfc/jsonrpc/outgoing/outgoing_notify.hpp>
 #include <wfc/jsonrpc/outgoing/outgoing_notify_json.hpp>
 #include <wfc/jsonrpc/handler/aspect/tags.hpp>
+#include <wfc/jsonrpc/errors/errors.hpp>
+#include <wfc/jsonrpc/errors/error_json.hpp>
+#include <wfc/jsonrpc/method/aspect/tags.hpp>
 
 #include <fas/aop/metalist.hpp>
 #include <memory>
@@ -59,7 +62,7 @@ private:
       request.params = std::move(req);
       request.method = name; 
       request.id = id;
-      auto d = std::make_unique< ::wfc::io::data_type>();
+      auto d = std::make_unique< typename T::data_type>();
       d->reserve(ReserveSize); 
       typedef outgoing_request_json<request_json> send_json;
       typename send_json::serializer()(request, std::inserter( *d, d->end() ));
@@ -115,7 +118,7 @@ private:
         outgoing_notify<request_type> notify;
         notify.params = std::move(req);
         notify.method = name; 
-        auto d = std::make_unique< ::wfc::io::data_type>();
+        auto d = std::make_unique< typename T::data_type>();
         d->reserve(ReserveSize); 
         typedef outgoing_notify_json<request_json> send_json;
         typename send_json::serializer()(notify, std::inserter( *d, d->end() ));

@@ -19,6 +19,7 @@ struct error_json
     >::type
   > type;
 
+  typedef error target; 
   typedef type::serializer serializer;
 };
   
