@@ -8,6 +8,7 @@
 
 #include <stdexcept>
 #include <vector>
+#include <array>
 #include <string>
 #include <set>
 #include <stdint.h>
@@ -403,7 +404,9 @@ struct array_base< std::unordered_map<JK, JV>, R>
   static inserter_iterator inserter(target_container& t) { return std::inserter(t, t.begin()); }
 };
 
-template<typename J, int N, typename R>
+#endif
+
+template<typename J, size_t N, typename R>
 struct array_base< std::array<J, N>, R>
 {
   typedef std::array<J, N> json_container;
@@ -412,8 +415,6 @@ struct array_base< std::array<J, N>, R>
   typedef std::array<target, N> target_container;
   typedef serializerT< array_r< json_container, R> > serializer;
 };
-#endif
-
 
 template<typename JK, typename JV, typename R>
 struct array_base< std::map<JK, JV>, R >
