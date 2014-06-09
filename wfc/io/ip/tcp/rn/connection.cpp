@@ -10,8 +10,8 @@ connection::~connection()
 }
 
   
-connection::connection(connection::descriptor_type&& desc, const connection::options_type& conf, wfc::io::handler handler )
-  : _impl( std::make_unique<connection_impl>(std::move(desc), conf, handler) )
+connection::connection(connection::descriptor_type&& desc, const connection::options_type& conf/*, wfc::io::incoming_handler handler*/ )
+  : _impl( std::make_unique<connection_impl>(std::move(desc), conf/*, handler*/) )
 {
   
 }
@@ -26,9 +26,9 @@ void connection::start()
   _impl->start();
 }
 
-void connection::stop()
+void connection::stop(std::function<void()> finalize)
 {
-  _impl->stop();
+  _impl->stop(finalize);
 }
 
 const wfc::io_service::strand& connection::strand() const

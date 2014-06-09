@@ -38,10 +38,11 @@ public:
   typedef typename super::options_type options_type;
   
 
-  descriptor_holder(descriptor_type&& desc, const options_type& conf, ::wfc::io::handler handler = nullptr)
+  descriptor_holder(descriptor_type&& desc, const options_type& conf/*, ::wfc::io::incoming_handler handler = nullptr*/)
     : super( desc.get_io_service(), conf)
     , _descriptor( std::move(desc) )
-    , _handler(handler)
+    // , _handler(handler)
+    , _handler(conf.incoming_handler)
   {
   }
   
@@ -64,14 +65,52 @@ public:
   {
     return this->get_aspect().template get< ::wfc::io::_error_code_>();
   }
-  
+
+  template<typename T>
+  void self_stop(T& t, std::function<void()> finalize)
+  {
+    if ( this->descriptor().is_open() )
+      this->descriptor().close();
+    super::self_stop(t, finalize);
+  }
+
+  template<typename T>
+  void stop_impl(T& t, std::function<void()> finalize)
+  {
+      if ( t.descriptor().is_open() )
+      {
+        t.descriptor().cancel();
+        t.descriptor().close();
+      }
+    
+      super::stop(t, finalize);
+  }
+  template<typename T>
+  void stop(T& t, std::function<void()> finalize)
+  {
+    std::atomic<bool> flag(false);
+    
+    super::get_io_service().post( super::strand().wrap( [this, &t, &flag, finalize](){
+      this->stop_impl(t, finalize);
+      flag = true;
+    }));
+    
+    
+    while (!flag)
+    {
+      super::get_io_service().reset();
+      super::get_io_service().poll();
+    }
+  }
+
 private:
   
   descriptor_type _descriptor;
 
 public:
   // TODO: в аспект
-  ::wfc::io::handler _handler;
+  ::wfc::io::incoming_handler_t _handler;
+  
 
 };
 

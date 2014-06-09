@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wfc/jsonrpc/outgoing/outgoing_request.hpp>
+#include <wfc/jsonrpc/outgoing/version_member.hpp>
 #include <wfc/json/name.hpp>
 #include <wfc/json/json.hpp>
 

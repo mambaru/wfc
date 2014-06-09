@@ -30,8 +30,8 @@ public:
   void operator = (const acceptor& conf) = delete;
 
   
-  acceptor(descriptor_type&& desc, const options_type& conf, wfc::io::handler handler = nullptr)
-    : super( std::move(desc), conf, handler)
+  acceptor(descriptor_type&& desc, const options_type& conf/*, wfc::io::incoming_handler handler = nullptr*/)
+    : super( std::move(desc), conf/*, handler*/)
   {
     super::create(*this);
   }
@@ -41,9 +41,11 @@ public:
     super::start(*this);
   }
   
-  void stop()
+  void stop(std::function<void()> finalize)
   {
-    super::stop(*this);
+    super::stop(*this, finalize);
+    super::get_io_service().reset();
+    while ( 0!=super::get_io_service().poll() ) { super::get_io_service().reset();};
   }
   
   template<typename Handler>

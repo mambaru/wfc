@@ -26,6 +26,9 @@ struct value;
 template<typename T = std::string>
 struct raw_value;
 
+template<typename T>
+struct value_quoted;
+
 template<typename N, typename T, T v>
 struct enum_value;
 
@@ -323,7 +326,6 @@ template<typename L, typename R, bool RU >
 struct member_if
 {
 };
-
 
 /// //////////////////////////////////////////////////////////////////////////////
 

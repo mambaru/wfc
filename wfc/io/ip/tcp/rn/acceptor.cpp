@@ -11,8 +11,8 @@ acceptor::~acceptor()
 }
 
   
-acceptor::acceptor(acceptor::descriptor_type&& desc, const acceptor::options_type& conf, wfc::io::handler handler )
-  : _impl( std::make_unique<acceptor_impl>(std::move(desc), conf, handler) )
+acceptor::acceptor(acceptor::descriptor_type&& desc, const acceptor::options_type& conf/*, wfc::io::incoming_handler handler*/ )
+  : _impl( std::make_unique<acceptor_impl>(std::move(desc), conf/*, handler*/) )
 {
   
 }
@@ -22,9 +22,19 @@ void acceptor::start()
   _impl->start();
 }
 
-void acceptor::stop()
+void acceptor::close()
 {
-  _impl->stop();
+  
+  if ( _impl->descriptor().is_open() )
+  {
+    _impl->descriptor().close();
+  }
+}
+
+void acceptor::stop(std::function<void()> finalize)
+{
+  _impl->stop(finalize);
+  _impl.reset();
 }
   
 void acceptor::shutdown()

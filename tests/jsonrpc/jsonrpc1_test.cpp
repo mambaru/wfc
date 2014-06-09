@@ -3,6 +3,7 @@
 #include <wfc/io/posix/rn/reader.hpp>
 #include <wfc/jsonrpc/service.hpp>
 #include <wfc/jsonrpc/handler.hpp>
+#include <wfc/jsonrpc/method.hpp>
 
 #include <string>
 #include <thread>
@@ -90,7 +91,8 @@ int main()
   
   auto jsonrpc_handler = std::bind( &service_type::operator(), &jsonrpc, _1, _2, _3);
   boost::asio::posix::stream_descriptor sd(io_service, dd[0]);
-  reader_type reader( std::move(sd), reader_options, jsonrpc_handler  );
+  reader_options.incoming_handler = jsonrpc_handler;
+  reader_type reader( std::move(sd), reader_options  );
   
   
   const char *test1 = "{\"method\":\"test1\",\"params\":[1,2,3,4,5],\"id\":1}\r\n";

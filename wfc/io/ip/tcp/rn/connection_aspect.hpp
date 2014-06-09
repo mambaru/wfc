@@ -28,21 +28,27 @@ struct ad_on_read_error
   template<typename T>
   void operator()(T& t, boost::system::error_code& ec )
   {
-    if ( !t.get_aspect().template get<_shutdown_flag_>())
+    if (ec != boost::asio::error::operation_aborted )
     {
-      if ( t.get_aspect().template get< wfc::io::writer::_outgoing_buffer_size_>() == 0 )
+      auto outgoing_buffer_size = t.get_aspect().template get< wfc::io::writer::_outgoing_buffer_size_>();
+      if ( !t.get_aspect().template get<_shutdown_flag_>())
       {
-        t.descriptor().close();
-        t.stop();
+        if ( outgoing_buffer_size!=0 )
+        {
+          COMMON_LOG_WARNING("connection closed with outgoing_buffer_size" << outgoing_buffer_size)
+        }
+        t.self_stop(t, nullptr);
+      }
+      else
+      {
+        DAEMON_LOG_ERROR("io shutdown not impl. outgoing_buffer_size" << outgoing_buffer_size)
+        t.self_stop(t, nullptr); // TODO: shutdown
       }
     }
-    else if (ec == boost::asio::error::operation_aborted )
+    else
     {
-        t.descriptor().close();
-        t.stop();
-      
+      DEBUG_LOG_MESSAGE("ad_on_read_error: boost::asio::error::operation_aborted")
     }
-      
   }
 };
 

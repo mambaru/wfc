@@ -15,6 +15,10 @@ struct connection_options_json
       ::wfc::json::member< n_keep_alive, connection_options, bool, &connection_options::keep_alive>
     >::type
   > type;
+  
+  typedef type::target     target;
+  typedef type::serializer serializer;
+
 };
 
 }}}}}

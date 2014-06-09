@@ -47,6 +47,9 @@ struct options_json
       ::wfc::json::member< n_workers, options, std::vector<options::worker> , &options::workers, vect_worker_json >
     >::type
   > type;
+  
+  typedef type::serializer serializer;
+  typedef type::target target;
 };
   /*
 struct options

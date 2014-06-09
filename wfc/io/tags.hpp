@@ -22,6 +22,9 @@ struct _dispatch_;
 struct _create_;
 struct _start_;
 struct _stop_;
+struct _after_stop_;
+struct _before_stop_;
+
 
 // for user --> <_incoming_, (){ t->_outgoing_ }>
 struct _incoming_;

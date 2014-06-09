@@ -2,7 +2,7 @@
 
 
 #include <wfc/jsonrpc/handler/handler_base.hpp>
-#include <wfc/jsonrpc/handler/tags.hpp>
+#include <wfc/jsonrpc/handler/aspect/tags.hpp>
 #include <wfc/jsonrpc/errors.hpp>
 #include <wfc/jsonrpc/incoming/incoming_holder.hpp>
 #include <wfc/jsonrpc/outgoing/outgoing_error_json.hpp>
@@ -13,10 +13,10 @@ namespace wfc{ namespace jsonrpc{
 struct f_invoke
 {
   incoming_holder& holder;
-  ::wfc::io::callback& callback;
+  ::wfc::io::outgoing_handler_t& callback;
   bool founded;
   
-  f_invoke(incoming_holder& holder, ::wfc::io::callback& callback)
+  f_invoke(incoming_holder& holder, ::wfc::io::outgoing_handler_t& callback)
     : holder( holder )
     , callback(callback)
     , founded(false)
@@ -69,10 +69,35 @@ public:
   {
     this->get_aspect().template get<_target_>() = trg;
     this->get_aspect().template get<_provider_>() = prv;
+    
+    {
+      auto ptr = this->get_aspect().template get<_provider_>();
+      if (auto p = ptr.lock() )
+      {
+        
+      }
+      else
+      {
+        
+      }
+    }
   }
 
   virtual std::shared_ptr<handler_base> clone(/*outgoing_request_handler_t request_handler*/) const 
   {
+    
+    {
+      auto ptr = this->get_aspect().template get<_provider_>();
+      if (auto p = ptr.lock() )
+      {
+        
+      }
+      else
+      {
+        
+      }
+    }
+    
     return std::make_shared<self>(*this);
   }
   
@@ -81,7 +106,7 @@ public:
     return fas::for_each_group<_method_>(*this, f_get_methods() ).result;
   }
 
-  virtual void process(incoming_holder holder, ::wfc::io::callback callback) 
+  virtual void process(incoming_holder holder, ::wfc::io::outgoing_handler_t callback) 
   {
     if ( !fas::for_each_group<_method_>(*this, f_invoke( holder, callback ) ) )
     {

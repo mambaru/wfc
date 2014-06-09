@@ -21,7 +21,7 @@ public:
   ~client();
   client(io_service& io, const options_type& conf, std::shared_ptr<wfc::jsonrpc::service> service);
   void start();
-  void stop();
+  void stop(std::function<void()> finalize);
   void shutdown();
 
 private:

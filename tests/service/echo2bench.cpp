@@ -82,7 +82,7 @@ int run_client(int , char *argv[])
   auto finish = std::chrono::high_resolution_clock::now();
 
   
-  options.connection.startup_handler = [&]( wfc::io::io_id_t /*id*/, wfc::io::callback callback, wfc::io::add_shutdown_handler add)
+  options.connection.startup_handler = [&]( wfc::io::io_id_t /*id*/, wfc::io::outgoing_handler_t callback, wfc::io::add_shutdown_handler_t add)
   {
     auto d = std::make_unique< wfc::io::data_type>( str.begin(), str.end() );
     callback( std::move(d) );
@@ -92,10 +92,11 @@ int run_client(int , char *argv[])
     });
   };
   
-  client_type client(io, options, wfc::io::simple_handler([&]( wfc::io::data_ptr /*d*/, wfc::io::callback /*callback*/){
+  options.incoming_handler = wfc::io::simple_handler([&]( wfc::io::data_ptr /*d*/, wfc::io::outgoing_handler_t /*callback*/){
     finish = std::chrono::high_resolution_clock::now();
     stat( std::chrono::duration_cast < std::chrono::microseconds>( finish - start ).count() );
-  }));
+  });
+  client_type client(io, options);
   cliptr = &client;
   
   start = std::chrono::high_resolution_clock::now();

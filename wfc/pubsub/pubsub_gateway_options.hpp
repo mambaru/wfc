@@ -8,6 +8,7 @@
 
 #include <wfc/io/io_base.hpp>
 #include <string>
+#include <vector>
 
 namespace wfc{ namespace pubsub{
   
@@ -22,6 +23,10 @@ struct pubsub_gateway_options:
   
   std::string outgoing_target;
   std::string outgoing_channel;
+  
+  bool auto_notify_publish;
+  std::vector<std::string> methods_to_publish;
+  std::vector<std::string> methods_to_query;
 };
 
 }}

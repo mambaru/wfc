@@ -33,6 +33,8 @@ struct options
   
   startup_handler_t  startup_handler = nullptr;
   shutdown_handler_t shutdown_handler = nullptr;
+  incoming_handler_t incoming_handler = nullptr;
+  outgoing_handler_t outgoing_handler = nullptr;
 
   /*
   transfer_handler_t transfer_handler = nullptr;
@@ -59,7 +61,7 @@ typedef fas::type_list_n<
   fas::value< _not_alive_, std::function<void()> >, 
   //fas::value< _startup_handler_, startup_handler_t>,
   //fas::value< _shutdown_handler_, shutdown_handler_t>,
-  fas::value< _transfer_handler_, transfer_handler_t>,
+   fas::value< _transfer_handler_, outgoing_handler_t>, // TODO: удалить 
 
   fas::stub< ::wfc::io::_start_>, 
   fas::group< ::wfc::io::_create_, _create_>

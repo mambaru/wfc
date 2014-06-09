@@ -33,22 +33,34 @@ struct ad_insert
     // TODO: Вынести в аспект и инициализировать на этапе старта 
     holder_options_type holder_options = t.options().connection;
     
-    /*if ( holder_options.startup_handler != nullptr )
-      abort();
-      */
+    if ( holder_options.startup_handler != nullptr )
+    {
+      
+      //abort();
+    }
+    else
+    {
+      
+    }
+      
     
     auto startup_handler = holder_options.startup_handler;
     
     holder_options.startup_handler = 
-      [&t, startup_handler]( ::wfc::io::io_id_t id, ::wfc::io::callback clb, ::wfc::io::add_shutdown_handler add )
+      [&t, startup_handler]( ::wfc::io::io_id_t id, ::wfc::io::outgoing_handler_t clb, ::wfc::io::add_shutdown_handler_t add )
     {
       if ( startup_handler != nullptr )
-        startup_handler( id, clb, add );
-      
-      add( [&t](::wfc::io::io_id_t id) 
       {
-        // post костыль, может не сработать, удаляем объект во время стопа
-        t.post([id,&t]()
+        startup_handler( id, clb, add );
+      }
+      else
+      {
+        
+      }
+      
+      add( /*t.strand().wrap(*/ [&t](::wfc::io::io_id_t id) 
+      {
+        t.get_io_service().post( t.owner().wrap( t.strand().wrap( [id,&t]()
         {
           auto &stg = t.get_aspect().template get<_holder_storage_>();
           auto itr = stg.find(id);
@@ -56,19 +68,31 @@ struct ad_insert
           {
             auto pconn = std::make_shared<holder_ptr>( std::move(itr->second) );
             stg.erase(itr);
-            (*pconn)->strand().post([pconn, id](){
-              // std::c1out << "smart delete " << id << std::endl;
-            });
+            t.get_io_service().post( t.strand().wrap([pconn, id](){
+            }));
           }
-          // t.get_aspect().template get<_holder_storage_>().erase(id);
-        });
+          else
+          {
+          }
+        })));
       });
     };
     
-    auto holder = std::make_unique<holder_type>( std::move(*d), holder_options, t._handler );
+//#warning возможно holder_options.incoming_handler = opt.incoming_handler
+    holder_options.incoming_handler = t._handler;
+    auto holder = std::make_unique<holder_type>( std::move(*d), holder_options );
     auto id = holder->get_id();
-    holder->start();
-    t.get_aspect().template get<_holder_storage_>().insert( std::make_pair( id, std::move(holder) ) );
+    auto res = t.get_aspect().template get<_holder_storage_>().insert( std::make_pair( id, std::move(holder) ) );
+    if ( res.second )
+    {
+      res.first->second->start();
+    }
+    else
+    {
+      abort();
+    }
+    //holder->start();
+    
   }
 };
 

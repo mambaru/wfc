@@ -4,17 +4,21 @@
 #include <wfc/io/tags.hpp>
 #include <wfc/io/basic/tags.hpp>
 #include <wfc/io/types.hpp>
+#include <wfc/io_service.hpp>
 
 #include <wfc/callback/callback_owner.hpp>
 #include <fas/aop.hpp>
 #include <functional>
+
+#include <mutex>              
+#include <condition_variable>
 
 namespace wfc{ namespace io{ 
   
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class io_base
   : public AspectClass<A>
-  , public iio
+  // , public iio
 {
 public:
   
@@ -36,8 +40,10 @@ public:
   io_base(io_service_type& io_service, const options_type& opt )
     : _io_service(io_service)
     , _options(opt)
+    , _stop_flag(ATOMIC_FLAG_INIT)
   {
     _id = create_id();
+    this->get_aspect().template get< basic::_transfer_handler_ >() = opt.outgoing_handler;
   }
     
   io_id_t get_id() const { return _id;}
@@ -64,31 +70,62 @@ public:
   
   strand_type& strand()
   {
+    if ( auto ptr = this->get_aspect().template get<_strand_>() )
+    {
+      return *(ptr.get());
+    }
+    abort();
+    /*
     if ( nullptr == this->get_aspect().template get<_strand_>() )
       abort();
     return *(this->get_aspect().template get<_strand_>());
+    */
   }
 
   const strand_type& strand() const
   {
+    /*
     if ( nullptr == this->get_aspect().template get<_strand_>() )
       abort();
     return *(this->get_aspect().template get<_strand_>());
+    */
+    if ( auto ptr = this->get_aspect().template get<_strand_>() )
+    {
+      return *(ptr.get());
+    }
+    abort();
+
   }
 
   // Ахтунг!!! owner только внутри strand(), т.к. нифиг не thread safe
   const owner_type& owner() const
   {
+    /*
     if ( nullptr == this->get_aspect().template get<_owner_>() )
       abort();
     return *(this->get_aspect().template get<_owner_>());
+    */
+    if ( auto ptr = this->get_aspect().template get<_owner_>() )
+    {
+      return *(ptr.get());
+    }
+    abort();
+
   }
 
   owner_type& owner()
   {
+    /*
     if ( nullptr == this->get_aspect().template get<_owner_>() )
       abort();
     return *(this->get_aspect().template get<_owner_>());
+    */
+    if ( auto ptr = this->get_aspect().template get<_owner_>() )
+    {
+      return *(ptr.get());
+    }
+    abort();
+
   }
 
   const options_type& options() const
@@ -103,10 +140,12 @@ public:
 
 ///  //////////////////////////////////////////////
 
+/*
   void add_release_handler( release_handler handler)
   {
     _release_handlers.push_back(handler);
   }
+  */
 
 
   template<typename Handler>
@@ -123,14 +162,15 @@ public:
 
 
   
-  ::wfc::io::callback callback( std::function<void(data_ptr)> handler)
+  ::wfc::io::outgoing_handler_t callback( std::function<void(data_ptr)> handler)
   {
-    auto wrp = this->strand().wrap( this->owner().wrap( [handler]( std::shared_ptr<data_ptr> dd ){
+    auto wrp = this->owner().wrap( this->strand().wrap( [handler]( std::shared_ptr<data_ptr> dd ){
       
       handler(std::move(*dd));
-    }, 
+    }), 
     [](){ 
-    }));
+    }
+    );
     
     auto wrp_ptr = std::make_shared< decltype(wrp) >(wrp);
     
@@ -160,15 +200,33 @@ protected:
     t.get_aspect().template gete<_create_>()(t, _options);
   }
 
-  transfer_handler_t transfer_handler() const 
+  
+  outgoing_handler_t outgoing_handler() const 
   {
-    return this->get_aspect().template get< basic::_transfer_handler_ >();
+    const auto& handler = this->get_aspect().template get< basic::_transfer_handler_ >();
+    if (handler == nullptr)
+    {
+      //std::function<void(data_ptr)> tmp = [](data_ptr)->void {};
+      // ахтунг! self::data_type!= ::wfc::io::data_type;
+      return nullptr;
+    }
+    return handler;
   }
+  
+  void outgoing_handler(outgoing_handler_t handler) 
+  {
+    if ( handler == nullptr )
+      return;
+      
+    auto& prev = this->get_aspect().template get< basic::_transfer_handler_ >();
+    prev = handler;
+  }
+  
 
   template<typename T>
   void start(T& t)
   {
-    
+    _stop_flag.clear();
     
     auto& sh = _options.startup_handler;
     
@@ -176,7 +234,8 @@ protected:
     {
       sh(
         _id, 
-        this->transfer_handler(),
+        this->outgoing_handler(),
+        //this->options().outgoing_handler,
         [&t, this]( std::function<void(io_id_t id)> release_fun ) 
         {
           t.dispatch( [this, release_fun]()
@@ -186,17 +245,24 @@ protected:
         }
       );
     }
+    
     // Сначала запускаем startup_handler (иначе в mt данные могут прийти раньше )
     t.get_aspect().template get<_start_>()(t);
   }
   
   template<typename T>
-  void stop(T& t)
+  void self_stop(T& t, std::function<void()> finalize)
   {
-    t.post([&t, this]()
+    if ( !_stop_flag.test_and_set() )
     {
+      
+      t.get_aspect().template gete<_before_stop_>()(t);
+      
       for ( auto& h : this->_release_handlers2)
+      {
         h( this->_id );
+      }
+      
       this->_release_handlers2.clear();
       
       auto& sh = this->_options.shutdown_handler;
@@ -204,18 +270,50 @@ protected:
       {
         sh( this->_id );
       }
-
-      t.get_aspect().template get<_stop_>()(t);
-    });
+        
+      if ( finalize!=nullptr )
+      {
+        finalize();
+      }
+      
+      t.get_aspect().template gete<_after_stop_>()(t);
+    }
   }
+  
+  template<typename T>
+  void stop(T& t, std::function<void()> finalize)
+  {
+    if ( !_stop_flag.test_and_set() )
+    {
+      t.get_aspect().template gete<_before_stop_>()(t);
+
+      if ( finalize!=nullptr )
+      {
+        finalize();
+      }
+
+      t.get_aspect().template gete<_after_stop_>()(t);
+
+    }
+
+    /*
+    _io_service.post( this->strand().wrap([&t, finalize]()
+    {
+      t.self_stop(t, finalize);
+    }));
+    */
+  }
+  
   
 private:
   io_service_type& _io_service;
   options_type _options;
-  std::list<release_handler> _release_handlers;
+  //std::list<release_handler> _release_handlers;
   std::list<std::function<void(io_id_t id)> > _release_handlers2;
   
   io_id_t _id;
+  std::atomic_flag _stop_flag;
+  
 };
 
 }}

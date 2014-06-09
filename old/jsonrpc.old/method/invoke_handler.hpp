@@ -158,7 +158,7 @@ public:
   void clear() {}
 
   template<typename T, typename Itr>
-  void request(T& t, int id, Itr beg, Itr end,  stat_function stat)
+  void request(T& t, int id, Itr, Itr,  stat_function stat)
   {
     t.get_aspect().template get<_method_not_impl_>()(t, id);
     if (stat != nullptr)

@@ -17,7 +17,7 @@ public:
   ~writer();
   writer(descriptor_type&& desc, const options_type& conf);
   void start();
-  void stop();
+  void stop(std::function<void()> finalize);
   void shutdown();
   
   bool status() const;

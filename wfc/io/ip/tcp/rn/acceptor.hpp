@@ -15,9 +15,10 @@ public:
   typedef acceptor_options options_type;
   typedef boost::asio::ip::tcp::acceptor descriptor_type;
   ~acceptor();
-  acceptor(descriptor_type&& desc, const options_type& conf, wfc::io::handler handler = nullptr);
+  acceptor(descriptor_type&& desc, const options_type& conf/*, wfc::io::incoming_handler handler = nullptr*/);
   void start();
-  void stop();
+  void close();
+  void stop(std::function<void()> finalize);
   void shutdown();
 private:
   std::unique_ptr<acceptor_impl> _impl;
