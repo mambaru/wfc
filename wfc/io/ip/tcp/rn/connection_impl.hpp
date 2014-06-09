@@ -12,10 +12,17 @@ public:
   typedef typename super::options_type options_type; 
   typedef typename super::descriptor_type descriptor_type;
 
-  connection_impl(descriptor_type&& desc, const options_type& conf, wfc::io::handler handler = nullptr)
-    : super( std::move(desc), conf, handler)
+  connection_impl(descriptor_type&& desc, const options_type& conf/*, wfc::io::incoming_handler handler = nullptr*/)
+    : super( std::move(desc), conf/*, handler*/)
   {
   }
+
+  /*
+  void stop(std::function<void()> finalize)
+  {
+    super::stop(finalize);
+  }
+  */
 };
   
 }}}}}

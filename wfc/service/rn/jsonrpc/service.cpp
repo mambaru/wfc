@@ -101,20 +101,15 @@ void service::stop()
 {
   for (auto& i: _tcp_servers)
   {
-    std::cout<< "service::stop()..." << std::endl;
     i->stop();
-    std::cout<< "...service::stop()" << std::endl;
     i.reset();
-    std::cout<< "service::stop() ok" << std::endl;
   }
   _tcp_servers.clear();
   
   if (_jsonrpc_for_tcp != nullptr)
   {
-    std::cout<< "_jsonrpc_for_tcp::stop()..." << std::endl;
     _jsonrpc_for_tcp->stop();
     _jsonrpc_for_tcp.reset();
-    std::cout<< "..._jsonrpc_for_tcp::stop()" << std::endl;
   }
   
 }

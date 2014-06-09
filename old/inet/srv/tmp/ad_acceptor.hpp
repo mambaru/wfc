@@ -33,10 +33,15 @@ struct ad_acceptor
     _acceptor = std::make_shared<acceptor_type>( t.get_io_service() );
     
     boost::asio::ip::tcp::resolver resolver( _acceptor->get_io_service() );
-    boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve({
-      t.server_context().host, 
-      t.server_context().port
-    });
+    boost::asio::ip::tcp::endpoint endpoint;
+    if ( t.server_context().host.size() )
+    {
+      endpoint = *resolver.resolve( {t.server_context().host, t.server_context().port} );
+    }
+    else
+    {
+      endpoint = *resolver.resolve( {t.server_context().port} );
+    }
 
     _acceptor->open(endpoint.protocol());
     _acceptor->set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));

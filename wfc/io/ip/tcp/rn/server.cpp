@@ -7,17 +7,12 @@ namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{
 
 server::~server()
 {
-  
-  std::cout << "server::~server()..." << std::endl;
-  if ( _impl!=nullptr )
-    _impl->stop();
-  _impl.reset();
-  std::cout << "...server::~server()" << std::endl;
+  //this->stop();
 }
 
   
-server::server(wfc::io_service& io, const server::options_type& conf, wfc::io::handler handler)
-  : _impl( std::make_unique<server_impl>(io, conf, handler) )
+server::server(wfc::io_service& io, const server::options_type& conf/*, wfc::io::incoming_handler handler*/)
+  : _impl( std::make_unique<server_impl>(io, conf/*, handler*/) )
 {
   
 }
@@ -29,7 +24,11 @@ void server::start()
 
 void server::stop()
 {
-  _impl->stop();
+  if ( _impl != nullptr )
+  {
+    _impl->stop(nullptr);
+    _impl.reset();
+  }
 }
   
 void server::shutdown()

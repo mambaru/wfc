@@ -72,6 +72,11 @@ struct basic_method_list: ::wfc::jsonrpc::method_list<
     ipubsub, 
     &ipubsub::publish
   >,
+  
+  /*
+  dual_method2
+  
+  */
 
   ::wfc::jsonrpc::dual_method3<
     _describe_, 

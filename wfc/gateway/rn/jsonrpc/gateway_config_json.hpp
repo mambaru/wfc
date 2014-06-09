@@ -28,7 +28,7 @@ struct gateway_config_json
           &gateway_config::jsonrpc,
           ::wfc::json::pointer<
             std::shared_ptr<jsonrpc_options>,
-            ::wfc::jsonrpc::options_json::type
+            ::wfc::jsonrpc::options_json
           >
       >, 
       
@@ -52,7 +52,13 @@ struct gateway_config_json
   
   typedef type::target     target;
   typedef type::serializer serializer;
+};
 
+struct gateway_config_array_json
+{
+  typedef ::wfc::json::array< std::vector<gateway_config_json::type > > type;
+  typedef type::target target;
+  typedef type::serializer serializer;
 };
 
 struct gateway_list_config_json
@@ -62,7 +68,7 @@ struct gateway_list_config_json
       gateway_list_config, 
       gateway_list_config::gateway_list_type, 
       &gateway_list_config::gateways, 
-      ::wfc::json::array< std::vector<gateway_config_json > >
+      gateway_config_array_json
   > type;
   
   typedef type::target     target;

@@ -15,8 +15,8 @@ public:
   typedef typename super::options_type options_type; 
   typedef typename super::descriptor_type descriptor_type;
   
-  reader_base(descriptor_type&& desc, const options_type& conf, wfc::io::handler handler = nullptr)
-    : super( std::move(desc), conf, handler )
+  reader_base(descriptor_type&& desc, const options_type& conf/*, wfc::io::incoming_handler handler = nullptr*/)
+    : super( std::move(desc), conf/*, handler */)
   {
   }
 };

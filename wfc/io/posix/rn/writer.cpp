@@ -21,9 +21,9 @@ void writer::start()
   _impl->start();
 }
 
-void writer::stop()
+void writer::stop(std::function<void()> finalize)
 {
-  _impl->stop();
+  _impl->stop(finalize);
 }
 
 bool writer::status() const

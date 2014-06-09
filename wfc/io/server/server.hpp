@@ -37,7 +37,7 @@ struct ad_configure
   
     descriptor_type desc( t.get_io_service() );
   
-    //std::cout << t.options().host << ":" << t.options().port << std::endl;
+    
     boost::asio::ip::tcp::resolver resolver( t.get_io_service() );
     boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve({
       t.options().host, 
@@ -62,7 +62,7 @@ struct ad_configure
         descriptor_type descriptor( *io, boost::asio::ip::tcp::v4(), fd);
         
         //descriptor_type descriptor( t.get_io_service(), boost::asio::ip::tcp::v4(), fd);
-        acceptors.push_back( std::make_unique<acceptor_type>( std::move(descriptor), conf, t._handler) );
+        acceptors.push_back( std::make_unique<acceptor_type>( std::move(descriptor), conf/*, t._handler*/) );
         services.push_back(io);
       }
       else
@@ -131,12 +131,52 @@ struct ad_start
   }
   */
 };
+
+struct _before_stop_;
+struct ad_before_stop
+{
+  std::shared_ptr<wfc::io_service> io_service_ptr;
+
+  template<typename T>
+  void operator()(T& t)
+  {
+    auto& acceptors = t.get_aspect().template get<_acceptors_>();
+    
+    for (auto& a : acceptors)
+    {
+      // сначала закрываем, чтоб реконнект на другой ассептор не прошел 
+      a->close();
+    }
+
+    for (auto& a : acceptors)
+    {
+      // stop - снихронная операция
+      a->stop(nullptr);
+    }
+    auto& services = t.get_aspect().template get<_io_services_>();
+    for (auto& s : services)
+    {
+      s->stop();
+    }
+    
+    auto& threads   = t.get_aspect().template get<_threads_>();
+    for (auto& t : threads)
+    {
+      t->join();
+    }
+    acceptors.clear();
+    threads.clear();
+    services.clear();
+  }
+};
   
 template<typename Acceptor>
 struct aspect: fas::aspect
 <
   //context<>,
   fas::stub< wfc::io::_stop_>,
+  fas::advice<_before_stop_, ad_before_stop>,
+  fas::group< wfc::io::_before_stop_, _before_stop_>,
   // fas::value<_acceptor_count_, size_t>,
   // fas::value<_thread_count_, size_t>,
   fas::type< wfc::io::server::_acceptor_type_, Acceptor>,
@@ -173,9 +213,9 @@ public:
   */
   
   
-  server(wfc::io_service& io, const options_type& conf, wfc::io::handler handler = nullptr)
+  server(wfc::io_service& io, const options_type& conf/*, wfc::io::incoming_handler handler = nullptr*/)
     : super(io, conf)
-    , _handler(handler)
+    , _handler(conf.incoming_handler) // TODO: убрать
   {
     super::create(*this);
     //this->get_aspect().template get<_create_>()(*this);
@@ -195,25 +235,11 @@ public:
   }
   
   
-  void stop()
+  void stop(std::function<void()> finalize)
   {
-    super::stop(*this);
-    
-    auto& services = super::get_aspect().template get<_io_services_>();
-    for (auto& s : services)
-    {
-      s->stop();
-    }
-    services.clear();
-    
-    auto& threads   = super::get_aspect().template get<_threads_>();
-    for (auto& t : threads)
-    {
-      t->join();
-    }
-    threads.clear();
-
-    //this->get_aspect().template get<_stop_>()(*this);
+    super::stop(*this, finalize);
+    super::get_io_service().reset();
+    while ( 0!=super::get_io_service().poll() ) { super::get_io_service().reset();};
   }
   
   void start()
@@ -231,7 +257,7 @@ public:
   */
   
   //wfc::io_service& io_service;
-  wfc::io::handler _handler;
+  wfc::io::incoming_handler_t _handler;
   
 };
   

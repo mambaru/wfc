@@ -9,8 +9,8 @@ client::~client()
 }
 
   
-client::client(wfc::io_service& io, const options_type& conf, wfc::io::handler handler )
-  : _impl( std::make_unique<client_impl>( io, conf, handler) )
+client::client(wfc::io_service& io, const options_type& conf/*, wfc::io::handler handler*/ )
+  : _impl( std::make_unique<client_impl>( io, conf/*, handler*/) )
 {
   
 }
@@ -25,9 +25,9 @@ void client::start()
   _impl->start();
 }
 
-void client::stop()
+void client::stop(std::function<void()> finalize)
 {
-  _impl->stop();
+  _impl->stop(finalize);
 }
   
 void client::shutdown()

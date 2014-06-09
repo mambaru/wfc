@@ -72,7 +72,7 @@ int main()
     result_list.push_back( std::string(d->begin(), d->end() ) );
   });
   */
-  auto handler = wfc::io::simple_handler( [](wfc::io::data_ptr d, wfc::io::callback) 
+  auto handler = wfc::io::simple_handler( [](wfc::io::data_ptr d, wfc::io::outgoing_handler_t) 
   {
     std::cout << "handle " << std::string(d->begin(), d->end() ) << std::endl;
     result_list.push_back( std::string(d->begin(), d->end() ) );
@@ -83,7 +83,8 @@ int main()
     typedef wfc::io::reader::reader< reader_aspect > reader_type;
 
     boost::asio::posix::stream_descriptor sd(*io_service, dd[0]);
-    reader_type reader( std::move(sd), init, handler);
+    init.incoming_handler = handler;
+    reader_type reader( std::move(sd), init );
     
     std::cout << "thread..." << std::endl;
     std::thread th([&reader, &io_service]()

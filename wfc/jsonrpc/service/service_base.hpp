@@ -39,9 +39,9 @@ worker_list _workers;
 struct io_data
 {
   std::shared_ptr<handler_base> method_handler;
-  ::wfc::io::callback writer;
+  ::wfc::io::outgoing_handler_t writer;
   
-  io_data( std::shared_ptr<handler_base> method_handler, ::wfc::io::callback writer)
+  io_data( std::shared_ptr<handler_base> method_handler, ::wfc::io::outgoing_handler_t writer)
     : method_handler(method_handler)
     , writer(writer)
   {}
@@ -92,8 +92,9 @@ public:
 
   // 
   template<typename T>
-  void process_result( T& , incoming_holder holder, ::wfc::io::callback)
+  void process_result( T& , incoming_holder holder, ::wfc::io::outgoing_handler_t)
   {
+    
     int call_id = holder.get_id<int>();
     auto itr = this->_call_io_map.find(call_id);
     if ( itr!=this->_call_io_map.end() )
@@ -116,6 +117,7 @@ public:
     {
       COMMON_LOG_WARNING("jsonrpc::service: jsonrpc id=" << call_id << " not found");
     }
+    
   }
   
   
@@ -150,10 +152,12 @@ public:
     handler_base::request_serializer_t serializer
   )
   {
+    
     this->dispatch([this, io_id, name, result_handler, serializer]()
     {
       if ( auto wrk = this->get_worker(name) )
       {
+        
         auto itr = this->_io_map.find(io_id);
         if (itr!=this->_io_map.end())
         {
@@ -178,7 +182,7 @@ public:
 
   // Для тестирования (и клиента)
   // !!! до запуска
-  void attach_handler(::wfc::io::io_id_t io_id, std::shared_ptr<handler_base> handler, ::wfc::io::callback writer)
+  void attach_handler(::wfc::io::io_id_t io_id, std::shared_ptr<handler_base> handler, ::wfc::io::outgoing_handler_t writer)
   {
     //this->dispatch([this, io_id, writer, handler]()
     {
@@ -206,11 +210,12 @@ public:
   
   
   // Новый коннект
-  void startup_handler(::wfc::io::io_id_t io_id, ::wfc::io::callback writer, ::wfc::io::add_shutdown_handler add_shutdown )
+  void startup_handler(::wfc::io::io_id_t io_id, ::wfc::io::outgoing_handler_t writer, ::wfc::io::add_shutdown_handler_t add_shutdown )
   {
     
     if ( writer == nullptr)
     {
+      
       // Костыль (из конфига прут аккцепторы)
       return;
     }
@@ -271,12 +276,13 @@ public:
 
   //typedef std::function<void(data_ptr, io_id_t, callback )> handler;
   /// Для входящих запросов
-  void operator()( data_ptr d, ::wfc::io::io_id_t id, ::wfc::io::callback callback)
+  void operator()( data_ptr d, ::wfc::io::io_id_t id, ::wfc::io::outgoing_handler_t callback)
   {
+    
     typedef std::chrono::high_resolution_clock clock_t;
     clock_t::time_point now = clock_t::now();
     
-    ::wfc::io::callback tp_callback = [now, callback]( ::wfc::io::data_ptr d)
+    ::wfc::io::outgoing_handler_t tp_callback = [now, callback]( ::wfc::io::data_ptr d)
     {
       callback( std::move(d) );
     };
@@ -339,7 +345,7 @@ public:
   }
 
   template<typename T>
-  void push_advice(T& , incoming_holder holder, std::weak_ptr<handler_base> hb, ::wfc::io::callback callback)
+  void push_advice(T& , incoming_holder holder, std::weak_ptr<handler_base> hb, ::wfc::io::outgoing_handler_t callback)
   {
     if ( holder.has_method() )
     {
@@ -359,6 +365,10 @@ public:
         // Отдаем воркеру
         (*(itr->second.second))->operator()( std::move(holder), hb, callback );
         ++(itr->second.second);
+      }
+      else
+      {
+        COMMON_LOG_WARNING("jsonrpc method not allowed: " << holder.method() )
       }
     }
   } 

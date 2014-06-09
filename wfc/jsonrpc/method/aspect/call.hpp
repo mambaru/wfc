@@ -1,149 +1,17 @@
 #pragma once
 
-#include <wfc/jsonrpc/errors.hpp>
 #include <wfc/jsonrpc/incoming/incoming_holder.hpp>
-#include <wfc/jsonrpc/outgoing/outgoing_error_json.hpp>
 #include <wfc/jsonrpc/outgoing/outgoing_request.hpp>
 #include <wfc/jsonrpc/outgoing/outgoing_request_json.hpp>
 #include <wfc/jsonrpc/outgoing/outgoing_notify.hpp>
 #include <wfc/jsonrpc/outgoing/outgoing_notify_json.hpp>
-#include <wfc/callback/callback_status.hpp>
-#include <wfc/jsonrpc/handler/target.hpp>
+#include <wfc/jsonrpc/handler/aspect/tags.hpp>
 
-#include <fas/type_list.hpp>
+#include <fas/aop/metalist.hpp>
 #include <memory>
 
 namespace wfc{ namespace jsonrpc{
   
-  
-template<typename I>
-struct interface_ 
-{
-  typedef fas::metalist::advice metatype;
-  typedef _interface_ tag;
-  typedef I advice_class;
-};
-
-template<typename I>
-struct provider
-  : fas::value<_provider_, std::weak_ptr<I> >
-{
-};
-
-
-template<typename I, typename P >
-struct dual_interface: 
-  fas::type_list_n<
-    target<I>,
-    provider< P >,
-    interface_<I>,
-    shutdown< mem_fun_shutdown< P, &P::shutdown> >,
-    startup< mem_fun_startup< I, P, &P::startup> >
-  >::type 
-{
-};
-
-
-
-/*
-template<typename T>
-struct provider
-{
-  typedef fas::metalist::advice metatype;
-  typedef _provider_ tag;
-  typedef T advice_class;
-};
-*/
-
-
-#define JSONRPC_METHOD_IMPL(Tg, Method)\
-  virtual void Method( call_params_ptr<Tg>::type req, std::function< void(call_result_ptr<Tg>::type) > callback)\
-  {\
-    if ( callback == nullptr )\
-    {\
-      this->call<Tg>( std::move(req), nullptr );\
-    }\
-    else\
-    {\
-      this->call<Tg>( std::move(req), [callback](call_result_ptr<Tg>::type resp, call_error_ptr<Tg>::type error)\
-      {\
-        if ( error==nullptr){\
-          if ( resp != nullptr) \
-            callback( std::move(resp) );\
-          else\
-            callback( nullptr );\
-        };\
-      });\
-    }\
-  }
-
-#define JSONRPC_METHOD_EMPTY(Tg, Method)\
-  virtual void Method( call_params_ptr<Tg>::type , std::function< void(call_result_ptr<Tg>::type) > )\
-  {\
-  }
-  
-#define JSONRPC_METHOD_IMPL_EX(Tg, Method)\
-  virtual void Method( call_params_ptr<Tg>::type req, std::function< void(call_result_ptr<Tg>::type) > callback, size_t, target_type)\
-  {\
-    if ( callback == nullptr )\
-    {\
-      this->call<Tg>( std::move(req), nullptr );\
-    }\
-    else\
-    {\
-      this->call<Tg>( std::move(req), [callback](call_result_ptr<Tg>::type resp, call_error_ptr<Tg>::type error)\
-      {\
-        if ( error==nullptr){\
-          if ( resp != nullptr) \
-            callback( std::move(resp) );\
-          else\
-            callback( nullptr );\
-        };\
-      });\
-    }\
-  }
-
-// handler - Игнорируеться, т.к. данные будут поступать через Таргет
-// TODO: внедрить Таргет
-#define JSONRPC_METHOD_IMPL2(Tg, Method, Tg2)\
-  virtual void Method( call_params_ptr<Tg>::type req, std::function< void(call_result_ptr<Tg>::type) > callback, size_t, std::function< void(call_params_ptr<Tg2>::type, std::function< void(call_result_ptr<Tg2>::type) >) > )\
-  {\
-    if ( callback == nullptr )\
-    {\
-      this->call<Tg>( std::move(req), nullptr );\
-    }\
-    else\
-    {\
-      this->call<Tg>( std::move(req), [callback](call_result_ptr<Tg>::type resp, call_error_ptr<Tg>::type error)\
-      {\
-        if ( error==nullptr){\
-          if ( resp != nullptr) \
-            callback( std::move(resp) );\
-          else\
-            callback( nullptr );\
-        };\
-      });\
-    }\
-  }
-
-  
-
-#define JSONRPC_METHOD_EMPTY_EX(Tg, Method)\
-  virtual void Method( call_params_ptr<Tg>::type , std::function< void(call_result_ptr<Tg>::type, size_t, target_type) > )\
-  {\
-  }
-
-#define JSONRPC_STARTUP_EMPTY(Tg, Method)\
-  virtual void Method(size_t, target_type) > )\
-  {\
-  }
-
-#define JSONRPC_SHUTDOWN_EMPTY(Tg, Method)\
-  virtual void Method(size_t)\
-  {\
-  }
-
-
 template<typename JReq, typename JResp, size_t ReserveSize = 80 >
 struct call
 {

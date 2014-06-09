@@ -5,7 +5,7 @@
 #include <memory>
 //#include <string>
 //#include <mutex>
-//#include <iostream>
+#include <iostream>
 #include <list>
 
 namespace wfc{
@@ -32,6 +32,7 @@ struct callback_wrapper
     {
       return _handler(std::forward<Args>(args)...);
     }
+    std::cout << "NOT ALIVE!!!" << std::endl;
     return _not_alive(/*std::forward<Args>(args)...*/);
   }
 private:
@@ -58,6 +59,7 @@ struct callback_wrapper2
     {
       return _handler(std::forward<Args>(args)...);
     }
+    std::cout << "NOT ALIVE 2 !!!" << std::endl;
     return decltype( _handler(std::forward<Args>(args)...))();
   }
 private:
@@ -131,6 +133,7 @@ public:
       {
         return f(std::forward<Args>(args)...);
       }
+      std::cout << "NOT ALIVE 3 !!!" << std::endl;
       return R();
     };
   }

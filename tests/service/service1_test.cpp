@@ -8,6 +8,8 @@
 #include <wfc/io/types.hpp>
 #include <boost/asio.hpp>
 #include <wfc/jsonrpc/handler.hpp>
+#include <wfc/jsonrpc/method.hpp>
+
 #include <thread>
 #include <memory>
 #include <algorithm>

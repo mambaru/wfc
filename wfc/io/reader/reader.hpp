@@ -31,8 +31,8 @@ public:
   void operator = (const reader& conf) = delete;
 
   
-  reader(descriptor_type&& desc, const options_type& opt, wfc::io::handler handler = nullptr)
-    : super( std::move(desc), opt, handler)
+  reader(descriptor_type&& desc, const options_type& opt/*, wfc::io::incoming_handler handler = nullptr*/)
+    : super( std::move(desc), opt/*, handler*/)
     // , _handler1( handler )
   {
     super::create(*this);
@@ -43,9 +43,9 @@ public:
     super::start(*this);
   }
   
-  void stop()
+  void stop(std::function<void()> finalize)
   {
-    super::stop(*this);
+    super::stop(*this, finalize);
   }
   
   bool status() const
@@ -78,7 +78,7 @@ public:
     return this->get_aspect().template get< _read_ >()(*this);
   }
 
-  void async_read(wfc::io::callback handler)
+  void async_read(wfc::io::outgoing_handler_t handler)
   {
     this->get_aspect().template get< _async_read_ >()(*this, handler);
   }

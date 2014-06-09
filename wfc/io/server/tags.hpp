@@ -6,9 +6,9 @@ namespace wfc{ namespace io{ namespace server{
 struct _create_;
 struct _configure_;
 struct _reconfigure_;
-struct _start_;  
-struct _stop_;
-
+struct _start_;  // Не нужно
+struct _stop_;   // Не нужно
+struct _before_stop_;
 // fields
 
 // types

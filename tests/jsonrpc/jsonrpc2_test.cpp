@@ -3,6 +3,7 @@
 #include <wfc/io/posix/rn/reader.hpp>
 #include <wfc/jsonrpc/service.hpp>
 #include <wfc/jsonrpc/handler.hpp>
+#include <wfc/jsonrpc/method.hpp>
 #include <wfc/jsonrpc/errors.hpp>
 #include <wfc/jsonrpc/incoming/incoming_json.hpp>
 

@@ -16,7 +16,7 @@ public:
   typedef server_options options_type;
   typedef boost::asio::ip::tcp::socket descriptor_type;
   ~server();
-  server(io_service& io, const options_type& conf, wfc::io::handler handler = nullptr);
+  server(io_service& io, const options_type& conf/*, wfc::io::incoming_handler handler = nullptr*/);
   void start();
   void stop();
   void shutdown();

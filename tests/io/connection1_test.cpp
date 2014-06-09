@@ -76,12 +76,13 @@ int main()
   std::cout << "-3-" << std::endl;
   
   connection_type::options_type conf;
-  
-  connection_type conn( std::move(sock), conf, wfc::io::simple_handler( [](wfc::io::data_ptr d, wfc::io::callback callback) {
+  conf.incoming_handler = wfc::io::simple_handler( [](wfc::io::data_ptr d, wfc::io::outgoing_handler_t callback) {
     std::cout << "------handler-------" << std::endl;
     std::reverse(d->begin(), d->end());
     callback( std::move(d) );
-  }));
+  });
+  
+  connection_type conn( std::move(sock), conf);
   conn.start();
   
    

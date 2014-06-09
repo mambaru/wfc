@@ -20,6 +20,7 @@ class pubsub_gateway
   , public ipubsub
 {
 public:
+  // TODO: rw spinlock
   typedef ::wfc::io::basic_io<> super;
   typedef pubsub_gateway_options options_type;
   typedef ::wfc::jsonrpc::service jsonrpc_service;
@@ -63,6 +64,7 @@ private:
   ::wfc::io::io_id_t _io_id;
   ipubsub_ptr _incoming_target;
   ipubsub_ptr _outgoing_target;
+  std::atomic<int> _method_id_counter;
 };
 
 }}

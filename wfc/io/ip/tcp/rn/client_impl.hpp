@@ -12,8 +12,8 @@ public:
   typedef typename super::options_type options_type; 
   //typedef typename super::descriptor_type descriptor_type;
 
-  client_impl(wfc::io_service& io, const options_type& conf, wfc::io::handler handler = nullptr)
-    : super( io, conf, handler)
+  client_impl(wfc::io_service& io, const options_type& conf/*, wfc::io::handler handler = nullptr*/)
+    : super( io, conf/*, handler*/)
   {
   }
 };

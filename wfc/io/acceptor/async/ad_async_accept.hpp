@@ -24,6 +24,7 @@ struct ad_async_accept
           if ( !t.descriptor().is_open() )
             return;
           
+          
           t.get_aspect().template get< _outgoing_>()(t, std::move(*dd), ec);
         }
       )

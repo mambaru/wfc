@@ -3,17 +3,12 @@
 #include <wfc/io/types.hpp>
 #include <wfc/jsonrpc/incoming/incoming.hpp>
 #include <wfc/jsonrpc/incoming/incoming_json.hpp>
-//#include <wfc/jsonrpc/handler/handler_base.hpp>
 #include <wfc/memory.hpp>
 
 #include <chrono>
 
 namespace wfc{ namespace jsonrpc{
 
-  
-class handler_base;
-
-  
 class incoming_holder
 {
   typedef ::wfc::io::data_type data_type;
@@ -66,18 +61,18 @@ public:
   bool empty() const { return !$();}
   bool $() const{ return _data != nullptr;}
   
-  bool has_method()   const { return $() && _incoming.method.first!=_incoming.method.second;}
-  bool has_result() const   { return $() && _incoming.result.first!=_incoming.result.second;}
-  bool has_error() const    { return $() && _incoming.error.first!=_incoming.error.second;}
-  bool has_id() const       { return $() && _incoming.id.first!=_incoming.id.second;}
-  bool has_params() const   { return $() && _incoming.params.first!=_incoming.params.second;}
+  bool has_method() const { return $() && _incoming.method.first!=_incoming.method.second; }
+  bool has_result() const { return $() && _incoming.result.first!=_incoming.result.second; }
+  bool has_error() const  { return $() && _incoming.error.first!=_incoming.error.second;   }
+  bool has_id() const     { return $() && _incoming.id.first!=_incoming.id.second;         }
+  bool has_params() const { return $() && _incoming.params.first!=_incoming.params.second; }
   
-  bool is_request() const     { return this->has_method() && this->has_id();   }
-  bool is_response() const    { return this->has_result() && this->has_id();   }
-  bool is_notify() const      { return this->has_method() && !this->has_id();  }
-  bool is_error() const       { return this->has_error(); }
+  bool is_request() const       { return this->has_method() && this->has_id();   }
+  bool is_response() const      { return this->has_result() && this->has_id();   }
+  bool is_notify() const        { return this->has_method() && !this->has_id();  }
+  bool is_error() const         { return this->has_error();                      }
   bool is_other_error() const   { return this->has_error() && !this->has_id();   }
-  bool is_request_error() const { return this->has_error() && this->has_id();   }
+  bool is_request_error() const { return this->has_error() && this->has_id();    }
   
   bool is_valid() const 
   {
@@ -86,7 +81,6 @@ public:
       || this->is_notify()
       || this->is_error();
   }
-  
     
   bool method(const char* ch)
   {
@@ -153,6 +147,11 @@ public:
     return std::move(result);
   }
   
+  std::string params_error_message(const json::json_error& e) const
+  {
+    return e.message(_incoming.params.first, _incoming.params.second);
+  }
+  
   template<typename J>
   std::unique_ptr<typename J::target> get_error() const
   {
@@ -163,26 +162,12 @@ public:
     auto result = std::make_unique<typename J::target>();
     typename J::serializer()(*result, _incoming.error.first, _incoming.error.second);
     return std::move(result);
-    /*
-    if ( !this->has_error() )
-      return nullptr;
-    auto result = std::make_unique<typename J::value_type>();
-    typename J::serializer()(*result, _incoming.error.first, _incoming.error.second);
-    return std::move(result);
-    */
   }
-  
-  /*
-  std::weak_ptr<wfc::io::iio> iio;
-  wfc::io::callback handler;
-  */
   
   const incoming& get()  const 
   {
     return _incoming;
   }
-  
-  //std::weak_ptr<handler_base> method_handler1;
   
 private:
   

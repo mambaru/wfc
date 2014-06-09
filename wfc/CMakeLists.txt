@@ -13,6 +13,7 @@ SET(
   pubsub/message_queue.cpp
   pubsub/topic_hub.cpp
   pubsub/pubsub_gateway.cpp
+  jsonrpc/service.cpp
   io/posix/rn/reader.cpp
   io/posix/rn/writer.cpp
   io/ip/tcp/rn/connection.cpp
@@ -35,3 +36,5 @@ add_library(
 target_link_libraries(wfc ${HAVE_boost_system-mt} ${CMAKE_THREAD_LIBS_INIT} )
 
 build_info(wfc wfc)
+
+install(TARGETS wfc DESTINATION ${CMAKE_INSTALL_PREFIX})
