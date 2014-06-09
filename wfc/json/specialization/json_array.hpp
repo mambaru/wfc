@@ -110,7 +110,7 @@ class serializerT< array_r<T, RR> >
 {
 };
 
-template< typename J, int N, typename RR, char L, char R >
+template< typename J, size_t N, typename RR, char L, char R >
 class serializerA< array_r< std::array<J,N>, RR>, L, R >
 {
   typedef array_r<std::array<J,N>, RR> array_type;
