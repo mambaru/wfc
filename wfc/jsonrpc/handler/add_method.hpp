@@ -7,6 +7,10 @@
 
 namespace wfc{ namespace jsonrpc{
 
+/*
+TODO: используем 
+  A: method_impl
+  method< method_impl >
 template< typename Method>
 struct add_method: fas::type_list<
   Method,
@@ -15,7 +19,7 @@ struct add_method: fas::type_list<
   >
 > {};
 
-
+*/
   /*
 template< typename Method>
 struct add_method: fas::type_list_n<

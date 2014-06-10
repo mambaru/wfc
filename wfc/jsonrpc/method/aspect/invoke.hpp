@@ -35,11 +35,11 @@ struct invoke: Handler
     typename T::outgoing_handler_t outgoing_handler
   ) 
   {
-    try
+    try // server_error
     {
       std::unique_ptr<typename request_json::target> req = nullptr;
 
-      try
+      try // invalid_params
       {
         req = holder.template get_params<request_json>();
       }
@@ -49,7 +49,7 @@ struct invoke: Handler
         return;
       }
       
-      if (holder.is_notify())
+      if ( holder.is_notify() )
       {
         Handler::operator()( t, std::move(req), nullptr);
       }
@@ -62,19 +62,6 @@ struct invoke: Handler
             if (err == nullptr )
             {
               TT::template invoke_result<T, response_json>( std::move(*ph), std::move(params), std::move(outgoing_handler) );
-              /*
-              outgoing_result<response_type> result_message;
-              result_message.result = std::move(params);
-              
-              auto id_range = ph->raw_id();
-              result_message.id = std::make_unique<typename T::data_type>( id_range.first, id_range.second );
-
-              auto d = ph->detach();
-              d->clear();
-              typedef outgoing_result_json<response_json> result_json;
-              typename result_json::serializer()(result_message, std::inserter( *d, d->end() ));
-              outgoing_handler( std::move(d) );
-              */
             }
             else
             {
@@ -86,8 +73,6 @@ struct invoke: Handler
     }
     catch(...)
     {
-      //TT::template invoke_error<T. error_json>( std::move(holder), std::make_unique<server_error>  (), std::move(outgoing_handler) );
-      //TT::template invoke_error<T, error_json>( std::move(holder), std::make_unique<invalid_params>(), std::move(outgoing_handler) );
       TT::template invoke_error<T, error_json>( std::move(holder), std::make_unique<server_error>(), std::move(outgoing_handler) );
     }
   }

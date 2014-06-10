@@ -11,11 +11,12 @@
 #include <wfc/jsonrpc/method/aspect/tags.hpp>
 
 #include <fas/aop/metalist.hpp>
+#include <functional>
 #include <memory>
 
 namespace wfc{ namespace jsonrpc{
   
-template<typename JReq, typename JResp, size_t ReserveSize = 80 >
+template<typename JReq, typename JResp/*, size_t ReserveSize = 80 TODO: в аспект!!!*/ >
 struct call
 {
   typedef fas::metalist::advice metatype;
@@ -25,84 +26,75 @@ struct call
   advice_class& get_advice() { return *this;}
   const advice_class& get_advice() const { return *this;}
   
-  typedef JReq  request_json;
-  typedef JResp response_json;
-  typedef typename request_json::target  request_type;
-  typedef typename response_json::target response_type;
-  typedef typename std::unique_ptr<request_type> request_ptr;
-  typedef typename std::unique_ptr<response_type> response_ptr;
+  typedef JReq  params_json;
+  typedef JResp result_json;
+  typedef typename params_json::target params_type;
+  typedef typename result_json::target result_type;
+  typedef typename std::unique_ptr<params_type> params_ptr;
+  typedef typename std::unique_ptr<result_type> result_ptr;
   typedef typename std::unique_ptr<error> error_ptr;
   
   template<typename T, typename TT>
   void operator()(
     T& t, 
     TT& tt, 
-    request_ptr req, 
-    std::function< void (response_ptr, error_ptr)> callback
+    params_ptr req, 
+    std::function< void (result_ptr, error_ptr)>&& callback
   ) const
   {
     if ( callback!=nullptr )
-      this->request_(t, tt, std::move(req), callback);
+      this->request_(t, tt, std::move(req), std::move(callback) );
     else
       this->notify_(t, tt, std::move(req));
   }
+
 private:
+  
+  template<typename T>
+  static inline void result_handler(typename T::holder_type holder, std::function< void (result_ptr, error_ptr)> callback) 
+  {
+    // получатель
+    if ( holder.is_response() )
+    {
+      result_ptr pres = nullptr;
+      // TODO!!! try - catch
+      pres = holder.template get_result<result_json>();
+      callback( std::move(pres), nullptr);
+    }
+    else if ( holder.is_error() )
+    {
+      // TODO!!! try - catch
+      error_ptr perr = holder.template get_error<error_json::type>();
+      callback( nullptr, std::move(perr) );
+    }
+    else
+    {
+      callback( nullptr, nullptr);
+    }
+  }
+  
+
   
   template<typename T, typename TT>
   void request_(
     T& t, 
     TT& tt, 
-    request_ptr req, 
-    std::function< void (response_ptr, error_ptr)> callback
+    params_ptr req, 
+    std::function< void (result_ptr, error_ptr)>&& callback
   ) const
   {
-    auto serializer = [](const char* name, request_ptr req, int id) -> typename T::data_ptr 
-    {
-      outgoing_request<request_type> request;
-      request.params = std::move(req);
-      request.method = name; 
-      request.id = id;
-      auto d = std::make_unique< typename T::data_type>();
-      d->reserve(ReserveSize); 
-      typedef outgoing_request_json<request_json> send_json;
-      typename send_json::serializer()(request, std::inserter( *d, d->end() ));
-      return std::move(d);
-    };
-      
-    std::function<void(incoming_holder holder)> result_handler = nullptr;
+    using namespace std::placeholders;
+
+    std::function<void(incoming_holder holder)> handler = nullptr;
     
     if ( callback!=nullptr )
-    {
-      result_handler = [callback](incoming_holder holder)
-      {
-        // получатель
-        if ( holder.is_response() )
-        {
-          auto pres = holder.get_result<response_json>();
-          /*std::make_unique<response_type>
-          response_json::serializer()( 
-          // TODO!!!
-          */
-          callback( std::move(pres), nullptr);
-        }
-        else if ( holder.is_error() )
-        {
-          // TODO!!!
-          auto perr = holder.get_error<error_json::type>();
-          callback( nullptr, std::move(perr) );
-        }
-        else
-        {
-          callback( nullptr, nullptr);
-        }
-      };
-    }
+      handler = std::bind(result_handler<T>, _1, callback );
       
     t.send_request( 
       tt.name(), 
       std::move(req),
-      std::move(serializer),
-      std::move(result_handler)
+      std::bind( TT::template serialize_request<T, params_json>, _1, _2, _3),
+      std::move(handler)
     );
   }
   
@@ -110,25 +102,16 @@ private:
   void notify_(
     T& t, 
     TT& tt, 
-    request_ptr req
+    params_ptr req
   ) const
   {
-      auto serializer = [](const char* name, request_ptr req) -> typename T::data_ptr 
-      {
-        outgoing_notify<request_type> notify;
-        notify.params = std::move(req);
-        notify.method = name; 
-        auto d = std::make_unique< typename T::data_type>();
-        d->reserve(ReserveSize); 
-        typedef outgoing_notify_json<request_json> send_json;
-        typename send_json::serializer()(notify, std::inserter( *d, d->end() ));
-        return std::move(d);
-      };
-      
+    using namespace std::placeholders;
+    //auto serializer = std::bind(notify_serializer<T>, _1, _2);
+    //auto serializer = std::bind( TT::template serialize_notify<T, params_json>, _1, _2);
     t.send_notify( 
       tt.name(), 
       std::move(req),
-      std::move(serializer)
+      std::bind( TT::template serialize_notify<T, params_json>, _1, _2)
     );
 
   }

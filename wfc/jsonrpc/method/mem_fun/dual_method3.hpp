@@ -20,7 +20,7 @@ template<
     size_t
   )
 >
-struct dual_method3_basic: method_basic< 
+struct basic_dual_method3: basic_method< 
   name<TgName>,
   invoke_mem_fun3< JReq, JResp, Target, mem_ptr>,
   call<JReq, JResp>

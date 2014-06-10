@@ -30,7 +30,7 @@ template<
     std::function< void(std::unique_ptr<Resp2>) >
   )
 >
-struct invoke_method2_basic: method_basic< 
+struct basic_invoke_method2: basic_method< 
   name<TgName>,
   invoke_mem_fun2< JReq, JResp, Req2, Resp2, Target, mem_ptr, Itf, mem_ptr2>
 >

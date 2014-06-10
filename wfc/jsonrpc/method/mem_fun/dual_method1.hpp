@@ -21,7 +21,7 @@ template<
     std::weak_ptr<Target>
   ) 
 >
-struct dual_method1_basic: method_basic< 
+struct basic_dual_method1: basic_method< 
   name<TgName>,
   invoke_mem_fun1< JParams, JResult, Target, Target, mem_ptr>,
   call<JParams, JResult>

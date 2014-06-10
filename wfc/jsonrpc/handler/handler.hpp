@@ -143,7 +143,6 @@ public:
   {
     this->get_aspect().template get<_shutdown_>()(*this, id);
   }
-
   
   target_type target() const
   {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wfc/jsonrpc/handler/handler_base.hpp>
-#include <wfc/jsonrpc/handler/handler_aspect.hpp>
+#include <wfc/jsonrpc/handler/aspect_handler.hpp>
 #include <wfc/jsonrpc/handler/aspect/tags.hpp>
 #include <wfc/jsonrpc/method/aspect/tags.hpp>
 #include <fas/aop.hpp>
@@ -10,10 +10,10 @@ namespace wfc{ namespace jsonrpc{
 
 template<typename... Args >
 class method_list_base
-  : public fas::aspect_class< typename fas::merge_aspect< fas::aspect<Args...>, handler_aspect>::type >
+  : public fas::aspect_class< typename fas::merge_aspect< fas::aspect<Args...>, aspect_handler>::type >
 {
 public:
-  typedef fas::aspect_class< typename fas::merge_aspect< fas::aspect<Args...>, handler_aspect>::type > super;
+  typedef fas::aspect_class< typename fas::merge_aspect< fas::aspect<Args...>, aspect_handler>::type > super;
   typedef typename super::aspect::template advice_cast<_target_>::type target_type;
   typedef typename super::aspect::template advice_cast<_provider_>::type provider_type;
   typedef typename super::aspect::template advice_cast<_interface_>::type interface_type;
@@ -74,13 +74,13 @@ public:
   template<typename Tg>
   struct call_params_ptr
   {
-    typedef typename super::aspect::template advice_cast<Tg>::type::aspect::template advice_cast<_call_>::type::request_ptr type;
+    typedef typename super::aspect::template advice_cast<Tg>::type::aspect::template advice_cast<_call_>::type::params_ptr type;
   };
 
   template<typename Tg>
   struct call_result_ptr
   {
-    typedef typename super::aspect::template advice_cast<Tg>::type::aspect::template advice_cast<_call_>::type::response_ptr type;
+    typedef typename super::aspect::template advice_cast<Tg>::type::aspect::template advice_cast<_call_>::type::result_ptr type;
   };
   
   template<typename Tg>
@@ -90,9 +90,12 @@ public:
   };
 
   template<typename Tg, typename ReqPtr>
-  void call(ReqPtr req, std::function<void(typename call_result_ptr<Tg>::type, typename call_error_ptr<Tg>::type)> callback) const
+  void call(
+    ReqPtr req, 
+    std::function<void(typename call_result_ptr<Tg>::type, typename call_error_ptr<Tg>::type)> callback
+  ) const
   {
-    this->get_aspect().template get<Tg>().call( *this, std::move(req), callback);
+    this->get_aspect().template get<Tg>().call( *this, std::move(req), std::move(callback) );
   }
   
   template<typename Tg, typename ReqPtr>
@@ -136,7 +139,7 @@ public:
     this->get_aspect().template get<Tg>().call( 
       *this, 
       std::move(req),
-      rpc_callback
+      std::move(rpc_callback)
     );
   }
   

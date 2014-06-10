@@ -57,6 +57,7 @@ struct foo_method
 int main(int , char* [])
 {
   
+  /*
   typedef wfc::jsonrpc::call< wfc::json::value<int>, wfc::json::value<int> > foo_call;
   
   context ctx;
@@ -80,5 +81,6 @@ int main(int , char* [])
       std::cout << "emdpty" << std::endl;
     }
   });
+  */
   
 }
