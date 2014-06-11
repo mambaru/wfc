@@ -10,14 +10,8 @@ namespace wfc{ namespace jsonrpc{
   
 template< size_t ReserveSize = 80 >
 struct notify_serializer
+  : fas::type<_notify_serializer_, notify_serializer<ReserveSize> >
 {
-  typedef fas::metalist::advice metatype;
-  typedef _notify_serializer_ tag;
-  typedef notify_serializer<ReserveSize> advice_class;
-
-  advice_class& get_advice() { return *this;}
-  const advice_class& get_advice() const { return *this;}
-
   template<typename T, typename ParamsJson>
   static inline auto 
   serialize(
@@ -38,14 +32,8 @@ struct notify_serializer
 };
 
 struct notify_serializer_proxy
+  : fas::type<_notify_serializer_, notify_serializer_proxy >
 {
-  typedef fas::metalist::advice metatype;
-  typedef _notify_serializer_ tag;
-  typedef notify_serializer_proxy advice_class;
-
-  advice_class& get_advice() { return *this;}
-  const advice_class& get_advice() const { return *this;}
-  
   template<typename T, typename ParamsJson>
   static inline auto 
   serialize(

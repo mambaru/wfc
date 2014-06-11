@@ -7,18 +7,11 @@
 #include <memory>
 
 namespace wfc{ namespace jsonrpc{
-  
 
 template< size_t ReserveSize = 80 >
 struct request_serializer
+  : fas::type<_request_serializer_, request_serializer<ReserveSize> >
 {
-  typedef fas::metalist::advice metatype;
-  typedef _request_serializer_ tag;
-  typedef request_serializer<ReserveSize> advice_class;
-
-  advice_class& get_advice() { return *this;}
-  const advice_class& get_advice() const { return *this;}
-
   template<typename T, typename ParamsJson>
   static inline auto 
   serialize(
@@ -41,14 +34,9 @@ struct request_serializer
 };
 
 struct request_serializer_proxy
+  : fas::type<_request_serializer_, request_serializer_proxy >
 {
-  typedef fas::metalist::advice metatype;
-  typedef _request_serializer_ tag;
-  typedef request_serializer_proxy advice_class;
 
-  advice_class& get_advice() { return *this;}
-  const advice_class& get_advice() const { return *this;}
-  
   template<typename T, typename ParamsJson>
   static inline auto 
   serialize(
@@ -62,7 +50,6 @@ struct request_serializer_proxy
 
   }
 };
-
 
 }} // wfc
 

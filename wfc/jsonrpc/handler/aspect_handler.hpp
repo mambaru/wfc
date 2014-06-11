@@ -6,6 +6,10 @@
 #include <wfc/jsonrpc/handler/aspect/provider.hpp>
 #include <wfc/jsonrpc/method/aspect/request_serializer.hpp>
 #include <wfc/jsonrpc/method/aspect/notify_serializer.hpp>
+#include <wfc/jsonrpc/method/aspect/process_response.hpp>
+#include <wfc/jsonrpc/method/aspect/send_error.hpp>
+#include <wfc/jsonrpc/method/aspect/send_result.hpp>
+
 
 #include <fas/aop.hpp>
 
@@ -18,7 +22,10 @@ struct aspect_handler: fas::aspect<
   fas::stub<_startup_>, 
   fas::stub<_shutdown_>,
   request_serializer<80>,
-  notify_serializer<80>
+  notify_serializer<80>,
+  send_error<80>,
+  send_result<80>,
+  process_response
 >{};
 
 

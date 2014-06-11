@@ -28,36 +28,6 @@ public:
     return this->get_aspect().template get<_name_>()();
   }
   
-  template<typename T, typename J>
-  static void invoke_result(
-    typename T::holder_type holder, 
-    std::unique_ptr<typename J::target> result, 
-    typename T::outgoing_handler_t outgoing_handler
-  )
-  {
-    super::aspect::template advice_cast<_invoke_result_>::type
-         ::template send_result<T, J>( 
-              std::move(holder), 
-              std::move(result),
-              std::move(outgoing_handler) 
-         );
-  }
-
-  template<typename T, typename J>
-  static void invoke_error(
-    typename T::holder_type holder, 
-    std::unique_ptr<typename J::target> err, 
-    typename T::outgoing_handler_t outgoing_handler
-  )
-  {
-    super::aspect::template advice_cast<_invoke_error_>::type
-         ::template send_error<T, J>( 
-              std::move(holder), 
-              std::move(err),
-              std::move(outgoing_handler) 
-         );
-  }
-  
   template<typename T>
   void operator()(
     T& t, 
@@ -102,10 +72,62 @@ public:
   template<typename T, typename ParamsJson>
   static inline auto serialize_notify(
     const char* name, 
-    std::unique_ptr<typename ParamsJson::target> req) -> typename T::data_ptr
+    std::unique_ptr<typename ParamsJson::target> req
+  ) -> typename T::data_ptr
   {
-    return super::aspect::template advice_cast<_notify_serializer_>::type::template serialize<T, ParamsJson>( name, std::move(req) );
+    return super::aspect::template advice_cast<_notify_serializer_>::type
+                ::template serialize<T, ParamsJson>( name, std::move(req) );
   }
+  
+  template<typename T, typename ResultJson, typename ErrorJson>
+  static inline void process_response(
+    typename T::holder_type holder, 
+    std::function< void (
+      std::unique_ptr<typename ResultJson::target>, 
+      std::unique_ptr<typename ErrorJson::target>
+    )> callback
+  ) 
+  {
+    return super::aspect::template advice_cast<_process_response_>::type
+            ::template process<T, ResultJson, ErrorJson>( 
+                std::move(holder), 
+                std::move(callback) 
+              );
+
+  }
+  
+  template<typename T, typename ResultJson>
+  static inline void send_result(
+    typename T::holder_type holder, 
+    std::unique_ptr<typename ResultJson::target> result, 
+    typename T::outgoing_handler_t outgoing_handler
+  )
+  {
+    return super::aspect::template advice_cast<_send_result_>::type
+            ::template send<T, ResultJson>( 
+                std::move(holder), 
+                std::move(result), 
+                std::move(outgoing_handler) 
+            );
+
+  }
+
+  template<typename T, typename ErrorJson>
+  static inline void send_error(
+    typename T::holder_type holder, 
+    std::unique_ptr<typename ErrorJson::target> err, 
+    typename T::outgoing_handler_t outgoing_handler
+  )
+  {
+    return super::aspect::template advice_cast<_send_error_>::type
+            ::template send<T, ErrorJson>( 
+                std::move(holder), 
+                std::move(err), 
+                std::move(outgoing_handler) 
+            );
+
+  }
+
 
 };
 

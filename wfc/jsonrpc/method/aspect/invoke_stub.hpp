@@ -3,7 +3,6 @@
 #include <wfc/jsonrpc/errors.hpp>
 #include <wfc/jsonrpc/handler/aspect/tags.hpp>
 #include <wfc/jsonrpc/method/aspect/tags.hpp>
-#include <wfc/jsonrpc/incoming/incoming_holder.hpp>
 #include <memory>
 
 namespace wfc{ namespace jsonrpc{
@@ -18,9 +17,18 @@ struct invoke_stub
   const advice_class& get_advice() const { return *this;}
   
   template<typename T, typename TT>
-  void operator()(T&, TT&, incoming_holder holder, ::wfc::io::outgoing_handler_t outgoing_handler) const
+  void operator()(
+    T&, 
+    TT&, 
+    typename T::holder_type holder, 
+    typename T::outgoing_handler_t outgoing_handler
+  ) const
   {
-    TT::template invoke_error<T, error_json>( std::move(holder), std::make_unique<method_not_impl>(), std::move(outgoing_handler) );
+    TT::template send_error<T, error_json>( 
+      std::move(holder), 
+      std::make_unique<method_not_impl>(), 
+      std::move(outgoing_handler) 
+    );
   }
 };
 
