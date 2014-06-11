@@ -7,6 +7,7 @@
 #include <wfc/jsonrpc/incoming/incoming_holder.hpp>
 #include <wfc/jsonrpc/outgoing/outgoing_error_json.hpp>
 #include <wfc/jsonrpc/types.hpp>
+#include <wfc/jsonrpc/method/aspect/tags.hpp>
 #include <fas/aop.hpp>
 
 namespace wfc{ namespace jsonrpc{
@@ -65,40 +66,16 @@ public:
   typedef Instanse super;
   typedef typename super::target_type target_type;
   typedef typename super::provider_type provider_type;
+  typedef typename super::context_type context_type;
   
   handler(target_type trg = target_type(), provider_type prv = provider_type() )
   {
     this->get_aspect().template get<_target_>() = trg;
     this->get_aspect().template get<_provider_>() = prv;
-    
-    {
-      auto ptr = this->get_aspect().template get<_provider_>();
-      if (auto p = ptr.lock() )
-      {
-        
-      }
-      else
-      {
-        
-      }
-    }
   }
 
-  virtual std::shared_ptr<handler_base> clone(/*outgoing_request_handler_t request_handler*/) const 
+  virtual std::shared_ptr<handler_base> clone() const 
   {
-    
-    {
-      auto ptr = this->get_aspect().template get<_provider_>();
-      if (auto p = ptr.lock() )
-      {
-        
-      }
-      else
-      {
-        
-      }
-    }
-    
     return std::make_shared<self>(*this);
   }
   
@@ -107,11 +84,18 @@ public:
     return fas::for_each_group<_method_>(*this, f_get_methods() ).result;
   }
 
-  virtual void process(incoming_holder holder, io::outgoing_handler_t callback) 
+  virtual void process(incoming_holder holder, io::outgoing_handler_t outgoing_handler) 
   {
-    if ( !fas::for_each_group<_method_>(*this, f_invoke( holder, callback ) ) )
+    if ( !fas::for_each_group<_method_>(*this, f_invoke( holder, outgoing_handler ) ) )
     {
+      super::aspect::template advice_cast<_send_error_>::type
+           ::template send<self, error_json>( 
+              std::move(holder), 
+              std::make_unique<procedure_not_found>(), 
+              std::move(outgoing_handler) 
+           );
       // В аспект!
+      /*
       typedef outgoing_error_json< error_json::type >::type json_type;
       outgoing_error<error> error_message;
       error_message.error = std::make_unique<error>(procedure_not_found());
@@ -125,6 +109,7 @@ public:
       auto d = std::make_unique< io::data_type>();
       typename json_type::serializer()(error_message, std::inserter( *d, d->end() ));
       callback( std::move(d) );
+      */
     };
   }
   
@@ -152,6 +137,16 @@ public:
   provider_type provider() const
   {
     return this->get_aspect().template get<_provider_>();
+  }
+  
+  context_type& context()
+  {
+    return this->get_aspect().template get<_context_>();
+  }
+
+  const context_type& context() const
+  {
+    return this->get_aspect().template get<_context_>();
   }
 
 private:

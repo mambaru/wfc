@@ -11,38 +11,38 @@ namespace wfc{ namespace jsonrpc{
 
 template<
   typename TgName, 
-  typename JReq, 
-  typename JResp, 
+  typename JParams, 
+  typename JResult, 
   typename Target, 
   void (Target::*mem_ptr)( 
-    std::unique_ptr<typename JReq::target>, 
-    std::function< void(std::unique_ptr<typename JResp::target>) >, 
+    std::unique_ptr<typename JParams::target>, 
+    std::function< void(std::unique_ptr<typename JResult::target>) >, 
     size_t
   )
 >
 struct basic_dual_method3: basic_method< 
   name<TgName>,
-  invoke_mem_fun3< JReq, JResp, Target, mem_ptr>,
-  call<JReq, JResp>
+  invoke_mem_fun3< JParams, JResult, Target, mem_ptr>,
+  call<JParams, JResult>
 >
 {};
 
 
 template<
   typename TgName, 
-  typename JReq, 
-  typename JResp, 
+  typename JParams, 
+  typename JResult, 
   typename Target, 
   void (Target::*mem_ptr)( 
-    std::unique_ptr<typename JReq::target>, 
-    std::function< void(std::unique_ptr<typename JResp::target>) >, 
+    std::unique_ptr<typename JParams::target>, 
+    std::function< void(std::unique_ptr<typename JResult::target>) >, 
     size_t
   )
 >
 struct dual_method3: method< 
   name<TgName>,
-  invoke_mem_fun3< JReq, JResp, Target, mem_ptr>,
-  call<JReq, JResp>
+  invoke_mem_fun3< JParams, JResult, Target, mem_ptr>,
+  call<JParams, JResult>
 >
 {};
 

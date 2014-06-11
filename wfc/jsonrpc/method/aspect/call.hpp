@@ -25,9 +25,11 @@ struct call
   typedef JResult result_json;
   typedef typename params_json::target params_type;
   typedef typename result_json::target result_type;
+  typedef error                        error_type;
+  
   typedef typename std::unique_ptr<params_type> params_ptr;
   typedef typename std::unique_ptr<result_type> result_ptr;
-  typedef typename std::unique_ptr<error> error_ptr;
+  typedef typename std::unique_ptr<error_type>  error_ptr;
   
   template<typename T, typename TT>
   void operator()(

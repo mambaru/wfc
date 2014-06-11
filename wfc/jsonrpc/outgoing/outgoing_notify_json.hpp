@@ -13,17 +13,17 @@ struct outgoing_notify_json
   typedef typename T::target target;
   typedef outgoing_notify<target> request_type;
   typedef typename request_type::version_type version_type;
-  typedef json::pointer<std::unique_ptr<target>, T> params_json;
+  typedef ::wfc::json::pointer<std::unique_ptr<target>, T> params_json;
   
   FAS_NAME(method)
   FAS_NAME(params)
 
-  typedef json::object<
+  typedef ::wfc::json::object<
     request_type,
     typename fas::type_list_n<
       version_member::type,
-      json::member<n_method, request_type, std::string, &request_type::method>,
-      json::member<n_params, request_type, std::unique_ptr<target>, &request_type::params, params_json >
+      ::wfc::json::member<n_method, request_type, std::string, &request_type::method>,
+      ::wfc::json::member<n_params, request_type, std::unique_ptr<target>, &request_type::params, params_json >
     >::type
   > type;
 

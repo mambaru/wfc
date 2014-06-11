@@ -17,6 +17,7 @@ public:
   typedef typename super::aspect::template advice_cast<_target_>::type target_type;
   typedef typename super::aspect::template advice_cast<_provider_>::type provider_type;
   typedef typename super::aspect::template advice_cast<_interface_>::type interface_type;
+  typedef typename super::aspect::template advice_cast<_context_>::type context_type;
 };
 
 template<typename... Args >

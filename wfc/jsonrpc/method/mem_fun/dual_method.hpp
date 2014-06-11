@@ -39,7 +39,7 @@ template<
 >
 struct dual_method: method< 
   name<TgName>,
-  invoke_mem_fun<JParams,JResult,I,mem_ptr>,
+  invoke_mem_fun<JParams, JResult, I, mem_ptr>,
   call<JParams, JResult>
 >
 {};

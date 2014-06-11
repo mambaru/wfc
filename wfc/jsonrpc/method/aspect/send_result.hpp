@@ -11,15 +11,15 @@ template<size_t ReserveSize>
 struct send_result
   : fas::type<_send_result_, send_result<ReserveSize> >
 {
-  template<typename T, typename ResultJson>
+  template<typename T, typename JResult>
   static inline void send(
     typename T::holder_type holder, 
-    std::unique_ptr<typename ResultJson::target> result, 
+    std::unique_ptr<typename JResult::target> result, 
     typename T::outgoing_handler_t outgoing_handler
   )
   {
-    typedef ResultJson result_json;
-    typedef typename ResultJson::target result_type;
+    typedef JResult result_json;
+    typedef typename JResult::target result_type;
     
     outgoing_result<result_type> result_message;
     result_message.result = std::move(result);
@@ -46,15 +46,15 @@ struct send_result
 struct send_result_proxy
   : fas::type<_send_result_, send_result_proxy >
 {
-  template<typename T, typename ResultJson>
+  template<typename T, typename JResult>
   static inline void send(
     typename T::holder_type holder, 
-    std::unique_ptr<typename ResultJson::target> res, 
+    std::unique_ptr<typename JResult::target> res, 
     typename T::outgoing_handler_t outgoing_handler
   )
   {
     return T::aspect::template advice_cast<_send_result_>::type
-            ::template send<T, ResultJson>( 
+            ::template send<T, JResult>( 
                 std::move(holder), 
                 std::move(res), 
                 std::move(outgoing_handler) 

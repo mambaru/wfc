@@ -9,6 +9,7 @@ struct _provider_;
 struct _interface_;
 struct _target_;
 struct _method_; // group
+struct _context_;
 
 
 }} // wfc

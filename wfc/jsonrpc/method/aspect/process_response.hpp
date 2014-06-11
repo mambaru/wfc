@@ -10,12 +10,12 @@ namespace wfc{ namespace jsonrpc{
 struct process_response
   : fas::type<_process_response_, process_response>
 {
-  template<typename T, typename ResultJson, typename ErrorJson>
+  template<typename T, typename JResult, typename JError>
   static inline void process(
     typename T::holder_type holder, 
     std::function< void (
-      std::unique_ptr<typename ResultJson::target>, 
-      std::unique_ptr<typename ErrorJson::target>
+      std::unique_ptr<typename JResult::target>, 
+      std::unique_ptr<typename JError::target>
     )> callback
   ) 
   {
@@ -24,7 +24,7 @@ struct process_response
     {
       try
       {
-        auto pres = holder.template get_result<ResultJson>();
+        auto pres = holder.template get_result<JResult>();
         callback( std::move(pres), nullptr);
       }
       catch(::wfc::json::json_error& e)
@@ -45,7 +45,7 @@ struct process_response
     {
       try
       {
-        auto perr = holder.template get_error<ErrorJson>();
+        auto perr = holder.template get_error<JError>();
         callback( nullptr, std::move(perr) );
       }
       catch(::wfc::json::json_error& e)
@@ -72,17 +72,17 @@ struct process_response
 struct process_response_proxy
   : fas::type<_process_response_, process_response_proxy>
 {
-  template<typename T, typename ResultJson, typename ErrorJson>
+  template<typename T, typename JResult, typename JError>
   static inline void process(
     typename T::holder_type holder, 
     std::function< void (
-      std::unique_ptr<typename ResultJson::target>, 
-      std::unique_ptr<typename ErrorJson::target>
+      std::unique_ptr<typename JResult::target>, 
+      std::unique_ptr<typename JError::target>
     )> callback
   ) 
   {
     return T::aspect::template advice_cast<_process_response_>::type
-            ::template process<T, ResultJson, ErrorJson>( 
+            ::template process<T, JResult, JError>( 
                 std::move(holder), 
                 std::move(callback) 
               );

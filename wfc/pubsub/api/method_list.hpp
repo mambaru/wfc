@@ -36,6 +36,7 @@ JSONRPC_TAG(describe)
 
 struct basic_method_list: ::wfc::jsonrpc::method_list<
 
+  //TODO: dual_interface
   ::wfc::jsonrpc::target<ipubsub>,
   ::wfc::jsonrpc::interface_<ipubsub>,
   ::wfc::jsonrpc::provider< ipubsub >,
@@ -119,10 +120,63 @@ struct method_list: basic_method_list
 {
   typedef basic_method_list super;
   
-  JSONRPC_SHUTDOWN_EMPTY(_describe_, describe)
-  JSONRPC_METHOD_IMPL2(_subscribe_, subscribe, _publish_)
+  virtual void describe(size_t)
+  {
+  }
+
+  // JSONRPC_METHOD_IMPL2(_subscribe_, subscribe, _publish_)
+  
+  
+  /*virtual void subscribe( 
+    request_subscribe_ptr req, 
+    std::function< void(call_result_ptr<Tg>::type) > callback, size_t, std::function< void(call_params_ptr<Tg2>::type, std::function< void(call_result_ptr<Tg2>::type) >) > )\
+    */
+    
+  virtual void subscribe(request_subscribe_ptr req, subscribe_callback callback, size_t, publish_handler )
+  {
+    /*if ( callback == nullptr )
+    {
+      this->call<_subscribe_>( std::move(req), nullptr );
+    }
+    else*/
+    {
+      this->call<_subscribe_>( std::move(req), callback, nullptr /*TODO: BAD GATEWAY*/ );
+      
+      /*this->call<_subscribe_>( std::move(req), [callback](response_subscribe_ptr resp, wfc::error_ptr error)
+      {
+        if ( error==nullptr){
+          if ( resp != nullptr) 
+            callback( std::move(resp) );
+          else
+            callback( nullptr );
+        };
+      });
+      */
+    }
+  }
+  /*
   JSONRPC_METHOD_IMPL(_publish_, publish)
   JSONRPC_METHOD_IMPL(_mpublish_, publish)
+  */
+  
+  virtual void publish(request_publish_ptr req, publish_callback callback)
+  {
+    /*if ( callback == nullptr )
+    {
+      this->call<_publish_>( std::move(req), nullptr );
+    }
+    else*/
+    {
+      this->call<_publish_>( std::move(req), callback, nullptr /*TODO: BAD GATEWAY*/);
+    }
+  }
+
+
+  virtual void publish(request_multi_publish_ptr req, multi_publish_callback callback)
+  {
+    this->call<_mpublish_>( std::move(req), callback, nullptr /*TODO: BAD GATEWAY*/);
+  }
+
   
   
   virtual void describe(request_describe_ptr req, describe_callback callback, size_t )

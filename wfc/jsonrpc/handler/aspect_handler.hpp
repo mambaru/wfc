@@ -4,6 +4,7 @@
 #include <wfc/jsonrpc/handler/aspect/target.hpp>
 #include <wfc/jsonrpc/handler/aspect/interface_.hpp>
 #include <wfc/jsonrpc/handler/aspect/provider.hpp>
+#include <wfc/jsonrpc/handler/aspect/context.hpp>
 #include <wfc/jsonrpc/method/aspect/request_serializer.hpp>
 #include <wfc/jsonrpc/method/aspect/notify_serializer.hpp>
 #include <wfc/jsonrpc/method/aspect/process_response.hpp>
@@ -25,7 +26,8 @@ struct aspect_handler: fas::aspect<
   notify_serializer<80>,
   send_error<80>,
   send_result<80>,
-  process_response
+  process_response,
+  context<fas::empty_type>
 >{};
 
 

@@ -19,11 +19,9 @@ namespace wfc{ namespace jsonrpc{
   
 struct aspect_method
   : fas::aspect< 
-      // request_serializer<80u>,
       request_serializer_proxy,
       notify_serializer_proxy,
       process_response_proxy,
-      //fas::advice<_request_serializer_, ad_request_serializer>,
       send_error_proxy,
       send_result_proxy,
       invoke_stub
