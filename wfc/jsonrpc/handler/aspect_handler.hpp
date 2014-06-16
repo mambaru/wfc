@@ -11,6 +11,7 @@
 #include <wfc/jsonrpc/handler/aspect/ad_response_handler.hpp>
 #include <wfc/jsonrpc/handler/aspect/ad_send_request.hpp>
 #include <wfc/jsonrpc/handler/aspect/ad_send_notify.hpp>
+#include <wfc/jsonrpc/handler/aspect/ad_invoke.hpp>
 #include <wfc/jsonrpc/handler/ihandler.hpp>
 
 #include <wfc/jsonrpc/method/aspect/request_serializer.hpp>
@@ -27,6 +28,7 @@ struct aspect_handler: fas::aspect<
   target<fas::empty_type>, 
   interface_<fas::empty_type>,
   provider<fas::empty_type>, 
+  context<fas::empty_type>,
   fas::stub<_startup_>, 
   fas::stub<_shutdown_>,
   request_serializer<80>,
@@ -34,11 +36,11 @@ struct aspect_handler: fas::aspect<
   send_error<80>,
   send_result<80>,
   process_response,
-  context<fas::empty_type>,
   fas::advice<_response_handler_, ad_response_handler>,
   fas::type<_ihandler_, ihandler>,
   fas::advice<_send_request_, ad_send_request>,
-  fas::advice<_send_notify_, ad_send_notify>
+  fas::advice<_send_notify_, ad_send_notify>,
+  fas::advice<_invoke_, ad_invoke>
 >{};
 
 

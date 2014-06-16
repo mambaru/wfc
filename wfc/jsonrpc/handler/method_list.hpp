@@ -13,7 +13,6 @@ public:
   typedef basic_method_list<Args...> super;
   typedef typename basic_method_list<Args...>::interface_type interface_type;
   typedef typename basic_method_list<Args...>::handler_interface handler_interface;
-  
 };
 
 

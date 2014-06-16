@@ -15,6 +15,7 @@ struct _response_handler_;
 struct _ihandler_;
 struct _send_request_;
 struct _send_notify_;
+struct _invoke_;
 
 }} // wfc
 

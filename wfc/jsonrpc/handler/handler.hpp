@@ -12,38 +12,6 @@
 
 namespace wfc{ namespace jsonrpc{
 
-struct f_invoke
-{
-  incoming_holder& holder;
-  ::wfc::io::outgoing_handler_t& callback;
-  bool founded;
-  
-  f_invoke(incoming_holder& holder, ::wfc::io::outgoing_handler_t& callback)
-    : holder( holder )
-    , callback(callback)
-    , founded(false)
-  {
-  }
-  
-  operator bool () const
-  {
-    return founded;
-  }
-  
-  template<typename T, typename Tg>
-  void operator()(T& t, fas::tag<Tg> )
-  {
-    if ( !founded && holder )
-    {
-      if ( holder.method_equal_to( t.get_aspect().template get<Tg>().name() ) )
-      {
-        t.get_aspect().template get<Tg>()(t, std::move(holder), callback );
-        founded = true;
-      }
-    }
-  }
-};
-
 struct f_get_methods
 {
   std::vector<std::string> result;
@@ -69,6 +37,10 @@ public:
   typedef typename super::provider_type provider_type;
   typedef typename super::context_type context_type;
   
+  typedef typename super::holder_type holder_type;
+  typedef typename super::io_id_t io_id_t;
+  typedef typename super::outgoing_handler_t outgoing_handler_t;
+  
   handler(target_type trg = target_type(), provider_type prv = provider_type() )
   {
     this->get_aspect().template get<_target_>() = trg;
@@ -82,36 +54,29 @@ public:
   
   virtual std::vector<std::string> get_methods() const
   {
+    // TODO: в аспект
     return fas::for_each_group<_method_>(*this, f_get_methods() ).result;
   }
 
-  virtual void invoke(incoming_holder holder, io::outgoing_handler_t outgoing_handler) 
+  virtual void invoke(holder_type holder, outgoing_handler_t outgoing_handler) 
   {
-    if ( !fas::for_each_group<_method_>(*this, f_invoke( holder, outgoing_handler ) ) )
-    {
-      super::aspect::template advice_cast<_send_error_>::type
-           ::template send<self, error_json>( 
-              std::move(holder), 
-              std::make_unique<procedure_not_found>(), 
-              std::move(outgoing_handler) 
-           );
-    };
+    super::get_aspect().template get<_invoke_>()(*this, std::move(holder), std::move(outgoing_handler) );
   }
   
   io_id_t get_io_id() const
   {
-    return _id;
+    return _io_id;
   }
   
-  virtual void start( io_id_t id ) 
+  virtual void start( io_id_t io_id ) 
   {
-    _id = id;
-    this->get_aspect().template get<_startup_>()(*this, id);
+    _io_id = io_id;
+    this->get_aspect().template get<_startup_>()(*this, io_id);
   }
   
-  virtual void stop( io_id_t id)
+  virtual void stop( io_id_t io_id)
   {
-    this->get_aspect().template get<_shutdown_>()(*this, id);
+    this->get_aspect().template get<_shutdown_>()(*this, io_id);
   }
   
   target_type target() const
@@ -136,10 +101,9 @@ public:
 
 private:
   
-  io::io_id_t _id;
+  io_id_t _io_id;
   
 };
 
 }} // wfc
-
 

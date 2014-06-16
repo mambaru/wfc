@@ -36,7 +36,10 @@ struct service_basic_aspect: fas::aspect<
   fas::advice<_callback_error_, ad_callback_error>,
   fas::advice<_error_handler_,  ad_error_handler>,
   fas::advice<_method_handler_, ad_method_handler>,
-  fas::advice<_result_handler_, ad_result_handler>
+  fas::advice<_result_handler_, ad_result_handler>,
+  fas::advice<_handler_start_, ad_handler_start>,
+  fas::advice<_create_handler_,ad_create_handler>,
+  fas::advice<_add_shutdown_,ad_add_shutdown>
 >{};
 
 struct service_aspect: fas::aspect<

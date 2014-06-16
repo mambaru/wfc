@@ -14,13 +14,16 @@
 namespace wfc{ namespace jsonrpc{
 
 
-template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
+template<
+  typename A = fas::aspect<>, 
+  template<typename> class AspectClass = fas::aspect_class 
+>
 class service_base
   : public io::basic_io<A, AspectClass>
   , public std::enable_shared_from_this< service_base<A, AspectClass> >
 {
 public:
-  typedef ihandler handler_interface; // В аспект
+  typedef ihandler handler_interface; // TODO: В io_registry
   typedef service_base<A, AspectClass> self;
   typedef io::basic_io<A, AspectClass> super;
   typedef typename super::options_type options_type;
@@ -49,8 +52,11 @@ public:
     this->stop();
   }
   
-  service_base(io_service_type& io_service, const options_type& opt, const handler_interface& handler )
-    : super( io_service, opt)
+  service_base(
+    io_service_type& io_service, 
+    const options_type& opt, 
+    const handler_interface& handler 
+  ) : super( io_service, opt)
     , _worker_manager( io_service, opt)
   {
     super::create(*this);
@@ -72,7 +78,12 @@ public:
   {
     return this->_io_reg;
   }
-  
+
+  io_registry& registry()
+  {
+    return this->_io_reg;
+  }
+
   void send_notify(
     io_id_t io_id,
     const char* name,
@@ -83,7 +94,7 @@ public:
     {
       if ( auto wrk = this->get_worker(name).lock() )
       {
-        auto writer = this->_io_reg.get_outgoing_handler( io_id );
+        auto writer = this->registry().get_outgoing_handler( io_id );
         wrk->dispatch([writer, name, serializer](){
           auto d = serializer(name);
           writer( std::move(d) );
@@ -103,7 +114,7 @@ public:
     {
       if ( auto wrk = this->get_worker(name).lock() )
       {
-        auto requester = this->_io_reg.add_result_handler( io_id, result_handler );
+        auto requester = this->registry().add_result_handler( io_id, result_handler );
         
         wrk->post([requester, name,  serializer]()
         {
@@ -116,42 +127,13 @@ public:
   
   
   // Новый коннект
-  void startup_handler( io_id_t io_id, outgoing_handler_t outgoing_handler, ::wfc::io::add_shutdown_handler_t add_shutdown /*TODO: в typedef*/ )
+  void create_handler( io_id_t io_id, outgoing_handler_t outgoing_handler, ::wfc::io::add_shutdown_handler_t add_shutdown /*TODO: в typedef*/ )
   {
-    if ( outgoing_handler == nullptr)
+    if ( outgoing_handler != nullptr)
     {
-      return;
+      super::get_aspect().template get<_create_handler_>()(*this, io_id, std::move(outgoing_handler) );
+      super::get_aspect().template get<_add_shutdown_>()(*this, std::move(add_shutdown) );
     }
-    
-    this->post([this, io_id, outgoing_handler]()
-    {
-      // TODO: в аспект
-      
-      auto handler = _handler_prototype->clone();
-     
-      handler->send_request = [io_id, this](const char* name, result_handler_t result_hander, request_serializer_t serializer)
-      {
-        this->send_request( io_id, name, result_hander, serializer);
-      };
-        
-      handler->send_notify = [io_id, this](const char* name, notify_serializer_t serializer)
-      {
-        this->send_notify( io_id, name, serializer);
-      };
-        
-      this->_io_reg.set_io(io_id, handler, outgoing_handler);
-      
-      handler->start(io_id);
-    });
-    
-    add_shutdown( this->strand().wrap( [this](io_id_t io_id)
-    {
-      // TODO: Сейчас dispatch, сделать post, иначе может выполниться раньше поста выше
-      if ( auto handler = this->_io_reg.erase_io(io_id) )
-      {
-        handler->stop(io_id);
-      }
-    }));
  }
   
 
@@ -198,13 +180,20 @@ public:
   
   std::shared_ptr<handler_interface> clone_prototype() const
   {
-    return _handler_prototype->clone();
+    if ( _handler_prototype != nullptr )
+    {
+      return _handler_prototype->clone();
+    }
+    else
+    {
+      return nullptr;
+    }
   }
 
 private:
   std::shared_ptr<handler_interface> _handler_prototype;
-  worker_manager _worker_manager;
-  io_registry _io_reg;
+  worker_manager _worker_manager; // TODO: в аспект
+  io_registry _io_reg; // TODO: в аспект
 };
 
 }} // wfc

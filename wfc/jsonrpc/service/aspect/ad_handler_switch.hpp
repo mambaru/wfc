@@ -7,6 +7,7 @@
 
 namespace wfc{ namespace jsonrpc{
   
+// TODO: rename holder_switch
 struct ad_handler_switch
 {
   template<typename T>

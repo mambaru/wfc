@@ -10,3 +10,6 @@
 #include <wfc/jsonrpc/service/aspect/ad_method_handler.hpp>
 #include <wfc/jsonrpc/service/aspect/ad_result_handler.hpp>
 #include <wfc/jsonrpc/service/aspect/ad_verify.hpp>
+#include <wfc/jsonrpc/service/aspect/ad_handler_start.hpp>
+#include <wfc/jsonrpc/service/aspect/ad_create_handler.hpp>
+#include <wfc/jsonrpc/service/aspect/ad_add_shutdown.hpp>

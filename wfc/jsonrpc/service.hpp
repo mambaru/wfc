@@ -19,7 +19,7 @@ public:
   
   service( io_service& ios, const options_type& opt, const ihandler& jsonrpc_handler);
   
-  void startup_handler( io_id_t io_id,  outgoing_handler_t writer,  add_shutdown_handler_t add_shutdown );
+  void create_handler( io_id_t io_id,  outgoing_handler_t writer,  add_shutdown_handler_t add_shutdown );
 
   void operator()(  data_ptr d,  io_id_t id,  outgoing_handler_t callback);
 

@@ -13,6 +13,9 @@ struct _result_handler_;
 struct _handler_switch_;
 struct _verify_;
 struct _worker_type_;
+struct _handler_start_;
+struct _create_handler_;
+struct _add_shutdown_;
  
 }} // wfc
 

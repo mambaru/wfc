@@ -7,8 +7,7 @@
 
 namespace wfc{ namespace jsonrpc{
   
-  
-struct ihandler_types
+struct ihandler_base
 {
   typedef incoming_holder holder_type;
   typedef holder_type::data_type data_type;
@@ -23,14 +22,14 @@ struct ihandler_types
 };
 
 
-template<typename T = ihandler_types >
+template<typename T = ihandler_base >
 struct ihandler_t: T
 {
 };
   
-struct ihandler: ihandler_t<ihandler_types>
+struct ihandler: ihandler_t<ihandler_base>
 {
-  typedef ihandler_t<ihandler_types> super;
+  typedef ihandler_t<ihandler_base> super;
   typedef super::outgoing_handler_t outgoing_handler_t;
   typedef super::holder_type holder_type;
   typedef super::io_id_t io_id_t;

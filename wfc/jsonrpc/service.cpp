@@ -9,9 +9,9 @@ service::service( io_service& ios, const options_type& opt, const handler_interf
 {
 }
 
-void service::startup_handler( io_id_t io_id,  outgoing_handler_t writer, add_shutdown_handler_t add_shutdown )
+void service::create_handler( io_id_t io_id,  outgoing_handler_t writer, add_shutdown_handler_t add_shutdown )
 {
-  _impl->startup_handler(io_id, writer, add_shutdown);
+  _impl->create_handler(io_id, writer, add_shutdown);
 }
 
 void service::operator()( data_ptr d,  io_id_t io_id,  outgoing_handler_t outgoing_handler)

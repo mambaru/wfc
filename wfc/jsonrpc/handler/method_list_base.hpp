@@ -17,11 +17,16 @@ public:
   typedef method_list_base<A, AspectClass> self;
   typedef AspectClass<A> super;
   
-  typedef typename super::aspect::template advice_cast<_ihandler_>::type  handler_interface;
-  typedef typename super::aspect::template advice_cast<_target_>::type    target_type;
-  typedef typename super::aspect::template advice_cast<_provider_>::type  provider_type;
-  typedef typename super::aspect::template advice_cast<_interface_>::type interface_type;
-  typedef typename super::aspect::template advice_cast<_context_>::type   context_type;
+  typedef typename super::aspect::template advice_cast<_ihandler_>
+                        ::type  handler_interface;
+  typedef typename super::aspect::template advice_cast<_target_>
+                        ::type  target_type;
+  typedef typename super::aspect::template advice_cast<_provider_>
+                        ::type  provider_type;
+  typedef typename super::aspect::template advice_cast<_interface_>
+                        ::type  interface_type;
+  typedef typename super::aspect::template advice_cast<_context_>
+                        ::type  context_type;
   
   typedef typename handler_interface::data_type data_type;
   typedef typename handler_interface::data_ptr  data_ptr;
