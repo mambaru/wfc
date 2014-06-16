@@ -18,8 +18,9 @@ public:
 
   typedef typename super::options_type options_type;
   typedef typename super::io_service_type io_service_type;
+  typedef typename super::handler_interface handler_interface;
 
-  basic_service(io_service_type& io_service, const options_type& opt, const handler_base& handler)
+  basic_service(io_service_type& io_service, const options_type& opt, const handler_interface& handler)
     : super( io_service, opt, handler)
   {
   }

@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <wfc/jsonrpc/handler/handler_base.hpp>
+#include <wfc/jsonrpc/handler/ihandler.hpp>
 #include <wfc/jsonrpc/handler/aspect/tags.hpp>
 #include <wfc/jsonrpc/errors.hpp>
 #include <wfc/jsonrpc/incoming/incoming_holder.hpp>
@@ -56,14 +56,15 @@ struct f_get_methods
 };
 
 
-template<typename Instanse>
+template<typename MethodList>
 class handler
-  : public Instanse
-  , public std::enable_shared_from_this< handler<Instanse> >
+  : public MethodList
+  , public std::enable_shared_from_this< handler<MethodList> >
 {
 public:
-  typedef handler<Instanse> self;
-  typedef Instanse super;
+  typedef handler<MethodList> self;
+  typedef MethodList super;
+  typedef typename super::handler_interface handler_interface;
   typedef typename super::target_type target_type;
   typedef typename super::provider_type provider_type;
   typedef typename super::context_type context_type;
@@ -74,7 +75,7 @@ public:
     this->get_aspect().template get<_provider_>() = prv;
   }
 
-  virtual std::shared_ptr<handler_base> clone() const 
+  virtual std::shared_ptr<handler_interface> clone() const 
   {
     return std::make_shared<self>(*this);
   }
@@ -84,7 +85,7 @@ public:
     return fas::for_each_group<_method_>(*this, f_get_methods() ).result;
   }
 
-  virtual void process(incoming_holder holder, io::outgoing_handler_t outgoing_handler) 
+  virtual void invoke(incoming_holder holder, io::outgoing_handler_t outgoing_handler) 
   {
     if ( !fas::for_each_group<_method_>(*this, f_invoke( holder, outgoing_handler ) ) )
     {
@@ -94,22 +95,6 @@ public:
               std::make_unique<procedure_not_found>(), 
               std::move(outgoing_handler) 
            );
-      // В аспект!
-      /*
-      typedef outgoing_error_json< error_json::type >::type json_type;
-      outgoing_error<error> error_message;
-      error_message.error = std::make_unique<error>(procedure_not_found());
-
-            // error_message.id = std::move( holder.raw_id() );
-
-      auto id_range = holder.raw_id();
-      error_message.id = std::make_unique<typename super::data_type>( id_range.first, id_range.second );
-      
-              
-      auto d = std::make_unique< io::data_type>();
-      typename json_type::serializer()(error_message, std::inserter( *d, d->end() ));
-      callback( std::move(d) );
-      */
     };
   }
   

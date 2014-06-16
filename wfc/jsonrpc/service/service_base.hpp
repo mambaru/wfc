@@ -20,12 +20,19 @@ class service_base
   , public std::enable_shared_from_this< service_base<A, AspectClass> >
 {
 public:
+  typedef ihandler handler_interface; // В аспект
   typedef service_base<A, AspectClass> self;
   typedef io::basic_io<A, AspectClass> super;
   typedef typename super::options_type options_type;
   typedef typename super::io_service_type io_service_type;
   typedef typename super::data_ptr data_ptr;
   typedef typename super::aspect::template advice_cast<_worker_type_>::type worker_type;
+  
+  typedef handler_interface::io_id_t io_id_t;
+  typedef handler_interface::outgoing_handler_t outgoing_handler_t;
+  typedef handler_interface::result_handler_t result_handler_t;
+  typedef handler_interface::notify_serializer_t notify_serializer_t;
+  typedef handler_interface::request_serializer_t request_serializer_t;
 
   /// ////////////////////////////
   
@@ -42,7 +49,7 @@ public:
     this->stop();
   }
   
-  service_base(io_service_type& io_service, const options_type& opt, const handler_base& handler )
+  service_base(io_service_type& io_service, const options_type& opt, const handler_interface& handler )
     : super( io_service, opt)
     , _worker_manager( io_service, opt)
   {
@@ -67,9 +74,9 @@ public:
   }
   
   void send_notify(
-    ::wfc::io::io_id_t io_id,
+    io_id_t io_id,
     const char* name,
-    handler_base::notify_serializer_t serializer
+    notify_serializer_t serializer
   )
   {
     this->dispatch([this, io_id, name, serializer]()
@@ -86,10 +93,10 @@ public:
   };
   
   void send_request(
-    ::wfc::io::io_id_t io_id,
+    io_id_t io_id,
     const char* name,
-    handler_base::result_handler_t result_handler,
-    handler_base::request_serializer_t serializer
+    result_handler_t result_handler,
+    request_serializer_t serializer
   )
   {
     this->dispatch([this, io_id, name, result_handler, serializer]()
@@ -109,7 +116,7 @@ public:
   
   
   // Новый коннект
-  void startup_handler( io::io_id_t io_id, io::outgoing_handler_t outgoing_handler, io::add_shutdown_handler_t add_shutdown )
+  void startup_handler( io_id_t io_id, outgoing_handler_t outgoing_handler, ::wfc::io::add_shutdown_handler_t add_shutdown /*TODO: в typedef*/ )
   {
     if ( outgoing_handler == nullptr)
     {
@@ -118,15 +125,16 @@ public:
     
     this->post([this, io_id, outgoing_handler]()
     {
+      // TODO: в аспект
       
       auto handler = _handler_prototype->clone();
      
-      handler->send_request = [io_id, this](const char* name, handler_base::result_handler_t result_hander, handler_base::request_serializer_t serializer)
+      handler->send_request = [io_id, this](const char* name, result_handler_t result_hander, request_serializer_t serializer)
       {
         this->send_request( io_id, name, result_hander, serializer);
       };
         
-      handler->send_notify = [io_id, this](const char* name, handler_base::notify_serializer_t serializer)
+      handler->send_notify = [io_id, this](const char* name, notify_serializer_t serializer)
       {
         this->send_notify( io_id, name, serializer);
       };
@@ -136,7 +144,7 @@ public:
       handler->start(io_id);
     });
     
-    add_shutdown( this->strand().wrap( [this](::wfc::io::io_id_t io_id)
+    add_shutdown( this->strand().wrap( [this](io_id_t io_id)
     {
       // TODO: Сейчас dispatch, сделать post, иначе может выполниться раньше поста выше
       if ( auto handler = this->_io_reg.erase_io(io_id) )
@@ -148,7 +156,7 @@ public:
   
 
   /// Для входящих запросов
-  void operator()( data_ptr d, io::io_id_t io_id, ::wfc::io::outgoing_handler_t outgoing_handler)
+  void operator()( data_ptr d, io_id_t io_id, outgoing_handler_t outgoing_handler)
   {
     this->get_aspect().template get<_input_>()( *this, std::move(d), io_id, std::move(outgoing_handler) );
   }
@@ -183,18 +191,18 @@ public:
     _worker_manager.stop();
   }
   
-  std::weak_ptr<handler_base> get_prototype() const
+  std::weak_ptr<handler_interface> get_prototype() const
   {
     return _handler_prototype;
   }
   
-  std::shared_ptr<handler_base> clone_prototype() const
+  std::shared_ptr<handler_interface> clone_prototype() const
   {
     return _handler_prototype->clone();
   }
 
 private:
-  std::shared_ptr<handler_base> _handler_prototype;
+  std::shared_ptr<handler_interface> _handler_prototype;
   worker_manager _worker_manager;
   io_registry _io_reg;
 };

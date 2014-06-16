@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wfc/jsonrpc/options.hpp>
-#include <wfc/jsonrpc/handler/handler_base.hpp>
+#include <wfc/jsonrpc/handler/ihandler.hpp>
 #include <wfc/jsonrpc/types.hpp>
 #include <wfc/io/types.hpp>
 #include <vector>
@@ -15,8 +15,9 @@ class service
 {
 public:
   typedef options options_type;
+  typedef ihandler handler_interface;
   
-  service( io_service& ios, const options_type& opt, const handler_base& jsonrpc_handler);
+  service( io_service& ios, const options_type& opt, const ihandler& jsonrpc_handler);
   
   void startup_handler( io_id_t io_id,  outgoing_handler_t writer,  add_shutdown_handler_t add_shutdown );
 

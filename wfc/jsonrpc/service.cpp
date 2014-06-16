@@ -4,7 +4,7 @@
 
 namespace wfc{ namespace jsonrpc{
 
-service::service( io_service& ios, const options_type& opt, const handler_base& handler)
+service::service( io_service& ios, const options_type& opt, const handler_interface& handler)
   : _impl( std::make_shared<service_impl>(ios, opt, handler) )
 {
 }

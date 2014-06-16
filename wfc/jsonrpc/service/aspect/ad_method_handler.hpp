@@ -12,7 +12,7 @@ struct ad_method_handler
   template<typename T>
   void operator()( T& t, incoming_holder holder, io::io_id_t io_id, ::wfc::io::outgoing_handler_t outgoing_handler)
   {
-    std::weak_ptr<handler_base> jsonrpc_handler;
+    std::weak_ptr<typename T::handler_interface> jsonrpc_handler;
     
     jsonrpc_handler = t.registry().get_jsonrpc_handler(io_id);
     
@@ -29,7 +29,7 @@ struct ad_method_handler
         {
           if ( auto h = jsonrpc_handler.lock() )
           {
-            h->process( std::move(*ph), outgoing_handler );
+            h->invoke( std::move(*ph), outgoing_handler );
           }
           else
           {

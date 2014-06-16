@@ -11,7 +11,7 @@ io_registry::io_registry()
   
 }
   
-void io_registry::set_io(io::io_id_t io_id, std::shared_ptr<handler_base> jsonrpc_handler, io::outgoing_handler_t outgoing_handler)
+void io_registry::set_io(io_id_t io_id, std::shared_ptr<handler_interface> jsonrpc_handler, outgoing_handler_t outgoing_handler)
 {
   auto result = _io_map.insert( std::make_pair( io_id, io_info(jsonrpc_handler, outgoing_handler) ) );
   if ( !result.second )
@@ -21,9 +21,10 @@ void io_registry::set_io(io::io_id_t io_id, std::shared_ptr<handler_base> jsonrp
   }
 }
   
-std::shared_ptr<handler_base> io_registry::erase_io( io::io_id_t io_id )
+auto io_registry::erase_io( io_id_t io_id ) 
+-> std::shared_ptr<handler_interface>
 {
-  std::shared_ptr<handler_base> result;
+  std::shared_ptr<handler_interface> result;
   auto itr = _io_map.find(io_id);
   if ( itr != _io_map.end() )
   {
@@ -37,10 +38,11 @@ std::shared_ptr<handler_base> io_registry::erase_io( io::io_id_t io_id )
   return result;
 }
   
-std::pair<int, io::outgoing_handler_t>
-io_registry::add_result_handler(io::io_id_t io_id, result_handler_t result_handler)
+
+auto io_registry::add_result_handler(io_id_t io_id, result_handler_t result_handler)
+->std::pair<call_id_t, outgoing_handler_t>
 {
-  std::pair<int, io::outgoing_handler_t> result(-1, nullptr);
+  std::pair<call_id_t, outgoing_handler_t> result(-1, nullptr);
   
   auto itr = this->_io_map.find(io_id);
   if (itr!=this->_io_map.end())
@@ -53,7 +55,8 @@ io_registry::add_result_handler(io::io_id_t io_id, result_handler_t result_handl
   return result;
 }
 
-io_registry::result_handler_t io_registry::get_result_handler(int call_id) const
+auto io_registry::get_result_handler(call_id_t call_id) const
+ -> io_registry::result_handler_t
 {
   auto itr = _call_io_map.find(call_id);
   if ( itr != _call_io_map.end() )
@@ -83,7 +86,9 @@ io_registry::result_handler_t io_registry::get_result_handler(int call_id) const
   return nullptr;
 }
   
-std::weak_ptr<handler_base> io_registry::get_jsonrpc_handler(io::io_id_t io_id) const
+
+auto io_registry::get_jsonrpc_handler(io_id_t io_id) const
+-> std::weak_ptr<handler_interface> 
 {
   auto itr = _io_map.find(io_id);
   
@@ -92,7 +97,8 @@ std::weak_ptr<handler_base> io_registry::get_jsonrpc_handler(io::io_id_t io_id) 
     : nullptr;
 }
   
-io::outgoing_handler_t io_registry::get_outgoing_handler(io::io_id_t io_id) const
+auto io_registry::get_outgoing_handler(io_id_t io_id) const
+ -> outgoing_handler_t
 {
   auto itr = _io_map.find(io_id);
   
