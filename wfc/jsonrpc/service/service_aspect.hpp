@@ -24,9 +24,6 @@
 namespace wfc{ namespace jsonrpc{
   
 
-
-
-
 struct ad_process_method
 {
   template<typename T>
@@ -63,18 +60,24 @@ struct ad_process_method
 struct ad_process_error
 {
   template<typename T>
-  void operator()( T& t, incoming_holder holder, ::wfc::io::outgoing_handler_t callback)
+  void operator()( T& t, incoming_holder holder /*, ::wfc::io::outgoing_handler_t callback*/)
   {
-    t.process_result(t, std::move(holder), callback);
+    t.get_aspect().template get<_process_result_>()(t, std::move(holder) /*, std::move(callback)*/ );
+    //t.process_result(t, std::move(holder), callback);
   }
 };
 
 struct ad_process_result
 {
   template<typename T>
-  void operator()( T& t, incoming_holder holder, ::wfc::io::outgoing_handler_t callback)
+  void operator()( T& t, incoming_holder holder/*, ::wfc::io::outgoing_handler_t*/ /*callback*/)
   {
-    t.process_result(t, std::move(holder), callback);
+    if ( auto handler = t.handler_by_call_id( holder.get_id<int>() ) )
+    {
+      handler( std::move(holder) );
+    }
+
+    // t.process_result(t, std::move(holder), callback);
   }
 };
 
@@ -90,11 +93,11 @@ struct ad_process
     }
     else if ( holder.has_result() )
     {
-      t.get_aspect().template get<_process_result_>()(t, std::move(holder), handler );
+      t.get_aspect().template get<_process_result_>()(t, std::move(holder) /*, handler*/ );
     }
     else if ( holder.has_error() )
     {
-      t.get_aspect().template get<_process_error_>()(t, std::move(holder), handler );
+      t.get_aspect().template get<_process_error_>()(t, std::move(holder) /*, handler*/ );
     }
   }
 };
@@ -146,7 +149,6 @@ struct ad_incoming
       // TODO; сделать логгирование 
       t.get_aspect().template get<_callback_error_>()(t, server_error(), callback);
     }
-    
   }
 };
 
