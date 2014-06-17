@@ -104,7 +104,8 @@ public:
       if ( !ec )
       {
         COMMON_LOG_MESSAGE( "Client " << this->options().host << ":" << this->options().port << " connected!" )
-          // TODO: для connection отдельный handler
+        // TODO: для connection отдельный handler
+        
         auto opt = this->options().connection;
         //opt.incoming_handler = this->_handler;
         this->_connection = std::make_shared<connection_type>( std::move(*psock), opt);

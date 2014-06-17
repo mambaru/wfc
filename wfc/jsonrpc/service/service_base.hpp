@@ -90,12 +90,12 @@ public:
     notify_serializer_t serializer
   )
   {
-    this->dispatch([this, io_id, name, serializer]()
+    this->post([this, io_id, name, serializer]()
     {
       if ( auto wrk = this->get_worker(name).lock() )
       {
         auto writer = this->registry().get_outgoing_handler( io_id );
-        wrk->dispatch([writer, name, serializer](){
+        wrk->post([writer, name, serializer](){
           auto d = serializer(name);
           writer( std::move(d) );
         });
@@ -110,40 +110,42 @@ public:
     request_serializer_t serializer
   )
   {
-    this->dispatch([this, io_id, name, result_handler, serializer]()
+    this->post([this, io_id, name, result_handler, serializer]()
     {
       if ( auto wrk = this->get_worker(name).lock() )
       {
         auto requester = this->registry().add_result_handler( io_id, result_handler );
-        
-        wrk->post([requester, name,  serializer]()
+        wrk->post([io_id, requester, name,  serializer]()
         {
           auto d = serializer(name, requester.first);
-          requester.second( std::move(d) );
+          if ( requester.second != nullptr )
+          {
+            requester.second( std::move(d) );
+          }
+          else
+          {
+            DAEMON_LOG_ERROR("Requester not found for io_id=" << io_id)
+          }
         });
       }
     });
   };
   
-  
   // Новый коннект
   void create_handler( io_id_t io_id, outgoing_handler_t outgoing_handler, ::wfc::io::add_shutdown_handler_t add_shutdown /*TODO: в typedef*/ )
   {
-    if ( outgoing_handler != nullptr)
+    if ( outgoing_handler != nullptr && add_shutdown!=nullptr)
     {
       super::get_aspect().template get<_create_handler_>()(*this, io_id, std::move(outgoing_handler) );
       super::get_aspect().template get<_add_shutdown_>()(*this, std::move(add_shutdown) );
     }
  }
-  
 
   /// Для входящих запросов
   void operator()( data_ptr d, io_id_t io_id, outgoing_handler_t outgoing_handler)
   {
     this->get_aspect().template get<_input_>()( *this, std::move(d), io_id, std::move(outgoing_handler) );
   }
-  
-  
   
   template<typename T>
   void start_advice(T& )
@@ -197,5 +199,4 @@ private:
 };
 
 }} // wfc
-
 

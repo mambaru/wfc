@@ -16,6 +16,8 @@ struct _worker_type_;
 struct _handler_start_;
 struct _create_handler_;
 struct _add_shutdown_;
+
+struct _io_registry_;
  
 }} // wfc
 

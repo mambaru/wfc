@@ -20,7 +20,7 @@ struct io_info
   typedef handler_interface::call_id_t call_id_t;
   typedef handler_interface::outgoing_handler_t outgoing_handler_t;
   
-  typedef std::map<int, result_handler_t>  result_map_t;
+  typedef std::map<call_id_t, result_handler_t>  result_map_t;
 
   std::shared_ptr<handler_interface> jsonrpc_handler;
   outgoing_handler_t outgoing_handler;

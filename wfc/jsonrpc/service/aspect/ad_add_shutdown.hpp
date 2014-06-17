@@ -21,18 +21,6 @@ struct ad_add_shutdown
         }
       });
     });
-    /*
-    add_shutdown( this->strand().wrap( [this](io_id_t io_id)
-    {
-      // TODO: Сейчас dispatch, сделать post, иначе может выполниться раньше поста выше
-      if ( auto handler = this->registry().erase_io(io_id) )
-      {
-        handler->stop(io_id);
-      }
-    }));
-    */
-
-    
   }
 };
 
