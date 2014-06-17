@@ -5,7 +5,6 @@ namespace wfc{ namespace jsonrpc{
   
 struct ad_callback_json
 {
-  
   template<typename T, typename J, typename O>
   void operator()( T&, J, O obj, typename T::data_ptr d, ::wfc::io::outgoing_handler_t callback)
   {
@@ -14,7 +13,6 @@ struct ad_callback_json
     typename J::serializer()(obj, std::inserter( *d, d->end() ));
     callback( std::move(d) );
   }
-  
   
   template<typename T, typename J, typename O>
   void operator()( T&, J, O obj, ::wfc::io::outgoing_handler_t handler)

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <wfc/io_service.hpp>
-#include <wfc/io/types.hpp>
 #include <wfc/jsonrpc/options.hpp>
-#include <wfc/jsonrpc/handler/handler_base.hpp>
+#include <wfc/jsonrpc/handler/ihandler.hpp>
+#include <wfc/jsonrpc/types.hpp>
+#include <wfc/io/types.hpp>
 #include <vector>
 #include <string>
 
@@ -15,12 +15,13 @@ class service
 {
 public:
   typedef options options_type;
+  typedef ihandler handler_interface;
   
-  service( ::wfc::io_service& io_service, const options_type& opt, const handler_base& handler);
+  service( io_service& ios, const options_type& opt, const ihandler& jsonrpc_handler);
   
-  void startup_handler( ::wfc::io::io_id_t io_id,  ::wfc::io::outgoing_handler_t writer,  ::wfc::io::add_shutdown_handler_t add_shutdown );
+  void create_handler( io_id_t io_id,  outgoing_handler_t writer,  add_shutdown_handler_t add_shutdown );
 
-  void operator()(  ::wfc::io::data_ptr d,  ::wfc::io::io_id_t id,  ::wfc::io::outgoing_handler_t callback);
+  void operator()(  data_ptr d,  io_id_t id,  outgoing_handler_t callback);
 
   std::vector<std::string> get_methods() const;
   

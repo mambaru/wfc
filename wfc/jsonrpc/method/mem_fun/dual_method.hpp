@@ -19,7 +19,7 @@ template<
     std::function< void(std::unique_ptr<typename JResult::target>) > 
   ) 
 >
-struct dual_method_basic: method_basic< 
+struct basic_dual_method: basic_method< 
   name<TgName>,
   invoke_mem_fun<JParams,JResult,I,mem_ptr>,
   call<JParams, JResult>
@@ -39,7 +39,7 @@ template<
 >
 struct dual_method: method< 
   name<TgName>,
-  invoke_mem_fun<JParams,JResult,I,mem_ptr>,
+  invoke_mem_fun<JParams, JResult, I, mem_ptr>,
   call<JParams, JResult>
 >
 {};

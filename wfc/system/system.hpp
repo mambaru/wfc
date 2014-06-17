@@ -107,11 +107,23 @@ inline void autoup(time_t timeout, std::function<void(bool, int)> f = nullptr)
     pid_t pid = ::fork();
     
     if (pid==0)
+    {
+      int null = ::open("/dev/null", O_RDWR);
+      if( -1 != null)
+      {
+        ::close(0);
+        ::close(1);
+        ::close(2);
+        ::dup2(null, 0);
+        ::dup2(null, 1);
+        ::dup2(null, 2);
+      }
       break;
+    }
     
     int status = 0;
     time_t t = time(0);
-    ::waitpid(pid, &status, 0);
+    ::waitpid(pid, &status, 0);    
     bool restart = status!=0 && ( time(0) - t >= timeout );
     f(restart, status);
     kill(pid, SIGKILL);

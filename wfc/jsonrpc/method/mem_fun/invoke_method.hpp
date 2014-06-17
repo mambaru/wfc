@@ -14,17 +14,21 @@ template<
   typename JParams, 
   typename JResult, 
   typename I, 
-  void (I::*mem_ptr)( std::unique_ptr<typename JParams::target>, std::function< void(std::unique_ptr<typename JResult::target>) > ) 
+  void (I::*mem_ptr)( 
+    std::unique_ptr<typename JParams::target>, 
+    std::function< void(std::unique_ptr<typename JResult::target>) > 
+  ) 
 >
-struct invoke_method_basic: method_basic< 
-  name<TgName>,
-  invoke_mem_fun< 
-    JParams,
-    JResult,
-    I,
-    mem_ptr
-  >
->
+struct basic_invoke_method
+  : basic_method< 
+      name<TgName>,
+      invoke_mem_fun< 
+        JParams,
+        JResult,
+        I,
+        mem_ptr
+      >
+    >
 {};
 
 template<
@@ -32,19 +36,21 @@ template<
   typename JParams, 
   typename JResult, 
   typename I, 
-  void (I::*mem_ptr)( std::unique_ptr<typename JParams::target>, std::function< void(std::unique_ptr<typename JResult::target>) > ) 
+  void (I::*mem_ptr)( 
+    std::unique_ptr<typename JParams::target>, 
+    std::function< void(std::unique_ptr<typename JResult::target>) > 
+  ) 
 >
-struct invoke_method: method< 
-  name<TgName>,
-  invoke_mem_fun< 
-    JParams,
-    JResult,
-    I,
-    mem_ptr
-  >
->
+struct invoke_method
+  : method< 
+      name<TgName>,
+      invoke_mem_fun< 
+        JParams,
+        JResult,
+        I,
+        mem_ptr
+      >
+    >
 {};
 
 }} // wfc
-
-

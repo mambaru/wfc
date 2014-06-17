@@ -36,7 +36,7 @@ void pubsub_gateway::initialize( std::shared_ptr< ::wfc::jsonrpc::service> jsonr
     }
   }
   
-  _jsonrpc->startup_handler
+  _jsonrpc->create_handler
   (
     super::get_id(),
     std::bind(&pubsub_gateway::process_outgoing, this, std::placeholders::_1),

@@ -21,7 +21,7 @@ template<
     std::weak_ptr<Itf>
   )
 >
-struct invoke_method1_basic: method_basic< 
+struct basic_invoke_method1: basic_method< 
   name<TgName>,
   invoke_mem_fun1< 
     JParams,

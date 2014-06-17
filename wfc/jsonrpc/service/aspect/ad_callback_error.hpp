@@ -14,7 +14,10 @@ struct ad_callback_error
     typedef outgoing_error_json< error_json::type >::type json_type;
     outgoing_error<error> error_message;
     error_message.error = std::make_unique<error>(err);
-    error_message.id = std::move( holder.raw_id() );
+    
+    auto id_range = holder.raw_id();
+    error_message.id = std::make_unique<typename T::data_type>( id_range.first, id_range.second );
+    //error_message.id = std::move( holder.raw_id() );
     t.get_aspect().template get<_callback_json_>()(t, json_type(), std::move(error_message), holder.detach(), callback );
   }
 
@@ -28,6 +31,5 @@ struct ad_callback_error
     t.get_aspect().template get<_callback_json_>()(t, json_type(), std::move(error_message), callback );
   }
 };
-
   
 }} // wfc

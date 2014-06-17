@@ -6,21 +6,21 @@ namespace wfc{ namespace jsonrpc{
 
 
 template<
-  typename Req, 
-  typename Resp, 
+  typename Params, 
+  typename Result, 
   typename Target, 
   typename Itf, 
   void (Target::*mem_ptr)( 
-    std::unique_ptr<Req>, 
-    std::function< void(std::unique_ptr<Resp>) >, 
+    std::unique_ptr<Params>, 
+    std::function< void(std::unique_ptr<Result>) >, 
     size_t, 
     std::weak_ptr<Itf>
   ) 
 >
 struct mem_fun_handler1
 {
-  typedef std::unique_ptr<Req> request_ptr;
-  typedef std::unique_ptr<Resp> responce_ptr;
+  typedef std::unique_ptr<Params> request_ptr;
+  typedef std::unique_ptr<Result> responce_ptr;
   typedef std::unique_ptr< ::wfc::jsonrpc::error> json_error_ptr;
   typedef std::function< void(responce_ptr, json_error_ptr) > jsonrpc_callback;
 
@@ -29,7 +29,12 @@ struct mem_fun_handler1
   {
     if ( auto i = t.target().lock() )
     {
-      (i.get()->*mem_ptr)( std::move(req), mem_fun_make_callback( std::move(cb)), t.get_id(), t.shared_from_this() );
+      (i.get()->*mem_ptr)( 
+        std::move(req), 
+        mem_fun_make_callback( std::move(cb) ), 
+        t.get_id(),
+        t.shared_from_this() 
+      );
     }
     else 
     {
