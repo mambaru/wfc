@@ -19,15 +19,13 @@ struct topic_json
   FAS_NAME(channel)
   FAS_NAME(messages)
 
-  typedef
-    json::object<
-      topic, 
-      fas::type_list_n<
-        json::member<n_channel,  topic, std::string, &topic::channel >,
-        json::member<n_messages, topic, std::unique_ptr<message>, &topic::messages,
-                                 messages_json::ptr_type >
-      >::type
-    > type;
+  typedef json::object<
+    topic,
+    fas::type_list_n<
+      json::member<n_channel, topic, std::string, &topic::channel >,
+      json::member<n_messages, topic, std::vector< topic::message_ptr >, &topic::messages, ::wfc::json::array<message_json::pointer> >
+    >::type
+  > type;
 
   typedef type::serializer serializer;
 };

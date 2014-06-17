@@ -73,6 +73,7 @@ int main()
   
   if ( test_count!=7 )
   {
+
     std::cout << "ERROR. invalid test count " << test_count << std::endl;
     exit(-1);
   }
