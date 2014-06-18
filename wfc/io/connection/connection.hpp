@@ -42,6 +42,42 @@ public:
     boost::asio::socket_base::non_blocking_io non_blocking_io(true);
     super::descriptor().io_control(non_blocking_io);
 
+    boost::asio::socket_base::keep_alive option(opt.keep_alive);
+    super::descriptor().set_option(option);
+
+    // boost::asio::socket_base::linger option(true, 30);
+    // socket.set_option(option);
+
+    // boost::asio::socket_base::receive_buffer_size option(8192);
+    // socket.set_option(option);
+    
+    // boost::asio::socket_base::send_buffer_size option(8192);
+    // socket.set_option(option);
+
+    // boost::asio::socket_base::linger option(true, 30);
+    // socket.set_option(option);
+    
+    /*
+    //if ( setsockopt((int)d, IPPROTO_TCP, TCP_NODELAY, (const char*)&val, sizeof(val)))
+    //  throw socket_error( "fas::system::inet::tcp_nodelay: " );
+    
+    //if ( setsockopt((int)d, SOL_SOCKET, SO_KEEPALIVE, (const char*)&val, sizeof(val)))
+    //  throw socket_error( "fas::system::inet::keepalive: " );
+    
+    boost::asio::ip::tcp::no_delay option(true);
+    super::descriptor().set_option(option);
+
+    boost::asio::socket_base::receive_buffer_size option(8192);
+    socket.set_option(option);
+    
+    boost::asio::socket_base::keep_alive option(true);
+    socket.set_option(option);
+
+    boost::asio::socket_base::linger option(true, 30);
+    socket.set_option(option);
+
+     */ 
+
   }
 
   void start()
