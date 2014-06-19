@@ -17,7 +17,8 @@ template<
   void (I::*mem_ptr)( 
     std::unique_ptr<typename JParams::target>, 
     std::function< void(std::unique_ptr<typename JResult::target>) > 
-  ) 
+  ),
+  typename ...Args
 >
 struct basic_invoke_method
   : basic_method< 
@@ -27,7 +28,8 @@ struct basic_invoke_method
         JResult,
         I,
         mem_ptr
-      >
+      >,
+      Args...
     >
 {};
 
@@ -39,7 +41,8 @@ template<
   void (I::*mem_ptr)( 
     std::unique_ptr<typename JParams::target>, 
     std::function< void(std::unique_ptr<typename JResult::target>) > 
-  ) 
+  ),
+  typename ...Args
 >
 struct invoke_method
   : method< 
@@ -49,7 +52,8 @@ struct invoke_method
         JResult,
         I,
         mem_ptr
-      >
+      >,
+      Args...
     >
 {};
 

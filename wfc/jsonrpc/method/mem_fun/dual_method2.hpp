@@ -29,7 +29,8 @@ template<
   void (Itf::*mem_ptr2)( 
     std::unique_ptr<Params2>, 
     std::function< void(std::unique_ptr<Result2>) >
-  )
+  ),
+  typename ...Args
 >
 struct basic_dual_method2: basic_method< 
   name<TgName>,
@@ -43,7 +44,8 @@ struct basic_dual_method2: basic_method<
     Itf, 
     mem_ptr2
   >,
-  call<JParams, JResult>
+  call<JParams, JResult>,
+  Args...
 >
 {};
 
@@ -68,7 +70,8 @@ template<
   void (Itf::*mem_ptr2)( 
     std::unique_ptr<Params2>, 
     std::function< void(std::unique_ptr<Result2>) >
-  )
+  ),
+  typename ...Args
 >
 struct dual_method2: method< 
   name<TgName>,
@@ -82,7 +85,8 @@ struct dual_method2: method<
     Itf, 
     mem_ptr2
   >,
-  call<JParams, JResult>
+  call<JParams, JResult>,
+  Args...
 >
 {};
 

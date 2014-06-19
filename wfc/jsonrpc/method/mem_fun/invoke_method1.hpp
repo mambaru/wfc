@@ -19,7 +19,8 @@ template<
     std::function< void(std::unique_ptr<typename JResult::target>) >, 
     size_t, 
     std::weak_ptr<Itf>
-  )
+  ),
+  typename ...Args
 >
 struct basic_invoke_method1: basic_method< 
   name<TgName>,
@@ -29,7 +30,8 @@ struct basic_invoke_method1: basic_method<
     Target,
     Itf, 
     mem_ptr
-  >
+  >,
+  Args...
 >
 {};
 
@@ -45,7 +47,8 @@ template<
     std::function< void(std::unique_ptr<typename JResult::target>) >, 
     size_t, 
     std::weak_ptr<Itf>
-  )
+  ),
+  typename ...Args
 >
 struct invoke_method1: method< 
   name<TgName>,
@@ -55,7 +58,8 @@ struct invoke_method1: method<
     Target,
     Itf, 
     mem_ptr
-  >
+  >,
+  Args...
 >
 {};
 

@@ -17,12 +17,14 @@ template<
   void (I::*mem_ptr)( 
     std::unique_ptr<typename JParams::target>, 
     std::function< void(std::unique_ptr<typename JResult::target>) > 
-  ) 
+  ),
+  typename ...Args
 >
 struct basic_dual_method: basic_method< 
   name<TgName>,
   invoke_mem_fun<JParams,JResult,I,mem_ptr>,
-  call<JParams, JResult>
+  call<JParams, JResult>,
+  Args...
 >
 {};
 
@@ -35,12 +37,14 @@ template<
   void (I::*mem_ptr)( 
     std::unique_ptr<typename JParams::target>, 
     std::function< void(std::unique_ptr<typename JResult::target>) > 
-  ) 
+  ),
+  typename ...Args
 >
 struct dual_method: method< 
   name<TgName>,
   invoke_mem_fun<JParams, JResult, I, mem_ptr>,
-  call<JParams, JResult>
+  call<JParams, JResult>,
+  Args...
 >
 {};
 

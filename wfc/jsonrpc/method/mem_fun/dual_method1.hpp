@@ -19,7 +19,8 @@ template<
     std::function< void(std::unique_ptr<typename JResult::target>) >, 
     size_t, 
     std::weak_ptr<Target>
-  ) 
+  ),
+  typename ...Args
 >
 struct basic_dual_method1: basic_method< 
   name<TgName>,
@@ -39,7 +40,8 @@ template<
     std::function< void(std::unique_ptr<typename JResult::target>) >, 
     size_t, 
     std::weak_ptr<Target>
-  ) 
+  ) ,
+  typename ...Args
 >
 struct dual_method1: method< 
   name<TgName>,

@@ -33,9 +33,8 @@ struct ad_method_handler
           }
           else
           {
-            std::cerr << "jsonrpc logic error: jsonrpc handler error" << std::endl;
-            DAEMON_LOG_FATAL("jsonrpc logic error: jsonrpc handler error" );
-            abort();
+            // Клиент отвалился 
+            COMMON_LOG_WARNING("jsonrpc service (ad_method_handler) : handler not found (client is disconnected)" );
           }
         }
       );

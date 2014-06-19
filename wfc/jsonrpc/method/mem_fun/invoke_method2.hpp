@@ -28,7 +28,8 @@ template<
   void (Itf::*mem_ptr2)( 
     std::unique_ptr<Params2>, 
     std::function< void(std::unique_ptr<Result2>) >
-  )
+  ),
+  typename ...Args
 >
 struct basic_invoke_method2: basic_method< 
   name<TgName>,
@@ -41,7 +42,8 @@ struct basic_invoke_method2: basic_method<
     mem_ptr, 
     Itf, 
     mem_ptr2
-  >
+  >,
+  Args...
 >
 {};
 
@@ -66,7 +68,8 @@ template<
   void (Itf::*mem_ptr2)( 
     std::unique_ptr<Params2>, 
     std::function< void(std::unique_ptr<Result2>) >
-  )
+  ),
+  typename ...Args
 >
 struct invoke_method2: method< 
   name<TgName>,
@@ -79,7 +82,8 @@ struct invoke_method2: method<
     mem_ptr, 
     Itf, 
     mem_ptr2
-  >
+  >,
+  Args...
 >
 {};
 
