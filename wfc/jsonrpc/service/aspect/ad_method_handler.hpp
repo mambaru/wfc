@@ -35,7 +35,7 @@ struct ad_method_handler
           {
             std::cerr << "jsonrpc logic error: jsonrpc handler error" << std::endl;
             DAEMON_LOG_FATAL("jsonrpc logic error: jsonrpc handler error" );
-            abort();
+            //abort();
           }
         }
       );
