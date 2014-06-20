@@ -18,7 +18,7 @@ struct client_options_json
       ::wfc::json::member< n_threads, client_options, int, &client_options::threads>, 
       ::wfc::json::member< n_host, client_options, std::string, &client_options::host>, 
       ::wfc::json::member< n_port, client_options, std::string, &client_options::port>, 
-      ::wfc::json::member< n_connection, client_options, connection_options, &client_options::connection, connection_options_json::type>
+      ::wfc::json::member< n_connection, client_options, connection_options, &client_options::connection, connection_options_json>
     >::type
   > type;
   

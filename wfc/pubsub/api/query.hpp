@@ -8,7 +8,20 @@ namespace request
 {
   struct query
   {
-    
+    std::string channel;
+    data_t content;
+
+    query()
+    {}
+
+    query(const std::string& channel)
+      : channel(channel)
+    {}
+
+    operator bool () const
+    {
+      return !channel.empty();
+    }
   };
 }
 
@@ -16,7 +29,9 @@ namespace response
 {
   struct query
   {
-
+    ::wfc::pubsub::status status = ::wfc::pubsub::status::not_support;
+    std::string channel;
+    data_t content;
   };
 }
 

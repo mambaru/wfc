@@ -6,35 +6,35 @@
 namespace wfc{ namespace jsonrpc{
  
 template<
-  typename JReq, 
-  typename JResp, 
-  typename Req2, 
-  typename Resp2, 
+  typename JParams, 
+  typename JResult, 
+  typename Params2, 
+  typename Result2, 
   typename Target, 
   void (Target::*mem_ptr)( 
-    std::unique_ptr<typename JReq::target>, 
-    std::function< void(std::unique_ptr<typename JResp::target>) >, 
+    std::unique_ptr<typename JParams::target>, 
+    std::function< void(std::unique_ptr<typename JResult::target>) >, 
     size_t, 
     std::function< void(
-      std::unique_ptr<Req2>, 
-      std::function< void(std::unique_ptr<Resp2>) >  
+      std::unique_ptr<Params2>, 
+      std::function< void(std::unique_ptr<Result2>) >  
     ) >
   ),
   typename Itf,
   void (Itf::*mem_ptr2)( 
-    std::unique_ptr<Req2>, 
-    std::function< void(std::unique_ptr<Resp2>) >
+    std::unique_ptr<Params2>, 
+    std::function< void(std::unique_ptr<Result2>) >
   )
 >
 struct invoke_mem_fun2
   : invoke<
-      JReq, 
-      JResp, 
+      JParams, 
+      JResult, 
       mem_fun_handler2<
-        typename JReq::target, 
-        typename JResp::target,
-        Req2,
-        Resp2,
+        typename JParams::target, 
+        typename JResult::target,
+        Params2,
+        Result2,
         Target, 
         mem_ptr,
         Itf,

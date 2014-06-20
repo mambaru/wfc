@@ -36,7 +36,7 @@ void pubsub_gateway::initialize( std::shared_ptr< ::wfc::jsonrpc::service> jsonr
     }
   }
   
-  _jsonrpc->startup_handler
+  _jsonrpc->create_handler
   (
     super::get_id(),
     std::bind(&pubsub_gateway::process_outgoing, this, std::placeholders::_1),
@@ -117,6 +117,10 @@ void pubsub_gateway::process_outgoing_( ::wfc::io::data_ptr d )
 {
   TRACE_LOG_MESSAGE("wfc::pubsub::gateway process outgoing: [[" << std::string( d->begin(), d->end() ) << "]");
   ::wfc::jsonrpc::incoming_holder holder( std::move(d) );
+  
+  // TODO: в try - catch
+  holder.parse();
+  
   if ( holder.is_request() )
   {
     // TODO: custom_request он же query
@@ -188,6 +192,7 @@ void pubsub_gateway::publish(request_publish_ptr req, publish_callback cb)
   {
     
     ::wfc::jsonrpc::incoming_holder holder( std::move(d) );
+    holder.parse();
     auto resp = std::make_unique<response::publish>();
     if ( holder.is_response() )
     {

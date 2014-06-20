@@ -7,21 +7,21 @@
 
 namespace wfc{ namespace jsonrpc{
 
-template<typename Resp>
-inline auto mem_fun_make_callback( std::function< void(std::unique_ptr<Resp>, std::unique_ptr< ::wfc::jsonrpc::error>) >&& cb)
-  -> std::function<void(std::unique_ptr<Resp>) >
+template<typename Result>
+inline auto mem_fun_make_callback( std::function< void(std::unique_ptr<Result>, std::unique_ptr< ::wfc::jsonrpc::error>) >&& cb)
+  -> std::function<void(std::unique_ptr<Result>) >
 {
   if (cb==nullptr)
     return nullptr;
     
-  return [cb]( std::unique_ptr<Resp> resp)
+  return [cb]( std::unique_ptr<Result> resp)
   {
     cb( std::move(resp), nullptr);
   };
 }
 
-template<typename Resp>
-inline void mem_fun_service_unavailable( std::function< void(std::unique_ptr<Resp>, std::unique_ptr< ::wfc::jsonrpc::error>) >&& cb)
+template<typename Result>
+inline void mem_fun_service_unavailable( std::function< void(std::unique_ptr<Result>, std::unique_ptr< ::wfc::jsonrpc::error>) >&& cb)
 {
   if (cb!=nullptr)
   {

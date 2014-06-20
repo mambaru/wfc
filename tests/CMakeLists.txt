@@ -1,6 +1,8 @@
 enable_testing()
 
+
 include_directories(..)
+include_directories(../faslib/)
 
 add_subdirectory(logger)
 add_subdirectory(core)

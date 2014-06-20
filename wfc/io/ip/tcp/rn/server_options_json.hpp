@@ -14,7 +14,7 @@ struct server_options_json
     server_options,
     fas::type_list_n<
       ::wfc::json::member< n_threads, server_options, int, &server_options::threads>, 
-      ::wfc::json::base< acceptor_options_json::type >
+      ::wfc::json::base< acceptor_options_json >
     >::type
   > type;
   

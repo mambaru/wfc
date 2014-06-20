@@ -1,56 +1,61 @@
 #pragma once
 
 #include <wfc/jsonrpc/errors.hpp>
-#include <wfc/jsonrpc/incoming/incoming_holder.hpp>
-#include <wfc/jsonrpc/outgoing/outgoing_error_json.hpp>
-#include <wfc/jsonrpc/outgoing/outgoing_result.hpp>
-#include <wfc/jsonrpc/outgoing/outgoing_result_json.hpp>
+#include <wfc/jsonrpc/method/aspect/tags.hpp>
+#include <fas/aop.hpp>
 #include <memory>
 
 namespace wfc{ namespace jsonrpc{
-
   
-template<typename JReq, typename JResp, typename Handler>
+
+template<typename JParams, typename JResult, typename Handler, typename JError = error_json>
 struct invoke: Handler
 {
   typedef fas::metalist::advice metatype;
   typedef _invoke_ tag;
-  typedef invoke<JReq, JResp, Handler> advice_class;
+  typedef invoke<JParams, JResult, Handler> advice_class;
 
   advice_class& get_advice() { return *this;}
   const advice_class& get_advice() const { return *this;}
   
-  typedef JReq  request_json;
-  typedef JResp response_json;
-  typedef typename request_json::target  request_type;
-  typedef typename response_json::target response_type;
+  typedef JParams params_json;
+  typedef JResult result_json;
+  typedef JError  error_json;
   
-  
-  template<typename T>
-  void operator()(T& t, incoming_holder holder, ::wfc::io::outgoing_handler_t handler) const
+  typedef typename params_json::target  params_type;
+  typedef typename result_json::target  result_type;
+  typedef typename error_json::target   error_type;
+
+  typedef typename std::unique_ptr<params_type> params_ptr;
+  typedef typename std::unique_ptr<result_type> result_ptr;
+  typedef typename std::unique_ptr<error_type>  error_ptr;
+
+  template<typename T, typename TT>
+  void operator()(
+    T& t, 
+    TT&,
+    typename T::holder_type holder, 
+    typename T::outgoing_handler_t outgoing_handler
+  ) 
   {
-    try
+    try // server_error
     {
-      std::unique_ptr<typename request_json::target> req = nullptr;
-      try
+      params_ptr req = nullptr;
+
+      try // invalid_params
       {
-        req = holder.get_params<request_json>();
+        req = holder.template get_params<params_json>();
       }
-      catch (const json::json_error& e)
+      catch (const json::json_error& )
       {
-        typedef outgoing_error_json< error_json::type >::type json_type;
-        outgoing_error<error> error_message;
-        error_message.error = std::make_unique<error>(invalid_params());
-        error_message.id = std::move( holder.raw_id() );
-        auto d = holder.detach();
-        d->clear();
-        typename json_type::serializer()(error_message, std::inserter( *d, d->end() ));
-        handler( std::move(d) );
-        return;
+        return TT::template send_error<T, error_json>( 
+          std::move(holder), 
+          std::make_unique<invalid_params>(), 
+          std::move(outgoing_handler) 
+        );
+        
       }
-      
-      
-      if (holder.is_notify())
+      if ( holder.is_notify() )
       {
         Handler::operator()( t, std::move(req), nullptr);
       }
@@ -58,31 +63,23 @@ struct invoke: Handler
       {
         auto ph = std::make_shared<incoming_holder>( std::move(holder) );
         Handler::operator()( t, std::move(req), 
-          [ph, handler]( std::unique_ptr<response_type> params, std::unique_ptr<error> err )
+          [ph, outgoing_handler]( result_ptr params, error_ptr err )
           {
-            if (err != nullptr )
+            if (err == nullptr )
             {
-              typedef outgoing_error_json< error_json::type >::type json_type;
-              outgoing_error<error> error_message;
-              error_message.error = std::move(err);
-              error_message.id = std::move( ph->raw_id() );
-              
-              auto d = ph->detach();
-              d->clear();
-              typename json_type::serializer()(error_message, std::inserter( *d, d->end() ));
-              // ph->handler( std::move(d) );
-              handler( std::move(d) );
+              TT::template send_result<T, result_json>( 
+                std::move(*ph), 
+                std::move(params), 
+                std::move(outgoing_handler) 
+              );
             }
             else
             {
-              outgoing_result<response_type> result;
-              result.result = std::move(params);
-              result.id = ph->raw_id();
-              auto d = ph->detach();
-              d->clear();
-              typedef outgoing_result_json<response_json> result_json;
-              typename result_json::serializer()(result, std::inserter( *d, d->end() ));
-              handler( std::move(d) );
+              TT::template send_error<T, error_json>( 
+                std::move(*ph), 
+                std::move(err), 
+                std::move(outgoing_handler)
+              );
             }
           } // callback 
         );
@@ -90,15 +87,15 @@ struct invoke: Handler
     }
     catch(...)
     {
-        typedef outgoing_error_json< error_json::type >::type json_type;
-        outgoing_error<error> error_message;
-        error_message.error = std::make_unique<error>(server_error());
-        error_message.id = std::move( holder.raw_id() );
-              
-        auto d = holder.detach();
-        d->clear();
-        typename json_type::serializer()(error_message, std::inserter( *d, d->end() ));
-        handler( std::move(d) );
+      DAEMON_LOG_ERROR("wfc::jsonrpc::invoke::operator() : unhandled exception (Server Error)")
+      
+      TT::template send_error<T, error_json>( 
+        std::move(holder), 
+        std::make_unique<server_error>(),
+        std::move(outgoing_handler) 
+      );
+      
+      throw;
     }
   }
 };

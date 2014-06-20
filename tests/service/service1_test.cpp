@@ -82,6 +82,7 @@ struct method_test2: wfc::jsonrpc::method<
 >{};
 
 
+
 struct method_list: wfc::jsonrpc::method_list<
   //wfc::jsonrpc::target<itest>,
   //wfc::jsonrpc::interface_target_ctl<itest, itest_ex, &itest_ex::startup, &itest_ex::shutdown>, 
@@ -94,8 +95,13 @@ struct method_list: wfc::jsonrpc::method_list<
   method_test2
 >
 {
-  JSONRPC_METHOD_IMPL( _test2_, test1 )
+  virtual void test1(std::unique_ptr<test1_params> req, std::function< void(std::unique_ptr<test1_params>) > callback) 
+  {
+    this->call<_test2_>( std::move(req), std::move(callback), nullptr ) ;
+  }
+  //JSONRPC_METHOD_IMPL( _test2_, test1 )
 };
+
 
 
 

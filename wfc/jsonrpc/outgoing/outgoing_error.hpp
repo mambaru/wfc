@@ -8,8 +8,9 @@ namespace wfc{ namespace jsonrpc{
 template<typename T>
 struct outgoing_error: outgoing
 {
+  typedef ::wfc::io::data_type data_type;
   std::unique_ptr<T> error;
-  std::unique_ptr< ::wfc::io::data_type> id;
+  std::unique_ptr<data_type> id;
   outgoing_error()
     : outgoing()
     , id(nullptr)

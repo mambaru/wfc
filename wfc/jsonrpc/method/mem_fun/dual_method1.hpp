@@ -19,9 +19,10 @@ template<
     std::function< void(std::unique_ptr<typename JResult::target>) >, 
     size_t, 
     std::weak_ptr<Target>
-  ) 
+  ),
+  typename ...Args
 >
-struct dual_method1_basic: method_basic< 
+struct basic_dual_method1: basic_method< 
   name<TgName>,
   invoke_mem_fun1< JParams, JResult, Target, Target, mem_ptr>,
   call<JParams, JResult>
@@ -39,7 +40,8 @@ template<
     std::function< void(std::unique_ptr<typename JResult::target>) >, 
     size_t, 
     std::weak_ptr<Target>
-  ) 
+  ) ,
+  typename ...Args
 >
 struct dual_method1: method< 
   name<TgName>,

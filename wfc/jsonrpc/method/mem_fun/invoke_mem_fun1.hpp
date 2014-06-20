@@ -6,24 +6,24 @@
 namespace wfc{ namespace jsonrpc{
   
 template<
-  typename JReq, 
-  typename JResp, 
+  typename JParams, 
+  typename JResult, 
   typename Target, 
   typename Itf,
   void (Target::*mem_ptr)( 
-    std::unique_ptr<typename JReq::target>, 
-    std::function< void(std::unique_ptr<typename JResp::target>) >, 
+    std::unique_ptr<typename JParams::target>, 
+    std::function< void(std::unique_ptr<typename JResult::target>) >, 
     size_t, 
     std::weak_ptr<Itf>
   ) 
 >
 struct invoke_mem_fun1
   : invoke<
-      JReq, 
-      JResp, 
+      JParams, 
+      JResult, 
       mem_fun_handler1<
-        typename JReq::target, 
-        typename JResp::target, 
+        typename JParams::target, 
+        typename JResult::target, 
         Target, 
         Itf, 
         mem_ptr

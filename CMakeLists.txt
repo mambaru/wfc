@@ -8,5 +8,9 @@ include(Wfc)
 
 add_subdirectory(config)
 add_subdirectory(wfc)
-add_subdirectory(tests)
-#add_subdirectory(tutorial)
+
+if ( WFC_BUILD_ALL )
+  add_subdirectory(tests)
+  add_subdirectory(tutorial)
+endif()
+

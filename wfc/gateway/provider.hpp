@@ -28,13 +28,13 @@ public:
   
   provider()
     : _sequence_mode(false)
-    , _enabled(true) // TDOD: false
+    , _client_count(0) // TDOD: false
     , _cli_itr(_clients.end())
   {}
   
   bool enabled() const
   {
-    return _enabled;
+    return _client_count!=0;
   }
   
   void sequence_mode(bool value) 
@@ -68,7 +68,6 @@ public:
       dq.front()();
       dq.pop();
     }
-
   }
 
   void process_queue()
@@ -94,25 +93,10 @@ public:
     std::unique_lock<mutex_type> lk(_mutex);
     
     this->_clients[clinet_id] = ptr;
+    this->_client_count = this->_clients.size();
     this->_cli_itr = this->_clients.begin();
     lk.unlock();
     this->process_queue();
-
-    /*
-    delayed_queue dq;
-    {
-      std::lock_guard<mutex_type> lk(_mutex);
-      this->_clients[clinet_id] = ptr;
-      this->_cli_itr = this->_clients.begin();
-      dq.swap(_delayed_queue);
-    }
-    
-    while ( !dq.empty() )
-    {
-      dq.front()();
-      dq.pop();
-    }
-    */
   }
     
   // Когда вызывать, определяеться в method_list
@@ -122,7 +106,7 @@ public:
     
     this->_clients.erase(clinet_id);
     this->_cli_itr = this->_clients.begin();
-    
+    this->_client_count = this->_clients.size();
     for ( auto& sh: _shudown_handlers )
       sh( clinet_id );
   }
@@ -318,7 +302,7 @@ public:
   
 private:
   std::atomic<bool> _sequence_mode;
-  std::atomic<bool> _enabled;
+  std::atomic<size_t>  _client_count;
   mutex_type _mutex;
   clinet_map _clients;
   typename clinet_map::iterator _cli_itr;

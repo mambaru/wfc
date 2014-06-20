@@ -1,16 +1,46 @@
 #include <iostream>
-
-#include <wfc/io/posix/rn/reader.hpp>
-#include <wfc/jsonrpc/service.hpp>
-#include <wfc/jsonrpc/handler.hpp>
-#include <wfc/jsonrpc/method.hpp>
-#include <wfc/jsonrpc/errors.hpp>
-#include <wfc/jsonrpc/incoming/incoming_json.hpp>
-
-#include <string>
-#include <thread>
-#include <functional>
-#include <boost/asio.hpp>
+#include <wfc/jsonrpc.hpp>
+#include <wfc/memory.hpp>
+#include <wfc/io/types.hpp>
+#include <algorithm>
+std::string requests[][2] = {
+  { 
+    "{\"method\":\"test1\",\"params\":[1,2,3,4,5],\"id\":1}",
+    "{\"jsonrpc\":\"2.0\",\"result\":[5,4,3,2,1],\"id\":1}"
+  },
+  { 
+    "{\"method\":\"test2\",\"params\":[1,2,3,4,5],\"id\":2}",
+    "{\"jsonrpc\":\"2.0\",\"result\":[5,4,3,2,1],\"id\":2}"
+  },
+  {
+    "{\"method\":\"test1\",\"params\":{1,2,3,4,5},\"id\":3}",
+    "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32700,\"message\":\"Parse error.\"},\"id\":null}"
+  },
+  {
+    "{\"method\":\"test3\",\"params\":{1,2,3,4,5}}",
+    "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32700,\"message\":\"Parse error.\"},\"id\":null}"
+  },
+  {
+    "{\"method\":\"test4\",\"params\":{1,2,3",
+    "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32700,\"message\":\"Parse error.\"},\"id\":null}"
+  },
+  {
+    "{\"method\":null,\"params\":[1,2,3,4,5],\"id\":1}",
+    "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32601,\"message\":\"Procedure not found.\"},\"id\":1}"
+  },
+  {
+    "{\"params\":[1,2,3,4,5],\"id\":1}",
+    "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32600,\"message\":\"Invalid Request.\"},\"id\":1}"
+  },
+  {
+    "{\"result\":[1,2,3,4,5],\"id\":1}",
+    "- ignored -"
+  },
+  {
+    "{\"result\":[1,2,3,4,5]}",
+    "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32600,\"message\":\"Invalid Request.\"},\"id\":null}"
+  }
+};
 
 typedef std::vector<int> test1_params;
 typedef wfc::json::array< std::vector< wfc::json::value<int> > > test1_json;
@@ -22,173 +52,69 @@ struct itest
   virtual void test1(std::unique_ptr<test1_params> req, std::function< void(std::unique_ptr<test1_params>) > callback) = 0;
 };
 
-/*
+
 class test: public itest
 {
 public:
   
   virtual void test1(std::unique_ptr<test1_params> req, std::function< void(std::unique_ptr<test1_params>) > callback)
   {
-    std::cout << "test::test" << std::endl;
     std::reverse(req->begin(), req->end());
-    callback(std::move(req));
+    if ( callback )
+      callback(std::move(req));
   }
 };
-*/
-
-FAS_STRING(_test1_, "test1")
-FAS_STRING(_test2_, "test2")
 
 
-struct method_test1: wfc::jsonrpc::method<
-  wfc::jsonrpc::name<_test1_>,
-  wfc::jsonrpc::call<test1_json, test1_json>
->{};
+JSONRPC_TAG(test1)
+JSONRPC_TAG(test2)
 
 
-/*
-
-  virtual void test1(std::unique_ptr<test1_params> req, std::function< void(std::unique_ptr<test1_params>) > callback)
-  {
-    typedef super::aspect::advice_cast<_>
-    if ( callback == nullptr )
-    {
-      this->call<_test1_>( std::move(req), nullptr );
-    }
-    else
-    {
-      this->call<_test1_>( std::move(req), [callback](std::unique_ptr<test1_params> resp, std::unique_ptr<wfc::jsonrpc::error> error)
-      {
-        if ( error==nullptr)
-          callback( std::move(resp) );
-      });
-    }
-
-*/
-
-/*
-#define JSONRPC_METHOD_IMPL(Tg, Method)\
-  virtual void test1( call_params_ptr<Tg>::type req, std::function< void(call_result_ptr<Tg>::type) > callback)\
-  {\
-    if ( callback == nullptr )\
-    {\
-      this->call<Tg>( std::move(req), nullptr );\
-    }\
-    else\
-    {\
-      this->call<Tg>( std::move(req), [callback](call_result_ptr<Tg>::type resp, call_error_ptr<Tg>::type error)\
-      {\
-        if ( error==nullptr){\
-          if ( resp != nullptr) \
-            callback( std::move(resp) );\
-          else\
-            callback( nullptr );\
-        };\
-      });\
-    }\
-  }
-  */
-
-struct method_list: wfc::jsonrpc::method_list<
-
-  wfc::jsonrpc::interface_<itest>,
-  
-  wfc::jsonrpc::method<
-    wfc::jsonrpc::name<_test1_>,
-    wfc::jsonrpc::call<test1_json, test1_json>
-  >
+struct method_list: wfc::jsonrpc::method_list
+<
+  wfc::jsonrpc::target<itest>,
+  wfc::jsonrpc::invoke_method< _test1_, test1_json,      test1_json,      itest, &itest::test1>,
+  wfc::jsonrpc::invoke_method< _test2_, test1_json,      test1_json,      itest, &itest::test1>
 >
-{
-  
-public:
-  
-  JSONRPC_METHOD_IMPL( _test1_, test1 );
-};
+{};
 
 
+typedef wfc::jsonrpc::handler<method_list> handler;
+
+int test_count = 0;
 
 int main()
 {
-  int dd[2];
-  ::pipe(dd);
-
-  typedef wfc::jsonrpc::handler<method_list> handler_type;
-  //handler_type handler;
-  auto handler = std::make_shared<handler_type>();
-  /*
-  handler.outgoing_request_handler=[]( handler::incoming_handler_t, handler::request_serializer_t ser) {
-    auto d = ser(333);
-    std::cout << "call JSON READY " << std::string( d->begin(), d->end() ) << std::endl;
-  };
-  */
+  auto tst = std::make_shared<test>();
+  wfc::io_service ios;
+  wfc::jsonrpc::service::options_type opt = wfc::jsonrpc::service::options_type::create();
+  opt.workers[0].threads = 10;
   
-  wfc::io_service io_service;
-  wfc::io_service::work wrk(io_service);
-  wfc::jsonrpc::options options;
-  //options.handler = phndl;
-  wfc::jsonrpc::service jsonrpc(io_service, options, *handler);
-
-  /*
-  jsonrpc.attach_handler( 1, handler, [&jsonrpc](wfc::io::data_ptr d)
+  wfc::jsonrpc::service service(ios, opt, handler(tst) );
+  service.start();
+  for (auto r: requests)
   {
-    wfc::jsonrpc::incoming_holder holder( std::move(d) );
-    wfc::jsonrpc::outgoing_result<test1_params> result;
-    result.id = std::move(holder.raw_id());
-    result.result = std::make_unique<test1_params>(test1_params({5,4,3,2,1}));
-    auto dd = std::make_unique<wfc::io::data_type>();
-    wfc::jsonrpc::outgoing_result_json<test1_json>::serializer() ( result, std::back_inserter(*dd) );
-    jsonrpc.operator()( std::move(dd), 1, []( wfc::io::data_ptr){} );
-  });
-  */
-  
-
-  jsonrpc.start();
-  
-  
-  std::thread th([&](){
-    io_service.run();
-  });
-
-  handler->test1( 
-    std::make_unique<test1_params>( test1_params({1,2,3,4,5}) ), 
-    []( std::unique_ptr<test1_params> res)
+    auto req = std::make_unique<wfc::io::data_type>( r[0].begin(), r[0].end() );
+    service( std::move(req), 1, [r](wfc::io::data_ptr res)
     {
-      std::cout << "Result ready" << std::endl;
-      if ( res == nullptr)
-        abort();
-
-      if ( res->size() != 5)
-        abort();
-      for (int i =0; i < 5;++i)
+      if ( std::string(res->begin(), res->end()) != r[1] )
       {
-        if (res->at(i) != (5-i) )
-          abort();
+        std::cout << "ERROR" << std::endl;
+        std::cout << "request: "  << r[0] << std::endl;
+        std::cout << "response: " << std::string(res->begin(), res->end()) << std::endl;
+        std::cout << "should be: " << r[1] << std::endl;
+        exit(-1);
       }
-      std::cout << "Done!" << std::endl;
-      exit(0);
-    }
-  );
-  
-  while (1){
-    sleep(1);
+      ++test_count;
+    });
   }
-
-  /*
-  for (int i=0;i<10;++i)
-    io_service.poll_one();
+  ios.poll();
   
-  phndl->test1( 
-    std::make_unique<test1_params>( test1_params({1,2,3,4,5}) ), 
-    []( std::unique_ptr<test1_params>)
-    {
-      exit(0);
-    }
-  );
-  shh(4);
-  
-  for (int i=0;i<10;++i)
-    io_service.poll_one();
-  */
-  
+  if ( test_count!=8 )
+  {
+    std::cout << "ERROR. invalid test count " << test_count << std::endl;
+    exit(-1);
+  }
+  return 0;
 }
 

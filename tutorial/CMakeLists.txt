@@ -1,2 +1,4 @@
 include_directories(..)
-add_subdirectory(inet)
+include_directories(../faslib/)
+
+add_subdirectory(jsonrpc)
