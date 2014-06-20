@@ -10,11 +10,6 @@ struct ad_dispatch
   void operator()(T& t, Callback callback)
   {
     t.strand().dispatch( t.owner().wrap(callback) );
-    /*
-    t.get_io_service().dispatch( 
-      t.strand().wrap(callback)
-    );
-    */
   }
 };
 

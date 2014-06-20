@@ -19,7 +19,9 @@ struct error_json
     >::type
   > type;
 
-  typedef type::serializer serializer;
+  typedef error target; 
+  typedef type::member_list member_list;
+  typedef type::serializer  serializer;
 };
   
 }}

@@ -27,7 +27,6 @@ struct async_write_some
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)
   {
-    
     TRACE_LOG_MESSAGE( "ASYNC WRITE [[" << std::string(d->begin(), d->end() ) << "]]..." )
     auto dd = std::make_shared<typename T::data_ptr>( std::move(d) );
     t.descriptor().async_write_some

@@ -18,6 +18,9 @@ public:
   connection_base(descriptor_type&& desc, const options_type& conf/*, wfc::io::incoming_handler handler = nullptr*/)
     : super( std::move(desc), conf/*, handler*/)
   {
+    // TODO: в опции 
+    boost::asio::ip::tcp::no_delay option(true);
+    super::descriptor().set_option(option);
   }
 };
   

@@ -42,6 +42,21 @@ public:
     boost::asio::socket_base::non_blocking_io non_blocking_io(true);
     super::descriptor().io_control(non_blocking_io);
 
+    boost::asio::socket_base::keep_alive option(opt.keep_alive);
+    super::descriptor().set_option(option);
+
+    // boost::asio::socket_base::linger option(true, 30);
+    // socket.set_option(option);
+
+    // boost::asio::socket_base::receive_buffer_size option(8192);
+    // socket.set_option(option);
+    
+    // boost::asio::socket_base::send_buffer_size option(8192);
+    // socket.set_option(option);
+
+    // boost::asio::socket_base::linger option(true, 30);
+    // socket.set_option(option);
+    
   }
 
   void start()

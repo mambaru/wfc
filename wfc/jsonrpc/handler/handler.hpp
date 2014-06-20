@@ -1,46 +1,16 @@
 #pragma once
 
 
-#include <wfc/jsonrpc/handler/handler_base.hpp>
+#include <wfc/jsonrpc/handler/ihandler.hpp>
 #include <wfc/jsonrpc/handler/aspect/tags.hpp>
 #include <wfc/jsonrpc/errors.hpp>
 #include <wfc/jsonrpc/incoming/incoming_holder.hpp>
 #include <wfc/jsonrpc/outgoing/outgoing_error_json.hpp>
+#include <wfc/jsonrpc/types.hpp>
+#include <wfc/jsonrpc/method/aspect/tags.hpp>
 #include <fas/aop.hpp>
 
 namespace wfc{ namespace jsonrpc{
-
-struct f_invoke
-{
-  incoming_holder& holder;
-  ::wfc::io::outgoing_handler_t& callback;
-  bool founded;
-  
-  f_invoke(incoming_holder& holder, ::wfc::io::outgoing_handler_t& callback)
-    : holder( holder )
-    , callback(callback)
-    , founded(false)
-  {
-  }
-  
-  operator bool () const
-  {
-    return founded;
-  }
-  
-  template<typename T, typename Tg>
-  void operator()(T& t, fas::tag<Tg> )
-  {
-    if ( !founded && holder.$() )
-    {
-      if ( holder.method( t.get_aspect().template get<Tg>().name() ) )
-      {
-        t.get_aspect().template get<Tg>()(t, std::move(holder), callback );
-        founded = true;
-      }
-    }
-  }
-};
 
 struct f_get_methods
 {
@@ -54,90 +24,60 @@ struct f_get_methods
 };
 
 
-template<typename Instanse>
+template<typename MethodList>
 class handler
-  : public Instanse
-  , public std::enable_shared_from_this< handler<Instanse> >
+  : public MethodList
+  , public std::enable_shared_from_this< handler<MethodList> >
 {
 public:
-  typedef handler<Instanse> self;
-  typedef Instanse super;
-  typedef typename Instanse::target_type target_type;
-  typedef typename Instanse::provider_type provider_type;
+  typedef handler<MethodList> self;
+  typedef MethodList super;
+  typedef typename super::handler_interface handler_interface;
+  typedef typename super::target_type target_type;
+  typedef typename super::provider_type provider_type;
+  typedef typename super::context_type context_type;
+  
+  typedef typename super::holder_type holder_type;
+  typedef typename super::io_id_t io_id_t;
+  typedef typename super::outgoing_handler_t outgoing_handler_t;
   
   handler(target_type trg = target_type(), provider_type prv = provider_type() )
   {
     this->get_aspect().template get<_target_>() = trg;
     this->get_aspect().template get<_provider_>() = prv;
-    
-    {
-      auto ptr = this->get_aspect().template get<_provider_>();
-      if (auto p = ptr.lock() )
-      {
-        
-      }
-      else
-      {
-        
-      }
-    }
   }
 
-  virtual std::shared_ptr<handler_base> clone(/*outgoing_request_handler_t request_handler*/) const 
+  virtual std::shared_ptr<handler_interface> clone() const 
   {
-    
-    {
-      auto ptr = this->get_aspect().template get<_provider_>();
-      if (auto p = ptr.lock() )
-      {
-        
-      }
-      else
-      {
-        
-      }
-    }
-    
     return std::make_shared<self>(*this);
   }
   
   virtual std::vector<std::string> get_methods() const
   {
+    // TODO: в аспект
     return fas::for_each_group<_method_>(*this, f_get_methods() ).result;
   }
 
-  virtual void process(incoming_holder holder, ::wfc::io::outgoing_handler_t callback) 
+  virtual void invoke(holder_type holder, outgoing_handler_t outgoing_handler) 
   {
-    if ( !fas::for_each_group<_method_>(*this, f_invoke( holder, callback ) ) )
-    {
-      // В аспект!
-      typedef outgoing_error_json< error_json::type >::type json_type;
-      outgoing_error<error> error_message;
-      error_message.error = std::make_unique<error>(procedure_not_found());
-      error_message.id = std::move( holder.raw_id() );
-              
-      auto d = std::make_unique< ::wfc::io::data_type>();
-      typename json_type::serializer()(error_message, std::inserter( *d, d->end() ));
-      callback( std::move(d) );
-    };
+    super::get_aspect().template get<_invoke_>()(*this, std::move(holder), std::move(outgoing_handler) );
   }
   
-  ::wfc::io::io_id_t get_id() const
+  io_id_t get_io_id() const
   {
-    return _id;
+    return _io_id;
   }
   
-  virtual void start(::wfc::io::io_id_t id) 
+  virtual void start( io_id_t io_id ) 
   {
-    _id = id;
-    this->get_aspect().template get<_startup_>()(*this, id);
+    _io_id = io_id;
+    this->get_aspect().template get<_startup_>()(*this, io_id);
   }
   
-  virtual void stop(::wfc::io::io_id_t id)
+  virtual void stop( io_id_t io_id)
   {
-    this->get_aspect().template get<_shutdown_>()(*this, id);
+    this->get_aspect().template get<_shutdown_>()(*this, io_id);
   }
-
   
   target_type target() const
   {
@@ -148,11 +88,22 @@ public:
   {
     return this->get_aspect().template get<_provider_>();
   }
+  
+  context_type& context()
+  {
+    return this->get_aspect().template get<_context_>();
+  }
+
+  const context_type& context() const
+  {
+    return this->get_aspect().template get<_context_>();
+  }
 
 private:
-  ::wfc::io::io_id_t _id;
+  
+  io_id_t _io_id;
+  
 };
 
 }} // wfc
-
 

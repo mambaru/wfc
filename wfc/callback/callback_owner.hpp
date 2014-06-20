@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wfc/callback/callback_status.hpp>
+#include <wfc/logger.hpp>
 //#include <map>
 #include <memory>
 //#include <string>
@@ -32,8 +33,9 @@ struct callback_wrapper
     {
       return _handler(std::forward<Args>(args)...);
     }
-    std::cout << "NOT ALIVE!!!" << std::endl;
-    return _not_alive(/*std::forward<Args>(args)...*/);
+    
+    DEBUG_LOG_WARNING("callback_wrapper: Owner not alive")
+    return _not_alive();
   }
 private:
   weak_type _alive;
@@ -59,7 +61,7 @@ struct callback_wrapper2
     {
       return _handler(std::forward<Args>(args)...);
     }
-    std::cout << "NOT ALIVE 2 !!!" << std::endl;
+    DEBUG_LOG_WARNING("callback_wrapper2: Owner not alive")
     return decltype( _handler(std::forward<Args>(args)...))();
   }
 private:
@@ -133,7 +135,7 @@ public:
       {
         return f(std::forward<Args>(args)...);
       }
-      std::cout << "NOT ALIVE 3 !!!" << std::endl;
+      DEBUG_LOG_WARNING("callback_owner: Owner not alive")
       return R();
     };
   }
