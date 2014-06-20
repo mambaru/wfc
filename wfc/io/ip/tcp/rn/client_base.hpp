@@ -34,6 +34,7 @@ inline typename T::options_type update_options(T* self, typename T::options_type
 template<typename A = fas::aspect<> >
 class client_base
   : public ::wfc::io::basic_io< typename fas::merge_aspect<A, client_aspect>::type >
+  , public std::enable_shared_from_this< client_base<A> >
   //public wfc::io::connection::connection< typename fas::merge_aspect<A, client_aspect>::type >
 {
   //typedef wfc::io::connection::connection< typename fas::merge_aspect<A, client_aspect>::type > super;
@@ -98,28 +99,33 @@ public:
     });
 
     auto psock = std::make_shared<socket_type>( this->get_io_service() );
-
-    psock->async_connect(ep, super::strand().wrap( [ep, psock, this](const boost::system::error_code& ec)
+    std::weak_ptr<self> wself = this->shared_from_this();
+    
+    psock->async_connect(ep, super::strand().wrap( [ep, psock, wself](const boost::system::error_code& ec)
     {
+      auto pthis = wself.lock();
+      if ( pthis == nullptr )
+        return;
+      
       if ( !ec )
       {
-        COMMON_LOG_MESSAGE( "Client " << this->options().host << ":" << this->options().port << " connected!" )
+        COMMON_LOG_MESSAGE( "Client " << pthis->options().host << ":" << pthis->options().port << " connected!" )
         // TODO: для connection отдельный handler
         
-        auto opt = this->options().connection;
+        auto opt = pthis->options().connection;
         //opt.incoming_handler = this->_handler;
-        this->_connection = std::make_shared<connection_type>( std::move(*psock), opt);
-        this->_connection->start();
+        pthis->_connection = std::make_shared<connection_type>( std::move(*psock), opt);
+        pthis->_connection->start();
       }
       else
       {
-        DAEMON_LOG_WARNING( this->options().host << ":" << this->options().port << ": " 
-                            << ec.message() << " " << this->options().reconnect_timeout << " seconds to reconnect." )
+        DAEMON_LOG_WARNING( pthis->options().host << ":" << pthis->options().port << ": " 
+                            << ec.message() << " " << pthis->options().reconnect_timeout << " seconds to reconnect." )
         
-        this->_reconnect_timer.expires_from_now( boost::posix_time::seconds( this->options().reconnect_timeout) );
-        this->_reconnect_timer.async_wait([this, ep, psock](const boost::system::error_code& ) 
+        pthis->_reconnect_timer.expires_from_now( boost::posix_time::seconds( pthis->options().reconnect_timeout) );
+        pthis->_reconnect_timer.async_wait([pthis, ep, psock](const boost::system::error_code& ) 
         {
-           this->connect();
+           pthis->connect();
         });
       }
     }));

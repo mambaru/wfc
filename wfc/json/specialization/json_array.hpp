@@ -126,7 +126,7 @@ public:
   {
     if ( parser::is_null(beg, end) )
     {
-      for (int i = 0; i < N ; ++i)
+      for (size_t i = 0; i < N ; ++i)
         t[i] = target();
       return parser::parse_null(beg, end);
     }

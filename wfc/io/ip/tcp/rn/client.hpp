@@ -22,7 +22,7 @@ public:
   void stop(std::function<void()> finalize);
   void shutdown();
 private:
-  std::unique_ptr<client_impl> _impl;
+  std::shared_ptr<client_impl> _impl;
 };
   
 }}}}}
