@@ -10,7 +10,7 @@ client::~client()
 
   
 client::client(wfc::io_service& io, const options_type& conf/*, wfc::io::handler handler*/ )
-  : _impl( std::make_unique<client_impl>( io, conf/*, handler*/) )
+  : _impl( std::make_shared<client_impl>( io, conf/*, handler*/) )
 {
   
 }
