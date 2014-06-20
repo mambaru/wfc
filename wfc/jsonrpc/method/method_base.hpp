@@ -55,13 +55,13 @@ public:
   /// ///////////////////////////////////////////////////
   /// ///////////////////////////////////////////////////
   
-  template<typename T, typename ReqPtr, typename Callback>
-  void call(T& t, ReqPtr req, Callback callback) const
+  template<typename T, typename ParamsPtr, typename Callback>
+  void call(T& t, ParamsPtr params, Callback callback) const
   {
     this->get_aspect().template get<_call_>()( 
       t, 
       *this, 
-      std::move(req), 
+      std::move(params), 
       std::move(callback) 
     );
   }

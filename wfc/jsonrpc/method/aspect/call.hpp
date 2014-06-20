@@ -11,7 +11,7 @@
 
 namespace wfc{ namespace jsonrpc{
   
-template<typename JParams, typename JResult>
+template<typename JParams, typename JResult, typename JError = error_json>
 struct call
 {
   typedef fas::metalist::advice metatype;
@@ -23,9 +23,10 @@ struct call
   
   typedef JParams params_json;
   typedef JResult result_json;
+  typedef JError  error_json;
   typedef typename params_json::target params_type;
   typedef typename result_json::target result_type;
-  typedef error                        error_type;
+  typedef typename error_json::target  error_type;
   
   typedef typename std::unique_ptr<params_type> params_ptr;
   typedef typename std::unique_ptr<result_type> result_ptr;
