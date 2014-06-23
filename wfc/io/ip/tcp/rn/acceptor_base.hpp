@@ -28,8 +28,8 @@ public:
   void stop(std::function<void()> finalize)
   {
     std::atomic<bool> flag(false);
-    super::stop([this, finalize, &flag](){
-      
+    super::stop([this, finalize, &flag]()
+    {
       auto &stg = this->get_aspect().template get<_holder_storage_>();
       for(auto& conn : stg)
       {

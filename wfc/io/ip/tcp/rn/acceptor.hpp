@@ -21,7 +21,7 @@ public:
   void stop(std::function<void()> finalize);
   void shutdown();
 private:
-  std::unique_ptr<acceptor_impl> _impl;
+  std::shared_ptr<acceptor_impl> _impl;
 };
   
 }}}}}

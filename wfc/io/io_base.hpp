@@ -131,6 +131,19 @@ public:
     this->post(*this, h);
   }
   
+  std::function<void()> super_wrap(std::function<void()> fun, std::function<void()> not_alive = nullptr)
+  {
+    return this->owner().wrap(
+      this->strand().wrap(
+        this->owner().wrap(
+          fun,
+          not_alive
+        )
+      ),
+      not_alive
+    );
+  }
+  
   ::wfc::io::outgoing_handler_t callback( std::function<void(data_ptr)> handler)
   {
     auto wrp = this->owner().wrap( this->strand().wrap( [handler]( std::shared_ptr<data_ptr> dd ){

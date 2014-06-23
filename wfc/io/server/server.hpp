@@ -64,7 +64,7 @@ struct ad_configure
         descriptor_type descriptor( *io, boost::asio::ip::tcp::v4(), fd);
         
         //descriptor_type descriptor( t.get_io_service(), boost::asio::ip::tcp::v4(), fd);
-        acceptors.push_back( std::make_unique<acceptor_type>( std::move(descriptor), conf/*, t._handler*/) );
+        acceptors.push_back( std::make_shared<acceptor_type>( std::move(descriptor), conf/*, t._handler*/) );
         services.push_back(io);
       }
       else
@@ -182,7 +182,7 @@ struct aspect: fas::aspect
   // fas::value<_acceptor_count_, size_t>,
   // fas::value<_thread_count_, size_t>,
   fas::type< wfc::io::server::_acceptor_type_, Acceptor>,
-  fas::value< _acceptors_, std::list< std::unique_ptr<Acceptor> > >,
+  fas::value< _acceptors_, std::list< std::shared_ptr<Acceptor> > >,
   fas::value< _threads_, std::list< std::unique_ptr<std::thread> > >,
   fas::value< _io_services_, std::list< std::shared_ptr<wfc::io_service> > >,
   fas::advice<_configure_server_, ad_configure>,

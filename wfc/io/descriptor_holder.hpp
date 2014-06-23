@@ -29,6 +29,7 @@ struct holder_aspect: fas::aspect<
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class descriptor_holder
   : public basic_io< typename fas::merge_aspect<A, holder_aspect>::type , AspectClass>
+  // , std::enable_shared_from_this< descriptor_holder<A, AspectClass> >
 {
 public:
   
@@ -90,10 +91,24 @@ public:
   {
     std::atomic<bool> flag(false);
     
-    super::get_io_service().post( super::strand().wrap( [this, &t, &flag, finalize](){
-      this->stop_impl(t, finalize);
+    /*std::weak_ptr<T>*/auto pthis = t.shared_from_this();
+    std::weak_ptr<typename decltype(pthis)::element_type> wthis(pthis);
+    super::get_io_service().post( super::super_wrap( [wthis, &t, &flag, finalize]()
+    {
+      if ( auto pthis = wthis.lock() )
+        pthis->stop_impl(t, finalize);
+      flag = true;
+    },
+    [&flag](){ flag=true;}
+    ));
+    /*
+    super::get_io_service().post( super::strand().wrap( [wthis, &t, &flag, finalize]()
+    {
+      if ( auto pthis = wthis.lock() )
+        pthis->stop_impl(t, finalize);
       flag = true;
     }));
+    */
     
     
     while (!flag)
