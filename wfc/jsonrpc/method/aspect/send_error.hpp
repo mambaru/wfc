@@ -30,6 +30,8 @@ struct send_error
     error_message.id = std::make_unique<data_type>( id_range.first, id_range.second );
 
     auto d = holder.detach();
+    if ( d == nullptr )
+      d = std::make_unique<data_type>();
     d->clear();
     d->reserve(ReserveSize);
     typename message_json::serializer()(error_message, std::inserter( *d, d->end() ));
