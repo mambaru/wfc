@@ -38,23 +38,23 @@ struct invoke: Handler
     typename T::outgoing_handler_t outgoing_handler
   ) 
   {
+    params_ptr req = nullptr;
+
+    try // invalid_params
+    {
+      req = holder.template get_params<params_json>();
+    }
+    catch (const json::json_error& )
+    {
+      return TT::template send_error<T, error_json>( 
+        std::move(holder), 
+        std::make_unique<invalid_params>(), 
+        std::move(outgoing_handler) 
+      );
+    }
+      
     try // server_error
     {
-      params_ptr req = nullptr;
-
-      try // invalid_params
-      {
-        req = holder.template get_params<params_json>();
-      }
-      catch (const json::json_error& )
-      {
-        return TT::template send_error<T, error_json>( 
-          std::move(holder), 
-          std::make_unique<invalid_params>(), 
-          std::move(outgoing_handler) 
-        );
-        
-      }
       if ( holder.is_notify() )
       {
         Handler::operator()( t, std::move(req), nullptr);
@@ -65,39 +65,63 @@ struct invoke: Handler
         Handler::operator()( t, std::move(req), 
           [ph, outgoing_handler]( result_ptr params, error_ptr err )
           {
-            if (err == nullptr )
+            try
             {
-              TT::template send_result<T, result_json>( 
-                std::move(*ph), 
-                std::move(params), 
-                std::move(outgoing_handler) 
-              );
+              if (err == nullptr )
+              {
+                TT::template send_result<T, result_json>( 
+                  std::move(*ph), 
+                  std::move(params), 
+                  std::move(outgoing_handler) 
+                );
+              }
+              else
+              {
+                TT::template send_error<T, error_json>( 
+                  std::move(*ph), 
+                  std::move(err), 
+                  std::move(outgoing_handler)
+                );
+              }
             }
-            else
+            catch(const std::exception& e)
             {
-              TT::template send_error<T, error_json>( 
-                std::move(*ph), 
-                std::move(err), 
-                std::move(outgoing_handler)
-              );
+              DAEMON_LOG_FATAL("jsonrpc service exception: " << e.what() )
+              abort();
+            }
+            catch(...)
+            {
+              DAEMON_LOG_FATAL("jsonrpc service unhandled exception")
+              abort();
             }
           } // callback 
         );
       }
     }
-    catch(...)
+    catch(const std::exception& e)
     {
-      DAEMON_LOG_ERROR("wfc::jsonrpc::invoke::operator() : unhandled exception (Server Error)")
-      
+      DAEMON_LOG_ERROR("wfc::jsonrpc::invoke::operator() : " << e.what() )
+      // Ахтунг! holder перемещен
       TT::template send_error<T, error_json>( 
         std::move(holder), 
         std::make_unique<server_error>(),
         std::move(outgoing_handler) 
       );
-      
+      throw;
+    }
+    catch(...)
+    {
+      DAEMON_LOG_ERROR("wfc::jsonrpc::invoke::operator() : unhandled exception (Server Error)")
+      // Ахтунг! holder перемещен
+      TT::template send_error<T, error_json>( 
+        std::move(holder), 
+        std::make_unique<server_error>(),
+        std::move(outgoing_handler) 
+      );
       throw;
     }
   }
+
 };
 
 
