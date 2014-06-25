@@ -6,6 +6,8 @@
 #include <wfc/io/types.hpp>
 #include <vector>
 #include <string>
+#include <thread>
+#include <list>
 
 namespace wfc{ namespace jsonrpc{
   
@@ -28,11 +30,24 @@ public:
   void start();
 
   void stop();
+  
+  std::weak_ptr<handler_interface> get_prototype() const;
+  
+  std::shared_ptr<handler_interface> clone_prototype() const;
+
 
 private:
+  typedef std::shared_ptr<service_impl> impl_ptr;
+  typedef std::shared_ptr<io_service> io_service_ptr;
   
-  std::shared_ptr<service_impl> _impl;
+  impl_ptr _impl;
+  int _threads;
   
+  std::vector<impl_ptr> _impl_list;
+  std::vector<std::thread> _thread_list;
+  std::vector<io_service_ptr> _io_service_list;
+
+  void run_thread(int idx);
 };
 
 

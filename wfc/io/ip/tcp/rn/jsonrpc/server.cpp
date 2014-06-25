@@ -5,6 +5,27 @@
 
 namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{ namespace jsonrpc{
 
+  /*
+struct no_jsonrpc_service
+{
+  typedef wfc::jsonrpc::service::handler_interface handler_interface;
+  typedef std::shared_ptr<handler_interface> handler_ptr;
+  typedef ::wfc::jsonrpc::service service_type;
+  typedef std::weak_ptr<service_type> service_ptr;
+  
+  no_jsonrpc_service(service_ptr service)
+    : service(service)
+  {}
+
+  void operator()( ::wfc::io::data_ptr d, ::wfc::io::io_id_t io_id, ::wfc::io::outgoing_handler_t outgoing_handler)
+  {
+    
+  }
+  
+  service_ptr service;
+  handler_ptr handler;
+}
+  */
 server::~server()
 {
 }

@@ -8,8 +8,8 @@ namespace wfc{ namespace io{ namespace basic{
 
 struct ad_create
 {
-  template<typename T,  typename Init>
-  void operator()(T& t, const Init& )
+  template<typename T/*,  typename Init*/>
+  void operator()(T& t/*, const Init&*/ )
   {
    
     typedef typename T::aspect::template advice_cast<_owner_type_>::type owner_type;

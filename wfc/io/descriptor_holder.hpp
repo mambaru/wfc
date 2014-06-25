@@ -11,8 +11,8 @@ struct _holder_create_;
 
 struct ad_holder_create
 {
-  template<typename T, typename Tmp>
-  void operator()(T& t, Tmp)
+  template<typename T/*, typename Tmp*/>
+  void operator()(T& t/*, Tmp*/)
   {
     t.get_aspect().template get<_status_>()=true;
   }
@@ -46,6 +46,17 @@ public:
     , _handler(conf.incoming_handler)
   {
   }
+  
+  template<typename Holder>
+  Holder dup(typename Holder::options_type& opt)
+  {
+    typedef typename Holder::descriptor_type dup_descriptor_type;
+    typedef typename dup_descriptor_type::native_handle_type dup_native_type;
+    dup_native_type f = ::dup( this->descriptor().native_handle() );
+    dup_descriptor_type dup_descriptor(this->get_io_service(), descriptor_type::protocol_type(), f );
+    return Holder( std::move(dup_descriptor), opt );
+  }
+  
   
   descriptor_type& descriptor()
   {

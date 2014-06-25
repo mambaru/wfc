@@ -18,10 +18,14 @@ struct ad_method_handler
     
     if ( jsonrpc_handler.lock() == nullptr )
     {
-      jsonrpc_handler = t.get_prototype();
-    };
-    
-    if ( auto wrk = t.get_worker( holder.method() ).lock() )
+      // Если обработчик не был создан create_handler
+      // который вызываеться при новом коннекте 
+      // то при каждом запросе создаем временный 
+      // При этом обработка идет минуя воркеры
+      auto temporary_handler = t.clone_prototype();
+      temporary_handler->invoke( std::move(holder), outgoing_handler );
+    }
+    else if ( auto wrk = t.get_worker( holder.method() ).lock() )
     {
       auto ph = std::make_shared<incoming_holder>(std::move(holder) );
       wrk->post(  

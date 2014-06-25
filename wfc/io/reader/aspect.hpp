@@ -145,8 +145,8 @@ struct _set_transfer_handler_;
 template<typename TgResult>
 struct set_transfer_handler
 {
-  template<typename T, typename Tmp>
-  void operator()( T& t, const Tmp&)
+  template<typename T/*, typename Tmp*/>
+  void operator()( T& t/*, const Tmp&*/)
   {
     
     auto& th = t.get_aspect().template get<  ::wfc::io::basic::_transfer_handler_>();
