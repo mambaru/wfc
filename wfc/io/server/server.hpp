@@ -41,7 +41,7 @@ struct ad_configure
     desc.open(endpoint.protocol());
     desc.set_option( boost::asio::ip::tcp::acceptor::reuse_address(true) );
     desc.bind(endpoint);
-    desc.listen(128); // TODO: сделать опционально 
+    desc.listen(1024); // TODO: сделать опционально 
     
     COMMON_LOG_MESSAGE("listen " << t.options().host << ":" << t.options().port)
 
@@ -80,6 +80,7 @@ struct ad_start
     // Ахтунг! сделать свой io_service если потоков > 0;
     t.dispatch([&t]()
     {
+      DEBUG_LOG_MESSAGE("#### server::ad_start")
       auto& acceptors = t.get_aspect().template get<_acceptors_>();
       for(auto& ptr : acceptors)
       {
@@ -92,6 +93,7 @@ struct ad_start
       for (auto s : services)
       {
         threads.push_back( std::make_unique<std::thread>( [&t, s](){ 
+          DEBUG_LOG_MESSAGE("#### server::ad_start run")
           s->run();
         }));
       }

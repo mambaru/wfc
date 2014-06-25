@@ -92,7 +92,7 @@ auto service::clone_prototype() const
 void service::run_thread(int idx)
 {
   io_service::work wrk( *(_io_service_list[idx]) );
-  _impl_list[i]->start();
+  _impl_list[idx]->start();
   _io_service_list[idx]->run();
 }
 
