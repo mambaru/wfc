@@ -5,6 +5,7 @@
 
 namespace wfc{ namespace io{ namespace rn{ namespace reader{ namespace check{
 
+  /*
 struct ad_create
 {
   template<typename T, typename Init>
@@ -14,5 +15,6 @@ struct ad_create
     t.get_aspect().template get< _limit_warning_ >() = init.rn_limit_warning;
   }
 };
+*/
 
 }}}}}

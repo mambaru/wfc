@@ -101,7 +101,7 @@ public:
     auto psock = std::make_shared<socket_type>( this->get_io_service() );
     std::weak_ptr<self> wself = this->shared_from_this();
     
-    psock->async_connect(ep, super::strand().wrap( [ep, psock, wself](const boost::system::error_code& ec)
+    psock->async_connect(ep, /*super::strand().wrap(*/ [ep, psock, wself](const boost::system::error_code& ec)
     {
       auto pthis = wself.lock();
       if ( pthis == nullptr )
@@ -128,7 +128,7 @@ public:
            pthis->connect();
         });
       }
-    }));
+    }/*)*/);
   }
 
   void start()

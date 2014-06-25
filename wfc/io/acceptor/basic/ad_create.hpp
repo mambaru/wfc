@@ -6,8 +6,8 @@ namespace wfc{ namespace io{ namespace acceptor{ namespace basic{
 
 struct ad_create
 {
-  template<typename T, typename Config>
-  void operator()(T& , const Config& )
+  template<typename T/*, typename Config*/>
+  void operator()(T& /*, const Config&*/ )
   {
     
   }

@@ -21,23 +21,17 @@ struct ad_configure
   {
     typedef typename T::aspect::template advice_cast<_acceptor_type_>::type acceptor_type;
     
-    /*
-    t.get_aspect().template get<_acceptor_count_>() = conf.acceptors;
-    t.get_aspect().template get<_thread_count_>() = conf.threads;
-    */
-    
     auto& acceptors = t.get_aspect().template get<_acceptors_>();
     while ( acceptors.size() > static_cast<size_t>(conf.threads) )
     {
-      //! acceptors.back()->stop();
       acceptors.pop_back();
     }
     
     typedef typename acceptor_type::descriptor_type descriptor_type;
-  
+
     descriptor_type desc( t.get_io_service() );
-  
-    
+
+    // TODO: нахрен отсюда - я не знаю какой протокол
     boost::asio::ip::tcp::resolver resolver( t.get_io_service() );
     boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve({
       t.options().host, 

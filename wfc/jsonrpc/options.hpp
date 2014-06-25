@@ -21,11 +21,12 @@ struct options:
     std::vector<strand> strands;
   };
   std::vector<worker> workers;
-  
+  int threads = 0;
   
   static options create() 
   {
     options opt;
+    opt.threads = 0;
     worker wrk;
     worker::strand stn;
     stn.count = 1;
