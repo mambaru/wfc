@@ -28,7 +28,7 @@ struct ad_insert
   {
     typedef typename T::aspect::template advice_cast<_holder_type_>::type holder_type;
     typedef typename holder_type::options_type holder_options_type;
-    typedef std::unique_ptr<holder_type> holder_ptr;
+    //typedef std::unique_ptr<holder_type> holder_ptr;
     
     // TODO: Вынести в аспект и инициализировать на этапе старта 
     holder_options_type holder_options = t.options().connection;
@@ -66,7 +66,8 @@ struct ad_insert
           auto itr = stg.find(id);
           if ( itr != stg.end() )
           {
-            auto pconn = std::make_shared<holder_ptr>( std::move(itr->second) );
+            //auto pconn = std::make_shared<holder_ptr>( std::move(itr->second) );
+            auto pconn = itr->second;
             stg.erase(itr);
             t.get_io_service().post( t.strand().wrap([pconn, id](){
             }));
@@ -80,9 +81,9 @@ struct ad_insert
     
 //#warning возможно holder_options.incoming_handler = opt.incoming_handler
     holder_options.incoming_handler = t._handler;
-    auto holder = std::make_unique<holder_type>( std::move(*d), holder_options );
+    auto holder = std::make_shared<holder_type>( std::move(*d), holder_options );
     auto id = holder->get_id();
-    auto res = t.get_aspect().template get<_holder_storage_>().insert( std::make_pair( id, std::move(holder) ) );
+    auto res = t.get_aspect().template get<_holder_storage_>().insert( std::make_pair( id, holder ) );
     if ( res.second )
     {
       res.first->second->start();
@@ -102,7 +103,7 @@ struct connection_manager_aspect: fas::aspect<
   fas::advice< wfc::io::_options_type_, acceptor_options>,
   fas::type<  _holder_type_,         connection >,
   fas::value< _config_,              acceptor_options  >,
-  fas::value< _holder_storage_,      std::map< ::wfc::io::io_id_t, std::unique_ptr<connection> >   >,
+  fas::value< _holder_storage_,      std::map< ::wfc::io::io_id_t, std::shared_ptr<connection> >   >,
   fas::advice< _insert_, ad_insert>
 >{};
 
