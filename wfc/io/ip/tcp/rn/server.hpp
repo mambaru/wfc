@@ -21,7 +21,7 @@ public:
   void stop();
   void shutdown();
 private:
-  std::unique_ptr<server_impl> _impl;
+  std::shared_ptr<server_impl> _impl;
 };
   
 }}}}}
