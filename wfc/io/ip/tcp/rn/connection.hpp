@@ -25,7 +25,7 @@ public:
   const ::wfc::io_service::strand& strand() const;
   ::wfc::io_service::strand& strand();
 private:
-  std::unique_ptr<connection_impl> _impl;
+  std::shared_ptr<connection_impl> _impl;
 };
   
 }}}}}
