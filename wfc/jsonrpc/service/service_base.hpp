@@ -90,7 +90,7 @@ public:
     notify_serializer_t serializer
   )
   {
-    this->post([this, io_id, name, serializer]()
+    //this->post([this, io_id, name, serializer]()
     {
       if ( auto wrk = this->get_worker(name).lock() )
       {
@@ -100,7 +100,7 @@ public:
           writer( std::move(d) );
         });
       }
-    });
+    }/*)*/;
   };
   
   void send_request(
@@ -110,7 +110,7 @@ public:
     request_serializer_t serializer
   )
   {
-    this->post([this, io_id, name, result_handler, serializer]()
+    /*this->post([this, io_id, name, result_handler, serializer]()*/
     {
       if ( auto wrk = this->get_worker(name).lock() )
       {
@@ -128,7 +128,7 @@ public:
           }
         });
       }
-    });
+    }/*)*/;
   };
   
   // Новый коннект
@@ -166,7 +166,8 @@ public:
   
   void start()
   {
-    this->dispatch( std::bind( &self::start_no_tf, this) );
+    this->start_no_tf();
+    //this->dispatch( std::bind( &self::start_no_tf, this) );
   }
   
   void stop()

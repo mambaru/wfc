@@ -11,7 +11,8 @@ struct ad_create
   template<typename T/*,  typename Init*/>
   void operator()(T& t/*, const Init&*/ )
   {
-   
+    typename T::lock_guard lk(t.mutex());
+    
     typedef typename T::aspect::template advice_cast<_owner_type_>::type owner_type;
     t.get_aspect().template get<_owner_>() = std::make_shared<owner_type>();
 

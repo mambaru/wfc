@@ -13,6 +13,7 @@ io_registry::io_registry()
   
 void io_registry::set_io(io_id_t io_id, std::shared_ptr<handler_interface> jsonrpc_handler, outgoing_handler_t outgoing_handler)
 {
+  lock_guard lk(_mutex);
   auto result = _io_map.insert( std::make_pair( io_id, io_info(jsonrpc_handler, outgoing_handler) ) );
   if ( !result.second )
   {
@@ -24,6 +25,7 @@ void io_registry::set_io(io_id_t io_id, std::shared_ptr<handler_interface> jsonr
 auto io_registry::erase_io( io_id_t io_id ) 
 -> std::shared_ptr<handler_interface>
 {
+  lock_guard lk(_mutex);
   std::shared_ptr<handler_interface> result;
   auto itr = _io_map.find(io_id);
   if ( itr != _io_map.end() )
@@ -44,6 +46,8 @@ auto io_registry::add_result_handler(io_id_t io_id, result_handler_t result_hand
 {
   std::pair<call_id_t, outgoing_handler_t> result(-1, nullptr);
   
+  lock_guard lk(_mutex);
+  
   auto itr = this->_io_map.find(io_id);
   if (itr!=this->_io_map.end())
   {
@@ -58,6 +62,8 @@ auto io_registry::add_result_handler(io_id_t io_id, result_handler_t result_hand
 auto io_registry::get_result_handler(call_id_t call_id) const
  -> io_registry::result_handler_t
 {
+  read_lock lk(_mutex);
+  
   auto itr = _call_io_map.find(call_id);
   if ( itr != _call_io_map.end() )
   {
@@ -90,6 +96,8 @@ auto io_registry::get_result_handler(call_id_t call_id) const
 auto io_registry::get_jsonrpc_handler(io_id_t io_id) const
 -> std::weak_ptr<handler_interface> 
 {
+  read_lock lk(_mutex);
+  
   auto itr = _io_map.find(io_id);
   
   return itr != _io_map.end() 
@@ -100,6 +108,8 @@ auto io_registry::get_jsonrpc_handler(io_id_t io_id) const
 auto io_registry::get_outgoing_handler(io_id_t io_id) const
  -> outgoing_handler_t
 {
+  read_lock lk(_mutex);
+  
   auto itr = _io_map.find(io_id);
   
   return itr != _io_map.end() 
@@ -109,6 +119,8 @@ auto io_registry::get_outgoing_handler(io_id_t io_id) const
 
 void io_registry::clear()
 {
+  lock_guard lk(_mutex);
+  
   _io_map.clear();
   _call_io_map.clear();
 }

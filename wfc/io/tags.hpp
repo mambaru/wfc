@@ -7,9 +7,12 @@ struct _io_service_type_;
 
 struct _context_;
 struct _data_type_;
-
 struct _strand_;
 struct _strand_type_;
+
+struct _mutex_type_;
+struct _lock_guard_;
+struct _read_lock_;
 
 struct _owner_;
 struct _owner_type_;
