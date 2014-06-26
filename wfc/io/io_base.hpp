@@ -31,6 +31,10 @@ public:
   typedef typename super::aspect::template advice_cast<_owner_type_>::type owner_type;
   typedef typename super::aspect::template advice_cast<_options_type_>::type options_type;
   typedef typename super::aspect::template advice_cast<_io_service_type_>::type io_service_type;
+  typedef typename super::aspect::template advice_cast<_mutex_type_>::type mutex_type;
+  typedef typename super::aspect::template advice_cast<_lock_guard_>::type lock_guard;
+  typedef typename super::aspect::template advice_cast<_read_lock_>::type read_lock;
+  
   typedef std::unique_ptr<data_type> data_ptr;
 
   ~io_base()
@@ -162,6 +166,12 @@ public:
     };
   }
   
+  mutex_type& mutex() const
+  {
+    return _mutex;
+  }
+
+  
 protected:
 
   template<typename T, typename Handler>
@@ -215,15 +225,18 @@ protected:
     if ( sh != nullptr )
     {
       sh(
-        _id, 
+        this->_id, 
         this->outgoing_handler(),
         //this->options().outgoing_handler,
         [&t, this]( std::function<void(io_id_t id)> release_fun ) 
         {
-          t.dispatch( [this, release_fun]()
+          lock_guard lk(this->mutex());
+          this->_release_handlers2.push_back(release_fun);
+          /*t.dispatch( [this, release_fun]()
           {
             this->_release_handlers2.push_back(release_fun);
           });
+          */
         }
       );
     }
@@ -240,18 +253,25 @@ protected:
       
       t.get_aspect().template gete<_before_stop_>()(t);
       
+      read_lock lk(_mutex);
       for ( auto& h : this->_release_handlers2)
       {
+        lk.unlock();
         h( this->_id );
+        lk.lock();
       }
       
       this->_release_handlers2.clear();
       
-      auto& sh = this->_options.shutdown_handler;
+      auto sh = this->_options.shutdown_handler;
       if ( sh != nullptr )
       {
+        lk.unlock();
         sh( this->_id );
+        lk.lock();
       }
+      
+      lk.unlock();
         
       if ( finalize!=nullptr )
       {
@@ -259,6 +279,8 @@ protected:
       }
       
       t.get_aspect().template gete<_after_stop_>()(t);
+      
+      lk.lock();
     }
   }
   
@@ -286,7 +308,6 @@ protected:
     */
   }
   
-  
 private:
   io_service_type& _io_service;
   options_type _options;
@@ -295,7 +316,7 @@ private:
   
   io_id_t _id;
   std::atomic_flag _stop_flag;
-  
+  mutable mutex_type _mutex;
 };
 
 }}

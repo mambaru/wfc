@@ -33,7 +33,14 @@ void service::create_handler( io_id_t io_id,  outgoing_handler_t writer, add_shu
 
 void service::operator()( data_ptr d,  io_id_t io_id,  outgoing_handler_t outgoing_handler)
 {
-  _impl->operator ()( std::move(d), io_id, outgoing_handler);
+  if ( _threads == 0  )
+  {
+    _impl->operator ()( std::move(d), io_id, outgoing_handler);
+  }
+  else
+  {
+    _impl_list[ io_id % _threads ]->operator ()( std::move(d), io_id, outgoing_handler);
+  }
 }
 
 std::vector<std::string> service::get_methods() const
@@ -73,9 +80,7 @@ void service::stop()
     
     _thread_list.clear();
   }
-    
 }
-
 
 auto service::get_prototype() const
 ->std::weak_ptr<handler_interface> 

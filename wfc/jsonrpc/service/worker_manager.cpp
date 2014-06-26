@@ -15,6 +15,7 @@ worker_manager::worker_manager(wfc::io_service& io_service, const options_type& 
 
 void worker_manager::start()
 {
+  lock_guard lk(_mutex);
   for (auto &w : _config.workers)
   {
     io_service_ptr io_ptr = nullptr;
@@ -40,11 +41,12 @@ void worker_manager::start()
           if ( itr == _method_map.end() )
           {
             pair_worker_list pwl;
-            itr = _method_map.insert( std::make_pair(m, pwl) ).first;
+            itr = _method_map.insert( std::make_pair(m, std::move(pwl) ) ).first;
           }
           itr->second.first.push_back(wrk);
           if ( itr->second.first.size() == 1)
-            itr->second.second = itr->second.first.begin();
+            itr->second.second.init( itr->second.first.begin() );
+            //itr->second.second = itr->second.first.begin();
         }
       }
     }
@@ -52,8 +54,10 @@ void worker_manager::start()
     for (int i=0; i < w.threads; ++i)
     {
       _threads.push_back( std::thread([io_ptr]() {
+        std::cout << "DEBUG_LOG_MESSAGE(\"jsonrpc thread run\")" << std::endl;
         ::wfc::io_service::work wrk(*io_ptr);
         io_ptr->run();
+        std::cout << "DEBUG_LOG_MESSAGE(\"jsonrpc thread stop\")" << std::endl;
       }));
     }
   }
@@ -61,6 +65,8 @@ void worker_manager::start()
 
 void worker_manager::stop()
 {
+  lock_guard lk(_mutex);
+  
   for (auto& s: this->_services)
     s->stop();
     
@@ -74,8 +80,10 @@ void worker_manager::stop()
 }
 
 std::weak_ptr< worker_manager::worker_type > 
-worker_manager::get_worker(const char* name)
+worker_manager::get_worker(const char* name) const
 {
+  read_lock lk(_mutex);
+  
   auto itr = _method_map.find( name );
   if ( itr == _method_map.end() )
   {
@@ -84,11 +92,18 @@ worker_manager::get_worker(const char* name)
 
   if ( itr!=_method_map.end() )
   {
+    auto wrk_itr =  itr->second.second.inc(
+      itr->second.first.begin(),
+      itr->second.first.end()
+    );
+    return *wrk_itr;
+    /*
     if ( itr->second.first.end() == itr->second.second )
     {
       itr->second.second = itr->second.first.begin();
     }
     return *(itr->second.second++);
+    */
   }
   return std::weak_ptr< worker_manager::worker_type >();
 }

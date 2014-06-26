@@ -3,6 +3,8 @@
 #include <wfc/jsonrpc/service/service_aspect.hpp>
 #include <wfc/jsonrpc/service/io_registry.hpp>
 #include <wfc/io/strand.hpp>
+#include <wfc/thread/spinlock.hpp>
+
 
 #include <thread>
 #include <list>
@@ -15,9 +17,26 @@ class worker_manager
 {
   typedef ::wfc::io::strand worker_type;
   typedef std::shared_ptr< worker_type > worker_ptr;
-  
   typedef std::list<worker_ptr> worker_list;
-  typedef std::pair<worker_list, typename worker_list::iterator > pair_worker_list;
+
+  struct iterator_holder
+  {
+    // iterator_holder( typename worker_list::iterator itr):itr(itr){}
+    void init( typename worker_list::const_iterator itr) { _itr =itr; }
+    typename worker_list::const_iterator inc(typename worker_list::const_iterator beg, typename worker_list::const_iterator end) const
+    {
+      if (beg==end) return beg;
+      std::lock_guard<spinlock> lk(_mutex);
+      if (_itr == end) _itr = beg;
+      return _itr++;
+    }
+  private:
+    mutable typename worker_list::const_iterator _itr;
+    mutable spinlock _mutex;
+  };
+  
+  
+  typedef std::pair<worker_list, /*typename worker_list::iterator*/iterator_holder > pair_worker_list;
   typedef std::map< std::string, pair_worker_list> method_map;
   typedef std::list< std::thread > thread_list;
   typedef std::shared_ptr< ::wfc::io_service> io_service_ptr;
@@ -33,7 +52,7 @@ public:
   
   void stop();
   
-  std::weak_ptr< worker_type > get_worker(const char* name);
+  std::weak_ptr< worker_type > get_worker(const char* name) const;
 
 private:
   wfc::io_service& _io_service;
@@ -43,6 +62,11 @@ private:
   worker_list _workers;
   service_list _services;
   thread_list _threads;
+  
+  typedef ::wfc::rwlock<std::mutex> mutex_type;
+  typedef ::wfc::read_lock<mutex_type> read_lock;
+  typedef std::lock_guard<mutex_type> lock_guard;
+  mutable mutex_type _mutex;
 };
 
 

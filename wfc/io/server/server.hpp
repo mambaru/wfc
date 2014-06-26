@@ -45,8 +45,6 @@ struct ad_configure
     
     COMMON_LOG_MESSAGE("listen " << t.options().host << ":" << t.options().port)
 
-    
-
     auto itr = acceptors.begin();
     auto& services = t.get_aspect().template get<_io_services_>();
     for (size_t i = 0 ; i < static_cast<size_t>(t.options().threads); ++i, ++itr)
@@ -54,6 +52,7 @@ struct ad_configure
       if ( acceptors.size() <  static_cast<size_t>(t.options().threads) )
       {
         auto io = std::make_shared<wfc::io_service>();
+        // TODO: desc.dup<descriptor_type>
         typename descriptor_type::native_handle_type fd = ::dup(desc.native_handle());
         descriptor_type descriptor( *io, boost::asio::ip::tcp::v4(), fd);
         
@@ -67,6 +66,11 @@ struct ad_configure
         // (*itr)->create( conf );
       }
     }
+    
+    if ( t.options().threads == 0)
+    {
+      acceptors.push_back( std::make_shared<acceptor_type>( std::move(desc), conf));
+    }
   }
 };
 
@@ -77,10 +81,9 @@ struct ad_start
   template<typename T>
   void operator()(T& t)
   {
-    // Ахтунг! сделать свой io_service если потоков > 0;
+    
     t.dispatch([&t]()
     {
-      DEBUG_LOG_MESSAGE("#### server::ad_start")
       auto& acceptors = t.get_aspect().template get<_acceptors_>();
       for(auto& ptr : acceptors)
       {
@@ -93,8 +96,9 @@ struct ad_start
       for (auto s : services)
       {
         threads.push_back( std::make_unique<std::thread>( [&t, s](){ 
-          DEBUG_LOG_MESSAGE("#### server::ad_start run")
+          std::cout << "DEBUG_LOG_MESSAGE(\"service thread run\")" << std::endl;
           s->run();
+          std::cout << "DEBUG_LOG_MESSAGE(\"service thread run\") stop" << std::endl;
         }));
       }
     });

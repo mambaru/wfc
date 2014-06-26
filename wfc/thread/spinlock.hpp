@@ -13,6 +13,17 @@ public:
   spinlock()
     : value(false) { }
 
+  spinlock(const spinlock&& other) 
+  {
+    value.exchange(other.value);
+  }
+  
+  spinlock& operator=(const spinlock&& other) 
+  {
+    value.exchange(other.value);
+    return *this;
+  }
+  
   spinlock(const spinlock&) = delete;
   
   spinlock& operator=(const spinlock&) = delete;

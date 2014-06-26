@@ -8,12 +8,15 @@
 
 #include <wfc/io/io_base.hpp>
 #include <fas/aop.hpp>
+#include <wfc/thread/rwlock.hpp>
+#include <mutex>
 
 
 namespace wfc{ namespace jsonrpc{
 
-struct io_info
+class io_info
 {
+public:
   typedef ihandler handler_interface;
   typedef handler_interface::result_handler_t   result_handler_t;
   typedef handler_interface::io_id_t io_id_t;
@@ -22,8 +25,8 @@ struct io_info
   
   typedef std::map<call_id_t, result_handler_t>  result_map_t;
 
-  std::shared_ptr<handler_interface> jsonrpc_handler;
-  outgoing_handler_t outgoing_handler;
+  const std::shared_ptr<handler_interface> jsonrpc_handler;
+  const outgoing_handler_t outgoing_handler;
   
   
   result_map_t result_map;
@@ -46,6 +49,10 @@ class io_registry
   
   typedef std::map< io_id_t, io_info >   io_map_t;
   typedef std::map< call_id_t, io_id_t > call_io_map_t;
+  
+  typedef ::wfc::rwlock<std::mutex> mutex_type;
+  typedef ::wfc::read_lock<mutex_type> read_lock;
+  typedef std::lock_guard<mutex_type> lock_guard;
   
 public:
   
@@ -71,6 +78,7 @@ private:
   call_id_t _call_id_counter;
   io_map_t _io_map;
   call_io_map_t _call_io_map;
+  mutable mutex_type _mutex;
 };
 
 }} // wfc

@@ -98,7 +98,7 @@ struct result_handler
     }
     else 
     {
-      boost::system::error_code ec = t.get_aspect().template get< ::wfc::io::_error_code_>();
+      boost::system::error_code ec = t.get_aspect().template get< ::wfc::io::_error_code_ >();
       
       if ( ec == boost::asio::error::operation_aborted)
       {
@@ -224,7 +224,8 @@ struct _user_handler_;
   
 struct basic_options
 {
-  size_t input_buffer_size = 8096;
+  //size_t input_buffer_size = 8096;
+  size_t input_buffer_size = 128;
 };
 
 /*

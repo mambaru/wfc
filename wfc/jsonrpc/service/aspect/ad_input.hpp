@@ -24,10 +24,10 @@ struct ad_input
 
     auto dd = std::make_shared< typename T::data_ptr >( std::move(d) );
 
-    t.post([&t, dd, io_id, tp_callback]()
+    //t.post([&t, dd, io_id, tp_callback]()
     {
       t.get_aspect().template get<_incoming_parser_>()( t, std::move(*dd), io_id, std::move(tp_callback) );
-    });
+    }/*)*/;
 
   }
 };
