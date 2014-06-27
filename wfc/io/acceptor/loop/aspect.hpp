@@ -13,7 +13,7 @@ typedef fas::type_list_n<
   fas::advice<_ready_, ad_ready>,
   fas::advice<_start_, ad_start>,
   fas::alias<_incoming_, _ready_>,
-  fas::group< wfc::io::_start_, _start_>
+  fas::group< wfc::io::_on_start_, _start_>
 >::type advice_list;
 
 struct aspect: fas::aspect

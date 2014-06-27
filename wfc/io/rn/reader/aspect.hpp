@@ -5,9 +5,10 @@
 #include <wfc/io/rn/reader/ad_trimmer.hpp>
 #include <wfc/io/rn/reader/ad_ready.hpp>
 #include <wfc/io/rn/reader/check/ad_check.hpp>
-#include <wfc/io/reader/aspect.hpp>
+#include <wfc/io/reader/aspect/aspect.hpp>
 #include <wfc/io/rn/rn.hpp>
 #include <wfc/io/basic/types.hpp>
+#include <wfc/io/basic/aspect.hpp>
 #include <fas/aop.hpp>
 
 namespace wfc{ namespace io{ namespace rn{ namespace reader{
@@ -44,8 +45,9 @@ struct options
   : basic_options
   ,  ::wfc::io::basic::options
 {
-  //std::function<callback_status()> not_alive = nullptr;
+  
 };
+
 
 
 template<typename TgOutgoing>

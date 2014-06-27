@@ -17,12 +17,22 @@ struct ad_holder_create
     t.get_aspect().template get<_status_>()=true;
   }
 };
+
+/*
+struct ad_error_code
+{
+  typedef ::boost::system::error_code error_code;
+private:
+  value
+}
+*/
   
 struct holder_aspect: fas::aspect<
   fas::advice< _holder_create_, ad_holder_create>,
-  fas::group< _create_, _holder_create_>,
-  fas::value< _status_, bool>,
-  fas::value< _error_code_, boost::system::error_code>
+  fas::group< _on_create_, _holder_create_>,
+  fas::value< _status_, bool>/*,
+  fas::value< _error_code_, boost::system::error_code> // todo; отдельно для reader, writer и про
+  */
 >{};
 
   
@@ -46,6 +56,12 @@ public:
     , _handler(conf.incoming_handler)
   {
   }
+  
+  ~descriptor_holder()
+  {
+    std::cout << "~descriptor_holder() ------------------- this=" << size_t(this) << std::endl;
+  }
+  
   
   template<typename Holder>
   Holder dup(typename Holder::options_type& opt)
@@ -73,26 +89,37 @@ public:
     return this->get_aspect().template get< ::wfc::io::_status_>();
   }
   
+  /*
   const boost::system::error_code& error_code() const 
   {
     return this->get_aspect().template get< ::wfc::io::_error_code_>();
   }
+  */
 
   template<typename T>
   void self_stop(T& t, std::function<void()> finalize)
   {
     if ( this->descriptor().is_open() )
-      this->descriptor().close();
+    {
+      std::cout << "self_stop -------------------> this=" << size_t(this) << std::endl;
+      boost::system::error_code ec;
+      this->descriptor().close(ec);
+    }
+    
     super::self_stop(t, finalize);
   }
+  
+  ::wfc::callback_owner _tmp;
 
   template<typename T>
   void stop_impl(T& t, std::function<void()> finalize)
   {
       if ( t.descriptor().is_open() )
       {
-        t.descriptor().cancel();
-        t.descriptor().close();
+        boost::system::error_code ec;
+        t.descriptor().cancel(ec);
+        if ( !ec )
+          t.descriptor().close(ec);
       }
     
       super::stop(t, finalize);
@@ -100,6 +127,11 @@ public:
   template<typename T>
   void stop(T& t, std::function<void()> finalize)
   {
+    //typename super::lock_guard lk( super::mutex() );
+    stop_impl(t, finalize);
+    return;
+    
+    
     std::atomic<bool> flag(false);
     
     /*std::weak_ptr<T>*/auto pthis = t.shared_from_this();

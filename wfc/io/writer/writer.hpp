@@ -10,6 +10,8 @@
 
 namespace wfc{ namespace io{ namespace writer{
   
+struct _error_code_;
+
 struct ad_async_write
 {
   template<typename T>
@@ -29,13 +31,16 @@ struct async_write_some
   {
     TRACE_LOG_MESSAGE( "ASYNC WRITE [[" << std::string(d->begin(), d->end() ) << "]]..." )
     auto dd = std::make_shared<typename T::data_ptr>( std::move(d) );
+    
+    t.mutex().unlock();
     t.descriptor().async_write_some
     (
       ::boost::asio::buffer( **dd ),
       //::boost::asio::buffer( tmp   ),
-      t.owner().wrap(t.strand().wrap( t.owner().wrap(
+      //t.owner().wrap(t.strand().wrap( t.owner().wrap(
         [this, &t, dd]( boost::system::error_code ec, std::size_t bytes_transferred )
         { 
+          typename T::lock_guard lk(t.mutex());
           if ( ec )
           {
             t.get_aspect().template get<_status_>() = false;
@@ -43,13 +48,16 @@ struct async_write_some
           }
           t.get_aspect().template get<Tg>()(t, std::move(*dd), bytes_transferred);
         }
-      )), 
+      /*)), 
       []()
       { 
-      })
+      })*/
     );
+    t.mutex().lock();
   }
 };
+
+
 
 struct _write_;
 struct _async_write_;
@@ -139,7 +147,10 @@ struct result_handler
     }
     else 
     {
-      boost::system::error_code ec = t.get_aspect().template get< ::wfc::io::_error_code_>();
+      t.get_aspect().template get< ::wfc::io::_status_>() = false;
+      boost::system::error_code ec = t.get_aspect().template get< _error_code_>();
+      
+      TRACE_LOG_MESSAGE("WRITER error: " << ec.value() << ", " << ec.message()  )
       
       if ( ec == boost::asio::error::operation_aborted)
       {
@@ -148,6 +159,7 @@ struct result_handler
       else
       {
         t.get_aspect().template get< TgError >()(t, ec, std::move(d) );
+        t.self_stop(t, nullptr);
       }
     }
   }
@@ -240,6 +252,7 @@ typedef std::list<  ::wfc::io::basic::data_ptr> data_list;
 
 template< template<typename> class AsyncWriteSome/*, typename TgOutgoing = _incoming_, typename TgOutput = _output_*/ >
 struct aspect: fas::aspect<
+  fas::value< _error_code_, boost::system::error_code>,
   fas::alias<_incoming_, _write_>, 
   fas::advice< _write_some_,    AsyncWriteSome<_write_handler_> >,      /// async_read_some - Вынести 
   fas::advice< _write_handler_, result_handler<_write_ready_, _write_aborted_, _write_error_> >,

@@ -6,7 +6,7 @@
 #include <fas/aop.hpp>
 
 #include <wfc/io/posix/rn/reader_options.hpp>
-#include <wfc/io/reader/aspect.hpp>
+#include <wfc/io/reader/aspect/aspect.hpp>
 #include <wfc/io/rn/reader/aspect.hpp>
 
 #include <wfc/io/posix/rn/writer_options.hpp>
@@ -85,15 +85,15 @@ struct ad_on_rn_write
   
 struct connection_aspect: 
   fas::aspect<
-    fas::value<_shutdown_flag_, bool>, 
+    fas::value<_shutdown_flag_, std::atomic<bool> >, 
     fas::advice<_on_write_, ad_on_write>, 
     fas::advice<_on_rn_write_, ad_on_rn_write>, 
     fas::advice<_on_read_error_, ad_on_read_error>,
-    fas::group<wfc::io::reader::_on_aborted_, _on_read_error_>,
+    fas::group<wfc::io::reader::_on_abort_, _on_read_error_>,
     fas::group<wfc::io::reader::_on_error_, _on_read_error_>, 
     fas::group<wfc::io::writer::_on_write_, _on_write_>, 
     fas::group<wfc::io::rn::writer::_on_write_, _on_rn_write_>, 
-    fas::stub< wfc::io::_stop_>, // tmp
+    //fas::stub< wfc::io::_stop_>, // tmp
 
     fas::advice< wfc::io::_options_type_, connection_options>,
     fas::type< wfc::io::_descriptor_type_, boost::asio::ip::tcp::socket>,
@@ -101,7 +101,9 @@ struct connection_aspect:
     wfc::io::rn::writer::aspect2<wfc::io::writer::_incoming_>,
     wfc::io::writer::stream< boost::asio::posix::stream_descriptor>, 
 
-    wfc::io::reader::aspect< wfc::io::async_read_some2, wfc::io::rn::reader::_incoming_, wfc::io::rn::writer::_incoming_ >,
+    //wfc::io::reader::aspect< wfc::io::reader::async_read_some, wfc::io::rn::reader::_incoming_, wfc::io::rn::writer::_incoming_ >,
+    fas::alias<wfc::io::reader::_output_, wfc::io::rn::writer::_incoming_>,
+    ::wfc::io::reader::aspect,
     wfc::io::rn::reader::aspect2<wfc::io::reader::_incoming_>,
     wfc::io::reader::error_log
   >

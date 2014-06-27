@@ -27,6 +27,26 @@ public:
   
   void stop(std::function<void()> finalize)
   {
+    super::stop([this, finalize]()
+    {
+      typename super::lock_guard lk( super::mutex() );
+      auto &stg = this->get_aspect().template get<_holder_storage_>();
+      for(auto& conn : stg)
+      {
+        conn.second->stop(nullptr);
+      }
+      
+      stg.clear();
+
+      super::mutex().unlock();
+      if (finalize!=nullptr)
+      {
+        finalize();
+      }
+      super::mutex().lock();
+    });
+
+    /*
     std::atomic<bool> flag(false);
     super::stop([this, finalize, &flag]()
     {
@@ -54,7 +74,7 @@ public:
       super::get_io_service().reset();
       super::get_io_service().poll();
     }
-    
+    */
 
   }
 };

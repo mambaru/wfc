@@ -13,8 +13,10 @@ struct _connection_type_;
 struct client_aspect: 
   fas::aspect<
     fas::type<_connection_type_, connection>,
-    fas::advice< wfc::io::_options_type_, client_options>,
+    fas::advice< wfc::io::_options_type_, client_options>
+    /*,
     fas::stub< wfc::io::_stop_ >
+    */
   >
 {
 };

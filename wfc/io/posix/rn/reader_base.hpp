@@ -6,6 +6,7 @@
 
 namespace wfc{ namespace io{ namespace posix{ namespace rn{ 
 
+  
 template<typename A = fas::aspect<> >
 class reader_base:
   public wfc::io::reader::reader< typename fas::merge_aspect<A, reader_aspect>::type >
@@ -15,8 +16,8 @@ public:
   typedef typename super::options_type options_type; 
   typedef typename super::descriptor_type descriptor_type;
   
-  reader_base(descriptor_type&& desc, const options_type& conf/*, wfc::io::incoming_handler handler = nullptr*/)
-    : super( std::move(desc), conf/*, handler */)
+  reader_base(descriptor_type&& desc, const options_type& conf)
+    : super( std::move(desc), conf)
   {
   }
 };
