@@ -11,7 +11,7 @@ namespace wfc{ namespace io{ namespace posix{ namespace rn{
  
 struct writer_aspect: 
   fas::aspect<
-    fas::stub< wfc::io::_stop_>, // tmp
+    //fas::stub< wfc::io::_stop_>, // tmp
     fas::type< wfc::io::_options_type_, writer_options >,
     wfc::io::rn::writer::aspect2<wfc::io::writer::_incoming_>,
     wfc::io::writer::stream< boost::asio::posix::stream_descriptor, wfc::io::rn::writer::_incoming_>

@@ -33,7 +33,7 @@ public:
   typedef typename super::aspect::template advice_cast<_io_service_type_>::type io_service_type;
   typedef typename super::aspect::template advice_cast<_mutex_type_>::type mutex_type;
   typedef typename super::aspect::template advice_cast<_lock_guard_>::type lock_guard;
-  typedef typename super::aspect::template advice_cast<_read_lock_>::type read_lock;
+  //typedef typename super::aspect::template advice_cast<_read_lock_>::type read_lock;
   
   typedef std::unique_ptr<data_type> data_ptr;
 
@@ -47,7 +47,7 @@ public:
     , _stop_flag(ATOMIC_FLAG_INIT)
   {
     _id = create_id();
-    this->get_aspect().template get< basic::_transfer_handler_ >() = opt.outgoing_handler;
+    //this->get_aspect().template get< basic::_transfer_handler_ >() = opt.outgoing_handler;
   }
     
   io_id_t get_id() const { return _id;}
@@ -150,13 +150,12 @@ public:
   
   ::wfc::io::outgoing_handler_t callback( std::function<void(data_ptr)> handler)
   {
-    auto wrp = this->owner().wrap( this->strand().wrap( [handler]( std::shared_ptr<data_ptr> dd ){
-      
-      handler(std::move(*dd));
-    }), 
-    [](){ 
-    }
-    );
+    auto wrp = this->owner().wrap(
+      this->strand().wrap( [handler]( std::shared_ptr<data_ptr> dd )
+      {
+        handler(std::move(*dd));
+      }
+    ), [](){});
     
     auto wrp_ptr = std::make_shared< decltype(wrp) >(wrp);
     
@@ -189,31 +188,35 @@ protected:
   template<typename T>
   void create(T& t)
   {
-    t.get_aspect().template gete<_create_>()(t/*, _options*/);
+    t.get_aspect().template gete<_on_create_>()(t);
   }
 
   
   outgoing_handler_t outgoing_handler() const 
   {
-    const auto& handler = this->get_aspect().template get< basic::_transfer_handler_ >();
-    if (handler == nullptr)
+    //read_lock lk(_mutex);
+    return this->get_aspect().template get< _transfer_handler_ >();
+    
+    //const auto& handler = this->get_aspect().template get< _transfer_handler_ >();
+    /*if (handler == nullptr)
     {
       //std::function<void(data_ptr)> tmp = [](data_ptr)->void {};
       // ахтунг! self::data_type!= ::wfc::io::data_type;
       return nullptr;
     }
     return handler;
+    */
   }
   
+  /*
   void outgoing_handler(outgoing_handler_t handler) 
   {
     if ( handler == nullptr )
       return;
       
-    auto& prev = this->get_aspect().template get< basic::_transfer_handler_ >();
+    auto& prev = this->get_aspect().template get< _transfer_handler_ >();
     prev = handler;
-  }
-  
+  }*/
 
   template<typename T>
   void start(T& t)
@@ -224,6 +227,7 @@ protected:
     
     if ( sh != nullptr )
     {
+      this->mutex().unlock();
       sh(
         this->_id, 
         this->outgoing_handler(),
@@ -239,10 +243,10 @@ protected:
           */
         }
       );
+      this->mutex().lock();
     }
-    
     // Сначала запускаем startup_handler (иначе в mt данные могут прийти раньше )
-    t.get_aspect().template get<_start_>()(t);
+    t.get_aspect().template gete<_on_start_>()(t);
   }
   
   template<typename T>
@@ -250,19 +254,39 @@ protected:
   {
     if ( !_stop_flag.test_and_set() )
     {
+      t.get_aspect().template getg<_on_stop_>()(t);
+      auto handlers = std::move(this->_release_handlers2);
+      auto id = this->_id;
+      _mutex.unlock();
+      for ( auto& h : handlers)
+        h( id );
       
-      t.get_aspect().template gete<_before_stop_>()(t);
+      if ( finalize!=nullptr )
+      {
+        finalize();
+      }
+      _mutex.lock();
+    }
+    return;
+    
+    
+    
+    if ( !_stop_flag.test_and_set() )
+    {
       
-      read_lock lk(_mutex);
+      t.get_aspect().template getg<_on_stop_>()(t);
+      
+      //read_lock lk(_mutex);
       for ( auto& h : this->_release_handlers2)
       {
-        lk.unlock();
+        //lk.unlock();
         h( this->_id );
-        lk.lock();
+        //lk.lock();
       }
       
       this->_release_handlers2.clear();
       
+      /*
       auto sh = this->_options.shutdown_handler;
       if ( sh != nullptr )
       {
@@ -270,17 +294,18 @@ protected:
         sh( this->_id );
         lk.lock();
       }
+      */
       
-      lk.unlock();
+      //lk.unlock();
         
       if ( finalize!=nullptr )
       {
         finalize();
       }
       
-      t.get_aspect().template gete<_after_stop_>()(t);
+      //t.get_aspect().template gete<_after_stop_>()(t);
       
-      lk.lock();
+      //lk.lock();
     }
   }
   
@@ -289,14 +314,14 @@ protected:
   {
     if ( !_stop_flag.test_and_set() )
     {
-      t.get_aspect().template gete<_before_stop_>()(t);
+      t.get_aspect().template gete<_on_stop_>()(t);
 
       if ( finalize!=nullptr )
       {
         finalize();
       }
 
-      t.get_aspect().template gete<_after_stop_>()(t);
+      //t.get_aspect().template gete<_after_stop_>()(t);
 
     }
 

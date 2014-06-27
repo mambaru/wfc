@@ -21,6 +21,8 @@ public:
     // TODO: в опции 
     boost::asio::ip::tcp::no_delay option(true);
     super::descriptor().set_option(option);
+    
+    //super::get_aspect().template get< ::wfc::io::reader::_read_more_>();
   }
 };
   

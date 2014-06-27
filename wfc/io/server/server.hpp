@@ -96,9 +96,9 @@ struct ad_start
       for (auto s : services)
       {
         threads.push_back( std::make_unique<std::thread>( [&t, s](){ 
-          std::cout << "DEBUG_LOG_MESSAGE(\"service thread run\")" << std::endl;
+          DEBUG_LOG_MESSAGE("service thread run")
           s->run();
-          std::cout << "DEBUG_LOG_MESSAGE(\"service thread run\") stop" << std::endl;
+          DEBUG_LOG_MESSAGE("service thread stop")
         }));
       }
     });
@@ -176,9 +176,9 @@ template<typename Acceptor>
 struct aspect: fas::aspect
 <
   //context<>,
-  fas::stub< wfc::io::_stop_>,
+  //fas::stub< wfc::io::_stop_>,
   fas::advice<_before_stop_, ad_before_stop>,
-  fas::group< wfc::io::_before_stop_, _before_stop_>,
+  fas::group< wfc::io::_on_stop_, _before_stop_>, // TODO: переименовать
   // fas::value<_acceptor_count_, size_t>,
   // fas::value<_thread_count_, size_t>,
   fas::type< wfc::io::server::_acceptor_type_, Acceptor>,
@@ -188,7 +188,7 @@ struct aspect: fas::aspect
   fas::advice<_configure_server_, ad_configure>,
   fas::group< _configure_, _configure_server_>,
   fas::advice<_start_server_, ad_start>,
-  fas::group< wfc::io::_start_, _start_server_>
+  fas::group< wfc::io::_on_start_, _start_server_>
   
 >
 {};
@@ -239,14 +239,20 @@ public:
   
   void stop(std::function<void()> finalize)
   {
+    typename super::lock_guard lk(super::mutex());
+    DEBUG_LOG_BEGIN("---- server::stop ----");
     super::stop(*this, finalize);
     super::get_io_service().reset();
     while ( 0!=super::get_io_service().poll() ) { super::get_io_service().reset();};
+    DEBUG_LOG_END("---- server::stop ----");
   }
   
   void start()
   {
+    typename super::lock_guard lk(super::mutex());
+    DEBUG_LOG_BEGIN("---- server::start ----");
     super::start(*this);
+    DEBUG_LOG_END("---- server::start ----");
     //this->get_aspect().template get<_start_>()(*this);
   }
   

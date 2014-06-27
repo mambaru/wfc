@@ -22,6 +22,8 @@ struct ad_create
     
     // Копируем, т.к. на момент вызова not_alive объект t уже умер
     t.get_aspect().template get<_not_alive_>() = t.options().not_alive;
+    t.get_aspect().template get<_transfer_handler_>() = t.options().outgoing_handler;
+    
     
   }
 };

@@ -38,14 +38,20 @@ public:
 
   void start()
   {
+    typename super::lock_guard lk(super::mutex());
+    DEBUG_LOG_BEGIN("---- aceptor::start ----");
     super::start(*this);
+    DEBUG_LOG_END("---- aceptor::start ----");
   }
   
   void stop(std::function<void()> finalize)
   {
+    typename super::lock_guard lk(super::mutex());
+    DEBUG_LOG_BEGIN("---- acceptor::stop ----");
     super::stop(*this, finalize);
-    super::get_io_service().reset();
-    while ( 0!=super::get_io_service().poll() ) { super::get_io_service().reset();};
+    //super::get_io_service().reset();
+    //while ( 0!=super::get_io_service().poll() ) { super::get_io_service().reset();};
+    DEBUG_LOG_END("---- acceptor::stop ----");
   }
   
   template<typename Handler>

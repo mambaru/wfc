@@ -61,12 +61,18 @@ public:
 
   void start()
   {
+    typename super::lock_guard lk(super::mutex());
+    DEBUG_LOG_BEGIN("---- connectoion::start ----");
     super::start(*this);
+    DEBUG_LOG_END("---- connectoion::start ----");
   }
   
   void stop(std::function<void()> finalize)
   {
+    typename super::lock_guard lk(super::mutex());
+    DEBUG_LOG_BEGIN("---- connection::stop ----");
     super::stop(*this, finalize);
+    DEBUG_LOG_END("---- connection::stop ----");
   }
   
   bool status() const

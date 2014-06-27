@@ -21,8 +21,8 @@ SET(
   jsonrpc/service.cpp
   jsonrpc/service/io_registry.cpp
   jsonrpc/service/worker_manager.cpp
-  io/posix/rn/reader.cpp
-  io/posix/rn/writer.cpp
+  #io/posix/rn/reader.cpp
+  #io/posix/rn/writer.cpp
   io/ip/tcp/rn/connection.cpp
   io/ip/tcp/rn/server.cpp
   io/ip/tcp/rn/acceptor.cpp

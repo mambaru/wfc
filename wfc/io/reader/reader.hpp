@@ -2,8 +2,8 @@
 
 //#include <wfc/io/reader/read/sync/tags.hpp>
 //#include <wfc/io/reader/read/async_callback/tags.hpp>
-#include <wfc/io/reader/tags.hpp>
-#include <wfc/io/reader/aspect.hpp>
+#include <wfc/io/reader/aspect/tags.hpp>
+#include <wfc/io/reader/aspect/aspect.hpp>
 #include <wfc/io/descriptor_holder.hpp>
 #include <wfc/io/types.hpp>
 #include <fas/aop.hpp>

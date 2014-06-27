@@ -60,8 +60,9 @@ struct ad_insert
       
       add( /*t.strand().wrap(*/ [&t](::wfc::io::io_id_t id) 
       {
-        t.get_io_service().post( t.owner().wrap( t.strand().wrap( [id,&t]()
-        {
+        /*t.get_io_service().post( t.owner().wrap( t.strand().wrap( [id,&t]()
+        {*/
+          typename T::lock_guard lk( t.mutex() );
           auto &stg = t.get_aspect().template get<_holder_storage_>();
           auto itr = stg.find(id);
           if ( itr != stg.end() )
@@ -69,13 +70,12 @@ struct ad_insert
             //auto pconn = std::make_shared<holder_ptr>( std::move(itr->second) );
             auto pconn = itr->second;
             stg.erase(itr);
-            t.get_io_service().post( t.strand().wrap([pconn, id](){
-            }));
+            //t.get_io_service().post( t.strand().wrap([pconn, id](){}));
           }
           else
           {
           }
-        })));
+        /*})));*/
       });
     };
     
@@ -125,12 +125,12 @@ struct acceptor_aspect:
   fas::aspect<
     connection_manager_aspect,
     fas::advice< wfc::io::_incoming_, ad_ready>,
-    wfc::io::strategy::ip::tcp::acceptor::async,
+    wfc::io::strategy::ip::tcp::acceptor::async
     
     // Доработать
-    fas::stub< wfc::io::_create_ >,
-    fas::stub< wfc::io::_start_ >,
-    fas::stub< wfc::io::_stop_ >
+    //fas::stub< wfc::io::_create_ >,
+    // fas::stub< wfc::io::_start_ >,
+    //fas::stub< wfc::io::_stop_ >
 
   >
 {};
