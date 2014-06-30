@@ -59,7 +59,7 @@ public:
   
   ~descriptor_holder()
   {
-    std::cout << "~descriptor_holder() ------------------- this=" << size_t(this) << std::endl;
+    
   }
   
   
@@ -101,7 +101,6 @@ public:
   {
     if ( this->descriptor().is_open() )
     {
-      std::cout << "self_stop -------------------> this=" << size_t(this) << std::endl;
       boost::system::error_code ec;
       this->descriptor().close(ec);
     }

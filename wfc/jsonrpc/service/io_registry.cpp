@@ -87,7 +87,7 @@ auto io_registry::get_result_handler(call_id_t call_id) const
   }
   else
   {
-    COMMON_LOG_WARNING("jsonrpc::service: jsonrpc id=" << call_id << " not found");
+    COMMON_LOG_WARNING("jsonrpc::service: jsonrpc call_id=" << call_id << " not found");
   }
   return nullptr;
 }

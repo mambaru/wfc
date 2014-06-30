@@ -20,11 +20,15 @@ struct ad_user_handler
       typedef std::chrono::high_resolution_clock clock_t;
       clock_t::time_point start = clock_t::now();
       */
-      auto callback =  t.callback([&t/*, start*/](typename T::data_ptr d)
+      auto pthis = t.shared_from_this();
+      auto callback =  /*t.callback(*/[pthis/*, start*/](typename T::data_ptr d)
         {
-          typename T::lock_guard lk(t.mutex());
-          t.get_aspect().template get<_output_>()(t, std::move(d) );
-        });
+          typename T::lock_guard lk(pthis->mutex());
+          if ( !pthis->status() )
+            return;
+          
+          pthis->get_aspect().template get<_output_>()(*pthis, std::move(d) );
+        }/*)*/;
 
       t.mutex().unlock();
       handler(
