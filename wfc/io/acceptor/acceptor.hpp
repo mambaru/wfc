@@ -46,8 +46,9 @@ public:
   
   void stop(std::function<void()> finalize)
   {
+    DEBUG_LOG_BEGIN("---- acceptor::stop prelock---- " << size_t(this) );
     typename super::lock_guard lk(super::mutex());
-    DEBUG_LOG_BEGIN("---- acceptor::stop ----");
+    DEBUG_LOG_BEGIN("---- acceptor::stop lock---- " << size_t(this) );
     super::stop(*this, finalize);
     //super::get_io_service().reset();
     //while ( 0!=super::get_io_service().poll() ) { super::get_io_service().reset();};

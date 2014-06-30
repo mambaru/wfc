@@ -32,22 +32,30 @@ struct async_write_some
     TRACE_LOG_MESSAGE( "ASYNC WRITE [[" << std::string(d->begin(), d->end() ) << "]]..." )
     auto dd = std::make_shared<typename T::data_ptr>( std::move(d) );
     
+    auto pthis = t.shared_from_this();
+    auto callback =         [pthis, dd]( boost::system::error_code ec, std::size_t bytes_transferred )
+        { 
+          DEBUG_LOG_BEGIN("async_write_some: " << ec.message())
+          typename T::lock_guard lk(pthis->mutex());
+          if ( ec )
+          {
+            pthis->get_aspect().template get<_status_>() = false;
+            pthis->get_aspect().template get<_error_code_>() = ec;
+          }
+          pthis->get_aspect().template get<Tg>()(*pthis, std::move(*dd), bytes_transferred);
+          DEBUG_LOG_END("async_write_some: " << ec.message())
+        };
+        
+    //auto wcallback = t.owner().wrap(callback);
+  
+    
     t.mutex().unlock();
     t.descriptor().async_write_some
     (
       ::boost::asio::buffer( **dd ),
+      callback
       //::boost::asio::buffer( tmp   ),
       //t.owner().wrap(t.strand().wrap( t.owner().wrap(
-        [this, &t, dd]( boost::system::error_code ec, std::size_t bytes_transferred )
-        { 
-          typename T::lock_guard lk(t.mutex());
-          if ( ec )
-          {
-            t.get_aspect().template get<_status_>() = false;
-            t.get_aspect().template get<_error_code_>() = ec;
-          }
-          t.get_aspect().template get<Tg>()(t, std::move(*dd), bytes_transferred);
-        }
       /*)), 
       []()
       { 

@@ -318,7 +318,9 @@ protected:
 
       if ( finalize!=nullptr )
       {
+        _mutex.unlock();
         finalize();
+        _mutex.lock();
       }
 
       //t.get_aspect().template gete<_after_stop_>()(t);

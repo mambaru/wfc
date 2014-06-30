@@ -47,7 +47,9 @@ struct options
 };
 
 //typedef rwlock<std::mutex> mutex_type;
-typedef spinlock mutex_type;
+//typedef spinlock mutex_type;
+
+typedef std::mutex mutex_type;
   
 typedef fas::type_list_n<
   
