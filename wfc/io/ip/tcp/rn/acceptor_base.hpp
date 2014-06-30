@@ -29,7 +29,7 @@ public:
   {
     super::stop([this, finalize]()
     {
-      typename super::lock_guard lk( super::mutex() );
+      typename super::lock_guard lk( this->mutex() );
       auto &stg = this->get_aspect().template get<_holder_storage_>();
       for(auto& conn : stg)
       {
@@ -38,12 +38,12 @@ public:
       
       stg.clear();
 
-      super::mutex().unlock();
+      this->mutex().unlock();
       if (finalize!=nullptr)
       {
         finalize();
       }
-      super::mutex().lock();
+      this->mutex().lock();
     });
 
     /*
