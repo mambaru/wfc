@@ -7,7 +7,7 @@
 
 #include <wfc/io/posix/rn/reader_options.hpp>
 #include <wfc/io/reader/aspect/aspect.hpp>
-#include <wfc/io/rn/reader/aspect.hpp>
+#include <wfc/io/rn/reader/aspect/aspect.hpp>
 
 #include <wfc/io/posix/rn/writer_options.hpp>
 #include <wfc/io/writer/writer.hpp>
@@ -102,10 +102,15 @@ struct connection_aspect:
     wfc::io::writer::stream< boost::asio::posix::stream_descriptor>, 
 
     //wfc::io::reader::aspect< wfc::io::reader::async_read_some, wfc::io::rn::reader::_incoming_, wfc::io::rn::writer::_incoming_ >,
-    fas::alias<wfc::io::reader::_output_, wfc::io::rn::writer::_incoming_>,
+    fas::alias< ::wfc::io::reader::_output_, ::wfc::io::rn::writer::_incoming_>,
+
+    fas::alias< ::wfc::io::reader::_incoming_, ::wfc::io::rn::reader::_input_>,
+    fas::alias< ::wfc::io::rn::reader::_output_, ::wfc::io::reader::_outgoing_>,
     ::wfc::io::reader::aspect,
-    wfc::io::rn::reader::aspect2<wfc::io::reader::_incoming_>,
-    wfc::io::reader::error_log
+    ::wfc::io::rn::reader::aspect,
+    ////wfc::io::rn::reader::aspect2<wfc::io::reader::_incoming_>,
+    wfc::io::reader::error_log,
+    wfc::io::writer::error_log
   >
 {
 };

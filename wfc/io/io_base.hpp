@@ -192,10 +192,13 @@ protected:
   }
 
   
+  /*
   outgoing_handler_t outgoing_handler() const 
   {
+    return this->options().outgoing_handler;
+    */
     //read_lock lk(_mutex);
-    return this->get_aspect().template get< _transfer_handler_ >();
+    //return this->get_aspect().template get< _transfer_handler_ >();
     
     //const auto& handler = this->get_aspect().template get< _transfer_handler_ >();
     /*if (handler == nullptr)
@@ -206,7 +209,7 @@ protected:
     }
     return handler;
     */
-  }
+  //}
   
   /*
   void outgoing_handler(outgoing_handler_t handler) 
@@ -227,15 +230,17 @@ protected:
     
     if ( sh != nullptr )
     {
+      auto outgoing_handler = _options.outgoing_handler;
+      auto pthis = t.shared_from_this();
       this->mutex().unlock();
       sh(
         this->_id, 
-        this->outgoing_handler(),
+        outgoing_handler,
         //this->options().outgoing_handler,
-        [&t, this]( std::function<void(io_id_t id)> release_fun ) 
+        [pthis]( std::function<void(io_id_t id)> release_fun ) 
         {
-          lock_guard lk(this->mutex());
-          this->_release_handlers2.push_back(release_fun);
+          lock_guard lk(pthis->mutex());
+          pthis->_release_handlers2.push_back(release_fun);
           /*t.dispatch( [this, release_fun]()
           {
             this->_release_handlers2.push_back(release_fun);

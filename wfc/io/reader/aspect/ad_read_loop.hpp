@@ -4,7 +4,7 @@
 
 namespace wfc{ namespace io{ namespace reader{ 
   
-struct ad_handler
+struct ad_read_loop
 {
   template<typename T>
   void operator()(T& t, typename T::data_ptr d)

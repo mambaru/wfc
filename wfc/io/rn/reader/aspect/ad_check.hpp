@@ -1,10 +1,10 @@
 #pragma once
 
-#include <wfc/io/rn/reader/tags.hpp>
-#include <wfc/io/rn/reader/check/tags.hpp>
+#include <wfc/io/rn/reader/aspect/tags.hpp>
+//#include <wfc/io/rn/reader/check/tags.hpp>
 #include <utility>
 
-namespace wfc{ namespace io{ namespace rn{ namespace reader{ namespace check{
+namespace wfc{ namespace io{ namespace rn{ namespace reader{
 
 struct ad_check
 {
@@ -26,4 +26,4 @@ struct ad_check
   }
 };
 
-}}}}}
+}}}}

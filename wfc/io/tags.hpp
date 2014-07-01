@@ -37,7 +37,7 @@ struct _before_stop_;
 struct _incoming_;
 struct _outgoing_;
 struct _options_type_;
-struct _transfer_handler_;
+//struct _transfer_handler_;
 
 // Descriptor holder
 struct _status_;

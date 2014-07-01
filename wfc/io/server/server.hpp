@@ -197,6 +197,7 @@ template<typename A>
 class server
   //: public fas::aspect_class<A>
   : public basic_io<A>
+  , public std::enable_shared_from_this< server<A> >
 {
 public:
   //typedef fas::aspect_class<A> super;

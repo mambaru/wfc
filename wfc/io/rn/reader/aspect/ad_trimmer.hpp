@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wfc/io/rn/reader/tags.hpp>
+#include <wfc/io/rn/reader/aspect/tags.hpp>
 #include <cstring>
 #include <utility>
 
