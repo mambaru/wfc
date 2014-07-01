@@ -23,16 +23,21 @@ struct _make_buffer_;
 // Чтение из сокета
 struct _read_some_;
 
+
 struct _on_abort_;
 struct _on_error_;
 struct _free_buffer_;
-struct _handler_;
+struct _read_loop_;
+struct _read_handler_;
 struct _user_handler_;
+struct _trace_;
 // Глобально, для всей цепочки например reader->rm->user->_outgoing_
 struct _outgoing_;
 struct _incoming_;
 struct _output_;
 
+struct _log_abort_;
+struct _log_error_;
 
 
 }}}

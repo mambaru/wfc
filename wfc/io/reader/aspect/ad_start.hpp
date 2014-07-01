@@ -9,10 +9,9 @@ struct ad_start
   template<typename T>
   void operator()(T& t)
   {
-    t.dispatch( [&t]() {
-      //t.get_aspect().template get<_is_started_>() = true; // TODO: нахуй
-      t.get_aspect().template gete<_read_more_>()(t);
-    });
+    //t.dispatch( [&t]() {
+    t.get_aspect().template get<_read_more_>()(t);
+    //});
   }
 };
 

@@ -4,7 +4,8 @@
 #include <wfc/io/rn/writer/ad_ready.hpp>
 #include <wfc/io/rn/writer/ad_tailor.hpp>
 #include <wfc/io/rn/rn.hpp>
-#include <wfc/io/writer/writer.hpp>
+#include <wfc/io/writer/aspect/aspect.hpp>
+#include <wfc/io/writer/basic_options.hpp>
 
 #include <fas/aop.hpp>
 
@@ -25,7 +26,7 @@ struct aspect: fas::aspect<
 
 
 struct basic_options
-  : ::wfc::io::writer::basic_options
+  //: ::wfc::io::writer::basic_options
 {
   /*
   size_t rn_limit_error = static_cast<size_t>(-1);
