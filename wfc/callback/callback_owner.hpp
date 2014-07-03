@@ -34,7 +34,6 @@ struct callback_wrapper
       return _handler(std::forward<Args>(args)...);
     }
     
-    DEBUG_LOG_WARNING("callback_wrapper: Owner not alive")
     return _not_alive();
   }
 private:
@@ -61,7 +60,6 @@ struct callback_wrapper2
     {
       return _handler(std::forward<Args>(args)...);
     }
-    DEBUG_LOG_WARNING("callback_wrapper2: Owner not alive")
     return decltype( _handler(std::forward<Args>(args)...))();
   }
 private:
@@ -135,7 +133,6 @@ public:
       {
         return f(std::forward<Args>(args)...);
       }
-      DEBUG_LOG_WARNING("callback_owner: Owner not alive")
       return R();
     };
   }

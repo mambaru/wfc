@@ -24,6 +24,7 @@ struct _wrap_;
 struct _dispatch_;
 
 struct _on_create_;
+struct _pre_start_;
 struct _on_start_;
 struct _on_stop_;
 /*

@@ -47,7 +47,6 @@ struct ad_on_read_error
     }
     else
     {
-      DEBUG_LOG_MESSAGE("ad_on_read_error: boost::asio::error::operation_aborted")
     }
   }
 };

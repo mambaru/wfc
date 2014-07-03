@@ -44,9 +44,11 @@ namespace wfc{ namespace io{ namespace reader{
 
 struct aspect: fas::aspect<
   fas::group< ::wfc::io::_on_start_, _start_>,
+  fas::group< ::wfc::io::_pre_start_, _init_>,
   
-  fas::advice< _read_more_,    ad_read_more >,
+  fas::advice< _init_, ad_init >,
   fas::advice< _start_, ad_start >, 
+  fas::advice< _read_more_,    ad_read_more >,
   fas::advice< _read_some_,    ad_async_read_some >,
   fas::advice< _read_ready_,   ad_read_ready >,
   fas::advice< _read_error_,   ad_read_error >,

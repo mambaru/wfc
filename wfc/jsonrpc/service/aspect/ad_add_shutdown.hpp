@@ -17,7 +17,6 @@ struct ad_add_shutdown
       {
         if ( auto handler = t.registry().erase_io(io_id) )
         {
-          DEBUG_LOG_MESSAGE("jsonrpc::serviec stop io_id=" << io_id)
           handler->stop(io_id);
         }
       }/*)*/;

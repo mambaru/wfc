@@ -2,6 +2,7 @@
 
 namespace wfc{ namespace io{ namespace reader{
 
+struct _init_;
 struct _start_;
 struct _is_started_;
 

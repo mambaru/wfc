@@ -111,6 +111,11 @@ public:
     abort();
   }
 
+  options_type& options()
+  {
+    return _options;
+  }
+
   const options_type& options() const
   {
     return _options;
@@ -225,6 +230,8 @@ protected:
   void start(T& t)
   {
     _stop_flag.clear();
+    
+    t.get_aspect().template gete<_pre_start_>()(t);
     
     auto& sh = _options.startup_handler;
     

@@ -39,6 +39,11 @@ public:
   {
     super::create(*this);
     
+    /*if (opt.outgoing_handler == nullptr)
+    {
+      abort();
+    }*/
+    
     boost::asio::socket_base::non_blocking_io non_blocking_io(true);
     super::descriptor().io_control(non_blocking_io);
 
@@ -62,17 +67,13 @@ public:
   void start()
   {
     typename super::lock_guard lk(super::mutex());
-    DEBUG_LOG_BEGIN("---- connectoion::start ----");
     super::start(*this);
-    DEBUG_LOG_END("---- connectoion::start ----");
   }
   
   void stop(std::function<void()> finalize)
   {
     typename super::lock_guard lk(super::mutex());
-    DEBUG_LOG_BEGIN("---- connection::stop ----");
     super::stop(*this, finalize);
-    DEBUG_LOG_END("---- connection::stop ----");
   }
   
   bool status() const
