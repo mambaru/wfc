@@ -15,7 +15,7 @@ struct ad_handler_start
     handler.send_request = std::bind(&T::send_request, &t, io_id, _1, _2, _3 );
       
     handler.send_notify = std::bind(&T::send_notify, &t, io_id, _1, _2);
-        
+   
     handler.start(io_id);
   }
 };

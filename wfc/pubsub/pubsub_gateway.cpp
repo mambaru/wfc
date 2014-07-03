@@ -9,7 +9,6 @@ namespace wfc{ namespace pubsub{
   
 pubsub_gateway::~pubsub_gateway()
 {
-  DEBUG_LOG_MESSAGE("pubsub_gateway::~pubsub_gateway()")
 }
 
 pubsub_gateway::pubsub_gateway( std::weak_ptr< wfc::global > global, const options_type& conf)
@@ -23,6 +22,7 @@ pubsub_gateway::pubsub_gateway( std::weak_ptr< wfc::global > global, const optio
 
 void pubsub_gateway::initialize( std::shared_ptr< ::wfc::jsonrpc::service> jsonrpc)
 {
+  lock_guard lk(super::mutex());
   _jsonrpc = jsonrpc;
   
   if ( auto g = _global.lock() )
@@ -65,20 +65,23 @@ void pubsub_gateway::start()
           return;
         }
         
-        size_t channel_len = req->channel.size();
-        size_t suffix_len = this->_options.subscribe_suffix.size();
-        
-        if ( suffix_len!=0 && suffix_len < channel_len )
         {
-          if ( 0 == req->channel.compare( channel_len - suffix_len, suffix_len, this->_options.subscribe_suffix ) )
+          lock_guard lk(super::mutex());
+          size_t channel_len = req->channel.size();
+          size_t suffix_len = this->_options.subscribe_suffix.size();
+          
+          if ( suffix_len!=0 && suffix_len < channel_len )
           {
-            req->channel.resize( channel_len - suffix_len );
+            if ( 0 == req->channel.compare( channel_len - suffix_len, suffix_len, this->_options.subscribe_suffix ) )
+            {
+              req->channel.resize( channel_len - suffix_len );
+            }
           }
         }
         
         if ( req!=nullptr && req->content!=nullptr)  
         {
-          TRACE_LOG_MESSAGE("pubsub_gateway::publish: -subscribe- [[" << std::string( req->content->begin(), req->content->end() ) << "]" << req->channel << ", " << suffix_len)
+          TRACE_LOG_MESSAGE("pubsub_gateway::publish: -subscribe- [[" << std::string( req->content->begin(), req->content->end() ) << "]" << req->channel /*<< ", " << suffix_len*/)
         }
         else
         {
@@ -92,15 +95,14 @@ void pubsub_gateway::start()
 
 void pubsub_gateway::stop()
 {
-  DEBUG_LOG_BEGIN("pubsub_gateway::stop()")
+  
   if ( auto t = _incoming_target.lock() )
   {
-    DEBUG_LOG_MESSAGE("pubsub_gateway::stop() describe")
     t->describe(super::get_id());
   }
   
+  lock_guard lk(super::mutex());
   _jsonrpc.reset();
-  DEBUG_LOG_END("pubsub_gateway::stop()")
   
 }
 
@@ -108,14 +110,15 @@ void pubsub_gateway::stop()
 void pubsub_gateway::process_outgoing( ::wfc::io::data_ptr d)
 {
   auto pd = std::make_shared< ::wfc::io::data_ptr>( std::move(d) );
-  super::post([this,pd](){
+  lock_guard lk(super::mutex());
+  //super::post([this,pd](){
     this->process_outgoing_( std::move(*pd) );
-  });
+  //});
 }
 
 void pubsub_gateway::process_outgoing_( ::wfc::io::data_ptr d )
 {
-  TRACE_LOG_MESSAGE("wfc::pubsub::gateway process outgoing: [[" << std::string( d->begin(), d->end() ) << "]");
+  TRACE_LOG_MESSAGE("wfc::pubsub::gateway::process_outgoing: [[" << std::string( d->begin(), d->end() ) << "]");
   ::wfc::jsonrpc::incoming_holder holder( std::move(d) );
   
   // TODO: в try - catch
@@ -141,8 +144,13 @@ void pubsub_gateway::process_outgoing_( ::wfc::io::data_ptr d )
       {
         ntf->channel = _options.outgoing_channel + "." + std::move(method);
       }
+      TRACE_LOG_MESSAGE("wfc::pubsub::gateway::process_outgoing publish to " << ntf->channel);
       ntf->content = std::move(holder.acquire_params());
       t->publish( std::move(ntf), nullptr );
+    }
+    else
+    {
+      TRACE_LOG_MESSAGE("wfc::pubsub::gateway::process_outgoing target not found");
     }
   }
   else

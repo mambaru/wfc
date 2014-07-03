@@ -11,6 +11,7 @@
 #include <wfc/io/basic_io.hpp>
 #include <wfc/jsonrpc/service.hpp>
 #include <wfc/pubsub/pubsub_gateway_options.hpp>
+#include <wfc/thread/rwlock.hpp>
 
 namespace wfc{ namespace pubsub{
   
@@ -20,12 +21,24 @@ class pubsub_gateway
   , public ipubsub
 {
 public:
+  
+  /*
+  typedef ::wfc::rwlock<std::mutex> mutex_type;
+  typedef std::lock_guard<mutex_type> lock_guard;
+  typedef ::wfc::read_lock<mutex_type> read_lock;
+  */
+  
   // TODO: rw spinlock
   typedef ::wfc::io::basic_io<> super;
   typedef pubsub_gateway_options options_type;
   typedef ::wfc::jsonrpc::service jsonrpc_service;
   typedef std::shared_ptr<jsonrpc_service> jsonrpc_ptr;
   typedef std::weak_ptr< ::wfc::pubsub::ipubsub > ipubsub_ptr;
+
+  typedef super::mutex_type mutex_type;
+  typedef super::lock_guard lock_guard;
+  //typedef super::read_lock  read_lock;
+
   
   virtual ~pubsub_gateway();
   pubsub_gateway( std::weak_ptr< ::wfc::global > global, const options_type& conf);
@@ -65,6 +78,7 @@ private:
   ipubsub_ptr _incoming_target;
   ipubsub_ptr _outgoing_target;
   std::atomic<int> _method_id_counter;
+  //mutable mutex_type _mutex;
 };
 
 }}

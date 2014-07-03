@@ -82,6 +82,8 @@ public:
     , _handler( conf.incoming_handler ) // TODO: убрать 
   {
     super::create(*this);
+    if ( conf.connection.incoming_handler ==nullptr )
+      abort();
   }
   
   void stop(std::function<void()> finalize)
@@ -123,6 +125,8 @@ public:
           
           auto opt = pthis->options().connection;
           //opt.incoming_handler = this->_handler;
+          if ( opt.incoming_handler == nullptr )
+            abort();
           pthis->_connection = std::make_shared<connection_type>( std::move(*psock), opt);
           pthis->_connection->start();
         }

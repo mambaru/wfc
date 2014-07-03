@@ -7,6 +7,7 @@
 #include <wfc/thread/rwlock.hpp>
 #include <wfc/thread/spinlock.hpp>
 #include <wfc/memory.hpp>
+#include <wfc/gateway/provider_config.hpp>
 
 namespace wfc{ namespace gateway{ 
   
@@ -26,17 +27,19 @@ public:
   typedef std::function<void(size_t)> shudown_handler;
   typedef std::list<shudown_handler> shudown_handler_list;
   
-  provider()
-    : _sequence_mode(false)
-    , _client_count(0) // TDOD: false
+  provider(const provider_config& conf)
+    : //_sequence_mode(false)
+     _conf(conf)
+    , _client_count(0)
     , _cli_itr(_clients.end())
   {}
   
-  bool enabled() const
+  bool ready() const
   {
     return _client_count!=0;
   }
   
+  /*
   void sequence_mode(bool value) 
   {
     std::lock_guard<mutex_type> lk(_mutex);
@@ -48,6 +51,16 @@ public:
     std::lock_guard<mutex_type> lk(_mutex);
     return _sequence_mode;
   }
+  */
+  
+  void reconfigure(const provider_config& conf)
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    _conf = conf;
+    if ( !_conf.enabled )
+      while ( !_delayed_queue.empty() ) _delayed_queue.pop();
+    
+  }
   
   void process_sequence_queue(std::unique_lock<mutex_type>& lk)
   {
@@ -55,6 +68,8 @@ public:
     _delayed_queue.front() = nullptr;
     lk.unlock();
     fn();
+    lk.lock();
+    _delayed_queue.pop();
   }
 
   void process_non_sequence_queue(std::unique_lock<mutex_type>& lk)
@@ -68,6 +83,7 @@ public:
       dq.front()();
       dq.pop();
     }
+    lk.lock();
   }
 
   void process_queue()
@@ -77,7 +93,7 @@ public:
     if ( _delayed_queue.empty() )
       return;
     
-    if ( _sequence_mode )
+    if ( _conf.sequence_mode )
     {
       this->process_sequence_queue(lk);
     }
@@ -97,6 +113,7 @@ public:
     this->_cli_itr = this->_clients.begin();
     lk.unlock();
     this->process_queue();
+    lk.lock();
   }
     
   // Когда вызывать, определяеться в method_list
@@ -125,7 +142,7 @@ public:
   {
     ::wfc::read_lock<mutex_type> lk(_mutex);
     
-    if ( _clients.empty() )
+    if ( !_conf.enabled || _clients.empty() )
       return interface_ptr();
     if ( _cli_itr == _clients.end() )
       _cli_itr = _clients.begin();
@@ -139,15 +156,13 @@ public:
     return this->get(client_id);
   }
   
-  
-  
   template<typename Resp>
   std::function<void(Resp)> wrap_callback(std::function<void(Resp)>&& callback) 
   {
     if ( callback==nullptr)
       return nullptr;
     
-    if (_sequence_mode)
+    if (_conf.sequence_mode)
     {
       return [this, callback](Resp req)
       {
@@ -167,7 +182,7 @@ public:
     if ( callback==nullptr)
       return nullptr;
     
-    if (_sequence_mode)
+    if (_conf.sequence_mode)
     {
       return [this, callback](size_t io_id, Resp req)
       {
@@ -253,6 +268,9 @@ public:
     Args... args
   )
   {
+    if ( !_conf.enabled )
+      return;
+    
     if (auto cli = this->get().lock() )
     {
       (cli.get()->*mem_ptr)( std::move(req), callback, args... );
@@ -274,6 +292,9 @@ public:
     Args... args
   )
   {
+    if ( !_conf.enabled )
+      return;
+
     size_t client_id = 0;
     if (auto cli = this->get(client_id).lock() )
     {
@@ -300,8 +321,15 @@ public:
     _shudown_handlers.push_back(sh);
   }
   
+  size_t queue_size() const
+  {
+    ::wfc::read_lock<mutex_type> lk(_mutex);
+    return _clients.size();
+  }
+  
 private:
-  std::atomic<bool> _sequence_mode;
+  provider_config _conf;
+  //std::atomic<bool> _sequence_mode;
   std::atomic<size_t>  _client_count;
   mutex_type _mutex;
   clinet_map _clients;

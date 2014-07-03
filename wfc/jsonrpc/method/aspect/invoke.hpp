@@ -44,13 +44,17 @@ struct invoke: Handler
     {
       req = holder.template get_params<params_json>();
     }
-    catch (const json::json_error& )
+    catch (const json::json_error& e)
     {
-      return TT::template send_error<T, error_json>( 
-        std::move(holder), 
-        std::make_unique<invalid_params>(), 
-        std::move(outgoing_handler) 
-      );
+      if ( holder.has_id() )
+      {
+        TT::template send_error<T, error_json>( 
+          std::move(holder), 
+          std::make_unique<invalid_params>(), 
+          std::move(outgoing_handler) 
+        );
+      }
+      COMMON_LOG_ERROR("jsonrpc::invoke Invalid Params: " << holder.params_error_message(e) )
     }
       
     try // server_error

@@ -96,9 +96,7 @@ struct ad_start
       for (auto s : services)
       {
         threads.push_back( std::make_unique<std::thread>( [&t, s](){ 
-          DEBUG_LOG_MESSAGE("service thread run")
           s->run();
-          DEBUG_LOG_MESSAGE("service thread stop")
         }));
       }
     });
@@ -241,19 +239,15 @@ public:
   void stop(std::function<void()> finalize)
   {
     typename super::lock_guard lk(super::mutex());
-    DEBUG_LOG_BEGIN("---- server::stop ----");
     super::stop(*this, finalize);
     super::get_io_service().reset();
     while ( 0!=super::get_io_service().poll() ) { super::get_io_service().reset();};
-    DEBUG_LOG_END("---- server::stop ----");
   }
   
   void start()
   {
     typename super::lock_guard lk(super::mutex());
-    DEBUG_LOG_BEGIN("---- server::start ----");
     super::start(*this);
-    DEBUG_LOG_END("---- server::start ----");
     //this->get_aspect().template get<_start_>()(*this);
   }
   

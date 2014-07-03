@@ -36,10 +36,8 @@ void service_list::initialize( std::shared_ptr<ifactory> fact )
   
 void service_list::start()
 {
-  DEBUG_LOG_MESSAGE("void service_list::start()")
   for (auto& i: _service_list)
   {
-    DEBUG_LOG_MESSAGE("void service_list::start() i->start();")
     i->start();
   }
 }

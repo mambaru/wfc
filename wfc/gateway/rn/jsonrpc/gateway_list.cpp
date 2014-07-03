@@ -60,10 +60,8 @@ void gateway_list::stop()
 {
   for (auto& i: _gateway_list)
   {
-    DEBUG_LOG_BEGIN("gateway_list::stop() instance")
     i->stop();
     i.reset();
-    DEBUG_LOG_BEGIN("gateway_list::end() instance")
   }
   _gateway_list.clear();
 }

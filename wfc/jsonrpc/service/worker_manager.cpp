@@ -54,10 +54,8 @@ void worker_manager::start()
     for (int i=0; i < w.threads; ++i)
     {
       _threads.push_back( std::thread([io_ptr]() {
-        std::cout << "DEBUG_LOG_MESSAGE(\"jsonrpc thread run\")" << std::endl;
         ::wfc::io_service::work wrk(*io_ptr);
         io_ptr->run();
-        std::cout << "DEBUG_LOG_MESSAGE(\"jsonrpc thread stop\")" << std::endl;
       }));
     }
   }
@@ -97,17 +95,9 @@ worker_manager::get_worker(const char* name) const
       itr->second.first.end()
     );
     return *wrk_itr;
-    /*
-    if ( itr->second.first.end() == itr->second.second )
-    {
-      itr->second.second = itr->second.first.begin();
-    }
-    return *(itr->second.second++);
-    */
   }
   return std::weak_ptr< worker_manager::worker_type >();
 }
-
 
 }} // wfc
 

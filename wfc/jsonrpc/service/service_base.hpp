@@ -124,7 +124,7 @@ public:
           }
           else
           {
-            DAEMON_LOG_ERROR("Requester not found for io_id=" << io_id)
+            DAEMON_LOG_ERROR("Requester not found for io_id=" << io_id << "[[" << std::string(d->begin(), d->end())<< "]]")
           }
         });
       }
@@ -134,13 +134,16 @@ public:
   // Новый коннект
   void create_handler( io_id_t io_id, outgoing_handler_t outgoing_handler, ::wfc::io::add_shutdown_handler_t add_shutdown /*TODO: в typedef*/ )
   {
-    DEBUG_LOG_BEGIN("jsonrpc::service::create_handler io_id=" << io_id)
     if ( outgoing_handler != nullptr && add_shutdown!=nullptr)
     {
       super::get_aspect().template get<_create_handler_>()(*this, io_id, std::move(outgoing_handler) );
       super::get_aspect().template get<_add_shutdown_>()(*this, std::move(add_shutdown) );
     }
-    DEBUG_LOG_END("jsonrpc::service::create_handler io_id=" << io_id)
+    else
+    {
+      DAEMON_LOG_ERROR("jsonrpc::service::create_handler: invalid args ")
+      abort();
+    }
  }
 
   /// Для входящих запросов
