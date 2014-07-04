@@ -22,6 +22,7 @@ pubsub_gateway::pubsub_gateway( std::weak_ptr< wfc::global > global, const optio
 
 void pubsub_gateway::initialize( std::shared_ptr< ::wfc::jsonrpc::service> jsonrpc)
 {
+  DEBUG_LOG_MESSAGE("void pubsub_gateway::initialize( std::shared_ptr< ::wfc::jsonrpc::service> jsonrpc)")
   lock_guard lk(super::mutex());
   _jsonrpc = jsonrpc;
   
@@ -49,16 +50,20 @@ void pubsub_gateway::initialize( std::shared_ptr< ::wfc::jsonrpc::service> jsonr
 
 void pubsub_gateway::start()
 {
+  DEBUG_LOG_MESSAGE("void pubsub_gateway::start() -1-")
   if ( auto t = _incoming_target.lock() )
   {
+    DEBUG_LOG_MESSAGE("void pubsub_gateway::start() -2-")
     auto names = _jsonrpc->get_methods();
     for (auto &n : names)
     {
+      DEBUG_LOG_MESSAGE("void pubsub_gateway::start() -3-")
       auto req = std::make_unique<request::subscribe>();
       req->channel = _options.incoming_channel + "." + n + _options.subscribe_suffix;
       
       t->subscribe(std::move(req), nullptr, super::get_id(), [this](request_publish_ptr req, publish_callback cb)
       {
+        DEBUG_LOG_MESSAGE("void pubsub_gateway::start() -4-")
         if ( req==nullptr )
         {
           this->publish(nullptr, cb);
@@ -66,6 +71,7 @@ void pubsub_gateway::start()
         }
         
         {
+          DEBUG_LOG_MESSAGE("void pubsub_gateway::start() -5-")
           lock_guard lk(super::mutex());
           size_t channel_len = req->channel.size();
           size_t suffix_len = this->_options.subscribe_suffix.size();

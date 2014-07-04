@@ -114,7 +114,8 @@ public:
     
     using namespace std::placeholders;
     callback_type callback = nullptr;
-    if ( result_callback!=nullptr || error_callback!=nullptr )
+    // !!! Птн Июл  4 19:30:24 MSK 2014  || -> && 
+    if ( result_callback!=nullptr && error_callback!=nullptr )
     {
       callback = std::bind( self::response_handler<Tg>, _1, _2, 
                             result_callback, error_callback);
