@@ -57,6 +57,7 @@ private:
   ) const
   {
     using namespace std::placeholders;
+    DEBUG_LOG_MESSAGE("======================== request_ callback==nullptr? " << (callback==nullptr) )
 
     std::function<void(incoming_holder holder)> handler = nullptr;
     
@@ -84,6 +85,7 @@ private:
     params_ptr req
   ) const
   {
+    DEBUG_LOG_MESSAGE("======================== notify_ " )
     using namespace std::placeholders;
     t.send_notify( 
       tt.name(), 
