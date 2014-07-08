@@ -34,6 +34,8 @@ public:
     , _cli_itr(_clients.end())
   {}
   
+  provider(const provider& ) = delete;
+  
   bool ready() const
   {
     return _client_count!=0;
@@ -64,8 +66,29 @@ public:
   
   void process_sequence_queue(std::unique_lock<mutex_type>& lk)
   {
+    if ( _wait_flag )
+      return;
+      /*abort();
+       * */
+    DEBUG_LOG_MESSAGE("process_sequence_queue: _delayed_queue.size()==" << _delayed_queue.size());
+    _delayed_queue.pop();
+    if ( _delayed_queue.empty() )
+    {
+      DEBUG_LOG_MESSAGE("process_sequence_queue: очередь пуста");
+      return;
+    }
     auto fn = _delayed_queue.front();
-    //_delayed_queue.front() = nullptr;
+    if ( fn == nullptr )
+    {
+      DEBUG_LOG_MESSAGE("process_sequence_queue: fn == nullptr");
+      abort();
+    }
+    _wait_flag = true;
+    lk.unlock();
+    fn();
+    lk.lock();
+    /*
+    auto fn = _delayed_queue.front();
     lk.unlock();
     bool ok = false;
     while ( this->ready() && !ok )
@@ -73,6 +96,7 @@ public:
     lk.lock();
     if ( ok )
       _delayed_queue.pop();
+    */
 
     // обертке callback
     // _delayed_queue.pop();
@@ -94,6 +118,9 @@ public:
 
   void process_queue()
   {
+    if ( !this->ready() )
+      return;
+    
     std::unique_lock<mutex_type> lk(_mutex);
 
     if ( _delayed_queue.empty() )
@@ -113,7 +140,7 @@ public:
   void startup(size_t clinet_id, interface_ptr ptr )
   {
     std::unique_lock<mutex_type> lk(_mutex);
-    
+    DEBUG_LOG_MESSAGE("provider startup clinet_id=" << clinet_id)
     this->_clients[clinet_id] = ptr;
     this->_client_count = this->_clients.size();
     this->_cli_itr = this->_clients.begin();
@@ -163,25 +190,37 @@ public:
   }
   
   template<typename Resp>
-  std::function<void(Resp)> wrap_callback(std::function<void(Resp)>&& callback) 
+  std::function<void(Resp)> wrap_callback(std::function<void(Resp)> callback) 
   {
     if (_conf.sequence_mode)
     {
       return [this, callback](Resp req)
       {
+        DEBUG_LOG_MESSAGE("Получен ответ!");
+        DEBUG_LOG_MESSAGE("wrap_callback this->_delayed_queue.size()==" << this->_delayed_queue.size());
         if ( callback!=nullptr)
+        {
+          DEBUG_LOG_BEGIN("callback " << (req!=nullptr));
           callback( std::move(req) );
+          DEBUG_LOG_END("callback");
+        }
+        else
+        {
+          DEBUG_LOG_MESSAGE("callback==nullptr!");
+        }
+        _wait_flag = false;
+        DEBUG_LOG_MESSAGE("Разбор очереди!");
         this->process_queue();
       };
     }
     else
     {
-      return std::move(callback);
+      return callback;
     }
   }
 
   template<typename Resp>
-  std::function<void(size_t, Resp)> wrap_callback2(std::function<void(size_t, Resp)>&& callback) 
+  std::function<void(size_t, Resp)> wrap_callback2(std::function<void(size_t, Resp)> callback) 
   {
     
     /*if ( callback==nullptr)
@@ -192,14 +231,21 @@ public:
     {
       return [this, callback](size_t io_id, Resp req)
       {
+        DEBUG_LOG_MESSAGE("wrap_callback2. Получен ответ!");
+        DEBUG_LOG_MESSAGE("wrap_callback2 this->_delayed_queue.size()==" << this->_delayed_queue.size());
         if ( callback!=nullptr)
+        {
+          DEBUG_LOG_BEGIN("wrap_callback2.callback " << (req!=nullptr));
           callback( io_id, std::move(req) );
+          DEBUG_LOG_END("wrap_callback2.callback " << (req!=nullptr));
+        }
+        _wait_flag = false;
         this->process_queue();
       };
     }
     else
     {
-      return std::move(callback);
+      return callback;
     }
   }
 
@@ -215,6 +261,7 @@ public:
     Args... args
   )
   {
+    DEBUG_LOG_MESSAGE("################### wrap " << (callback==nullptr) );
     // Ахтунг! То-же и для wrap2!!!
     auto preq = std::make_shared<Req>( std::move(req) );
     // обход бага завата Args...
@@ -226,22 +273,26 @@ public:
         Args... args
       )
       {
+        DEBUG_LOG_MESSAGE("Отправляем запрос! callback==nullptr? " << (callback==nullptr) );
         //this->post(mem_ptr, std::move(*preq), callback, args...);
         
         if ( auto cli = this->get().lock() )
         {
-          (cli.get()->*mem_ptr)( std::move(*preq), std::move(callback), args... );
+          DEBUG_LOG_BEGIN("Отправляем запрос! Готов для отправки callback==nullptr? " << (callback==nullptr));
+          (cli.get()->*mem_ptr)( std::move(*preq), callback, args... );
+          DEBUG_LOG_END("Отправляем запрос! Готов для отправки callback==nullptr? " << (callback==nullptr));
           return true;
         }
         else
         {
+          _wait_flag = false;
           return false;
         }
 
       }, 
       mem_ptr, 
       preq, 
-      this->wrap_callback( std::move(callback) ), 
+      this->wrap_callback( callback ), 
       std::forward<Args>(args)...
     );
   }
@@ -270,7 +321,8 @@ public:
         size_t client_id = 0;
         if ( auto cli = this->get(client_id).lock() )
         {
-          // (cli.get()->*mem_ptr)( std::move(*preq), std::move(callback), args... );
+          // (cli.get()->*mem_ptr)( std::move(*preq), callback, args... );
+          //_wait_flag = true;
           
                 (cli.get()->*mem_ptr)( 
         std::move(*preq), 
@@ -285,6 +337,7 @@ public:
         }
         else
         {
+          _wait_flag = false;
           return false;
         }
 
@@ -302,7 +355,7 @@ public:
                 
         if ( auto cli = this->get().lock() )
         {
-          (cli.get()->*mem_ptr)( std::move(*preq), std::move(callback), args... );
+          (cli.get()->*mem_ptr)( std::move(*preq), callback, args... );
           return true;
         }
         else
@@ -315,7 +368,7 @@ public:
       wcallback, 
       mem_ptr, 
       preq, 
-      this->wrap_callback2( std::move(callback) ), 
+      this->wrap_callback2( callback ), 
       std::forward<Args>(args)...
     );
   }
@@ -330,83 +383,41 @@ public:
     Args... args
   )
   {
-#error не правильно очередь разгребает
-    DEBUG_LOG_BEGIN(size_t(this) <<  "---> post  callback==nullptr? " << (callback==nullptr) )
+    DEBUG_LOG_MESSAGE("####################### POST callback==nullptr? " << (callback==nullptr) );
     auto cli = this->get().lock();
 
     std::lock_guard<mutex_type> lk(_mutex);
-
     if ( !_conf.enabled )
       return;
+
+    auto fn = this->wrap( mem_ptr, std::move(req), callback, std::forward<Args>(args)...);
     
-    if ( _conf.sequence_mode && ( _wait_flag || cli == nullptr || !_delayed_queue.empty() )  )
+    if ( _conf.sequence_mode )
     {
-      _delayed_queue.push( this->wrap( mem_ptr, std::move(req), callback, std::forward<Args>(args)...) );
-      
-    }
-    else if ( cli!=nullptr )
-    {
-       
-      if ( _conf.sequence_mode )
+      bool ready_for_call = _delayed_queue.empty() && !_wait_flag;
+      _delayed_queue.push( fn );
+      DEBUG_LOG_MESSAGE("post ready_for_call=" << ready_for_call << " _delayed_queue.size()==" << _delayed_queue.size() );
+      if ( ready_for_call )
       {
-        auto tmp = std::move(callback);
-        callback = this->wrap_callback( std::move(tmp) );
         _wait_flag = true;
+        _mutex.unlock();
+        fn();
+        _mutex.lock();
       }
-      _mutex.unlock();
-      DEBUG_LOG_END( size_t(this) << "---> post send callback==nullptr? " << (callback==nullptr) )
-      (cli.get()->*mem_ptr)( std::move(req), callback, args... );
-      _mutex.lock();
-    }
-    DEBUG_LOG_END( size_t(this) << "---> post  callback==nullptr? " << (callback==nullptr) )
-    /*
-    // TODO: что будет если клиент закрылся после получения this->get()
-    bool ready_for_send = cli!=nullptr && _delayed_queue.empty();
-
-    if ( ready_for_send )
-    {
-      DEBUG_LOG_MESSAGE("provider post -2-")
-      if ( _conf.sequence_mode )
-      {
-        DEBUG_LOG_MESSAGE("provider post -3-")
-        _delayed_queue.push(nullptr);
-        callback = this->wrap_callback( std::move(callback) );
-      }
-      DEBUG_LOG_MESSAGE("provider post -4-")
-      _mutex.unlock();
-      (cli.get()->*mem_ptr)( std::move(req), callback, args... );
-      _mutex.lock();
-      DEBUG_LOG_MESSAGE("provider post -5-")
     }
     else
     {
-      DEBUG_LOG_MESSAGE("provider post -6-")
-      if ( _conf.sequence_mode && _delayed_queue.empty() )
+      if (auto cli = this->get().lock() )
       {
-        DEBUG_LOG_MESSAGE("provider post -7-")
-        _delayed_queue.push(nullptr);  
+        _mutex.unlock();
+        fn();
+        _mutex.lock();
       }
-      DEBUG_LOG_MESSAGE("provider post -8-")
-      _delayed_queue.push( this->wrap( mem_ptr, std::move(req), callback, std::forward<Args>(args)...) );
+      else
+      {
+        _delayed_queue.push( fn );
+      }
     }
-    */
-    
-
-    
-    /*
-    if ( !_conf.enabled )
-      return;
-    
-    if (auto cli = this->get().lock() )
-    {
-      (cli.get()->*mem_ptr)( std::move(req), callback, args... );
-    }
-    else
-    {
-      std::lock_guard<mutex_type> lk(_mutex);
-      _delayed_queue.push( this->wrap( mem_ptr, std::move(req), callback, std::forward<Args>(args)...) );
-    }
-    */
   }
   
   /* для переопределенного callback с id клиента*/
@@ -419,6 +430,46 @@ public:
     Args... args
   )
   {
+    
+
+    DEBUG_LOG_MESSAGE("####################### POST2 callback==nullptr? " << (callback==nullptr) );
+    
+    auto cli = this->get().lock();
+
+    std::lock_guard<mutex_type> lk(_mutex);
+    if ( !_conf.enabled )
+      return;
+
+    auto fn = this->wrap2( mem_ptr, std::move(req), callback, std::forward<Args>(args)...);
+    
+    if ( _conf.sequence_mode )
+    {
+      bool ready_for_call = _delayed_queue.empty() && !_wait_flag;
+      _delayed_queue.push( fn );
+      if ( ready_for_call )
+      {
+        _wait_flag = true;
+        _mutex.unlock();
+        fn();
+        _mutex.lock();
+      }
+    }
+    else
+    {
+      if (auto cli = this->get().lock() )
+      {
+        _mutex.unlock();
+        fn();
+        _mutex.lock();
+      }
+      else
+      {
+        _delayed_queue.push( fn );
+      }
+    }
+
+    
+    /*
     if ( !_conf.enabled )
       return;
 
@@ -440,6 +491,7 @@ public:
       auto wrp = this->wrap2( mem_ptr, std::move(req), callback, std::forward<Args>(args)...);
       _delayed_queue.push( wrp );
     }
+    */
   }
   
   void operator+= ( shudown_handler sh )
@@ -455,14 +507,18 @@ public:
   }
   
 private:
-  bool _wait_flag;
+  
+  // Ожидание ответа, на вызов из головы очереди ожидания (только в sequence_mode)
+  std::atomic<bool> _wait_flag;
+  // Очередь ожидания (только для sequence_mode)
+  delayed_queue _delayed_queue;
+  
   provider_config _conf;
   //std::atomic<bool> _sequence_mode;
   std::atomic<size_t>  _client_count;
   mutex_type _mutex;
   clinet_map _clients;
   typename clinet_map::iterator _cli_itr;
-  delayed_queue _delayed_queue;
   shudown_handler_list _shudown_handlers;
 };
   

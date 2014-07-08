@@ -87,6 +87,7 @@ void gateway::start()
 
   for (auto& i: _pubsubs)
   {
+    DEBUG_LOG_MESSAGE("gateway::start() _pubsubs start")
     i->start();
   }
 }

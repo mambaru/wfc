@@ -8,8 +8,12 @@
 
 namespace wfc{ namespace pubsub{
 
+  /*
 struct _publish_;
+struct _query_;
 struct _subscribe_;
+struct _describe_;
+*/
 
 
 }}

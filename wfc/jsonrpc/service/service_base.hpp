@@ -115,7 +115,7 @@ public:
       if ( auto wrk = this->get_worker(name).lock() )
       {
         auto requester = this->registry().add_result_handler( io_id, result_handler );
-        wrk->post([io_id, requester, name,  serializer]()
+        wrk->post([this, io_id, requester, name,  serializer]()
         {
           auto d = serializer(name, requester.first);
           if ( requester.second != nullptr )
@@ -124,7 +124,7 @@ public:
           }
           else
           {
-            DAEMON_LOG_ERROR("Requester not found for io_id=" << io_id << "[[" << std::string(d->begin(), d->end())<< "]]")
+            DAEMON_LOG_ERROR("Requester not found for io_id=" << io_id << "[[" << std::string(d->begin(), d->end())<< "]] " << " this=" << size_t(this) )
           }
         });
       }
@@ -134,6 +134,7 @@ public:
   // Новый коннект
   void create_handler( io_id_t io_id, outgoing_handler_t outgoing_handler, ::wfc::io::add_shutdown_handler_t add_shutdown /*TODO: в typedef*/ )
   {
+    DEBUG_LOG_MESSAGE("####################### create_handler io_id=" << io_id << " this=" << size_t(this) );
     if ( outgoing_handler != nullptr && add_shutdown!=nullptr)
     {
       super::get_aspect().template get<_create_handler_>()(*this, io_id, std::move(outgoing_handler) );
