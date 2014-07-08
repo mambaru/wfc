@@ -24,6 +24,7 @@ struct method_test2: wfc::jsonrpc::method<
 JSONRPC_METHOD_IMPL( _test2_, test1 )
 */
 
+/*
 
 
 JSONRPC_TAG(publish)
@@ -52,9 +53,6 @@ struct basic_method_list: ::wfc::jsonrpc::method_list<
 
   ::wfc::jsonrpc::dual_method<
     _mpublish_, 
-/*    ::wfc::json::array< std::vector<request::publish_json::type> >,
-    ::wfc::json::array< std::vector<response::publish_json::type> >,
-    */
     request::multi_publish_json::type,
     response::multi_publish_json::type,
 
@@ -74,10 +72,6 @@ struct basic_method_list: ::wfc::jsonrpc::method_list<
     &ipubsub::publish
   >,
   
-  /*
-  dual_method2
-  
-  */
 
   ::wfc::jsonrpc::dual_method3<
     _describe_, 
@@ -86,33 +80,6 @@ struct basic_method_list: ::wfc::jsonrpc::method_list<
     ipubsub, 
     &ipubsub::describe
   >
-  
-  /*
-  ::wfc::jsonrpc::method<
-    ::wfc::jsonrpc::name< ::wfc::pubsub::_describe_>,
-    ::wfc::jsonrpc::call<
-      ::wfc::pubsub::request::describe_json::type,
-      ::wfc::pubsub::response::describe_json::type
-    >,
-    ::wfc::jsonrpc::invoke_mem_fun<
-      ::wfc::pubsub::request::describe_json::type,
-      ::wfc::pubsub::response::describe_json::type,
-      ipubsub,
-      &ipubsub::subscribe
-    >
-  >
-*/
-
-    /*, 
-  
-  ::wfc::jsonrpc::dual_method_ex<
-    _subscribe_, 
-    request::subscribe_json::type,
-    response::subscribe_json::type,
-    ipubsub, 
-    &ipubsub::subscribe
-  >
-  */
 >
 {};
 
@@ -124,58 +91,29 @@ struct method_list: basic_method_list
   {
   }
 
-  // JSONRPC_METHOD_IMPL2(_subscribe_, subscribe, _publish_)
   
-  
-  /*virtual void subscribe( 
-    request_subscribe_ptr req, 
-    std::function< void(call_result_ptr<Tg>::type) > callback, size_t, std::function< void(call_params_ptr<Tg2>::type, std::function< void(call_result_ptr<Tg2>::type) >) > )\
-    */
-    
   virtual void subscribe(request_subscribe_ptr req, subscribe_callback callback, size_t, publish_handler )
   {
-    /*if ( callback == nullptr )
+    
     {
-      this->call<_subscribe_>( std::move(req), nullptr );
-    }
-    else*/
-    {
-      this->call<_subscribe_>( std::move(req), callback, nullptr /*TODO: BAD GATEWAY*/ );
+      this->call<_subscribe_>( std::move(req), callback, nullptr  );
       
-      /*this->call<_subscribe_>( std::move(req), [callback](response_subscribe_ptr resp, wfc::error_ptr error)
-      {
-        if ( error==nullptr){
-          if ( resp != nullptr) 
-            callback( std::move(resp) );
-          else
-            callback( nullptr );
-        };
-      });
-      */
+    
     }
   }
-  /*
-  JSONRPC_METHOD_IMPL(_publish_, publish)
-  JSONRPC_METHOD_IMPL(_mpublish_, publish)
-  */
   
   virtual void publish(request_publish_ptr req, publish_callback callback)
   {
     DEBUG_LOG_MESSAGE("======================== gateway method list publish callback==nullptr? " << (callback==nullptr) )
-    /*if ( callback == nullptr )
     {
-      this->call<_publish_>( std::move(req), nullptr );
-    }
-    else*/
-    {
-      this->call<_publish_>( std::move(req), callback, nullptr /*TODO: BAD GATEWAY*/);
+      this->call<_publish_>( std::move(req), callback, nullptr );
     }
   }
 
 
   virtual void publish(request_multi_publish_ptr req, multi_publish_callback callback)
   {
-    this->call<_mpublish_>( std::move(req), callback, nullptr /*TODO: BAD GATEWAY*/);
+    this->call<_mpublish_>( std::move(req), callback, nullptr );
   }
 
   
@@ -203,6 +141,7 @@ struct method_list: basic_method_list
   virtual void query( ipubsub::request_query_ptr, ipubsub::query_callback ) {}
   virtual void notify( ipubsub::request_notify_ptr, ipubsub::notify_callback ) {}
 };
+*/
 
 }}
 

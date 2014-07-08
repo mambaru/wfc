@@ -31,7 +31,7 @@ struct pubsub_status_json
   >::type status_enum_list;
 
   typedef json::enumerator< pubsub::status, status_enum_list > type;
-  
+  typedef type::target target;
   typedef type::serializer serializer;
 };
 

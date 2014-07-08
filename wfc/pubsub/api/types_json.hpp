@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wfc/pubsub/api/types.hpp>
+#include <wfc/json/json.hpp>
 
 namespace wfc{ namespace pubsub{
 
@@ -12,13 +13,12 @@ typedef std::string key_t;
 
 struct types_json
 {
-  typedef wfc::json::value< std::string > string_type;
+  typedef ::wfc::json::value< std::string > string_type;
   typedef string_type identity_type;
   typedef string_type key_type;
-  typedef wfc::json::value< size_t > cursor_type;
+  typedef ::wfc::json::value< size_t > cursor_type;
   typedef json::raw_value< pubsub::data_type > data_type;
-  typedef wfc::json::pointer< pubsub::data_ptr, data_type> data_ptr;
-
+  typedef ::wfc::json::pointer< pubsub::data_ptr, data_type> data_ptr;
 };
 
 }}

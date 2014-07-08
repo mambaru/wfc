@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wfc/pubsub/status.hpp>
-#include <wfc/pubsub/api/publish.hpp>
+#include <wfc/pubsub/api/query.hpp>
 #include <wfc/pubsub/api/types_json.hpp>
 #include <wfc/pubsub/api/pubsub_status_json.hpp>
 
@@ -15,10 +15,12 @@ namespace request
     FAS_NAME(content)
     typedef
       json::object<
-        notify,
+        query,
         fas::type_list_n<
-          json::member<n_channel, notify, std::string, &notify::channel>,
-          json::member<n_content, notify, data_t, &notify::content, types_json::data_type>
+          json::member<n_channel, query, std::string, &query::channel>,
+          json::member<n_content, query, data_ptr,    &query::content,  
+            json::pointer< data_ptr, json::raw_value<data_t> >
+          >
         >::type
     > type;
 
@@ -35,11 +37,13 @@ namespace response
     FAS_NAME(content)
     typedef
       json::object<
-        notify,
+        query,
         fas::type_list_n<
-          json::member<n_status, notify, ::wfc::pubsub::status, &notify::status, pubsub_status_json>,
-          json::member<n_channel, notify, std::string, &notify::channel>,
-          json::member<n_content, notify, data_t, &notify::content, types_json::data_type>
+          json::member<n_status,  query, ::wfc::pubsub::status, &query::status, pubsub_status_json>,
+          json::member<n_channel, query, std::string, &query::channel>,
+          json::member<n_content, query, data_ptr,    &query::content,  
+            json::pointer< data_ptr, json::raw_value<data_t> >
+          >
         >::type
     > type;
 

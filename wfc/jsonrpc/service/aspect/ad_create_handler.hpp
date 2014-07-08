@@ -14,8 +14,8 @@ struct ad_create_handler
     {
       if ( auto handler = t.clone_prototype() )
       {
-        t.get_aspect().template get<_handler_start_>()(t, io_id, *handler);
         t.registry().set_io( io_id, handler, outgoing_handler );
+        t.get_aspect().template get<_handler_start_>()(t, io_id, *handler);
       }
     }/*)*/;
   }

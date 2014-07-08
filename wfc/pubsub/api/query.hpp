@@ -9,7 +9,8 @@ namespace request
   struct query
   {
     std::string channel;
-    data_t content;
+    //data_t content;
+    data_ptr content;
 
     query()
     {}
@@ -31,7 +32,8 @@ namespace response
   {
     ::wfc::pubsub::status status = ::wfc::pubsub::status::not_support;
     std::string channel;
-    data_t content;
+    // data_t content;
+    data_ptr content;
   };
 }
 
