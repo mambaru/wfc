@@ -126,7 +126,6 @@ public:
   )
   {
     {
-      DAEMON_LOG_MESSAGE("send_request_")
       auto requester = this->registry().add_result_handler( io_id, result_handler );
       if ( requester.second != nullptr )
       {
