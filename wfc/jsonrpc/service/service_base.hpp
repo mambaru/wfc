@@ -90,17 +90,32 @@ public:
     notify_serializer_t serializer
   )
   {
-    //this->post([this, io_id, name, serializer]()
+    
+    if ( auto writer = this->registry().get_outgoing_handler( io_id ) )
     {
       if ( auto wrk = this->get_worker(name).lock() )
       {
-        auto writer = this->registry().get_outgoing_handler( io_id );
         wrk->post([writer, name, serializer](){
           auto d = serializer(name);
           writer( std::move(d) );
         });
       }
-    }/*)*/;
+      else if ( this->options().workers.empty() )
+      {
+        auto d = serializer(name);
+        writer( std::move(d) );
+      }
+      else
+      {
+        COMMON_LOG_WARNING("jsonrpc worker unavailable for method: " << name )
+        abort();
+      }
+    }
+    else
+    {
+      DAEMON_LOG_ERROR("Requester not found for io_id=" << io_id << " for method: " << name )
+      abort();
+    }
   };
   
   void send_request(
@@ -110,23 +125,36 @@ public:
     request_serializer_t serializer
   )
   {
-    /*this->post([this, io_id, name, result_handler, serializer]()*/
     {
-      if ( auto wrk = this->get_worker(name).lock() )
+      DAEMON_LOG_MESSAGE("send_request_")
+      auto requester = this->registry().add_result_handler( io_id, result_handler );
+      if ( requester.second != nullptr )
       {
-        auto requester = this->registry().add_result_handler( io_id, result_handler );
-        wrk->post([this, io_id, requester, name,  serializer]()
+        if ( auto wrk = this->get_worker(name).lock() )
+        {
+          wrk->post([this, io_id, requester, name,  serializer]()
+          {
+            auto d = serializer(name, requester.first);
+            requester.second( std::move(d) );
+          });
+        }
+        else if ( this->options().workers.empty() )
         {
           auto d = serializer(name, requester.first);
-          if ( requester.second != nullptr )
-          {
-            requester.second( std::move(d) );
-          }
-          else
-          {
-            DAEMON_LOG_ERROR("Requester not found for io_id=" << io_id << "[[" << std::string(d->begin(), d->end())<< "]] " << " this=" << size_t(this) )
-          }
-        });
+          requester.second( std::move(d) );
+        }
+        else
+        {
+          COMMON_LOG_WARNING("jsonrpc worker unavailable for method: " << name )
+          // TODO: сделать ошибку
+          abort();
+          //result_handler(nullptr);
+        }
+      }
+      else
+      {
+        DAEMON_LOG_ERROR("Requester not found for io_id=" << io_id << " for method: " << name )
+        abort();
       }
     }/*)*/;
   };
@@ -134,11 +162,10 @@ public:
   // Новый коннект
   void create_handler( io_id_t io_id, outgoing_handler_t outgoing_handler, ::wfc::io::add_shutdown_handler_t add_shutdown /*TODO: в typedef*/ )
   {
-    DEBUG_LOG_MESSAGE("####################### create_handler io_id=" << io_id << " this=" << size_t(this) );
     if ( outgoing_handler != nullptr && add_shutdown!=nullptr)
     {
-      super::get_aspect().template get<_create_handler_>()(*this, io_id, std::move(outgoing_handler) );
       super::get_aspect().template get<_add_shutdown_>()(*this, std::move(add_shutdown) );
+      super::get_aspect().template get<_create_handler_>()(*this, io_id, std::move(outgoing_handler) );      
     }
     else
     {

@@ -104,7 +104,6 @@ struct method_list: basic_method_list
   
   virtual void publish(request_publish_ptr req, publish_callback callback)
   {
-    DEBUG_LOG_MESSAGE("======================== gateway method list publish callback==nullptr? " << (callback==nullptr) )
     {
       this->call<_publish_>( std::move(req), callback, nullptr );
     }
