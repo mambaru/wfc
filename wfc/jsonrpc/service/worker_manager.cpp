@@ -15,6 +15,7 @@ worker_manager::worker_manager(wfc::io_service& io_service, const options_type& 
 
 void worker_manager::start()
 {
+  this->stop();
   lock_guard lk(_mutex);
   for (auto &w : _config.workers)
   {
@@ -46,7 +47,6 @@ void worker_manager::start()
           itr->second.first.push_back(wrk);
           if ( itr->second.first.size() == 1)
             itr->second.second.init( itr->second.first.begin() );
-            //itr->second.second = itr->second.first.begin();
         }
       }
     }

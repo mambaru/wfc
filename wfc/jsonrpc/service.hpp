@@ -38,16 +38,16 @@ public:
 
 private:
   typedef std::shared_ptr<service_impl> impl_ptr;
-  typedef std::shared_ptr<io_service> io_service_ptr;
+  // typedef std::shared_ptr<io_service> io_service_ptr;
   
   impl_ptr _impl;
-  int _threads;
+  // int _threads;
   
   std::vector<impl_ptr> _impl_list;
-  std::vector<std::thread> _thread_list;
-  std::vector<io_service_ptr> _io_service_list;
+  //std::vector<std::thread> _thread_list;
+  //std::vector<io_service_ptr> _io_service_list;
 
-  void run_thread(int idx);
+  //void run_thread(int idx);
 };
 
 

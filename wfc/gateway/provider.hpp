@@ -13,12 +13,13 @@ namespace wfc{ namespace gateway{
   
 template<typename Itf>
 class provider
+  : public std::enable_shared_from_this< provider<Itf> >
 {
   typedef ::wfc::spinlock basic_mutex_type;
   typedef ::wfc::rwlock<basic_mutex_type> mutex_type;
   typedef Itf interface_type;
   typedef provider<interface_type> self;
-  typedef std::weak_ptr<interface_type> interface_ptr;
+  typedef std::shared_ptr<interface_type> interface_ptr;
   typedef std::map<size_t, interface_ptr> clinet_map;
   typedef std::queue< std::function<bool()> > delayed_queue;
   
@@ -70,17 +71,14 @@ public:
       return;
       /*abort();
        * */
-    DEBUG_LOG_MESSAGE("process_sequence_queue: _delayed_queue.size()==" << _delayed_queue.size());
     _delayed_queue.pop();
     if ( _delayed_queue.empty() )
     {
-      DEBUG_LOG_MESSAGE("process_sequence_queue: очередь пуста");
       return;
     }
     auto fn = _delayed_queue.front();
     if ( fn == nullptr )
     {
-      DEBUG_LOG_MESSAGE("process_sequence_queue: fn == nullptr");
       abort();
     }
     _wait_flag = true;
@@ -137,10 +135,11 @@ public:
   }
 
   // Когда вызывать, определяеться в method_list
-  void startup(size_t clinet_id, interface_ptr ptr )
+  void startup(size_t clinet_id, std::weak_ptr<interface_type> wptr )
   {
+    
+    auto ptr = wptr.lock();
     std::unique_lock<mutex_type> lk(_mutex);
-    DEBUG_LOG_MESSAGE("provider startup clinet_id=" << clinet_id)
     this->_clients[clinet_id] = ptr;
     this->_client_count = this->_clients.size();
     this->_cli_itr = this->_clients.begin();
@@ -176,7 +175,7 @@ public:
     ::wfc::read_lock<mutex_type> lk(_mutex);
     
     if ( !_conf.enabled || _clients.empty() )
-      return interface_ptr();
+      return nullptr;
     if ( _cli_itr == _clients.end() )
       _cli_itr = _clients.begin();
     client_id = _cli_itr->first;
@@ -194,23 +193,18 @@ public:
   {
     if (_conf.sequence_mode)
     {
-      return [this, callback](Resp req)
+      auto pthis = this->shared_from_this();
+      return [pthis, callback](Resp req)
       {
-        DEBUG_LOG_MESSAGE("Получен ответ!");
-        DEBUG_LOG_MESSAGE("wrap_callback this->_delayed_queue.size()==" << this->_delayed_queue.size());
         if ( callback!=nullptr)
         {
-          DEBUG_LOG_BEGIN("callback " << (req!=nullptr));
           callback( std::move(req) );
-          DEBUG_LOG_END("callback");
         }
         else
         {
-          DEBUG_LOG_MESSAGE("callback==nullptr!");
         }
-        _wait_flag = false;
-        DEBUG_LOG_MESSAGE("Разбор очереди!");
-        this->process_queue();
+        pthis->_wait_flag = false;
+        pthis->process_queue();
       };
     }
     else
@@ -227,20 +221,18 @@ public:
       return nullptr;
       */
     
+    
     if (_conf.sequence_mode)
     {
-      return [this, callback](size_t io_id, Resp req)
+      auto pthis = this->shared_from_this();
+      return [pthis, callback](size_t io_id, Resp req)
       {
-        DEBUG_LOG_MESSAGE("wrap_callback2. Получен ответ!");
-        DEBUG_LOG_MESSAGE("wrap_callback2 this->_delayed_queue.size()==" << this->_delayed_queue.size());
         if ( callback!=nullptr)
         {
-          DEBUG_LOG_BEGIN("wrap_callback2.callback " << (req!=nullptr));
           callback( io_id, std::move(req) );
-          DEBUG_LOG_END("wrap_callback2.callback " << (req!=nullptr));
         }
-        _wait_flag = false;
-        this->process_queue();
+        pthis->_wait_flag = false;
+        pthis->process_queue();
       };
     }
     else
@@ -261,31 +253,30 @@ public:
     Args... args
   )
   {
-    DEBUG_LOG_MESSAGE("################### wrap " << (callback==nullptr) );
-    // Ахтунг! То-же и для wrap2!!!
     auto preq = std::make_shared<Req>( std::move(req) );
+    auto pthis = this->shared_from_this();
     // обход бага завата Args...
     return std::bind(
-      [this](
+      [pthis](
         void (interface_type::*mem_ptr)(Req, std::function<void(Resp)>, Args... args), 
         std::shared_ptr<Req> preq, 
         std::function<void(Resp)> callback, 
         Args... args
       )
       {
-        DEBUG_LOG_MESSAGE("Отправляем запрос! callback==nullptr? " << (callback==nullptr) );
         //this->post(mem_ptr, std::move(*preq), callback, args...);
         
-        if ( auto cli = this->get().lock() )
+        
+        
+        if ( auto cli = pthis->get() )
         {
-          DEBUG_LOG_BEGIN("Отправляем запрос! Готов для отправки callback==nullptr? " << (callback==nullptr));
+          //cli.get()->subscribe(nullptr, nullptr);
           (cli.get()->*mem_ptr)( std::move(*preq), callback, args... );
-          DEBUG_LOG_END("Отправляем запрос! Готов для отправки callback==nullptr? " << (callback==nullptr));
           return true;
         }
         else
         {
-          _wait_flag = false;
+          pthis->_wait_flag = false;
           return false;
         }
 
@@ -310,16 +301,16 @@ public:
   )
   {
     auto preq = std::make_shared<Req>( std::move(req) );
-    auto wcallback =       [this](
+    auto pthis = this->shared_from_this();
+    auto wcallback =       [pthis](
         void (interface_type::*mem_ptr)(Req, std::function<void(Resp)>, Args... args), 
         std::shared_ptr<Req> preq, 
         std::function<void(size_t, Resp)> callback, 
         Args... args
       ) -> bool
       {
-      
         size_t client_id = 0;
-        if ( auto cli = this->get(client_id).lock() )
+        if ( auto cli = pthis->get(client_id) )
         {
           // (cli.get()->*mem_ptr)( std::move(*preq), callback, args... );
           //_wait_flag = true;
@@ -337,7 +328,7 @@ public:
         }
         else
         {
-          _wait_flag = false;
+          pthis->_wait_flag = false;
           return false;
         }
 
@@ -383,8 +374,7 @@ public:
     Args... args
   )
   {
-    DEBUG_LOG_MESSAGE("####################### POST callback==nullptr? " << (callback==nullptr) );
-    auto cli = this->get().lock();
+    auto cli = this->get();
 
     std::lock_guard<mutex_type> lk(_mutex);
     if ( !_conf.enabled )
@@ -396,7 +386,6 @@ public:
     {
       bool ready_for_call = _delayed_queue.empty() && !_wait_flag;
       _delayed_queue.push( fn );
-      DEBUG_LOG_MESSAGE("post ready_for_call=" << ready_for_call << " _delayed_queue.size()==" << _delayed_queue.size() );
       if ( ready_for_call )
       {
         _wait_flag = true;
@@ -407,7 +396,7 @@ public:
     }
     else
     {
-      if (auto cli = this->get().lock() )
+      if ( cli!=nullptr )
       {
         _mutex.unlock();
         fn();
@@ -432,9 +421,8 @@ public:
   {
     
 
-    DEBUG_LOG_MESSAGE("####################### POST2 callback==nullptr? " << (callback==nullptr) );
     
-    auto cli = this->get().lock();
+    auto cli = this->get();
 
     std::lock_guard<mutex_type> lk(_mutex);
     if ( !_conf.enabled )
@@ -456,7 +444,7 @@ public:
     }
     else
     {
-      if (auto cli = this->get().lock() )
+      if (cli!=nullptr )
       {
         _mutex.unlock();
         fn();
