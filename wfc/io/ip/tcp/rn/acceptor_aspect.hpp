@@ -81,8 +81,10 @@ struct ad_insert
     
 //#warning возможно holder_options.incoming_handler = opt.incoming_handler
     holder_options.incoming_handler = t._handler;
+
     if ( t._handler == nullptr )
       abort();
+
     auto holder = std::make_shared<holder_type>( std::move(*d), holder_options );
     auto id = holder->get_id();
     auto res = t.get_aspect().template get<_holder_storage_>().insert( std::make_pair( id, holder ) );

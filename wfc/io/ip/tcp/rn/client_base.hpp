@@ -125,8 +125,10 @@ public:
           
           auto opt = pthis->options().connection;
           //opt.incoming_handler = this->_handler;
+
           if ( opt.incoming_handler == nullptr )
             abort();
+
           pthis->_connection = std::make_shared<connection_type>( std::move(*psock), opt);
           pthis->_connection->start();
         }
