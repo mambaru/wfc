@@ -20,7 +20,8 @@ struct ad_method_handler
       // который вызываеться при новом коннекте 
       // то при каждом запросе создаем временный 
       // При этом обработка идет минуя воркеры
-      handler = t.clone_prototype();
+      // !!! handler = t.clone_prototype();
+      handler = t.get_prototype();
     }
     
     if ( auto wrk = t.get_worker( holder.method() ).lock() )
