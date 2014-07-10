@@ -56,7 +56,8 @@ public:
     io_service_type& io_service, 
     const options_type& opt, 
     const handler_interface& handler 
-  ) : super( io_service, opt)
+  ) 
+    : super( io_service, opt)
     , _worker_manager( io_service, opt)
   {
     super::create(*this);
@@ -125,37 +126,36 @@ public:
     request_serializer_t serializer
   )
   {
+    auto requester = this->registry().add_result_handler( io_id, result_handler );
+    if ( requester.second != nullptr )
     {
-      auto requester = this->registry().add_result_handler( io_id, result_handler );
-      if ( requester.second != nullptr )
+      if ( auto wrk = this->get_worker(name).lock() )
       {
-        if ( auto wrk = this->get_worker(name).lock() )
-        {
-          wrk->post([this, io_id, requester, name,  serializer]()
-          {
-            auto d = serializer(name, requester.first);
-            requester.second( std::move(d) );
-          });
-        }
-        else if ( this->options().workers.empty() )
+        wrk->post([this, io_id, requester, name,  serializer]()
         {
           auto d = serializer(name, requester.first);
           requester.second( std::move(d) );
-        }
-        else
-        {
-          COMMON_LOG_WARNING("jsonrpc worker unavailable for method: " << name )
-          // TODO: сделать ошибку
-          abort();
-          //result_handler(nullptr);
-        }
+        });
+      }
+      else if ( this->options().workers.empty() )
+      {
+        auto d = serializer(name, requester.first);
+        requester.second( std::move(d) );
       }
       else
       {
-        DAEMON_LOG_ERROR("Requester not found for io_id=" << io_id << " for method: " << name )
+        COMMON_LOG_WARNING("jsonrpc worker unavailable for method: " << name )
+        // TODO: сделать ошибку
         abort();
+        //result_handler(nullptr);
       }
-    }/*)*/;
+    }
+    else
+    {
+      DAEMON_LOG_ERROR("Requester not found for io_id=" << io_id << " for method: " << name )
+      abort();
+    }
+    
   };
   
   // Новый коннект
@@ -208,7 +208,7 @@ public:
     _worker_manager.stop();
   }
   
-  std::weak_ptr<handler_interface> get_prototype() const
+  std::shared_ptr<handler_interface> get_prototype() const
   {
     return _handler_prototype;
   }
