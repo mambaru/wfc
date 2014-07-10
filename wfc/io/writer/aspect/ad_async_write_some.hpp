@@ -13,6 +13,9 @@ struct ad_async_write_some
   {
     if ( !t.status() )
       return;
+    
+    if ( d == nullptr || d->empty() )
+      return;
 
     auto dd = std::make_shared<typename T::data_ptr>( std::move(d) );
     auto pthis = t.shared_from_this();
