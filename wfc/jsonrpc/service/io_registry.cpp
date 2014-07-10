@@ -98,7 +98,7 @@ auto io_registry::get_result_handler(call_id_t call_id) const
   
 
 auto io_registry::get_jsonrpc_handler(io_id_t io_id) const
--> std::weak_ptr<handler_interface> 
+-> std::shared_ptr<handler_interface> 
 {
   read_lock lk(_mutex);
   

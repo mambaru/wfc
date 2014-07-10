@@ -67,7 +67,7 @@ public:
 
   result_handler_t get_result_handler(call_id_t call_id) const;
   
-  std::weak_ptr<handler_interface> get_jsonrpc_handler(io_id_t io_id) const;
+  std::shared_ptr<handler_interface> get_jsonrpc_handler(io_id_t io_id) const;
   
   outgoing_handler_t get_outgoing_handler(io_id_t io_id) const;
   

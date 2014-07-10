@@ -65,12 +65,12 @@ public:
   }
   
   
-  std::weak_ptr< worker_type > get_worker(const std::string& name)
+  std::shared_ptr< worker_type > get_worker(const std::string& name)
   {
     return this->get_worker(name.c_str());
   }
   
-  std::weak_ptr< worker_type > get_worker(const char* name)
+  std::shared_ptr< worker_type > get_worker(const char* name)
   {
     return _worker_manager.get_worker(name);
   }
@@ -94,7 +94,7 @@ public:
     
     if ( auto writer = this->registry().get_outgoing_handler( io_id ) )
     {
-      if ( auto wrk = this->get_worker(name).lock() )
+      if ( auto wrk = this->get_worker(name) )
       {
         wrk->post([writer, name, serializer](){
           auto d = serializer(name);
@@ -129,7 +129,7 @@ public:
     auto requester = this->registry().add_result_handler( io_id, result_handler );
     if ( requester.second != nullptr )
     {
-      if ( auto wrk = this->get_worker(name).lock() )
+      if ( auto wrk = this->get_worker(name) )
       {
         wrk->post([this, io_id, requester, name,  serializer]()
         {

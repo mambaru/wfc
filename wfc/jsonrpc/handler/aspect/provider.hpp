@@ -8,7 +8,7 @@ namespace wfc{ namespace jsonrpc{
   
 template<typename I>
 struct provider
-  : fas::value<_provider_, std::weak_ptr<I> >
+  : fas::value<_provider_, std::shared_ptr<I> >
 {
 };
 

@@ -133,12 +133,11 @@ public:
     
     std::atomic<bool> flag(false);
     
-    /*std::weak_ptr<T>*/auto pthis = t.shared_from_this();
-    std::weak_ptr<typename decltype(pthis)::element_type> wthis(pthis);
-    super::get_io_service().post( super::super_wrap( [wthis, &t, &flag, finalize]()
+    auto pthis = t.shared_from_this();
+    //std::weak_ptr<typename decltype(pthis)::element_type> wthis(pthis);
+    super::get_io_service().post( super::super_wrap( [pthis, &t, &flag, finalize]()
     {
-      if ( auto pthis = wthis.lock() )
-        pthis->stop_impl(t, finalize);
+      pthis->stop_impl(t, finalize);
       flag = true;
     },
     [&flag](){ flag=true;}
