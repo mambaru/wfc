@@ -89,7 +89,7 @@ void service::stop()
 }
 
 auto service::get_prototype() const
-->std::weak_ptr<handler_interface> 
+->std::shared_ptr<handler_interface> 
 {
   return _impl->get_prototype();
 }

@@ -106,17 +106,20 @@ public:
       });
 
       auto psock = std::make_shared<socket_type>( this->get_io_service() );
-      std::weak_ptr<self> wself = this->shared_from_this();
+      auto pthis = this->shared_from_this();
       
       psock->get_io_service().reset();
-      psock->async_connect(ep, /*super::strand().wrap(*/ [ep, psock, wself](const boost::system::error_code& ec)
+      psock->async_connect(ep, /*super::strand().wrap(*/ [ep, psock, pthis](const boost::system::error_code& ec)
       {
+        // TODO: проверить статус (если клент передумал)
+        /*
         auto pthis = wself.lock();
         if ( pthis == nullptr )
         {
           TRACE_LOG_MESSAGE("void connect() wself==nullptr")
           return;
         }
+        */
         
         if ( !ec )
         {
