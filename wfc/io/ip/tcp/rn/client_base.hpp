@@ -92,7 +92,7 @@ public:
   
   void connect()
   {
-    TRACE_LOG_MESSAGE( "void connect()..." << this->options().host << ":" << this->options().port )
+    COMMON_LOG_MESSAGE( "Client connect to " << this->options().host << ":" << this->options().port << " ..." )
 
     boost::asio::ip::tcp::resolver resolver( this->get_io_service() );
     boost::asio::ip::tcp::endpoint ep = *resolver.resolve({
