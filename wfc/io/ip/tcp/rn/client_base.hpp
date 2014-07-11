@@ -16,11 +16,10 @@ inline typename T::options_type update_options(T* self, typename T::options_type
       auto add_handler = [self](::wfc::io::io_id_t id) 
       {
         DAEMON_LOG_WARNING("Connection " << id << " closed. Reconnect...")
-        //std::bind( &self::connect, self)
+        
         self->post( [self](){
           self->connect();
         } );
-        //self->post( std::bind( &self::connect, self) );
       };
       
       add(add_handler);

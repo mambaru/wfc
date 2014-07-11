@@ -21,7 +21,7 @@ class provider
   typedef provider<interface_type> self;
   typedef std::shared_ptr<interface_type> interface_ptr;
   typedef std::map<size_t, interface_ptr> clinet_map;
-  typedef std::queue< std::function<bool()> > delayed_queue;
+  typedef std::queue< std::function<bool(std::unique_lock<mutex_type>&)> > delayed_queue;
   
 public:
   
@@ -54,11 +54,13 @@ public:
   void process_sequence_queue(std::unique_lock<mutex_type>& lk, bool last_call_ready)
   {
     if ( !last_call_ready && _wait_flag )
-      return;
-
-    if ( _wait_flag )
     {
-      _wait_flag = true;
+      return;
+    }
+
+    if ( last_call_ready )
+    {
+      //_wait_flag = true;
       _delayed_queue.pop();
     }
     
@@ -72,14 +74,23 @@ public:
     {
       abort();
     }
-    _wait_flag = true;
-    lk.unlock();
-    fn();
-    lk.lock();
+    //_wait_flag = true;
+    //lk.unlock();
+    
+    fn(lk);
+    
+    //lk.lock();
   }
 
   void process_non_sequence_queue(std::unique_lock<mutex_type>& lk)
   {
+    while ( !_delayed_queue.empty() )
+    {
+      auto fn = _delayed_queue.front();
+      _delayed_queue.pop();
+      fn(lk);
+    }
+    /*
     delayed_queue dq;
     dq.swap(_delayed_queue);
     lk.unlock();
@@ -90,14 +101,15 @@ public:
       dq.pop();
     }
     lk.lock();
+    */
   }
 
-  void process_queue(bool last_call_ready = false)
+  void process_queue(std::unique_lock<mutex_type>& lk, bool last_call_ready = false)
   {
     if ( !this->ready() )
       return;
     
-    std::unique_lock<mutex_type> lk(_mutex);
+    //std::unique_lock<mutex_type> lk(_mutex);
 
     if ( _delayed_queue.empty() )
       return;
@@ -116,23 +128,25 @@ public:
   void startup(size_t clinet_id, std::shared_ptr<interface_type> ptr )
   {
     std::unique_lock<mutex_type> lk(_mutex);
+    
     this->_clients[clinet_id] = ptr;
     this->_client_count = this->_clients.size();
     this->_cli_itr = this->_clients.begin();
-    lk.unlock();
-    this->process_queue();
-    lk.lock();
+    this->process_queue(lk, false);
   }
     
   // Когда вызывать, определяеться в method_list
   void shutdown(size_t clinet_id)
   {
-    std::lock_guard<mutex_type> lk(_mutex);
-    
+    std::unique_lock<mutex_type> lk(_mutex);
+
     this->_clients.erase(clinet_id);
     this->_cli_itr = this->_clients.begin();
     this->_client_count = this->_clients.size();
-    for ( auto& sh: _shudown_handlers )
+    auto shs = _shudown_handlers;
+    lk.unlock();
+
+    for ( auto& sh: shs )
       sh( clinet_id );
   }
 
@@ -145,11 +159,9 @@ public:
       return interface_ptr();
     return itr->second;
   }
-
-  interface_ptr get(size_t& client_id)
+  
+  interface_ptr self_get(size_t& client_id)
   {
-    std::lock_guard<mutex_type> lk(_mutex);
-    
     if ( !_conf.enabled || _clients.empty() )
       return nullptr;
     if ( _cli_itr == _clients.end() )
@@ -158,11 +170,24 @@ public:
     return (_cli_itr++)->second;
   }
 
+  interface_ptr get(size_t& client_id)
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    return this->self_get(client_id);
+  }
+
   interface_ptr get()
   {
     size_t client_id = 0;
     return this->get(client_id);
   }
+
+  interface_ptr self_get()
+  {
+    size_t client_id = 0;
+    return this->self_get(client_id);
+  }
+
   
   template<typename Resp>
   std::function<void(Resp)> wrap_callback(std::function<void(Resp)> callback) 
@@ -176,8 +201,9 @@ public:
         {
           callback( std::move(req) );
         }
-        //pthis->_wait_flag = false;
-        pthis->process_queue(true);
+        std::unique_lock<mutex_type> lk(pthis->_mutex);
+        pthis->_wait_flag = false;
+        pthis->process_queue(lk, true);
       };
     }
     else
@@ -198,8 +224,10 @@ public:
         {
           callback( io_id, std::move(req) );
         }
-        //pthis->_wait_flag = false;
-        pthis->process_queue(true);
+        
+        std::unique_lock<mutex_type> lk(pthis->_mutex);
+        pthis->_wait_flag = false;
+        pthis->process_queue(lk, true);
       };
     }
     else
@@ -213,7 +241,7 @@ public:
     typename Resp,
     typename... Args
   >
-  std::function<bool()> wrap( 
+  std::function<bool(std::unique_lock<mutex_type>&)> wrap( 
     void (interface_type::*mem_ptr)(Req, std::function<void(Resp)>, Args... args), 
     Req req, 
     std::function<void(Resp)> callback, 
@@ -225,16 +253,19 @@ public:
     // обход бага завата Args...
     return std::bind(
       [pthis](
+        std::unique_lock<mutex_type>& lk, 
         void (interface_type::*mem_ptr)(Req, std::function<void(Resp)>, Args... args), 
         std::shared_ptr<Req> preq, 
         std::function<void(Resp)> callback, 
         Args... args
       )
       {
-        if ( auto cli = pthis->get() )
+        if ( auto cli = pthis->self_get() )
         {
           pthis->_wait_flag = true;
+          lk.unlock();
           (cli.get()->*mem_ptr)( std::move(*preq), callback, args... );
+          lk.lock();
           return true;
         }
         else
@@ -244,6 +275,7 @@ public:
         }
 
       }, 
+      std::placeholders::_1,
       mem_ptr, 
       preq, 
       this->wrap_callback( callback ), 
@@ -256,7 +288,7 @@ public:
     typename Resp,
     typename... Args
   >
-  std::function<bool()> wrap2( 
+  std::function<bool(std::unique_lock<mutex_type>&)> wrap2( 
     void (interface_type::*mem_ptr)(Req, std::function<void(Resp)>, Args... args), 
     Req req, 
     std::function<void(size_t, Resp)> callback, 
@@ -266,6 +298,7 @@ public:
     auto preq = std::make_shared<Req>( std::move(req) );
     auto pthis = this->shared_from_this();
     auto wcallback =       [pthis](
+        std::unique_lock<mutex_type>& lk,
         void (interface_type::*mem_ptr)(Req, std::function<void(Resp)>, Args... args), 
         std::shared_ptr<Req> preq, 
         std::function<void(size_t, Resp)> callback, 
@@ -273,10 +306,10 @@ public:
       ) -> bool
       {
         size_t client_id = 0;
-        if ( auto cli = pthis->get(client_id) )
+        if ( auto cli = pthis->self_get(client_id) )
         {
           pthis->_wait_flag = true;
-          
+          lk.unlock();
           (cli.get()->*mem_ptr)( 
             std::move(*preq), 
             [client_id, callback](Resp resp)
@@ -285,7 +318,7 @@ public:
             }, 
             args... 
           );
-
+          lk.lock();
           return true;
         }
         else
@@ -297,6 +330,7 @@ public:
 
     return std::bind(
       wcallback, 
+      std::placeholders::_1,
       mem_ptr, 
       preq, 
       this->wrap_callback2( callback ), 
@@ -314,9 +348,10 @@ public:
     Args... args
   )
   {
-    auto cli = this->get();
-
     std::unique_lock<mutex_type> lk(_mutex);
+    
+    auto cli = this->self_get();
+    
     if ( !_conf.enabled )
       return;
 
@@ -326,26 +361,14 @@ public:
     {
       _delayed_queue.push( fn );
       this->process_sequence_queue( lk, false);
-      //_mutex.unlock();
-      /*
-      bool ready_for_call = _delayed_queue.empty() && !_wait_flag;
-      _delayed_queue.push( fn );
-      if ( ready_for_call )
-      {
-        //_wait_flag = true;
-        _mutex.unlock();
-        fn();
-        _mutex.lock();
-      }
-      */
     }
     else
     {
       if ( cli!=nullptr )
       {
-        _mutex.unlock();
-        fn();
-        _mutex.lock();
+        //_mutex.unlock();
+        fn(lk);
+        //_mutex.lock();
       }
       else
       {
@@ -364,12 +387,10 @@ public:
     Args... args
   )
   {
+    std::unique_lock<mutex_type> lk(_mutex);
     
+    auto cli = this->self_get();
 
-    
-    auto cli = this->get();
-
-    std::lock_guard<mutex_type> lk(_mutex);
     if ( !_conf.enabled )
       return;
 
@@ -377,23 +398,28 @@ public:
     
     if ( _conf.sequence_mode )
     {
+      _delayed_queue.push( fn );
+      this->process_sequence_queue( lk, false);
+
+      /*
       bool ready_for_call = _delayed_queue.empty() && !_wait_flag;
       _delayed_queue.push( fn );
       if ( ready_for_call )
       {
         _wait_flag = true;
-        _mutex.unlock();
-        fn();
-        _mutex.lock();
+        //_mutex.unlock();
+        fn(lk);
+        //_mutex.lock();
       }
+      */
     }
     else
     {
       if (cli!=nullptr )
       {
-        _mutex.unlock();
-        fn();
-        _mutex.lock();
+        //_mutex.unlock();
+        fn(lk);
+        //_mutex.lock();
       }
       else
       {
