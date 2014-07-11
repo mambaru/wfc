@@ -60,7 +60,6 @@ public:
 
     if ( last_call_ready )
     {
-      //_wait_flag = true;
       _delayed_queue.pop();
     }
     
@@ -74,12 +73,7 @@ public:
     {
       abort();
     }
-    //_wait_flag = true;
-    //lk.unlock();
-    
     fn(lk);
-    
-    //lk.lock();
   }
 
   void process_non_sequence_queue(std::unique_lock<mutex_type>& lk)
@@ -90,18 +84,6 @@ public:
       _delayed_queue.pop();
       fn(lk);
     }
-    /*
-    delayed_queue dq;
-    dq.swap(_delayed_queue);
-    lk.unlock();
-    
-    while ( !dq.empty() )
-    {
-      dq.front()();
-      dq.pop();
-    }
-    lk.lock();
-    */
   }
 
   void process_queue(std::unique_lock<mutex_type>& lk, bool last_call_ready = false)
@@ -366,9 +348,7 @@ public:
     {
       if ( cli!=nullptr )
       {
-        //_mutex.unlock();
         fn(lk);
-        //_mutex.lock();
       }
       else
       {
@@ -400,57 +380,18 @@ public:
     {
       _delayed_queue.push( fn );
       this->process_sequence_queue( lk, false);
-
-      /*
-      bool ready_for_call = _delayed_queue.empty() && !_wait_flag;
-      _delayed_queue.push( fn );
-      if ( ready_for_call )
-      {
-        _wait_flag = true;
-        //_mutex.unlock();
-        fn(lk);
-        //_mutex.lock();
-      }
-      */
     }
     else
     {
       if (cli!=nullptr )
       {
-        //_mutex.unlock();
         fn(lk);
-        //_mutex.lock();
       }
       else
       {
         _delayed_queue.push( fn );
       }
     }
-
-    
-    /*
-    if ( !_conf.enabled )
-      return;
-
-    size_t client_id = 0;
-    if (auto cli = this->get(client_id).lock() )
-    {
-      (cli.get()->*mem_ptr)( 
-        std::move(req), 
-        [client_id, callback](Resp resp)
-        {
-          callback( client_id, std::move(resp));
-        }, 
-        args... 
-      );
-    }
-    else
-    {
-      std::lock_guard<mutex_type> lk(_mutex);
-      auto wrp = this->wrap2( mem_ptr, std::move(req), callback, std::forward<Args>(args)...);
-      _delayed_queue.push( wrp );
-    }
-    */
   }
   
   void operator+= ( shudown_handler sh )
