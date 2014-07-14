@@ -67,7 +67,7 @@ public:
   std::pair<call_id_t, outgoing_handler_t>
   add_result_handler(io_id_t io_id, result_handler_t result_handler);
 
-  result_handler_t get_result_handler(call_id_t call_id) const;
+  result_handler_t detach_result_handler(call_id_t call_id);
   
   std::shared_ptr<handler_interface> get_jsonrpc_handler(io_id_t io_id) const;
   
