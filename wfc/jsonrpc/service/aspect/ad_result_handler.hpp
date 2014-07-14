@@ -13,7 +13,7 @@ struct ad_result_handler
   template<typename T>
   void operator()( T& t, incoming_holder holder)
   {
-    if ( auto handler = t.registry().get_result_handler( holder.get_id<int>() ) )
+    if ( auto handler = t.registry().detach_result_handler( holder.get_id<int>() ) )
     {
       handler( std::move(holder) );
     }

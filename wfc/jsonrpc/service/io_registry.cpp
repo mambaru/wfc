@@ -69,7 +69,7 @@ auto io_registry::add_result_handler(io_id_t io_id, result_handler_t result_hand
   return result;
 }
 
-auto io_registry::get_result_handler(call_id_t call_id) const
+auto io_registry::detach_result_handler(call_id_t call_id)
  -> io_registry::result_handler_t
 {
   read_lock lk(_mutex);
@@ -83,15 +83,20 @@ auto io_registry::get_result_handler(call_id_t call_id) const
       auto itr3 = itr2->second.result_map.find(call_id);
       if ( itr3 != itr2->second.result_map.end() )
       {
-        return itr3->second;
+        auto result = itr3->second;
+        itr2->second.result_map.erase(itr3);
+        _call_io_map.erase(itr);
+        return result;
       }
       else
       {
+        _call_io_map.erase(itr);
         DAEMON_LOG_ERROR("jsonrpc::service: jsonrpc id=" << call_id << " not found in response list");
       }
     }
     else
     {
+      _call_io_map.erase(itr);
       COMMON_LOG_WARNING("jsonrpc::service: io id=" << itr->second << " not found");
     }
   }
