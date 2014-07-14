@@ -109,13 +109,11 @@ public:
       else
       {
         COMMON_LOG_WARNING("jsonrpc worker unavailable for method: " << name )
-        abort();
       }
     }
     else
     {
-      DAEMON_LOG_ERROR("Requester not found for io_id=" << io_id << " for method: " << name )
-      abort();
+      COMMON_LOG_WARNING("Requester not found for io_id=" << io_id << " for method: " << name )
     }
   };
   
@@ -145,15 +143,11 @@ public:
       else
       {
         COMMON_LOG_WARNING("jsonrpc worker unavailable for method: " << name )
-        // TODO: сделать ошибку
-        abort();
-        //result_handler(nullptr);
       }
     }
     else
     {
-      DAEMON_LOG_ERROR("Requester not found for io_id=" << io_id << " for method: " << name )
-      abort();
+      COMMON_LOG_WARNING("Requester not found for io_id=" << io_id << " for method: " << name )
     }
     
   };

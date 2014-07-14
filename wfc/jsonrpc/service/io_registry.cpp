@@ -6,13 +6,16 @@ namespace wfc{ namespace jsonrpc{
 
   
 io_registry::io_registry()
-  : _call_id_counter(0)
+  : _tmp_time(0)
+  , _call_id_counter(0)
 {
   
 }
   
 void io_registry::set_io(io_id_t io_id, std::shared_ptr<handler_interface> jsonrpc_handler, outgoing_handler_t outgoing_handler)
 {
+#warning
+  this->check();
   lock_guard lk(_mutex);
   auto result = _io_map.insert( std::make_pair( io_id, io_info(jsonrpc_handler, outgoing_handler) ) );
   if ( !result.second )
@@ -47,6 +50,9 @@ auto io_registry::erase_io( io_id_t io_id )
 auto io_registry::add_result_handler(io_id_t io_id, result_handler_t result_handler)
   ->std::pair< call_id_t, outgoing_handler_t >
 {
+  #warning
+  this->check();
+
   std::pair<call_id_t, outgoing_handler_t> result(-1, nullptr);
   
   lock_guard lk(_mutex);
@@ -127,6 +133,16 @@ void io_registry::clear()
   
   _io_map.clear();
   _call_io_map.clear();
+}
+
+void io_registry::check() const
+{
+  time_t now = time(0);
+  if ( _tmp_time  < now )
+  {
+    COMMON_LOG_MESSAGE("DEBUG: _io_map.size()==" << _io_map.size() << " _call_io_map.size()==" << _call_io_map.size())
+    _tmp_time = now;
+  }
 }
 
 }} // wfc
