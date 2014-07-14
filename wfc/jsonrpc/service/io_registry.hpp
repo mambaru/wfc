@@ -29,11 +29,13 @@ public:
   const outgoing_handler_t outgoing_handler;
   
   
+  
   result_map_t result_map;
 
   io_info( std::shared_ptr<handler_interface> jsonrpc_handler, outgoing_handler_t outgoing_handler)
     : jsonrpc_handler(jsonrpc_handler)
     , outgoing_handler(outgoing_handler)
+    
   {}
 };
 
@@ -73,8 +75,10 @@ public:
   
   void clear();
   
-private:
+  void check() const;
   
+private:
+  mutable time_t _tmp_time;
   call_id_t _call_id_counter;
   io_map_t _io_map;
   call_io_map_t _call_io_map;
