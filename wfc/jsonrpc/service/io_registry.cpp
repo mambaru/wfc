@@ -14,8 +14,8 @@ io_registry::io_registry()
   
 void io_registry::set_io(io_id_t io_id, std::shared_ptr<handler_interface> jsonrpc_handler, outgoing_handler_t outgoing_handler)
 {
-#warning
-  this->check();
+//#warning
+//  this->check();
   lock_guard lk(_mutex);
   auto result = _io_map.insert( std::make_pair( io_id, io_info(jsonrpc_handler, outgoing_handler) ) );
   if ( !result.second )
@@ -50,8 +50,7 @@ auto io_registry::erase_io( io_id_t io_id )
 auto io_registry::add_result_handler(io_id_t io_id, result_handler_t result_handler)
   ->std::pair< call_id_t, outgoing_handler_t >
 {
-  #warning
-  this->check();
+  // this->check();
 
   std::pair<call_id_t, outgoing_handler_t> result(-1, nullptr);
   
@@ -145,7 +144,7 @@ void io_registry::check() const
   time_t now = time(0);
   if ( _tmp_time  < now )
   {
-    COMMON_LOG_MESSAGE("DEBUG: _io_map.size()==" << _io_map.size() << " _call_io_map.size()==" << _call_io_map.size())
+    // Здесь был trace _io_map и _call_io_map
     _tmp_time = now;
   }
 }
