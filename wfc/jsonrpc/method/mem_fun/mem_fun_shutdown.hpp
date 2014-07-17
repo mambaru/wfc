@@ -13,7 +13,7 @@ struct mem_fun_shutdown
   template<typename T>
   void operator()(T& t, io::io_id_t id) const
   {
-    if (auto trg = t.provider().lock() )
+    if (auto trg = t.provider() )
     {
       (trg.get()->*mem_ptr)( id );
     }

@@ -14,7 +14,7 @@ template<
     std::unique_ptr<Params>, 
     std::function< void(std::unique_ptr<Result>) >, 
     size_t, 
-    std::weak_ptr<Itf>
+    std::shared_ptr<Itf>
   ) 
 >
 struct mem_fun_handler1
@@ -27,7 +27,7 @@ struct mem_fun_handler1
   template<typename T>
   void operator()(T& t, request_ptr req, jsonrpc_callback cb) const
   {
-    if ( auto i = t.target().lock() )
+    if ( auto i = t.target() )
     {
       (i.get()->*mem_ptr)( 
         std::move(req), 

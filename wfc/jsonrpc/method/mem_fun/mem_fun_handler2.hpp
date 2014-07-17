@@ -38,19 +38,19 @@ struct mem_fun_handler2
   template<typename T>
   void operator()(T& t, request_ptr req, jsonrpc_callback cb) const
   {
-    if ( auto i = t.target().lock() )
+    if ( auto i = t.target() )
     {
-      std::weak_ptr<Itf> self = t.shared_from_this();
+      std::shared_ptr<Itf> self = t.shared_from_this();
       (i.get()->*mem_ptr)( 
         std::move(req), 
         mem_fun_make_callback( std::move(cb)),
         t.get_io_id(),
         [self](request2_ptr req, std::function< void(responce2_ptr) > callback)
         {
-          if ( auto p = self.lock() )
-          {
-            (p.get()->*mem_ptr2)(std::move(req),callback);
-          }
+          //if ( auto p = self.lock() )
+          // {
+          (self.get()->*mem_ptr2)( std::move(req), callback);
+          // }
         }
       );
     }

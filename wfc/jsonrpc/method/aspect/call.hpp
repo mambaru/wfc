@@ -57,7 +57,6 @@ private:
   ) const
   {
     using namespace std::placeholders;
-    DAEMON_LOG_MESSAGE("request_")
 
     std::function<void(incoming_holder holder)> handler = nullptr;
     
@@ -85,14 +84,12 @@ private:
     params_ptr req
   ) const
   {
-    DAEMON_LOG_MESSAGE ( "notify_" )
     using namespace std::placeholders;
     t.send_notify( 
       tt.name(), 
       std::move(req),
       std::bind( TT::template serialize_notify<T, params_json>, _1, _2)
     );
-
   }
 };
 
