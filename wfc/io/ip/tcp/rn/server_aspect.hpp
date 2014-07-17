@@ -19,7 +19,6 @@ struct server_aspect: fas::aspect
   fas::stub< ::wfc::io::server::_reconfigure_ >,
   fas::stub< ::wfc::io::server::_start_ >,
   fas::stub< ::wfc::io::server::_stop_ >
-  
 >{};
   
 }}}}}

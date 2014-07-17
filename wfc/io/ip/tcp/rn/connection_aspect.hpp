@@ -92,23 +92,15 @@ struct connection_aspect:
     fas::group<wfc::io::reader::_on_error_, _on_read_error_>, 
     fas::group<wfc::io::writer::_on_write_, _on_write_>, 
     fas::group<wfc::io::rn::writer::_on_write_, _on_rn_write_>, 
-    //fas::stub< wfc::io::_stop_>, // tmp
-
     fas::advice< wfc::io::_options_type_, connection_options>,
     fas::type< wfc::io::_descriptor_type_, boost::asio::ip::tcp::socket>,
-    
     wfc::io::rn::writer::aspect2<wfc::io::writer::_incoming_>,
     wfc::io::writer::aspect,
-    //wfc::io::writer::< boost::asio::posix::stream_descriptor>, 
-
-    //wfc::io::reader::aspect< wfc::io::reader::async_read_some, wfc::io::rn::reader::_incoming_, wfc::io::rn::writer::_incoming_ >,
     fas::alias< ::wfc::io::reader::_output_, ::wfc::io::rn::writer::_incoming_>,
-
     fas::alias< ::wfc::io::reader::_incoming_, ::wfc::io::rn::reader::_input_>,
     fas::alias< ::wfc::io::rn::reader::_output_, ::wfc::io::reader::_outgoing_>,
     ::wfc::io::reader::aspect,
     ::wfc::io::rn::reader::aspect,
-    ////wfc::io::rn::reader::aspect2<wfc::io::reader::_incoming_>,
     wfc::io::reader::error_log,
     wfc::io::writer::error_log
   >

@@ -14,7 +14,9 @@ struct ad_async_read_some
   {
     if ( !t.status() )
       return;
+    
     auto dd = std::make_shared<typename T::data_ptr>( std::move(d) );
+    
     auto pthis = t.shared_from_this();
     
     auto callback = [pthis, dd]( boost::system::error_code ec , std::size_t bytes_transferred )
@@ -22,6 +24,7 @@ struct ad_async_read_some
       typename T::lock_guard lk(pthis->mutex());
       pthis->get_aspect().template get<_read_handler_>()(*pthis, std::move(*dd), std::move(ec), bytes_transferred);
     };
+    
     t.mutex().unlock();
     t.descriptor().async_read_some( ::boost::asio::buffer( **dd ), callback);
     t.mutex().lock();

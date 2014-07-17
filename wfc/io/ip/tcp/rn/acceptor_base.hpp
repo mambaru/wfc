@@ -16,14 +16,29 @@ public:
   typedef typename super::options_type options_type; 
   typedef typename super::descriptor_type descriptor_type;
   
-  acceptor_base(descriptor_type&& desc, const options_type& conf/*, wfc::io::incoming_handler handler = nullptr*/)
-    : super( std::move(desc), conf/*, handler*/)
+  acceptor_base(descriptor_type&& desc, const options_type& conf)
+    : super( std::move(desc), conf)
   {
   }
   
   ~acceptor_base()
   {
   }
+  
+  void listen()
+  {
+    boost::asio::ip::tcp::resolver resolver( super::get_io_service() );
+    boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve({
+      super::options().host, 
+      super::options().port
+    });
+
+    super::descriptor().open(endpoint.protocol());
+    super::descriptor().set_option( boost::asio::ip::tcp::acceptor::reuse_address(true) );
+    super::descriptor().bind(endpoint);
+    super::descriptor().listen( super::options().backlog );
+  }
+
   
   void stop(std::function<void()> finalize)
   {
@@ -45,37 +60,6 @@ public:
       }
       this->mutex().lock();
     });
-
-    /*
-    std::atomic<bool> flag(false);
-    super::stop([this, finalize, &flag]()
-    {
-      auto &stg = this->get_aspect().template get<_holder_storage_>();
-      for(auto& conn : stg)
-      {
-        conn.second->stop(nullptr);
-      }
-      
-      stg.clear();
-
-      
-      if (finalize!=nullptr)
-      {
-        finalize();
-      }
-      
-      flag = true;
-    });
-    
-    
-    while ( !flag )
-    {
-      
-      super::get_io_service().reset();
-      super::get_io_service().poll();
-    }
-    */
-
   }
 };
   

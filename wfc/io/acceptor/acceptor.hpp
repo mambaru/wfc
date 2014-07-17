@@ -30,18 +30,21 @@ public:
   void operator = (const acceptor& conf) = delete;
 
   
-  acceptor(descriptor_type&& desc, const options_type& conf/*, wfc::io::incoming_handler handler = nullptr*/)
-    : super( std::move(desc), conf/*, handler*/)
+  acceptor(descriptor_type&& desc, const options_type& conf)
+    : super( std::move(desc), conf)
   {
     super::create(*this);
     
     if ( conf.incoming_handler == nullptr )
       abort();
-
-    if ( super::_handler == nullptr )
-      abort();
-
   }
+  
+  template<typename AcceptorType, typename IOService, typename ProtocolType>
+  std::shared_ptr<AcceptorType> clone(IOService& io, const ProtocolType& protocol)
+  {
+    return std::make_shared< AcceptorType >( super::template dup<descriptor_type>(io, protocol),  super::options() );
+  }
+  
 
   void start()
   {

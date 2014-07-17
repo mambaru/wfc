@@ -29,8 +29,43 @@ struct ad_configure
     }
     
     typedef typename acceptor_type::descriptor_type descriptor_type;
-
     descriptor_type desc( t.get_io_service() );
+    auto acceptor_proto = std::make_shared<acceptor_type>( std::move(desc), conf);
+    
+    COMMON_LOG_MESSAGE("listen " << t.options().host << ":" << t.options().port)
+    acceptor_proto->listen();
+    
+    size_t threads = static_cast<size_t>(t.options().threads);
+    
+    if ( threads == 0)
+    {
+      acceptors.push_back( acceptor_proto );
+      return;
+    }
+
+    
+    auto& services = t.get_aspect().template get<_io_services_>();
+    
+    auto itr = acceptors.begin();
+    for (size_t i = 0 ; i < static_cast<size_t>(t.options().threads); ++i, ++itr)
+    {
+      if ( acceptors.size() < threads )
+      {
+        auto io = std::make_shared<wfc::io_service>();
+        services.push_back(io);
+        acceptors.push_back( acceptor_proto->clone(*io));
+      }
+      else
+      {
+        (*itr)->reconfigure(conf);
+      }
+    }
+    
+    
+    /*
+    typedef typename acceptor_type::descriptor_type descriptor_type;
+
+    
 
     // TODO: нахрен отсюда - я не знаю какой протокол
     boost::asio::ip::tcp::resolver resolver( t.get_io_service() );
@@ -53,18 +88,14 @@ struct ad_configure
       if ( acceptors.size() <  static_cast<size_t>(t.options().threads) )
       {
         auto io = std::make_shared<wfc::io_service>();
-        // TODO: desc.dup<descriptor_type>
         typename descriptor_type::native_handle_type fd = ::dup(desc.native_handle());
         descriptor_type descriptor( *io, boost::asio::ip::tcp::v4(), fd);
-        
-        //descriptor_type descriptor( t.get_io_service(), boost::asio::ip::tcp::v4(), fd);
-        acceptors.push_back( std::make_shared<acceptor_type>( std::move(descriptor), conf/*, t._handler*/) );
+        acceptors.push_back( std::make_shared<acceptor_type>( std::move(descriptor), conf) );
         services.push_back(io);
       }
       else
       {
         // TODO: сделать реконфигурацию
-        // (*itr)->create( conf );
       }
     }
     
@@ -72,20 +103,26 @@ struct ad_configure
     {
       acceptors.push_back( std::make_shared<acceptor_type>( std::move(desc), conf));
     }
+    */
   }
 };
 
 struct ad_start
 {
-  std::shared_ptr<wfc::io_service> io_service_ptr;
+  //std::shared_ptr<wfc::io_service> io_service_ptr;
 
   template<typename T>
   void operator()(T& t)
   {
     
-    t.dispatch([&t]()
-    {
+    //t.dispatch([&t]()
+    //{
+      
+      
       auto& acceptors = t.get_aspect().template get<_acceptors_>();
+      //COMMON_LOG_MESSAGE("listen " << t.options().host << ":" << t.options().port)
+      //acceptors.front()->listen();
+      
       for(auto& ptr : acceptors)
       {
         ptr->start();
@@ -100,43 +137,14 @@ struct ad_start
           s->run();
         }));
       }
-    });
+    //});
   }  
-  /*
-  template<typename T>
-  void operator()(T& t)
-  {
-    // Ахтунг! сделать свой io_service если потоков > 0;
-    t.dispatch([&t]()
-    {
-      size_t thread_count = t.get_aspect().template get<_thread_count_>();
-      
-      auto& acceptors = t.get_aspect().template get<_acceptors_>();
-      auto& threads   = t.get_aspect().template get<_threads_>();
-      
-      while ( threads.size() > thread_count )
-        threads.pop_back();
-      
-      while ( threads.size() < thread_count )
-      {
-        threads.push_back( std::make_unique<std::thread>( [&t](){ 
-          t.get_io_service().run();
-        }));
-      }
-      
-      for(auto& ptr : acceptors)
-      {
-        ptr->start();
-      }
-    });
-  }
-  */
 };
 
 struct _before_stop_;
 struct ad_before_stop
 {
-  std::shared_ptr<wfc::io_service> io_service_ptr;
+  //std::shared_ptr<wfc::io_service> io_service_ptr;
 
   template<typename T>
   void operator()(T& t)
@@ -174,12 +182,8 @@ struct ad_before_stop
 template<typename Acceptor>
 struct aspect: fas::aspect
 <
-  //context<>,
-  //fas::stub< wfc::io::_stop_>,
   fas::advice<_before_stop_, ad_before_stop>,
   fas::group< wfc::io::_on_stop_, _before_stop_>, // TODO: переименовать
-  // fas::value<_acceptor_count_, size_t>,
-  // fas::value<_thread_count_, size_t>,
   fas::type< wfc::io::server::_acceptor_type_, Acceptor>,
   fas::value< _acceptors_, std::list< std::shared_ptr<Acceptor> > >,
   fas::value< _threads_, std::list< std::unique_ptr<std::thread> > >,
@@ -194,46 +198,34 @@ struct aspect: fas::aspect
  
 template<typename A>  
 class server
-  //: public fas::aspect_class<A>
   : public basic_io<A>
   , public std::enable_shared_from_this< server<A> >
 {
 public:
-  //typedef fas::aspect_class<A> super;
-  //typedef typename super::aspect::template advice_cast< wfc::io::_options_type_>::type options_type;
   
   typedef basic_io<A> super;
   typedef typename super::options_type options_type;
 
-  /*
-  server(wfc::io_service& io, wfc::io::handler handler = nullptr)
-    : io_service(io)
-    , _handler(handler)
-  {
-    this->get_aspect().template get<_create_>()(*this);
-  }
-  */
-  
-  
-  server(wfc::io_service& io, const options_type& conf/*, wfc::io::incoming_handler handler = nullptr*/)
+  server(wfc::io_service& io, const options_type& conf)
     : super(io, conf)
-    , _handler(conf.incoming_handler) // TODO: убрать
+    // , _handler(conf.incoming_handler) // TODO: убрать
   {
     super::create(*this);
-    //this->get_aspect().template get<_create_>()(*this);
     this->get_aspect().template gete<_configure_>()(*this, conf);
   }
 
   
   void configure(const options_type& conf)
   {
-    this->get_aspect().template gete<_configure_>()(*this, conf);
+    abort();
+    //this->get_aspect().template gete<_configure_>()(*this, conf);
   }
   
   
   void reconfigure(const options_type& conf)
   {
-    this->get_aspect().template get<_reconfigure_>()(*this, conf);
+    abort();
+    //this->get_aspect().template get<_reconfigure_>()(*this, conf);
   }
   
   
@@ -241,6 +233,7 @@ public:
   {
     typename super::lock_guard lk(super::mutex());
     super::stop(*this, finalize);
+    // TODO: Убрать!!!
     super::get_io_service().reset();
     while ( 0!=super::get_io_service().poll() ) { super::get_io_service().reset();};
   }
@@ -248,21 +241,11 @@ public:
   void start()
   {
     typename super::lock_guard lk(super::mutex());
+    //this->get_aspect().template gete<_configure_>()(*this, super::options() );
     super::start(*this);
-    //this->get_aspect().template get<_start_>()(*this);
   }
   
-  
-  /*
-  wfc::io_service& get_io_service()
-  {
-    return io_service;
-  }
-  */
-  
-  //wfc::io_service& io_service;
-  wfc::io::incoming_handler_t _handler;
-  
+  //wfc::io::incoming_handler_t _handler;
 };
   
 }}}
