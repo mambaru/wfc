@@ -16,11 +16,10 @@ inline typename T::options_type update_options(T* self, typename T::options_type
       auto add_handler = [self](::wfc::io::io_id_t id) 
       {
         DAEMON_LOG_WARNING("Connection " << id << " closed. Reconnect...")
-        //std::bind( &self::connect, self)
+        
         self->post( [self](){
           self->connect();
         } );
-        //self->post( std::bind( &self::connect, self) );
       };
       
       add(add_handler);
@@ -93,58 +92,45 @@ public:
   
   void connect()
   {
-    TRACE_LOG_MESSAGE("void connect()...")
-    //super::get_io_service().reset();
-    /*super::get_io_service().post([this]()
-    {
-      TRACE_LOG_MESSAGE("void connect() posted")
-      */
-      boost::asio::ip::tcp::resolver resolver( this->get_io_service() );
-      boost::asio::ip::tcp::endpoint ep = *resolver.resolve({
-        this->options().host, 
-        this->options().port
-      });
+    COMMON_LOG_MESSAGE( "Client connect to " << this->options().host << ":" << this->options().port << " ..." )
 
-      auto psock = std::make_shared<socket_type>( this->get_io_service() );
-      std::weak_ptr<self> wself = this->shared_from_this();
+    boost::asio::ip::tcp::resolver resolver( this->get_io_service() );
+    boost::asio::ip::tcp::endpoint ep = *resolver.resolve({
+      this->options().host, 
+      this->options().port
+    });
+
+    auto psock = std::make_shared<socket_type>( this->get_io_service() );
+    auto pthis = this->shared_from_this();
       
-      psock->get_io_service().reset();
-      psock->async_connect(ep, /*super::strand().wrap(*/ [ep, psock, wself](const boost::system::error_code& ec)
+    psock->async_connect(ep, [ep, psock, pthis](const boost::system::error_code& ec)
+    {
+      if ( !ec )
       {
-        auto pthis = wself.lock();
-        if ( pthis == nullptr )
-        {
-          TRACE_LOG_MESSAGE("void connect() wself==nullptr")
-          return;
-        }
-        
-        if ( !ec )
-        {
-          COMMON_LOG_MESSAGE( "Client " << pthis->options().host << ":" << pthis->options().port << " connected!" )
-          // TODO: для connection отдельный handler
+        COMMON_LOG_MESSAGE( "Client " << pthis->options().host << ":" << pthis->options().port << " connected!" )
+        // TODO: для connection отдельный handler
           
-          auto opt = pthis->options().connection;
-          //opt.incoming_handler = this->_handler;
+        auto opt = pthis->options().connection;
+        //opt.incoming_handler = this->_handler;
 
-          if ( opt.incoming_handler == nullptr )
-            abort();
+        if ( opt.incoming_handler == nullptr )
+          abort();
 
-          pthis->_connection = std::make_shared<connection_type>( std::move(*psock), opt);
-          pthis->_connection->start();
-        }
-        else
-        {
-          DAEMON_LOG_WARNING( pthis->options().host << ":" << pthis->options().port << ": " 
-                              << ec.message() << " " << pthis->options().reconnect_timeout << " seconds to reconnect." )
+        pthis->_connection = std::make_shared<connection_type>( std::move(*psock), opt);
+        pthis->_connection->start();
+      }
+      else
+      {
+        DAEMON_LOG_WARNING( pthis->options().host << ":" << pthis->options().port << ": " 
+                            << ec.message() << " " << pthis->options().reconnect_timeout << " seconds to reconnect." )
           
-          pthis->_reconnect_timer.expires_from_now( boost::posix_time::seconds( pthis->options().reconnect_timeout) );
-          pthis->_reconnect_timer.async_wait([pthis, ep, psock](const boost::system::error_code& ) 
-          {
-            pthis->connect();
-          });
-        }
-      }/*)*/);
-    //});
+        pthis->_reconnect_timer.expires_from_now( boost::posix_time::seconds( pthis->options().reconnect_timeout) );
+        pthis->_reconnect_timer.async_wait([pthis, ep, psock](const boost::system::error_code& ) 
+        {
+          pthis->connect();
+        });
+      }
+    });
   }
 
   void start()

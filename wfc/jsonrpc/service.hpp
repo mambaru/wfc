@@ -31,7 +31,7 @@ public:
 
   void stop();
   
-  std::weak_ptr<handler_interface> get_prototype() const;
+  std::shared_ptr<handler_interface> get_prototype() const;
   
   std::shared_ptr<handler_interface> clone_prototype() const;
 

@@ -29,11 +29,13 @@ public:
   const outgoing_handler_t outgoing_handler;
   
   
+  
   result_map_t result_map;
 
   io_info( std::shared_ptr<handler_interface> jsonrpc_handler, outgoing_handler_t outgoing_handler)
     : jsonrpc_handler(jsonrpc_handler)
     , outgoing_handler(outgoing_handler)
+    
   {}
 };
 
@@ -65,16 +67,18 @@ public:
   std::pair<call_id_t, outgoing_handler_t>
   add_result_handler(io_id_t io_id, result_handler_t result_handler);
 
-  result_handler_t get_result_handler(call_id_t call_id) const;
+  result_handler_t detach_result_handler(call_id_t call_id);
   
-  std::weak_ptr<handler_interface> get_jsonrpc_handler(io_id_t io_id) const;
+  std::shared_ptr<handler_interface> get_jsonrpc_handler(io_id_t io_id) const;
   
   outgoing_handler_t get_outgoing_handler(io_id_t io_id) const;
   
   void clear();
   
-private:
+  void check() const;
   
+private:
+  mutable time_t _tmp_time;
   call_id_t _call_id_counter;
   io_map_t _io_map;
   call_io_map_t _call_io_map;

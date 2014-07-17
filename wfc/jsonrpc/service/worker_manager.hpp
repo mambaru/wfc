@@ -52,7 +52,7 @@ public:
   
   void stop();
   
-  std::weak_ptr< worker_type > get_worker(const char* name) const;
+  std::shared_ptr< worker_type > get_worker(const char* name) const;
 
 private:
   wfc::io_service& _io_service;

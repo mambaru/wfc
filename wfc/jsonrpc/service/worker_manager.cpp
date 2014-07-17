@@ -77,7 +77,7 @@ void worker_manager::stop()
   this->_services.clear();
 }
 
-std::weak_ptr< worker_manager::worker_type > 
+std::shared_ptr< worker_manager::worker_type > 
 worker_manager::get_worker(const char* name) const
 {
   read_lock lk(_mutex);
@@ -96,7 +96,7 @@ worker_manager::get_worker(const char* name) const
     );
     return *wrk_itr;
   }
-  return std::weak_ptr< worker_manager::worker_type >();
+  return std::shared_ptr< worker_manager::worker_type >();
 }
 
 }} // wfc

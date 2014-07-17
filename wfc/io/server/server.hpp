@@ -85,7 +85,6 @@ struct ad_start
     
     t.dispatch([&t]()
     {
-      DEBUG_LOG_MESSAGE("#### server::ad_start")
       auto& acceptors = t.get_aspect().template get<_acceptors_>();
       for(auto& ptr : acceptors)
       {
@@ -98,7 +97,6 @@ struct ad_start
       for (auto s : services)
       {
         threads.push_back( std::make_unique<std::thread>( [&t, s](){ 
-          DEBUG_LOG_MESSAGE("#### server::ad_start run")
           s->run();
         }));
       }

@@ -6,13 +6,16 @@ namespace wfc{ namespace jsonrpc{
 
   
 io_registry::io_registry()
-  : _call_id_counter(0)
+  : _tmp_time(0)
+  , _call_id_counter(0)
 {
   
 }
   
 void io_registry::set_io(io_id_t io_id, std::shared_ptr<handler_interface> jsonrpc_handler, outgoing_handler_t outgoing_handler)
 {
+//#warning
+//  this->check();
   lock_guard lk(_mutex);
   auto result = _io_map.insert( std::make_pair( io_id, io_info(jsonrpc_handler, outgoing_handler) ) );
   if ( !result.second )
@@ -47,6 +50,8 @@ auto io_registry::erase_io( io_id_t io_id )
 auto io_registry::add_result_handler(io_id_t io_id, result_handler_t result_handler)
   ->std::pair< call_id_t, outgoing_handler_t >
 {
+  // this->check();
+
   std::pair<call_id_t, outgoing_handler_t> result(-1, nullptr);
   
   lock_guard lk(_mutex);
@@ -63,7 +68,7 @@ auto io_registry::add_result_handler(io_id_t io_id, result_handler_t result_hand
   return result;
 }
 
-auto io_registry::get_result_handler(call_id_t call_id) const
+auto io_registry::detach_result_handler(call_id_t call_id)
  -> io_registry::result_handler_t
 {
   read_lock lk(_mutex);
@@ -77,15 +82,20 @@ auto io_registry::get_result_handler(call_id_t call_id) const
       auto itr3 = itr2->second.result_map.find(call_id);
       if ( itr3 != itr2->second.result_map.end() )
       {
-        return itr3->second;
+        auto result = itr3->second;
+        itr2->second.result_map.erase(itr3);
+        _call_io_map.erase(itr);
+        return result;
       }
       else
       {
+        _call_io_map.erase(itr);
         DAEMON_LOG_ERROR("jsonrpc::service: jsonrpc id=" << call_id << " not found in response list");
       }
     }
     else
     {
+      _call_io_map.erase(itr);
       COMMON_LOG_WARNING("jsonrpc::service: io id=" << itr->second << " not found");
     }
   }
@@ -98,7 +108,7 @@ auto io_registry::get_result_handler(call_id_t call_id) const
   
 
 auto io_registry::get_jsonrpc_handler(io_id_t io_id) const
--> std::weak_ptr<handler_interface> 
+-> std::shared_ptr<handler_interface> 
 {
   read_lock lk(_mutex);
   
@@ -127,6 +137,16 @@ void io_registry::clear()
   
   _io_map.clear();
   _call_io_map.clear();
+}
+
+void io_registry::check() const
+{
+  time_t now = time(0);
+  if ( _tmp_time  < now )
+  {
+    // Здесь был trace _io_map и _call_io_map
+    _tmp_time = now;
+  }
 }
 
 }} // wfc

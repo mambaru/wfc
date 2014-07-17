@@ -88,6 +88,8 @@ struct ad_insert
     auto holder = std::make_shared<holder_type>( std::move(*d), holder_options );
     auto id = holder->get_id();
     auto res = t.get_aspect().template get<_holder_storage_>().insert( std::make_pair( id, holder ) );
+    
+    
     if ( res.second )
     {
       res.first->second->start();
