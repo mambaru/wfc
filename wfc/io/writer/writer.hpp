@@ -10,7 +10,7 @@
 #include <iostream>
 
 namespace wfc{ namespace io{ namespace writer{
-
+/*
 struct options
   :  ::wfc::io::basic::options
   , basic_options
@@ -30,5 +30,5 @@ struct writer_aspect: fas::aspect
 
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 using writer = writer_base< typename fas::merge_aspect< A, writer_aspect>::type, AspectClass>;
-
+*/
 }}}

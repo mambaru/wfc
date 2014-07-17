@@ -11,7 +11,7 @@
 
 #include <wfc/io/posix/rn/writer_options.hpp>
 #include <wfc/io/writer/writer.hpp>
-#include <wfc/io/rn/writer/aspect.hpp>
+#include <wfc/io/rn/writer/aspect/aspect.hpp>
 
 
 namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{
@@ -98,7 +98,8 @@ struct connection_aspect:
     fas::type< wfc::io::_descriptor_type_, boost::asio::ip::tcp::socket>,
     
     wfc::io::rn::writer::aspect2<wfc::io::writer::_incoming_>,
-    wfc::io::writer::stream< boost::asio::posix::stream_descriptor>, 
+    wfc::io::writer::aspect,
+    //wfc::io::writer::< boost::asio::posix::stream_descriptor>, 
 
     //wfc::io::reader::aspect< wfc::io::reader::async_read_some, wfc::io::rn::reader::_incoming_, wfc::io::rn::writer::_incoming_ >,
     fas::alias< ::wfc::io::reader::_output_, ::wfc::io::rn::writer::_incoming_>,
