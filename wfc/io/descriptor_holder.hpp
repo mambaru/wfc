@@ -47,13 +47,14 @@ public:
   typedef basic_io< typename fas::merge_aspect<A, holder_aspect>::type , AspectClass> super;
   typedef typename super::aspect::template advice_cast<_descriptor_type_>::type descriptor_type;
   typedef typename super::options_type options_type;
+  typedef typename super::io_service_type io_service_type;
   
 
   descriptor_holder(descriptor_type&& desc, const options_type& conf/*, ::wfc::io::incoming_handler handler = nullptr*/)
     : super( desc.get_io_service(), conf)
     , _descriptor( std::move(desc) )
     // , _handler(handler)
-    , _handler(conf.incoming_handler)
+    //, _handler(conf.incoming_handler)
   {
   }
   
@@ -61,6 +62,17 @@ public:
   {
     
   }
+
+  template<typename Descriptor, typename IOServiceType, typename ProtocolType>
+  Descriptor dup(IOServiceType& io, const ProtocolType& protocol)
+  {
+    typedef Descriptor dup_descriptor_type;
+    typedef typename dup_descriptor_type::native_handle_type dup_native_type;
+    dup_native_type f = ::dup( this->descriptor().native_handle() );
+    dup_descriptor_type dup_descriptor(io, protocol, f);
+    return std::move(dup_descriptor);
+  }
+
   
   
   template<typename Holder>
@@ -69,9 +81,10 @@ public:
     typedef typename Holder::descriptor_type dup_descriptor_type;
     typedef typename dup_descriptor_type::native_handle_type dup_native_type;
     dup_native_type f = ::dup( this->descriptor().native_handle() );
-    dup_descriptor_type dup_descriptor(this->get_io_service(), descriptor_type::protocol_type(), f );
+    dup_descriptor_type dup_descriptor(this->get_io_service(), typename descriptor_type::protocol_type(), f );
     return Holder( std::move(dup_descriptor), opt );
   }
+  
   
   
   descriptor_type& descriptor()
@@ -165,7 +178,7 @@ private:
 
 public:
   // TODO: в аспект
-  ::wfc::io::incoming_handler_t _handler;
+  //::wfc::io::incoming_handler_t _handler;
   
 
 };

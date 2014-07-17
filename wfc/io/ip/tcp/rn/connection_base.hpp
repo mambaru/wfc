@@ -15,14 +15,18 @@ public:
   typedef typename super::options_type options_type; 
   typedef typename super::descriptor_type descriptor_type;
   
-  connection_base(descriptor_type&& desc, const options_type& conf/*, wfc::io::incoming_handler handler = nullptr*/)
-    : super( std::move(desc), conf/*, handler*/)
+  connection_base(descriptor_type&& desc, const options_type& opt)
+    : super( std::move(desc), opt)
   {
-    // TODO: в опции 
-    boost::asio::ip::tcp::no_delay option(true);
-    super::descriptor().set_option(option);
+    boost::asio::ip::tcp::no_delay no_delay(true);
+    super::descriptor().set_option(no_delay);
     
-    //super::get_aspect().template get< ::wfc::io::reader::_read_more_>();
+    boost::asio::socket_base::non_blocking_io non_blocking_io(true);
+    super::descriptor().io_control(non_blocking_io);
+
+    boost::asio::socket_base::keep_alive keep_alive(opt.keep_alive);
+    super::descriptor().set_option(keep_alive);
+
   }
 };
   

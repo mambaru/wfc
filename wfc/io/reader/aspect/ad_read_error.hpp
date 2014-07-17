@@ -10,7 +10,7 @@ struct ad_read_error
   template<typename T>
   void operator()(T& t, typename T::data_ptr d, boost::system::error_code ec)
   {
-    t.get_aspect().template get<_status_ >()= false;
+    t.get_aspect().template get<_status_ >() = false;
     
     if ( ec == boost::asio::error::operation_aborted)
     {

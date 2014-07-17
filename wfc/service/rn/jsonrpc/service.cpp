@@ -35,7 +35,9 @@ service::service(wfc::io_service& io, const service_config& conf, std::shared_pt
   : _io_service(io)
   , _conf( conf )
 {
+  DEBUG_LOG_BEGIN("service::service")
   this->create( io, conf, fact);
+  DEBUG_LOG_END("service::service")
 }
   
 service::service(std::weak_ptr< wfc::global > global, const service_config& conf/*, std::shared_ptr<ifactory> fact*/)

@@ -2,7 +2,7 @@
 
 #include <wfc/io/reader/aspect/tags.hpp>
 
-namespace wfc{ namespace io{ namespace reader{ 
+namespace wfc{ namespace io{ namespace reader{ namespace dgram{ namespace sync{
   
 struct ad_user_handler
 {
@@ -17,11 +17,14 @@ struct ad_user_handler
     else
     {
       auto pthis = t.shared_from_this();
-      auto callback = [pthis](typename T::data_ptr d)
+      auto ep = t.get_aspect().template get<_remote_endpoint_>();
+      
+      auto callback = [pthis, ep](typename T::data_ptr d)
       {
         typename T::lock_guard lk(pthis->mutex());
         if ( !pthis->status() )
           return;
+        t.get_aspect().template get<_remote_endpoint_>() = ep;
         pthis->get_aspect().template get<_output_>()(*pthis, std::move(d) );
       };
 
@@ -39,4 +42,4 @@ struct ad_user_handler
 };
 
 
-}}}
+}}}}}
