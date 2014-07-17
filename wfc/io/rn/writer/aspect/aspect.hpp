@@ -1,11 +1,9 @@
 #pragma once
 
-#include <wfc/io/rn/writer/tags.hpp>
-#include <wfc/io/rn/writer/ad_ready.hpp>
-#include <wfc/io/rn/writer/ad_tailor.hpp>
+#include <wfc/io/rn/writer/aspect/tags.hpp>
+#include <wfc/io/rn/writer/aspect/ad_ready.hpp>
+#include <wfc/io/rn/writer/aspect/ad_tailor.hpp>
 #include <wfc/io/rn/rn.hpp>
-#include <wfc/io/writer/aspect/aspect.hpp>
-#include <wfc/io/writer/basic_options.hpp>
 
 #include <fas/aop.hpp>
 
@@ -24,28 +22,19 @@ struct aspect: fas::aspect<
 >
 {};
 
-
-struct basic_options
-  //: ::wfc::io::writer::basic_options
-{
-  /*
-  size_t rn_limit_error = static_cast<size_t>(-1);
-  size_t rn_limit_warning= static_cast<size_t>(-1);
-  */
-};
-
+/*
 struct options
   : basic_options
   , ::wfc::io::basic::options
 {
 };
-
+*/
 
 
 template<typename TgOutgoing>
 struct aspect2: fas::aspect< 
   advice_list,
-  fas::type< ::wfc::io::_options_type_, options >,
+  fas::type< ::wfc::io::_options_type_, basic_options >,
   fas::alias<_outgoing_, TgOutgoing>
 >
 {};

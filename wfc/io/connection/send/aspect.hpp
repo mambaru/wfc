@@ -7,6 +7,7 @@
 
 namespace wfc{ namespace io{ namespace connection{ namespace send{ 
 
+  /*
 
 typedef fas::type_list_n<
   fas::advice< _send_, ad_send>
@@ -18,5 +19,6 @@ struct aspect: fas::aspect
   advice_list
 >
 {};
+*/
 
 }}}}

@@ -25,8 +25,7 @@ namespace wfc{ namespace io{ namespace writer{
 typedef std::list<  ::wfc::io::basic::data_ptr> data_list;
 
 struct aspect: fas::aspect<
-  //fas::value< _error_code_, boost::system::error_code>,
-  fas::alias<_incoming_, _write_>, 
+  fas::alias<  _incoming_, _write_ >, 
   fas::advice< _write_some_,    ad_async_write_some >, 
   fas::advice< _write_handler_, ad_write_handler >,
   fas::advice< _write_ready_, ad_write_ready>,
@@ -42,13 +41,6 @@ struct aspect: fas::aspect<
   fas::stub<_write_error_>
 >{};
 
-template<typename Descriptor,  typename TgOutgoing = _incoming_ >
-struct stream: fas::aspect<
-  fas::type<  ::wfc::io::_descriptor_type_, Descriptor>,
-  aspect
->
-{};
-  
 struct error_log: fas::aspect<
   fas::advice<_log_error_, ad_log_error>,
   fas::advice<_log_abort_, ad_log_abort>,
