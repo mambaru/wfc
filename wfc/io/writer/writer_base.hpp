@@ -10,6 +10,7 @@
 
 namespace wfc{ namespace io{ namespace writer{
   
+/*
 template<typename A = fas::aspect<>, template<typename> class AspectClass = fas::aspect_class >
 class writer_base
   : public descriptor_holder<A, AspectClass>
@@ -62,5 +63,6 @@ public:
   }
 private:
 };
+*/
 
 }}}

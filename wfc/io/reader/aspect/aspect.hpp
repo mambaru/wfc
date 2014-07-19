@@ -22,6 +22,7 @@
 #include <wfc/io/reader/aspect/ad_read_ready.hpp>
 #include <wfc/io/reader/aspect/ad_read_more.hpp>
 #include <wfc/io/reader/aspect/ad_start.hpp>
+#include <wfc/io/reader/aspect/ad_init.hpp>
 #include <wfc/io/reader/aspect/ad_trace.hpp>
 #include <wfc/io/reader/aspect/ad_read_handler.hpp>
 #include <wfc/io/reader/aspect/ad_user_handler.hpp>

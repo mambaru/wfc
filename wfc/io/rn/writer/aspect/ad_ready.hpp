@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wfc/io/rn/writer/tags.hpp>
+#include <wfc/io/rn/writer/aspect/tags.hpp>
 #include <utility>
 
 namespace wfc{ namespace io{ namespace rn{ namespace writer{
