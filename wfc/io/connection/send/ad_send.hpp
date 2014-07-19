@@ -7,6 +7,7 @@
 
 namespace wfc{ namespace io{ namespace connection{ namespace send{
 
+  /*
 struct ad_send
 {
   template<typename T>
@@ -23,5 +24,6 @@ struct ad_send
   }
 
 };
+*/
 
 }}}}

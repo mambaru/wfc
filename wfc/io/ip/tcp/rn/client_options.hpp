@@ -4,7 +4,7 @@
 #include <functional>
 #include <wfc/io/types.hpp>
 #include <wfc/io/ip/tcp/rn/connection_options.hpp>
-#include <wfc/io/rn/writer/aspect.hpp>
+#include <wfc/io/rn/writer/aspect/aspect.hpp>
 
 
 

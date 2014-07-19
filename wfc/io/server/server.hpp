@@ -2,6 +2,7 @@
 
 #include <wfc/io_service.hpp>
 #include <wfc/io/server/tags.hpp>
+#include <wfc/io/basic_io.hpp>
 #include <wfc/io/tags.hpp>
 
 #include <list>
