@@ -81,7 +81,9 @@ class service
 {
   typedef  ::wfc::jsonrpc::service jsonrpc_type;
   typedef  ::wfc::io::ip::tcp::rn::jsonrpc::server server_tcp_type;
+  typedef  ::wfc::io::ip::udp::rn::jsonrpc::server server_udp_type;
   typedef std::shared_ptr<server_tcp_type> server_tcp_ptr;
+  typedef std::shared_ptr<server_udp_type> server_udp_ptr;
   typedef std::shared_ptr<jsonrpc_type> jsonrpc_ptr;
   
 public:
@@ -111,6 +113,10 @@ private:
   
   jsonrpc_ptr _jsonrpc_for_tcp;
   std::list< server_tcp_ptr > _tcp_servers;
+
+  jsonrpc_ptr _jsonrpc_for_udp;
+  std::list< server_udp_ptr > _udp_servers;
+
 };
 
 }}}}

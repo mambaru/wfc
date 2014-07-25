@@ -9,8 +9,8 @@ client::~client()
 }
 
   
-client::client(wfc::io_service& io, const options_type& conf/*, wfc::io::handler handler*/ )
-  : _impl( std::make_shared<client_impl>( io, conf/*, handler*/) )
+client::client(wfc::io_service& io, const options_type& conf )
+  : _impl( std::make_shared<client_impl>( io, conf) )
 {
   
 }
@@ -35,7 +35,4 @@ void client::shutdown()
   
 }
 
-  
-
-  
 }}}}}

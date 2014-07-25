@@ -1,5 +1,6 @@
 #pragma once
 
+/*
 namespace wfc{ namespace io{ namespace reader{
 
 struct _init_;
@@ -42,3 +43,4 @@ struct _log_error_;
 
 
 }}}
+*/
