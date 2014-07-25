@@ -24,6 +24,7 @@ struct _make_buffer_;
 // Чтение из сокета
 struct _read_some_;
 
+struct _remote_endpoint_;
 
 struct _on_abort_;
 struct _on_error_;

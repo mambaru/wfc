@@ -1,11 +1,11 @@
 #pragma once
 
 #include <fas/aop.hpp>
-#include <wfc/io/ip/tcp/rn/acceptor_aspect.hpp>
+#include <wfc/io/ip/udp/rn/acceptor_aspect.hpp>
 #include <wfc/io/acceptor/acceptor.hpp>
 
 #include <thread>
-namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{ 
+namespace wfc{ namespace io{ namespace ip{ namespace udp{ namespace rn{ 
 
 template<typename A = fas::aspect<> >
 class acceptor_base:
@@ -27,18 +27,20 @@ public:
   
   void listen()
   {
+    /*
     COMMON_LOG_MESSAGE("listen " << super::options().host << ":" << super::options().port)
     
-    boost::asio::ip::tcp::resolver resolver( super::get_io_service() );
-    boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve({
+    boost::asio::ip::udp::resolver resolver( super::get_io_service() );
+    boost::asio::ip::udp::endpoint endpoint = *resolver.resolve({
       super::options().host, 
       super::options().port
     });
 
     super::descriptor().open(endpoint.protocol());
-    super::descriptor().set_option( boost::asio::ip::tcp::acceptor::reuse_address(true) );
+    super::descriptor().set_option( boost::asio::ip::udp::acceptor::reuse_address(true) );
     super::descriptor().bind(endpoint);
     super::descriptor().listen( super::options().backlog );
+    */
   }
 
   
@@ -46,6 +48,7 @@ public:
   {
     super::stop([this, finalize]()
     {
+      /*
       typename super::lock_guard lk( this->mutex() );
       auto &stg = this->get_aspect().template get<_holder_storage_>();
       for(auto& conn : stg)
@@ -61,6 +64,7 @@ public:
         finalize();
       }
       this->mutex().lock();
+      */
     });
   }
 };

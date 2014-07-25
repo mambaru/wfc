@@ -23,8 +23,8 @@ struct ad_user_handler
       {
         typename T::lock_guard lk(pthis->mutex());
         if ( !pthis->status() )
-          return;
-        t.get_aspect().template get<_remote_endpoint_>() = ep;
+          return;                        
+        pthis->get_aspect().template get<_remote_endpoint_>() = ep;
         pthis->get_aspect().template get<_output_>()(*pthis, std::move(d) );
       };
 

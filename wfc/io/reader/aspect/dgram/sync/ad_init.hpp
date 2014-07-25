@@ -14,7 +14,7 @@ struct ad_init
       std::weak_ptr<T> wthis = t.shared_from_this();
       
       t.options().outgoing_handler = 
-        [wthis](typename T::data_ptr d)
+        [wthis](typename T::data_ptr /*d*/)
         {
           if ( auto pthis = wthis.lock() )
           {
