@@ -4,6 +4,8 @@
 #include <wfc/jsonrpc/options_json.hpp>
 #include <wfc/io/ip/tcp/rn/server_options.hpp>
 #include <wfc/io/ip/tcp/rn/server_options_json.hpp>
+#include <wfc/io/ip/udp/rn/server_options.hpp>
+#include <wfc/io/ip/udp/rn/server_options_json.hpp>
 #include <wfc/json/json.hpp>
 #include <wfc/json/name.hpp>
 
@@ -14,6 +16,7 @@ struct service_config_json
 {
   JSON_NAME(jsonrpc)
   JSON_NAME(tcp)
+  JSON_NAME(udp)
   
   typedef ::wfc::json::object<
     service_config,
@@ -34,7 +37,15 @@ struct service_config_json
           std::vector< ::wfc::io::ip::tcp::rn::server_options >, 
           &service_config::tcp, 
           ::wfc::json::array< ::wfc::io::ip::tcp::rn::server_options_json::type >
+      >,
+      ::wfc::json::member< 
+          n_udp, 
+          service_config, 
+          std::vector< ::wfc::io::ip::udp::rn::server_options >, 
+          &service_config::udp, 
+          ::wfc::json::array< ::wfc::io::ip::udp::rn::server_options_json::type >
       >
+
     >::type
   > type;
 

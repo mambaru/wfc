@@ -21,9 +21,11 @@ namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{ namespac
 class server;
 }}}}}}
 
+namespace wfc{ namespace io{ namespace ip{ namespace udp{ namespace rn{ namespace jsonrpc{
+class server;
+}}}}}}
 
 namespace wfc{ namespace service{ namespace rn{ namespace jsonrpc{
-
 
 struct ifactory
 {
@@ -111,7 +113,7 @@ private:
   ::wfc::io_service& _io_service;
   service_config _conf;
   
-  jsonrpc_ptr _jsonrpc_for_tcp;
+  jsonrpc_ptr _jsonrpc;
   std::list< server_tcp_ptr > _tcp_servers;
 
   jsonrpc_ptr _jsonrpc_for_udp;

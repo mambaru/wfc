@@ -39,11 +39,13 @@ public:
       abort();
   }
   
+  /*
   template<typename AcceptorType, typename IOService, typename ProtocolType>
   std::shared_ptr<AcceptorType> clone(IOService& io, const ProtocolType& protocol)
   {
     return std::make_shared< AcceptorType >( super::template dup<descriptor_type>(io, protocol),  super::options() );
   }
+  */
   
 
   void start()

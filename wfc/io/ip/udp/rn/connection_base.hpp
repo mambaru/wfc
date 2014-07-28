@@ -22,6 +22,22 @@ public:
   {
   }
   
+  void listen()
+  {
+    COMMON_LOG_MESSAGE("udp \"listen\" " << super::options().host << ":" << super::options().port)
+    
+    boost::asio::ip::udp::resolver resolver( super::get_io_service() );
+    boost::asio::ip::udp::endpoint endpoint = *resolver.resolve({
+      super::options().host, 
+      super::options().port
+    });
+
+    super::descriptor().open( endpoint.protocol() );
+    //super::descriptor().set_option( boost::asio::ip::udp::acceptor::reuse_address(true) );
+    super::descriptor().bind( endpoint );
+
+  }
+  
 };
   
 }}}}}
