@@ -166,25 +166,17 @@ public:
   void start()
   {
     _thread = std::make_shared<std::thread>([this](){
-      DEBUG_LOG_MESSAGE("acceptor_thread::start -2-")
        this->_acceptor->start();
-       DEBUG_LOG_MESSAGE("acceptor_thread::start -3-")
        this->_io_service.run();
-       DEBUG_LOG_MESSAGE("acceptor_thread::start -4-")
     });
   }
   
   void stop()
   {
-    DEBUG_LOG_MESSAGE("acceptor_thread::stop -1-")
     _io_service.stop();
-    DEBUG_LOG_MESSAGE("acceptor_thread::stop -2-")
     _acceptor->close();
-    DEBUG_LOG_MESSAGE("acceptor_thread::stop -3-")
     _acceptor->stop(nullptr);
-    DEBUG_LOG_MESSAGE("acceptor_thread::stop -4-")
     _thread->join();
-    DEBUG_LOG_MESSAGE("acceptor_thread::stop -5-")
   }
   
 private:
@@ -243,7 +235,6 @@ public:
   
   void stop()
   {
-    DEBUG_LOG_BEGIN("acceptor_manager:: acceptor stop...")
     
     if ( _acceptors.empty()) 
     {
@@ -289,7 +280,6 @@ public:
     _threads.clear();
     _io_services.clear();
     */
-    DEBUG_LOG_BEGIN("acceptor stop")
 
   }
   
@@ -310,14 +300,11 @@ private:
     auto acceptor_proto = std::make_shared<acceptor_type>( std::move(desc), _opt);
     
     /// listen TODO: в ассептор
-    DEBUG_LOG_MESSAGE("_reconfigure_and_start() -3-")
     // Ахтенун: listen не здесь!!
     acceptor_proto->listen();
-    DEBUG_LOG_MESSAGE("_reconfigure_and_start() -4-")
     
     if ( threads == 0)
     {
-      DEBUG_LOG_MESSAGE("_reconfigure_and_start() -5-")
       _acceptor_proto = acceptor_proto;
       _acceptor_proto->start();
       return;
@@ -325,24 +312,18 @@ private:
     
     _acceptor_proto = nullptr;
     
-    DEBUG_LOG_MESSAGE("_reconfigure_and_start() -6-")
     auto itr = _acceptors.begin();
     for (size_t i = 0 ; i < threads; ++i)
     {
-      DEBUG_LOG_MESSAGE("_reconfigure_and_start() -6.1-")
       if ( _acceptors.size() < threads )
       {
         auto acceptor_thread = std::make_shared<acceptor_thread_type>( acceptor_proto );
         _acceptors.push_back( acceptor_thread );
         acceptor_thread->start();
         /*
-        DEBUG_LOG_MESSAGE("_reconfigure_and_start() -6.2-")
         auto io = std::make_shared<io_service_type>();
-        DEBUG_LOG_MESSAGE("_reconfigure_and_start() -6.3-")
         _io_services.push_back(io);
-        DEBUG_LOG_MESSAGE("_reconfigure_and_start() -6.4-")
         _acceptors.push_back( acceptor_proto->clone(*io));
-        DEBUG_LOG_MESSAGE("_reconfigure_and_start() -6.5-")
         */
       }
       else
@@ -352,7 +333,6 @@ private:
       }
     }
 
-    DEBUG_LOG_MESSAGE("_reconfigure_and_start() -7-")
 
     
     
@@ -360,7 +340,6 @@ private:
     
     
     /*
-    DEBUG_LOG_MESSAGE("_reconfigure_and_start() -1-")
     size_t threads = static_cast<size_t>(_opt.threads);
     
     while ( _threads.size() > threads )
@@ -373,38 +352,28 @@ private:
       _threads.pop_back();
     }
     
-    DEBUG_LOG_MESSAGE("_reconfigure_and_start() -2-")
     typedef typename acceptor_type::descriptor_type descriptor_type;
     descriptor_type desc( _io_service );
     auto acceptor_proto = std::make_shared<acceptor_type>( std::move(desc), _opt);
     
     /// listen TODO: в ассептор
-    DEBUG_LOG_MESSAGE("_reconfigure_and_start() -3-")
     acceptor_proto->listen();
-    DEBUG_LOG_MESSAGE("_reconfigure_and_start() -4-")
     
     if ( threads == 0)
     {
-      DEBUG_LOG_MESSAGE("_reconfigure_and_start() -5-")
       acceptor_proto->start();
       _acceptors.push_back( acceptor_proto );
       return;
     }
 
-    DEBUG_LOG_MESSAGE("_reconfigure_and_start() -6-")
     auto itr = _acceptors.begin();
     for (size_t i = 0 ; i < threads; ++i)
     {
-      DEBUG_LOG_MESSAGE("_reconfigure_and_start() -6.1-")
       if ( _acceptors.size() < threads )
       {
-        DEBUG_LOG_MESSAGE("_reconfigure_and_start() -6.2-")
         auto io = std::make_shared<io_service_type>();
-        DEBUG_LOG_MESSAGE("_reconfigure_and_start() -6.3-")
         _io_services.push_back(io);
-        DEBUG_LOG_MESSAGE("_reconfigure_and_start() -6.4-")
         _acceptors.push_back( acceptor_proto->clone(*io));
-        DEBUG_LOG_MESSAGE("_reconfigure_and_start() -6.5-")
       }
       else
       {
@@ -413,28 +382,22 @@ private:
       }
     }
 
-    DEBUG_LOG_MESSAGE("_reconfigure_and_start() -7-")
     /// 
     /// start
     /// 
     
     for(auto& ptr : _acceptors)
     {
-      DEBUG_LOG_MESSAGE("_reconfigure_and_start() -7.1-")
       ptr->start();
     }
 
-    DEBUG_LOG_MESSAGE("_reconfigure_and_start() -8-")
     for (auto& s : _io_services)
     {
-      DEBUG_LOG_MESSAGE("_reconfigure_and_start() -8.1-")
       _threads.push_back( std::make_shared<std::thread>( [s]()
       { 
-        DEBUG_LOG_MESSAGE("run acceptor thread")
         s->run();
       }));
     }
-    DEBUG_LOG_MESSAGE("_reconfigure_and_start() -9-")
     */
 
   }

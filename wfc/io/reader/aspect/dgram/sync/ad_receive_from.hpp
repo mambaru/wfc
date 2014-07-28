@@ -44,10 +44,8 @@ struct ad_receive_from
     boost::system::error_code ec;
     
     t.mutex().unlock();
-    DEBUG_LOG_MESSAGE( "##################################### receive_from" )
     std::size_t bytes_transferred =
       t.descriptor().receive_from( ::boost::asio::buffer(*d), ep, 0, ec);
-    DEBUG_LOG_MESSAGE( "=====================================" )
     t.mutex().lock();
     
     t.get_aspect().template get<_remote_endpoint_>() = std::move(ep);

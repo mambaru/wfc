@@ -12,7 +12,6 @@ connection::~connection()
 connection::connection( std::shared_ptr<connection_impl> impl)
   : _impl(impl)
 {
-  DEBUG_LOG_MESSAGE("connection::connection( std::shared_ptr<connection_impl> impl)")
 }
 
   
@@ -23,10 +22,8 @@ connection::connection(descriptor_type&& desc, const options_type& conf )
 
 std::shared_ptr<connection> connection::clone(::wfc::io_service& io)
 {
-  DEBUG_LOG_MESSAGE("connection::clone() -1-")
   typedef typename descriptor_type::protocol_type protocol_type;
   auto impl = _impl->clone<connection_impl>( io, protocol_type::v4() );
-  DEBUG_LOG_MESSAGE("connection::clone() -2-")
   return std::shared_ptr<connection>( new connection( impl ) );
 }
 
@@ -42,9 +39,7 @@ io_id_t connection::get_id() const
 
 void connection::start()
 {
-  DEBUG_LOG_MESSAGE( "udp connection::listen() -1-" )
   _impl->start();
-  DEBUG_LOG_MESSAGE( "udp connection::listen() -2-" )
 }
 
 void connection::close()
@@ -54,18 +49,13 @@ void connection::close()
 
 void connection::stop(std::function<void()> finalize)
 {
-  DEBUG_LOG_MESSAGE( "udp void connection::stop -1-" )
   _impl->descriptor().cancel();
-  DEBUG_LOG_MESSAGE( "udp void connection::stop -2-" )
   _impl->stop(finalize);
-  DEBUG_LOG_MESSAGE( "udp void connection::stop -3-" )
 }
 
 void connection::listen()
 {
-  DEBUG_LOG_MESSAGE( "udp connection::listen() -1-" )
   _impl->listen();
-  DEBUG_LOG_MESSAGE( "udp connection::listen() -2-" )
 }
 
 const wfc::io_service::strand& connection::strand() const
