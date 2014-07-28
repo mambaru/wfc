@@ -172,6 +172,13 @@ public:
     }
   }
 
+  
+  template<typename AcceptorType, typename IOService, typename ProtocolType>
+  std::shared_ptr<AcceptorType> clone(IOService& io, const ProtocolType& protocol)
+  {
+    return std::make_shared< AcceptorType >( this->dup<descriptor_type>(io, protocol),  super::options() );
+  }
+
 private:
   
   descriptor_type _descriptor;

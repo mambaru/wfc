@@ -1,6 +1,7 @@
 #pragma once
 
-#include <wfc/io/ip/udp/rn/connection_options.hpp>
+//#include <wfc/io/ip/udp/rn/connection_options.hpp>
+#include <wfc/io/ip/udp/rn/acceptor_options.hpp>
 //#include <wfc/io/strategy/posix/connection/rn/stream.hpp>
 #include <wfc/io/tags.hpp>
 #include <fas/aop.hpp>
@@ -13,6 +14,7 @@
 #include <wfc/io/posix/rn/writer_options.hpp>
 #include <wfc/io/writer/writer.hpp>
 #include <wfc/io/rn/writer/aspect/aspect.hpp>
+#include <wfc/io/writer/aspect/dgram/aspect.hpp>
 
 
 namespace wfc{ namespace io{ namespace ip{ namespace udp{ namespace rn{
@@ -87,15 +89,17 @@ struct ad_on_rn_write
 struct ad_data_stub
 {
   template<typename T>
-  void operator()(T& , data_ptr )
+  void operator()(T& , data_ptr d)
   {
     DEBUG_LOG_MESSAGE("WRITE STUB!!!!!!!!!!!!!!!")
+    DEBUG_LOG_MESSAGE(std::string( d->begin(), d->end()) )
   }
 };
 
   
 struct connection_aspect: 
   fas::aspect<
+    ::wfc::io::writer::dgram::aspect,
     ::wfc::io::reader::dgram::sync::aspect,
     fas::value<_shutdown_flag_, std::atomic<bool> >, 
     fas::advice<_on_write_, ad_on_write>, 
@@ -105,12 +109,12 @@ struct connection_aspect:
     fas::group<wfc::io::reader::_on_error_, _on_read_error_>, 
     fas::group<wfc::io::writer::_on_write_, _on_write_>, 
     fas::group<wfc::io::rn::writer::_on_write_, _on_rn_write_>, 
-    fas::advice< wfc::io::_options_type_, connection_options>,
+    fas::advice< wfc::io::_options_type_, acceptor_options>,
     
     fas::type< wfc::io::_descriptor_type_, boost::asio::ip::udp::socket>,
     fas::value < ::wfc::io::reader::_remote_endpoint_, boost::asio::ip::udp::socket::endpoint_type>,
   
-    fas::advice< wfc::io::writer::_write_some_, ad_data_stub>,
+    // fas::advice< wfc::io::writer::_write_some_, ad_data_stub>,
     
     wfc::io::rn::writer::aspect2<wfc::io::writer::_incoming_>,
     wfc::io::writer::aspect,

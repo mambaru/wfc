@@ -22,8 +22,9 @@ struct connection_options_json
     >::type
   > type;
   
-  typedef type::target     target;
-  typedef type::serializer serializer;
+  typedef type::target      target;
+  typedef type::serializer  serializer;
+  typedef type::member_list member_list;
 
 };
 

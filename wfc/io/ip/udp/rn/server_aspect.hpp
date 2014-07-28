@@ -2,6 +2,7 @@
 
 
 #include <wfc/io/ip/udp/rn/acceptor.hpp>
+#include <wfc/io/ip/udp/rn/connection.hpp>
 #include <wfc/io/ip/udp/rn/server_options.hpp>
 
 #include <wfc/io/server/tags.hpp>
@@ -12,7 +13,7 @@ namespace wfc{ namespace io{ namespace ip{ namespace udp{ namespace rn{
   
 struct server_aspect: fas::aspect
 <
-  ::wfc::io::server::aspect<acceptor>,
+  ::wfc::io::server::aspect<connection>,
   fas::type< ::wfc::io::_options_type_, server_options>,
   fas::stub< ::wfc::io::server::_create_ >,
   fas::stub< ::wfc::io::server::_configure_ >,

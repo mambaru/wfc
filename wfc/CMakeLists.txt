@@ -33,6 +33,7 @@ SET(
   io/ip/udp/rn/connection.cpp
   io/ip/udp/rn/acceptor.cpp
   io/ip/udp/rn/server.cpp
+  io/ip/udp/rn/jsonrpc/server.cpp
 
   service/rn/jsonrpc/service.cpp
   service/rn/jsonrpc/service_list.cpp

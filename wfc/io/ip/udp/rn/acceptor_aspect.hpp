@@ -15,7 +15,8 @@ namespace wfc{ namespace io{ namespace ip{ namespace udp{ namespace rn{
   
 struct acceptor_aspect: 
   fas::aspect<
-    fas::type< _descriptor_type_, boost::asio::ip::udp::socket>
+    fas::advice< ::wfc::io::_options_type_, acceptor_options>,
+    fas::type< ::wfc::io::_descriptor_type_, boost::asio::ip::udp::socket>
   >
 {};
 

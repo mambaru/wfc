@@ -2,29 +2,42 @@
 #include <wfc/service/rn/jsonrpc/service.hpp>
 #include <wfc/jsonrpc/service.hpp>
 #include <wfc/io/ip/tcp/rn/jsonrpc/server.hpp>
+#include <wfc/io/ip/udp/rn/jsonrpc/server.hpp>
+
 namespace wfc{ namespace service{ namespace rn{ namespace jsonrpc{
 
 void service::create(wfc::io_service& io, const service_config& conf, std::shared_ptr<ifactory> fact)
 {
   _conf = conf;
+
+  jsonrpc_options jopt;
+  if ( conf.jsonrpc == nullptr )
+  {
+    jopt = jsonrpc_options::create();
+  }
+  else
+  {
+    jopt = *(conf.jsonrpc);
+  }
   
+  _jsonrpc = fact->create_for_tcp(io, jopt);
+
   if ( !conf.tcp.empty() )
   {
-    jsonrpc_options jopt;
-    if ( conf.jsonrpc == nullptr )
-    {
-      jopt = jsonrpc_options::create();
-    }
-    else
-    {
-      jopt = *(conf.jsonrpc);
-    }
-    
-    _jsonrpc_for_tcp = fact->create_for_tcp(io, jopt);
     for (auto& t : conf.tcp )
     {
       _tcp_servers.push_back(
-          std::make_shared<server_tcp_type>( io, t, _jsonrpc_for_tcp )
+          std::make_shared<server_tcp_type>( io, t, _jsonrpc )
+      );
+    }
+  }
+  
+  if ( !conf.udp.empty() )
+  {
+    for (auto& t : conf.udp )
+    {
+      _udp_servers.push_back(
+          std::make_shared<server_udp_type>( io, t, _jsonrpc )
       );
     }
   }
@@ -59,12 +72,17 @@ void service::initialize( std::shared_ptr<ifactory> fact )
   
 void service::start()
 {
-  if (_jsonrpc_for_tcp != nullptr)
+  if (_jsonrpc != nullptr)
   {
-    _jsonrpc_for_tcp->start();
+    _jsonrpc->start();
   }
     
   for (auto& i: _tcp_servers)
+  {
+    i->start();
+  }
+
+  for (auto& i: _udp_servers)
   {
     i->start();
   }
@@ -107,11 +125,19 @@ void service::stop()
     i.reset();
   }
   _tcp_servers.clear();
-  
-  if (_jsonrpc_for_tcp != nullptr)
+
+  for (auto& i: _udp_servers)
   {
-    _jsonrpc_for_tcp->stop();
-    _jsonrpc_for_tcp.reset();
+    i->stop();
+    i.reset();
+  }
+  _udp_servers.clear();
+
+  
+  if (_jsonrpc != nullptr)
+  {
+    _jsonrpc->stop();
+    _jsonrpc.reset();
   }
   
 }

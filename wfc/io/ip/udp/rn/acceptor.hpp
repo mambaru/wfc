@@ -8,7 +8,9 @@
 
 namespace wfc{ namespace io{ namespace ip{ namespace udp{ namespace rn{
 
-class acceptor_impl;
+// class acceptor_impl;
+  
+class connection;
   
 class acceptor
 {
@@ -27,9 +29,9 @@ public:
   std::shared_ptr<acceptor> clone(::wfc::io_service& io);
   
 private:
-  acceptor(std::shared_ptr<acceptor_impl> impl);
-  
-  std::shared_ptr<acceptor_impl> _impl;
+  acceptor(std::shared_ptr<connection> impl);
+  std::shared_ptr<connection> _impl;
+  options_type _options;
 };
   
 }}}}}
