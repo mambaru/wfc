@@ -91,8 +91,6 @@ struct ad_data_stub
   template<typename T>
   void operator()(T& , data_ptr d)
   {
-    DEBUG_LOG_MESSAGE("WRITE STUB!!!!!!!!!!!!!!!")
-    DEBUG_LOG_MESSAGE(std::string( d->begin(), d->end()) )
   }
 };
 

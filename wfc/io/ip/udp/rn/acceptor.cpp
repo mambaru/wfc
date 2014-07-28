@@ -60,7 +60,6 @@ void acceptor::listen()
 
 void acceptor::start()
 {
-  DEBUG_LOG_MESSAGE( "##################################### void acceptor::start()" )
   _impl->start();
 }
 
