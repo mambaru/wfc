@@ -6,7 +6,7 @@
 #include <memory>
 
 namespace wfc{ namespace jsonrpc{
-  
+
 
 template<typename JParams, typename JResult, typename Handler, typename JError = error_json>
 struct invoke: Handler
@@ -46,6 +46,7 @@ struct invoke: Handler
     }
     catch (const json::json_error& e)
     {
+      COMMON_LOG_ERROR("jsonrpc::invoke Invalid Params: " << holder.params_error_message(e) )
       if ( holder.has_id() )
       {
         TT::template send_error<T, error_json>( 
@@ -54,7 +55,7 @@ struct invoke: Handler
           std::move(outgoing_handler) 
         );
       }
-      COMMON_LOG_ERROR("jsonrpc::invoke Invalid Params: " << holder.params_error_message(e) )
+      throw;
     }
       
     try // server_error
