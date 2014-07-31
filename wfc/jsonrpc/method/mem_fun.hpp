@@ -22,3 +22,5 @@
 #include <wfc/jsonrpc/method/mem_fun/mem_fun_handler1.hpp>
 #include <wfc/jsonrpc/method/mem_fun/mem_fun_handler2.hpp>
 #include <wfc/jsonrpc/method/mem_fun/mem_fun_handler3.hpp>
+
+#include <wfc/jsonrpc/method/mem_fun/mem_fun_target3.hpp>
