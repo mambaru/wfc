@@ -40,7 +40,7 @@ void acceptor::reconfigure(const options_type& )
 
 void acceptor::listen()
 {
-  COMMON_LOG_MESSAGE("fuckup udp \"listen\" " << _options.host << ":" << _options.port)
+  COMMON_LOG_MESSAGE("udp \"listen\" " << _options.host << ":" << _options.port)
   //_impl->listen();
   /*
       COMMON_LOG_MESSAGE("udp \"listen\" " << _options.host << ":" << _options.port)

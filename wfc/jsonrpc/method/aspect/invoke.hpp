@@ -55,7 +55,7 @@ struct invoke: Handler
           std::move(outgoing_handler) 
         );
       }
-      throw;
+      return;
     }
       
     try // server_error
@@ -107,6 +107,7 @@ struct invoke: Handler
     {
       DAEMON_LOG_ERROR("wfc::jsonrpc::invoke::operator() : " << e.what() )
       // Ахтунг! holder перемещен
+      holder = decltype(holder)(nullptr);
       TT::template send_error<T, error_json>( 
         std::move(holder), 
         std::make_unique<server_error>(),
@@ -118,6 +119,7 @@ struct invoke: Handler
     {
       DAEMON_LOG_ERROR("wfc::jsonrpc::invoke::operator() : unhandled exception (Server Error)")
       // Ахтунг! holder перемещен
+      holder = decltype(holder)(nullptr);
       TT::template send_error<T, error_json>( 
         std::move(holder), 
         std::make_unique<server_error>(),
