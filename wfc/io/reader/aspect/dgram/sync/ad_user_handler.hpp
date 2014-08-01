@@ -16,6 +16,7 @@ struct ad_user_handler
     }
     else
     {
+
       auto pthis = t.shared_from_this();
       auto ep = t.get_aspect().template get<_remote_endpoint_>();
       
@@ -38,6 +39,7 @@ struct ad_user_handler
       
       t.mutex().lock();
     }
+    
   }
 };
 

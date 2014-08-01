@@ -47,10 +47,7 @@ struct mem_fun_handler2
         t.get_io_id(),
         [self](request2_ptr req, std::function< void(responce2_ptr) > callback)
         {
-          //if ( auto p = self.lock() )
-          // {
           (self.get()->*mem_ptr2)( std::move(req), callback);
-          // }
         }
       );
     }
