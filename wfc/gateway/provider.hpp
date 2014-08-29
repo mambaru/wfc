@@ -416,7 +416,7 @@ private:
   provider_config _conf;
   //std::atomic<bool> _sequence_mode;
   std::atomic<size_t>  _client_count;
-  mutex_type _mutex;
+  mutable mutex_type _mutex;
   clinet_map _clients;
   typename clinet_map::iterator _cli_itr;
   shudown_handler_list _shudown_handlers;
