@@ -71,7 +71,7 @@ auto io_registry::add_result_handler(io_id_t io_id, result_handler_t result_hand
 auto io_registry::detach_result_handler(call_id_t call_id)
  -> io_registry::result_handler_t
 {
-  read_lock lk(_mutex);
+  lock_guard lk(_mutex);
   
   auto itr = _call_io_map.find(call_id);
   if ( itr != _call_io_map.end() )
