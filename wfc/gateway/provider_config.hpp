@@ -3,7 +3,8 @@
 #include <cstddef>
 
 namespace wfc{ namespace gateway{ 
-  
+
+// перенести в папку  
 struct provider_config
 {
   bool enabled = false;

@@ -2,6 +2,7 @@
 
 #include <wfc/jsonrpc/errors.hpp>
 #include <wfc/jsonrpc/method/aspect/tags.hpp>
+#include <wfc/logger.hpp>
 #include <fas/aop.hpp>
 #include <memory>
 
