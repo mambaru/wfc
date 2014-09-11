@@ -10,6 +10,38 @@
 #include <wfc/gateway/provider_config.hpp>
 
 namespace wfc{ namespace gateway{ 
+ 
+/*
+ * Три режима для post:
+ * 1. Последовательный - следующий запрос отправляется, только после подтверждения предыдущего
+ * 2. Надежный - гарантированая доставка. При разрыве соединия запросы перераспределяються. Нет коннекта ставим в очередь
+ * 3. Простой - просто отправляеться, если есть хотябы один коннект. Нет коннекта ставим в очередь. Разрыв коннекта - теряем
+ * 4. Тупой - есть коннект, отправляем, если нет,  то теряем
+ */
+template<typename Itf>
+class provider2
+  : public std::enable_shared_from_this< provider2<Itf> >
+{
+  typedef Itf interface_type;
+  typedef provider2<interface_type> self;
+
+  typedef std::shared_ptr<interface_type> interface_ptr;
+
+  typedef ::wfc::spinlock basic_mutex_type;
+  typedef ::wfc::rwlock<basic_mutex_type> mutex_type;
+
+  typedef std::map<size_t, interface_ptr> clinet_map;
+  typedef std::function<bool()> send_function;
+  typedef std::queue< send_function > send_queue;
+  typedef std::map<size_t, send_queue> send_map;
+  
+
+public:
+
+private:
+  
+  
+};
   
 template<typename Itf>
 class provider

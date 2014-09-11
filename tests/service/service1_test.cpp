@@ -1,4 +1,4 @@
 
-int main(int argc, char* [])
+int main(int , char* [])
 {
 }
