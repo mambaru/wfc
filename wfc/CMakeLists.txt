@@ -39,6 +39,8 @@ SET(
   service/rn/jsonrpc/service_list.cpp
   gateway/rn/jsonrpc/gateway.cpp
   gateway/rn/jsonrpc/gateway_list.cpp
+
+  system/detail/aligned_allocator.cpp
 )
 
 add_library(
