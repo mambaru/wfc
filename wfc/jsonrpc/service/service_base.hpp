@@ -59,6 +59,7 @@ public:
   ) 
     : super( io_service, opt)
     , _worker_manager( io_service, opt)
+    , _active(false)
   {
     super::create(*this);
     _handler_prototype = handler.clone();
@@ -91,29 +92,31 @@ public:
     notify_serializer_t serializer
   )
   {
-    
-    if ( auto writer = this->registry().get_outgoing_handler( io_id ) )
+    if (_active)
     {
-      if ( auto wrk = this->get_worker(name) )
+      if ( auto writer = this->registry().get_outgoing_handler( io_id ) )
       {
-        wrk->post([writer, name, serializer](){
+        if ( auto wrk = this->get_worker(name) )
+        {
+          wrk->post([writer, name, serializer](){
+            auto d = serializer(name);
+            writer( std::move(d) );
+          });
+        }
+        else if ( this->options().workers.empty() )
+        {
           auto d = serializer(name);
           writer( std::move(d) );
-        });
-      }
-      else if ( this->options().workers.empty() )
-      {
-        auto d = serializer(name);
-        writer( std::move(d) );
+        }
+        else
+        {
+          COMMON_LOG_WARNING("jsonrpc worker unavailable for method: " << name )
+        }
       }
       else
       {
-        COMMON_LOG_WARNING("jsonrpc worker unavailable for method: " << name )
+        COMMON_LOG_WARNING("Requester not found for io_id=" << io_id << " for method: " << name )
       }
-    }
-    else
-    {
-      COMMON_LOG_WARNING("Requester not found for io_id=" << io_id << " for method: " << name )
     }
   };
   
@@ -124,32 +127,34 @@ public:
     request_serializer_t serializer
   )
   {
-    auto requester = this->registry().add_result_handler( io_id, result_handler );
-    if ( requester.second != nullptr )
+    if (_active)
     {
-      if ( auto wrk = this->get_worker(name) )
+      auto requester = this->registry().add_result_handler( io_id, result_handler );
+      if ( requester.second != nullptr )
       {
-        wrk->post([this, io_id, requester, name,  serializer]()
+        if ( auto wrk = this->get_worker(name) )
+        {
+          wrk->post([this, io_id, requester, name,  serializer]()
+          {
+            auto d = serializer(name, requester.first);
+            requester.second( std::move(d) );
+          });
+        }
+        else if ( this->options().workers.empty() )
         {
           auto d = serializer(name, requester.first);
           requester.second( std::move(d) );
-        });
-      }
-      else if ( this->options().workers.empty() )
-      {
-        auto d = serializer(name, requester.first);
-        requester.second( std::move(d) );
+        }
+        else
+        {
+          COMMON_LOG_WARNING("jsonrpc worker unavailable for method: " << name )
+        }
       }
       else
       {
-        COMMON_LOG_WARNING("jsonrpc worker unavailable for method: " << name )
+        COMMON_LOG_WARNING("Requester not found for io_id=" << io_id << " for method: " << name )
       }
     }
-    else
-    {
-      COMMON_LOG_WARNING("Requester not found for io_id=" << io_id << " for method: " << name )
-    }
-    
   };
   
   // Новый коннект
@@ -194,10 +199,12 @@ public:
   {
     this->start_no_tf();
     //this->dispatch( std::bind( &self::start_no_tf, this) );
+    _active = true;
   }
   
   void stop()
   {
+    _active = false;
     // TODO: dispatch
     _worker_manager.stop();
   }
@@ -223,6 +230,7 @@ private:
   std::shared_ptr<handler_interface> _handler_prototype;
   worker_manager _worker_manager; // TODO: в аспект
   io_registry _io_reg; // TODO: в аспект
+  bool _active;
 };
 
 }} // wfc
