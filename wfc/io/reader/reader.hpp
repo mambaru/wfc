@@ -73,6 +73,7 @@ public:
   }
   */
 
+  /*
   data_ptr read()
   {
     return this->get_aspect().template get< _read_ >()(*this);
@@ -82,6 +83,7 @@ public:
   {
     this->get_aspect().template get< _async_read_ >()(*this, handler);
   }
+  */
 
   /*
   template<typename ...Args>

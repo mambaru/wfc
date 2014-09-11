@@ -1,0 +1,2 @@
+add_executable(provider_test provider_test.cpp)
+add_test(provider_test provider_test)
