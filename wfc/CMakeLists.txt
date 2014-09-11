@@ -1,9 +1,12 @@
 include(BuildInfo)
 include(Wfc)
 
-#find_package(Boost COMPONENTS system REQUIRED)
-CONFIGURE_LIBRARY(boost/system/error_code.hpp  "/usr/include /usr/local/include"
-                  boost_system-mt   "/lib /usr/lib /usr/local/lib /usr/lib64")
+IF (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.7)
+  find_package(Boost COMPONENTS system thread program_options REQUIRED)
+ELSE (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.7)
+  CONFIGURE_LIBRARY(boost/system/error_code.hpp "/usr/include /usr/local/include"
+                    boost_system-mt "/lib /usr/lib /usr/local/lib /usr/lib64")
+ENDIF (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.7)   
 
 include_directories(..)
 include_directories(../faslib/)
@@ -48,8 +51,11 @@ add_library(
   ${wfc_source_list}
 )
 
-#target_link_libraries(wfc ${Boost_SYSTEM_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} )
-target_link_libraries(wfc ${HAVE_boost_system-mt} ${CMAKE_THREAD_LIBS_INIT} )
+IF (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.7)
+  target_link_libraries(wfc ${Boost_SYSTEM_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} )
+ELSE (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.7)
+  target_link_libraries(wfc ${HAVE_boost_system-mt} ${CMAKE_THREAD_LIBS_INIT} )
+ENDIF (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.7) 
 
 build_info(wfc wfc)
 
