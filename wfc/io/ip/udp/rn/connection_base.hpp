@@ -33,6 +33,10 @@ public:
     });
 
     super::descriptor().open( endpoint.protocol() );
+    
+    boost::asio::socket_base::receive_buffer_size option(16777216 * 4);
+    super::descriptor().set_option(option);
+    
     //super::descriptor().set_option( boost::asio::ip::udp::acceptor::reuse_address(true) );
     super::descriptor().bind( endpoint );
 
