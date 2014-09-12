@@ -64,14 +64,19 @@ void worker_manager::start()
 void worker_manager::stop()
 {
   lock_guard lk(_mutex);
-  
-  for (auto& s: this->_services)
-    s->stop();
-    
-  for (auto& t: this->_threads)
-    t.join();
-    
+
   this->_workers.clear();
+
+  for (auto& s: this->_services)
+  {
+    s->stop();
+  }
+
+  for (auto& t: this->_threads)
+  {
+    t.join();
+  }
+
   this->_threads.clear();
   this->_method_map.clear();
   this->_services.clear();
