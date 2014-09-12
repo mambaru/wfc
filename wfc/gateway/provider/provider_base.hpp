@@ -32,18 +32,22 @@ public:
     
   }
   
-  template<typename Req, typename Resp, typename... Args>
+  template<typename Req, typename Resp>
   void post( 
-    void (interface_type::* mem_ptr)(Req, std::function<void(Resp)>, Args... args), 
+    void (interface_type::* mem_ptr)(Req, std::function<void(Resp)>), 
     Req req, 
-    std::function<void(Resp)> callback, 
-    Args... args
+    std::function<void(Resp)> callback
   )
   {
     if ( !_conf.enabled )
       return;
+      
+    if ( auto cli = this->_ready_for_send() )
+    {
+      cli.get()->*mem_ptr( std::move(req),  this->_wrap_callback(std::move(callback)));
+    }
 
-    auto fn = this->wrap( mem_ptr, std::move(req), callback, std::forward<Args>(args)...);
+    auto fn = this->_wrap( mem_ptr, std::move(req), callback);
     
     this->send( fn );
   }
@@ -57,13 +61,37 @@ public:
   
 private:
   
+  bool _ready() const
+  {
+    return true;
+  }
+
+  interface_ptr _ready_for_send() const
+  {
+    // if _ready()
+    //    1. sequnce_mode: if очередь пуста
+    //    2. !sequnce_mode: true
+    return interface_ptr();
+  }
+  
+  interface_ptr _capture_for_send() 
+  {
+    if ( this->_ready_for_send )
+    {
+      // if (sequnce_mode)
+      //    { wait = true}
+      //
+    }
+    return nullptr;
+  }
+
   template<
     typename Req, 
     typename Resp,
     typename... Args
   >
   send_func
-  wrap( 
+  _wrap( 
     void (interface_type::*mem_ptr)(Req, std::function<void(Resp)>, Args... args), 
     Req req, 
     std::function<void(Resp)> callback, 
