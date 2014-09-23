@@ -58,36 +58,24 @@ struct ad_insert
         
       }
       
-      add( /*t.strand().wrap(*/ [&t](::wfc::io::io_id_t id) 
+      add( [&t](::wfc::io::io_id_t id) 
       {
-        /*t.get_io_service().post( t.owner().wrap( t.strand().wrap( [id,&t]()
-        {*/
-          typename T::lock_guard lk( t.mutex() );
-          auto &stg = t.get_aspect().template get<_holder_storage_>();
-          auto itr = stg.find(id);
-          if ( itr != stg.end() )
-          {
-            //auto pconn = std::make_shared<holder_ptr>( std::move(itr->second) );
-            auto pconn = itr->second;
-            stg.erase(itr);
-            //t.get_io_service().post( t.strand().wrap([pconn, id](){}));
-          }
-          else
-          {
-          }
-        /*})));*/
+        typename T::lock_guard lk( t.mutex() );
+        auto &stg = t.get_aspect().template get<_holder_storage_>();
+        auto itr = stg.find(id);
+        if ( itr != stg.end() )
+        {
+          auto pconn = itr->second;
+          stg.erase(itr);
+        }
+        else
+        {
+        }
       });
     };
     
 //#warning возможно holder_options.incoming_handler = opt.incoming_handler
     holder_options.incoming_handler = t.options().incoming_handler;
-    /*!!!
-    holder_options.incoming_handler = t._handler;
-
-    if ( t._handler == nullptr )
-      abort();
-    */
-
     auto holder = std::make_shared<holder_type>( std::move(*d), holder_options );
     auto id = holder->get_id();
     auto res = t.get_aspect().template get<_holder_storage_>().insert( std::make_pair( id, holder ) );
@@ -101,8 +89,6 @@ struct ad_insert
     {
       abort();
     }
-    //holder->start();
-    
   }
 };
 
