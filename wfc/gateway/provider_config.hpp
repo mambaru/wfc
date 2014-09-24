@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <ctime>
 
 namespace wfc{ namespace gateway{ 
 
@@ -11,6 +12,7 @@ enum class provider_mode
   ensured,      // гарантированная доставка (callback(null) по timeout или limit). Все уведомления в запросы
   sequenced     // последовательная отправка (следующий после подтверждения) (callback(null) по timeout или limit). Все уведомления в запросы
 };
+
 // перенести в папку  
 struct provider_config
 {

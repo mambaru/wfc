@@ -8,10 +8,12 @@ namespace wfc{ namespace gateway{
 
 template<typename Itf>  
 class simple_provider
-  : public provider_base<Itf>
+  : public basic_provider<Itf, simple_provider>
+  
 {
-  typedef provider_base<Itf> super;
-  typedef typename super::send_func send_func;
+  typedef basic_provider<Itf, simple_provider> super;
+  typedef typename super::interface_type interface_type;
+  
 public:
 
   simple_provider(const provider_config& conf)
@@ -19,21 +21,20 @@ public:
   {
   }
   
-  virtual void confirm() override
+  template<typename Req, typename Callback, typename... Args>
+  void post( 
+    void (interface_type::*mem_ptr)(Req, Callback, Args... args), 
+    Req req, 
+    Callback callback, 
+    Args... args
+  )
   {
-    
-  }
-  
-  virtual void rollback() override
-  {
-    
+    if ( auto cli = super::get() )
+    {
+      (cli.get()->*mem_ptr)( std::move(req), std::move(callback), std::forward<Args>(args)... );
+    }
   }
 
-  virtual void send(send_func /*fn*/) override
-  {
-    
-  }
-  
 };
 
 }}
