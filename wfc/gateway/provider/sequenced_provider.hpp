@@ -2,10 +2,15 @@
 
 #include <wfc/gateway/provider/provider_base.hpp>
 #include <wfc/gateway/provider_config.hpp>
+#include <wfc/logger.hpp>
 #include <memory>
+#include <queue>
 
 namespace wfc{ namespace gateway{ 
 
+/*
+ * Не важно сколько активных клиентов, следующий после ответа 
+ */
 template<typename Itf>  
 class sequenced_provider
   : public basic_provider<Itf, sequenced_provider>
@@ -18,12 +23,14 @@ public:
   typedef typename super::interface_type interface_type;
   typedef typename super::mutex_type mutex_type;
   typedef std::function<void()> post_function;
+  typedef std::queue< post_function > delayed_queue;
+  //typedef std::map<size_t, post_function> wait_map;
 
 
   sequenced_provider(const provider_config& conf)
     : super(conf)
+    , _wait_client_id(0)
   {
-    
   }
   
   template<typename Req, typename Callback, typename... Args>
@@ -37,17 +44,22 @@ public:
     std::lock_guard<mutex_type> lk( super::_mutex );
     
     post_function f = this->wrap_(mem_ptr, std::move(req), std::move(callback), std::forward<Args>(args)...); 
-    f();
-    //Callback wrapped = this->wrap_callback_( callback );
-    // 1. Нет коннекта - в очередь
-    // 2. Есть коннект
-    // 2.1 Пустая очередь - отправляем
-    /*
-    if ( auto cli = super::get() )
+    size_t clent_id = 0;
+    bool send_flag = false;
+    if ( auto cli = this->get_(clent_id) )
     {
-      (cli.get()->*mem_ptr)( std::move(req), std::move(callback), std::forward<Args>(args)... );
+      if ( _wait_post == nullptr )
+      {
+        send_flag = true;
+        _wait_post = f;
+        _wait_client_id = clent_id;
+        f();
+      }
     }
-    */
+    if (!send_flag)
+    {
+      _queue.push( std::move(f) );
+    }
   }
 
 private:
@@ -67,11 +79,24 @@ private:
     Args... args
   )
   {
-    std::lock_guard<mutex_type> lk( pthis->mutex() );
-    if ( auto cli = pthis->get_() )
+    // вызов только из кретической секции
+    if ( auto cli = pthis->get_( pthis->_wait_client_id ) )
     {
-      (cli.get()->*mem_ptr)( std::move(*req), std::move(callback), std::forward<Args>(args)... );
+      pthis->mutex().unlock();
+      // А если shutdown? 
+      try
+      {
+        (cli.get()->*mem_ptr)( std::move(*req), std::move(callback), std::forward<Args>(args)... );
+      } 
+      catch ( ... )
+      {
+        DAEMON_LOG_FATAL("sequenced_provider::send_ unhandled exception")
+        abort();
+      }
+      pthis->mutex().lock();
+      return true;
     }
+    return false;
   }
   
   
@@ -101,15 +126,33 @@ private:
   wrap_callback_(std::function<void(Resp, Args...)> callback) 
   {
     auto pthis = this->shared_from_this();
-    return [pthis, callback](Resp req, Args... args)
+    return [pthis, callback](Resp resp, Args... args)
     {
       if ( callback!=nullptr)
       {
-        callback( std::move(req), std::forward<Args>(args)... );
+        callback( std::move(resp), std::forward<Args>(args)... );
       }
+      pthis->process_queue();
     };
   }
 
+  void process_queue()
+  {
+    std::lock_guard<mutex_type> lk( super::_mutex );
+    _wait_client_id = 0;
+    _wait_post = nullptr;
+    if ( _queue.empty() )
+      return;
+    _wait_post = _queue.front();
+    _queue.pop();
+    _wait_post();
+  }
+  
+private:
+  size_t _wait_client_id;
+  post_function _wait_post;
+  delayed_queue _queue;
+  
 };
 
 }}

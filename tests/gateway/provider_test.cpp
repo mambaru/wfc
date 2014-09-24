@@ -1,3 +1,5 @@
+#define WFC_DISABLE_GLOBAL_LOG
+
 #include <wfc/gateway/provider/provider.hpp>
 #include <wfc/memory.hpp>
 
