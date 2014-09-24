@@ -16,7 +16,11 @@ public:
     if (_logger)
       _logger->write(_name, _ident, _ss.str());
     else
-      std::cerr << _name << " " << _ident << " " << _ss.str();
+    {
+#ifndef WFC_DISABLE_CLOG
+      std::clog << _name << " " << _ident << " " << _ss.str();
+#endif
+    }
   }
   
   logstream(const logstream& ll)
@@ -34,8 +38,6 @@ public:
   {
     if ( _logger )
       _logger->initialize(_name, _ss);
-    /*else
-      std::cerr <<  "logger not found " << _name <<   std::endl;*/
   }
   
   std::string str() const
