@@ -82,6 +82,7 @@ private:
     // вызов только из кретической секции
     if ( auto cli = pthis->get_( pthis->_wait_client_id ) )
     {
+      // shutdown.lock();
       pthis->mutex().unlock();
       // А если shutdown? 
       try
@@ -152,6 +153,9 @@ private:
   size_t _wait_client_id;
   post_function _wait_post;
   delayed_queue _queue;
+  
+  std::condition_variable_any _can_shutdows;
+  std::list<size_t>           _delayed_shutdows;
   
 };
 
