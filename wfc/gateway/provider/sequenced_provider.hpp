@@ -154,8 +154,12 @@ private:
   post_function _wait_post;
   delayed_queue _queue;
   
+  std::atomic<bool>  _can_shutdows;
+  std::list<size_t>  _delayed_shutdows;
+  /*
   std::condition_variable_any _can_shutdows;
   std::list<size_t>           _delayed_shutdows;
+  */
   
 };
 
