@@ -11,7 +11,7 @@ namespace wfc{
 template<typename M = std::mutex>
 class rwlock
 {
-  std::atomic<int>  _readers;
+  std::atomic<int> _readers;
   std::atomic<int> _writer;
   
   typedef M mutex_type;
