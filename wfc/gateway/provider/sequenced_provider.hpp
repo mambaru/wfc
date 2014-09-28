@@ -24,7 +24,6 @@ public:
   typedef typename super::mutex_type mutex_type;
   typedef std::function<void()> post_function;
   typedef std::queue< post_function > delayed_queue;
-  //typedef std::map<size_t, post_function> wait_map;
 
 
   sequenced_provider(const provider_config& conf)
@@ -46,9 +45,9 @@ public:
     post_function f = this->wrap_(mem_ptr, std::move(req), std::move(callback), std::forward<Args>(args)...); 
     size_t clent_id = 0;
     bool send_flag = false;
-    if ( auto cli = this->get_(clent_id) )
+    if ( _wait_post == nullptr )
     {
-      if ( _wait_post == nullptr )
+      if ( auto cli = this->get_(clent_id) )
       {
         send_flag = true;
         _wait_post = f;
@@ -56,6 +55,7 @@ public:
         f();
       }
     }
+    
     if (!send_flag)
     {
       _queue.push( std::move(f) );
@@ -80,10 +80,11 @@ private:
   )
   {
     // вызов только из кретической секции
+    pthis->_wait_client_id = 0;
     if ( auto cli = pthis->get_( pthis->_wait_client_id ) )
     {
       // shutdown.lock();
-      pthis->mutex().unlock();
+      // pthis->mutex().unlock();
       // А если shutdown? 
       try
       {
@@ -94,7 +95,7 @@ private:
         DAEMON_LOG_FATAL("sequenced_provider::send_ unhandled exception")
         abort();
       }
-      pthis->mutex().lock();
+      // pthis->mutex().lock();
       return true;
     }
     return false;
@@ -130,18 +131,18 @@ private:
     return [pthis, callback](Resp resp, Args... args)
     {
       if ( callback!=nullptr)
-      {
         callback( std::move(resp), std::forward<Args>(args)... );
-      }
+
+      _wait_client_id = 0;
+      _wait_post = nullptr;
+
+      std::unique_lock<mutex_type> lk( pthis->_mutex,  std::try_to_lock);
       pthis->process_queue();
     };
   }
 
-  void process_queue()
+  void process_queue_()
   {
-    std::lock_guard<mutex_type> lk( super::_mutex );
-    _wait_client_id = 0;
-    _wait_post = nullptr;
     if ( _queue.empty() )
       return;
     _wait_post = _queue.front();
@@ -153,13 +154,6 @@ private:
   size_t _wait_client_id;
   post_function _wait_post;
   delayed_queue _queue;
-  
-  std::atomic<bool>  _can_shutdows;
-  std::list<size_t>  _delayed_shutdows;
-  /*
-  std::condition_variable_any _can_shutdows;
-  std::list<size_t>           _delayed_shutdows;
-  */
   
 };
 
