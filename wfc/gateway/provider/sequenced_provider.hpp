@@ -13,11 +13,12 @@ namespace wfc{ namespace gateway{
  */
 template<typename Itf>  
 class sequenced_provider
-  : public basic_provider<Itf, sequenced_provider>
+  : public basic_provider<Itf, sequenced_provider, std::recursive_mutex>
 {
   typedef sequenced_provider<Itf> self;
-  typedef basic_provider<Itf, sequenced_provider> super;
+  typedef basic_provider<Itf, sequenced_provider, std::recursive_mutex> super;
   
+  static const size_t null_id = static_cast<size_t>(-1);
 public:
   
   typedef typename super::interface_type interface_type;
@@ -25,12 +26,57 @@ public:
   typedef std::function<void()> post_function;
   typedef std::queue< post_function > delayed_queue;
 
-
+  //int warning_count = 0;
   sequenced_provider(const provider_config& conf)
     : super(conf)
-    , _wait_client_id(0)
+    , _wait_client_id(null_id)
+    , _wait_call_id(0)
+    , _call_id_counter(0)
+    , _lost_call(0)
+    , _lost_callback(0)
   {
   }
+  
+  size_t lost_call() const 
+  {
+    std::lock_guard<mutex_type> lk( super::_mutex ); //!
+    return _lost_call;
+  }
+  
+  size_t lost_callback() const 
+  {
+    std::lock_guard<mutex_type> lk( super::_mutex );
+    return _lost_callback;
+  }
+
+  virtual void shutdown(size_t client_id)
+  {
+    std::lock_guard<mutex_type> lk( super::_mutex ); //!
+    
+    //std::cout << "shutdown { " << client_id << std::endl;
+    
+    super::shutdown_(client_id);
+    
+    if ( _wait_client_id == client_id )
+    {
+      ++_lost_call;
+      //DAEMON_LOG_WARNING(":" /*<< ++warning_count*/ << " provider(mode=sequenced): закрытие соединения при ожидании подверждения удаленного вызова. Информация об успешном/неуспешном вызове отсутствует.")
+      _wait_client_id = null_id;
+      _wait_call_id = 0;
+      this->process_queue_();
+    }
+  }
+
+  virtual void startup(size_t client_id, std::shared_ptr<interface_type> ptr )
+  {
+    std::lock_guard<mutex_type> lk( super::_mutex );
+    // std::cout << "startup { " << client_id << std::endl;
+    super::startup_(client_id, std::move(ptr) );
+    if ( _wait_client_id == null_id )
+      this->process_queue_();
+    // std::cout << "} startup " << client_id << std::endl;
+  }
+
   
   template<typename Req, typename Callback, typename... Args>
   void post( 
@@ -40,65 +86,77 @@ public:
     Args... args
   )
   {
+     
     std::lock_guard<mutex_type> lk( super::_mutex );
     
     post_function f = this->wrap_(mem_ptr, std::move(req), std::move(callback), std::forward<Args>(args)...); 
-    size_t clent_id = 0;
-    bool send_flag = false;
-    if ( _wait_post == nullptr )
+    
+    _queue.push( f );
+    
+    if ( _wait_client_id != null_id )
+      return;
+    
+    /*
+    size_t size = _queue.size();
+    if ( size != 1 )
     {
-      if ( auto cli = this->get_(clent_id) )
-      {
-        send_flag = true;
-        _wait_post = f;
-        _wait_client_id = clent_id;
-        f();
-      }
+      DAEMON_LOG_FATAL("Fail queue size: " << size)
+      abort();
+    }
+    */
+    
+    if ( _queue.size() != 1 )
+    {
+      // Проверить наличие коннектов. Если есть то fail
+      return;
     }
     
-    if (!send_flag)
-    {
-      _queue.push( std::move(f) );
-    }
+    f();
   }
 
 private:
   
-  mutex_type& mutex() const
-  {
-    return super::_mutex;
-  }
-
   
   template<typename Req, typename Callback, typename... Args>
   static void send_( 
     std::shared_ptr<self> pthis,
+    size_t call_id,
     void (interface_type::*mem_ptr)(Req, Callback, Args... args), 
     std::shared_ptr<Req> req, 
     Callback callback, 
     Args... args
   )
   {
+    if ( pthis->_wait_client_id != null_id )
+    {
+      DAEMON_LOG_FATAL("" << "Logic error " << pthis->_wait_client_id)
+      abort();
+    }
+     
     // вызов только из кретической секции
-    pthis->_wait_client_id = 0;
+    pthis->_wait_client_id = null_id;
     if ( auto cli = pthis->get_( pthis->_wait_client_id ) )
     {
-      // shutdown.lock();
-      // pthis->mutex().unlock();
-      // А если shutdown? 
       try
       {
+        pthis->_wait_call_id = call_id;
+        // std::cout << "send_ ready!!!" << pthis->_wait_client_id << std::endl;
+        pthis->_mutex.unlock();
         (cli.get()->*mem_ptr)( std::move(*req), std::move(callback), std::forward<Args>(args)... );
+        pthis->_mutex.lock();
       } 
       catch ( ... )
       {
         DAEMON_LOG_FATAL("sequenced_provider::send_ unhandled exception")
         abort();
       }
-      // pthis->mutex().lock();
-      return true;
     }
-    return false;
+    else
+    {
+      pthis->_wait_client_id = null_id;
+      std::cout << "send_ NOT ready!!! " << pthis->_call_id_counter << std::endl;
+    }
+  
   }
   
   
@@ -112,10 +170,12 @@ private:
   {
     auto preq = std::make_shared<Req>( std::move(req) );
     auto pthis = super::shared_from_this();
+    ++this->_call_id_counter;
     
     return std::bind(
       &sequenced_provider<Itf>::send_<Req, Callback, Args...>,
       pthis,
+      this->_call_id_counter,
       mem_ptr, 
       preq, 
       this->wrap_callback_(callback), 
@@ -127,17 +187,39 @@ private:
   std::function<void(Resp, Args...)>
   wrap_callback_(std::function<void(Resp, Args...)> callback) 
   {
+    auto call_id = this->_call_id_counter;
     auto pthis = this->shared_from_this();
-    return [pthis, callback](Resp resp, Args... args)
+    return [pthis, call_id, callback](Resp resp, Args... args)
     {
+      
+      
       if ( callback!=nullptr)
         callback( std::move(resp), std::forward<Args>(args)... );
 
-      _wait_client_id = 0;
-      _wait_post = nullptr;
+      std::lock_guard<mutex_type> lk(pthis->_mutex); //!
+      
+      
+      if ( pthis->_wait_call_id != call_id )
+      {
+        ++pthis->_lost_callback;
+        DAEMON_LOG_WARNING("" << " екправильный call_id " << pthis->_wait_call_id << " " << call_id)
+        //abort();
+       return;
+      }
 
-      std::unique_lock<mutex_type> lk( pthis->_mutex,  std::try_to_lock);
-      pthis->process_queue();
+      pthis->_queue.pop();
+      
+      if ( pthis->_wait_client_id == null_id )
+      {
+        DAEMON_LOG_WARNING("" << " _wait_client_id сброшен callback: pthis->_wait_client_id == null_id")
+       return;
+        //abort();
+      }
+      
+      pthis->_wait_client_id = null_id;
+      pthis->_wait_call_id = 0;
+      pthis->process_queue_();
+      
     };
   }
 
@@ -145,16 +227,25 @@ private:
   {
     if ( _queue.empty() )
       return;
-    _wait_post = _queue.front();
-    _queue.pop();
-    _wait_post();
+    auto f = _queue.front();
+    f();
+    
+    //std::cout << "process_queue_ { size=" << _queue.size() << std::endl;
+    //auto f = _queue.front();
+    //this->_mutex.unlock();
+    //f();
+    //this->_mutex.lock();
+    //std::cout << "} process_queue_" << std::endl;
   }
   
 private:
   size_t _wait_client_id;
-  post_function _wait_post;
+  size_t _wait_call_id;
+  size_t _call_id_counter;
   delayed_queue _queue;
   
+  size_t _lost_call;
+  size_t _lost_callback;
 };
 
 }}
