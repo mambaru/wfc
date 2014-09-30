@@ -28,6 +28,8 @@ public:
   rwlock()
     : _readers(0)
     , _writer(0)
+    , _can_read()
+    , _can_write()
   {
   }
 

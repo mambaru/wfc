@@ -20,7 +20,8 @@ public:
   typedef Itf interface_type;
   typedef std::shared_ptr<interface_type> interface_ptr;
   
-  typedef ::wfc::spinlock basic_mutex_type;
+  //typedef ::wfc::spinlock basic_mutex_type;
+  typedef std::recursive_mutex basic_mutex_type;
   typedef ::wfc::rwlock<basic_mutex_type> mutex_type;
 
   
@@ -30,12 +31,19 @@ public:
   typedef std::shared_ptr<simple_provider_t> simple_provider_ptr;
   typedef std::shared_ptr<sequenced_provider_t> sequenced_provider_ptr;
   
-  typedef provider_base<Itf> provider_base_type;
+  typedef iprovider<Itf> provider_base_type;
   typedef provider_base_type* provider_base_ptr;
 
   provider(const provider_config& conf)
+    : _conf(conf)
+    , _simple( std::make_shared<simple_provider_t>(conf) )
+    , _sequenced( std::make_shared<sequenced_provider_t>(conf) )
   {
-    this->reconfigure(conf);
+  }
+  
+  sequenced_provider_ptr get_sequenced() const 
+  {
+    return _sequenced;
   }
   
   void reconfigure(const provider_config& conf)

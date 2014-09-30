@@ -3,6 +3,7 @@
 #include <wfc/gateway/provider_config.hpp>
 #include <wfc/thread/rwlock.hpp>
 #include <wfc/thread/spinlock.hpp>
+#include <wfc/logger.hpp>
 #include <memory>
 #include <map>
 #include <list>
@@ -10,20 +11,50 @@
 namespace wfc{ namespace gateway{ 
 
 template<typename Itf>  
-class provider_base
+class iprovider
 {
 public:
   typedef Itf interface_type;
   typedef std::shared_ptr<interface_type> interface_ptr;
+  typedef std::function<void(size_t)> shudown_handler;
+  typedef std::list<shudown_handler> shudown_handler_list;
+
   
-  typedef ::wfc::spinlock basic_mutex_type;
+  virtual ~iprovider(){}
+
+  virtual void reconfigure(const provider_config& conf) = 0;
+    
+  virtual interface_ptr get(size_t& client_id) const  = 0;
+  
+  virtual interface_ptr get() const  = 0;
+  
+  virtual void startup(size_t clinet_id, std::shared_ptr<interface_type> ptr )  = 0;
+
+  virtual void shutdown(size_t clinet_id)  = 0;
+
+  virtual void add_shudown_handler( shudown_handler sh )  = 0;
+  
+  virtual shudown_handler_list get_shudown_handlers( ) const  = 0;
+
+  virtual void set_shudown_handlers( shudown_handler_list lst )  = 0;
+};
+  
+template<typename Itf, typename Mutex = ::wfc::spinlock>  
+class provider_base
+  : public iprovider<Itf>
+{
+public:
+  typedef iprovider<Itf> super;
+  typedef typename super::interface_type interface_type;
+  typedef typename super::interface_ptr interface_ptr;
+  typedef typename super::shudown_handler shudown_handler;
+  typedef typename super::shudown_handler_list shudown_handler_list;
+  
+  typedef Mutex basic_mutex_type;
   typedef ::wfc::rwlock<basic_mutex_type> mutex_type;
 
   typedef std::map<size_t, interface_ptr> client_map;
   typedef typename client_map::const_iterator client_iterator;
-  
-  typedef std::function<void(size_t)> shudown_handler;
-  typedef std::list<shudown_handler> shudown_handler_list;
 
   provider_base(const provider_config& conf)
   {
@@ -50,26 +81,17 @@ public:
   }
 
     // Когда вызывать, определяеться в method_list
-  virtual void startup(size_t clinet_id, std::shared_ptr<interface_type> ptr )
+  virtual void startup(size_t client_id, std::shared_ptr<interface_type> ptr )
   {
     std::unique_lock<mutex_type> lk(_mutex);
-    
-    this->_clients[clinet_id] = ptr;
-    this->_cli_itr = this->_clients.begin();
+    this->startup_(client_id, std::move(ptr));
   }
     
   // Когда вызывать, определяеться в method_list
-  virtual void shutdown(size_t clinet_id)
+  virtual void shutdown(size_t client_id)
   {
     std::unique_lock<mutex_type> lk(_mutex);
-
-    this->_clients.erase(clinet_id);
-    this->_cli_itr = this->_clients.begin();
-    auto shs = _shudown_handlers;
-    lk.unlock();
-
-    for ( auto& sh: shs )
-      sh( clinet_id );
+    this->shutdown_(client_id);
   }
 
   /*
@@ -98,6 +120,35 @@ public:
 
 protected:
   
+  void startup_(size_t client_id, std::shared_ptr<interface_type> ptr )
+  {
+    this->_clients[client_id] = ptr;
+    this->_cli_itr = this->_clients.begin();
+  }
+  
+  void shutdown_(size_t client_id)
+  {
+    this->_clients.erase(client_id);
+    this->_cli_itr = this->_clients.begin();
+    auto shs = _shudown_handlers;
+    _mutex.unlock();
+
+    for ( auto& sh: shs )
+    {
+      try 
+      { 
+        sh( client_id ); 
+      } 
+      catch(...)
+      {
+        DAEMON_LOG_FATAL("provider_base::shutdown_[shudown_handler]: unhandled exception")
+        abort();
+      }
+    }
+    
+    _mutex.lock();
+  }
+  
   interface_ptr get_(size_t& client_id) const
   {
     if ( !_conf.enabled || _clients.empty() )
@@ -118,25 +169,25 @@ protected:
 protected:
   provider_config _conf;
   mutable mutex_type _mutex;
-  
+
 private:
-  
   shudown_handler_list _shudown_handlers;
   client_map _clients;
   mutable client_iterator _cli_itr;
 };
 
-template<typename Itf, template<typename> class Derived>  
+template<typename Itf, template<typename> class Derived, typename Mutex = ::wfc::spinlock >  
 class basic_provider
-  : public provider_base<Itf>
+  : public provider_base<Itf, Mutex>
   , public std::enable_shared_from_this< Derived<Itf> >
 {
-  typedef provider_base<Itf> super;
+public:
+  
+  typedef provider_base<Itf, Mutex> super;
   
   basic_provider(const provider_config& conf)
     : super(conf)
-  {
-  }
+  {}
 };
 
 

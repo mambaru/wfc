@@ -16,10 +16,10 @@ enum class provider_mode
 // перенести в папку  
 struct provider_config
 {
-  bool enabled = false;
-  provider_mode mode; // TODO: в конфиг
-  bool sequence_mode = true; // TODO: удалить
-  time_t timeout = 60; // TODO: в конфиг.  после timeout (callback(null) для всех)
+  bool enabled = true;
+  provider_mode mode = provider_mode::simple; // TODO: в конфиг
+  bool sequence_mode = true;                  // TODO: удалить
+  time_t timeout = 60;                        // TODO: в конфиг.  после timeout (callback(null) для всех)
   size_t queue_limit = 1024*1024;
   size_t queue_warning = 1024*10;
 };
