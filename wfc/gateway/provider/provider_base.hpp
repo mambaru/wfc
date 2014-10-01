@@ -52,6 +52,8 @@ public:
   
   typedef Mutex basic_mutex_type;
   typedef ::wfc::rwlock<basic_mutex_type> mutex_type;
+  //typedef std::lock_guard<mutex_type>  lock_guard_type;
+  typedef ::wfc::read_lock<mutex_type> read_lock_type;
 
   typedef std::map<size_t, interface_ptr> client_map;
   typedef typename client_map::const_iterator client_iterator;
@@ -83,14 +85,14 @@ public:
     // Когда вызывать, определяеться в method_list
   virtual void startup(size_t client_id, std::shared_ptr<interface_type> ptr )
   {
-    std::unique_lock<mutex_type> lk(_mutex);
+    std::lock_guard<mutex_type> lk(_mutex);
     this->startup_(client_id, std::move(ptr));
   }
     
   // Когда вызывать, определяеться в method_list
   virtual void shutdown(size_t client_id)
   {
-    std::unique_lock<mutex_type> lk(_mutex);
+    std::lock_guard<mutex_type> lk(_mutex);
     this->shutdown_(client_id);
   }
 
@@ -122,6 +124,9 @@ protected:
   
   void startup_(size_t client_id, std::shared_ptr<interface_type> ptr )
   {
+    if ( !_conf.enabled )
+      return;
+
     this->_clients[client_id] = ptr;
     this->_cli_itr = this->_clients.begin();
   }
@@ -165,7 +170,6 @@ protected:
     return this->get_(client_id);
   }
 
-
 protected:
   provider_config _conf;
   mutable mutex_type _mutex;
@@ -181,6 +185,7 @@ class basic_provider
   : public provider_base<Itf, Mutex>
   , public std::enable_shared_from_this< Derived<Itf> >
 {
+  
 public:
   
   typedef provider_base<Itf, Mutex> super;
@@ -189,6 +194,5 @@ public:
     : super(conf)
   {}
 };
-
 
 }}

@@ -48,8 +48,8 @@ public:
   template<typename V>
   std::stringstream& operator << ( V v)
   {
-    if ( _logger )
-      _ss<<v;
+    //if ( _logger )
+    _ss<<v;
     return _ss;
   }
 

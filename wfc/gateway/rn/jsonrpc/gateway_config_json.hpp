@@ -1,15 +1,15 @@
 #pragma once
 
+#include <wfc/gateway/rn/jsonrpc/gateway_config.hpp>
+#include <wfc/pubsub/pubsub_gateway_options_json.hpp>
 #include <wfc/jsonrpc/options.hpp>
 #include <wfc/jsonrpc/options_json.hpp>
 #include <wfc/io/ip/tcp/rn/client_options.hpp>
 #include <wfc/io/ip/tcp/rn/client_options_json.hpp>
-#include <wfc/pubsub/pubsub_gateway_options_json.hpp>
 #include <wfc/json/json.hpp>
 #include <wfc/json/name.hpp>
 
 namespace wfc{ namespace gateway{ namespace rn{ namespace jsonrpc{
-
 
 struct gateway_config_json
 {

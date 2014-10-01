@@ -1,6 +1,14 @@
+
+sequence_mode (bool to enum, 4 режима)
+#define WFC_DISABLE_GLOBAL_LOG
+#define WFC_DISABLE_CLOG
+можно использовать header only
+---------------
+
 current release
 io_service тепрь объект ::wfc::wfc, и инициализирует global через конструктор. global::io_service теперь ссылка, а не std::weak_ptr
 create_config для каждого класса instance
 config: jsonrpc=null - дефолтный конфиг
 исправлен баг парсера для пустых объектов и массивов
 в методе stop нужно удалить все объекты
+
