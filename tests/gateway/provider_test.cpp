@@ -1,4 +1,5 @@
 #define WFC_DISABLE_GLOBAL_LOG
+//#define WFC_DISABLE_CLOG
 
 #include <unistd.h>
 #include <algorithm>
@@ -6,8 +7,8 @@
 #include <wfc/memory.hpp>
 #include <wfc/thread/rwlock.hpp>
 
-const int CALL_COUNT = 10000;
-const int THREAD_COUNT = 1;
+const int CALL_COUNT = 1000;
+const int THREAD_COUNT = 3;
 const int METHOD_COUNT = 3;
 
 namespace request{
@@ -168,14 +169,23 @@ void simple_test1()
 {
   provider_config conf;
   conf.mode = wfc::gateway::provider_mode::sequenced;
-  provider_type privider(conf);
-  std::atomic<int> callback_count(0);
-  std::atomic<int> callback1_count(0);
-  std::atomic<int> callback2_count(0);
-  std::atomic<int> callback3_count(0);
+  conf.timeout_ms = 500;
+  provider_type provider(conf);
+  std::atomic<size_t> callback_count(0);
+  std::atomic<size_t> callback1_count(0);
+  std::atomic<size_t> callback2_count(0);
+  std::atomic<size_t> callback3_count(0);
+    auto t = std::make_shared<test>();
+
 
   auto testing = [&]()->bool {
-    return callback_count < METHOD_COUNT*THREAD_COUNT*CALL_COUNT + privider.get_sequenced()->lost_call();
+    std::cout << callback_count << "*" << METHOD_COUNT*THREAD_COUNT*CALL_COUNT 
+              << " dropped: " << provider.get_sequenced()->dropped() 
+              << " lost: "<< provider.get_sequenced()->lost_callback() 
+              << " queueu:"<< provider.get_sequenced()->queue_size()
+              << " t->count1:" << t->count1 
+              <<  std::endl;
+    return callback_count < METHOD_COUNT*THREAD_COUNT*CALL_COUNT + provider.get_sequenced()->lost_callback() + provider.get_sequenced()->dropped();
   };
   test::callback1 c1 = [&](std::unique_ptr<response::test>)
   {
@@ -209,9 +219,8 @@ void simple_test1()
     ++callback3_count;
     //std::cout << "test::callback2 - " << callback3_count << std::endl;
   };
-  auto t = std::make_shared<test>();
-  //t->async_mode = true;
-  privider.startup(1, t);
+  t->async_mode = true;
+  provider.startup(1, t);
   
   typedef ::wfc::rwlock<std::mutex> mutex_type;
   mutex_type mutex;
@@ -220,11 +229,11 @@ void simple_test1()
   {
     //std::cout << "-------------------------------------" << std::endl;
     if ( METHOD_COUNT > 0 )
-      privider.post(&test::method1, std::make_unique<request::test>(0), c1);  
+      provider.post(&test::method1, std::make_unique<request::test>(0), c1);  
     if ( METHOD_COUNT > 1 )
-      privider.post(&test::method2, std::make_unique<request::test>(0), c2);
+      provider.post(&test::method2, std::make_unique<request::test>(0), c2);
     if ( METHOD_COUNT > 2 )
-      privider.post(&test::method3, std::make_unique<request::test>(0), c3, 24, std::string("24"));
+      provider.post(&test::method3, std::make_unique<request::test>(0), c3, 24, std::string("24"));
   };
   
   auto thread_func = [&]()
@@ -238,6 +247,7 @@ void simple_test1()
     ::wfc::read_lock<mutex_type> lk(mutex);
     while ( /*callback_count < METHOD_COUNT*THREAD_COUNT*CALL_COUNT*/ testing())
     {
+      usleep(2000);
       //std::cout << "callback_count: " << callback_count << std::endl;
       t->callback_all();
     }
@@ -262,10 +272,10 @@ void simple_test1()
     {
       
       usleep(30);
-      privider.shutdown(client_id);
+      provider.shutdown(client_id);
       usleep(30);
       client_id = callback_count + 1;
-      privider.startup(client_id, t);
+      provider.startup(client_id, t);
     };
   }));
   
@@ -293,8 +303,8 @@ void simple_test1()
   std::cout << "callback count3: " << callback3_count << std::endl;
   
   std::cout << "callback total: " << callback_count << std::endl;
-  std::cout << "lost_call: " << privider.get_sequenced()->lost_call() << std::endl;
-  std::cout << "lost_callback: " << privider.get_sequenced()->lost_callback() << std::endl;
+  std::cout << "lost_call: " << provider.get_sequenced()->lost_call() << std::endl;
+  std::cout << "lost_callback: " << provider.get_sequenced()->lost_callback() << std::endl;
 
   if ( !t->check(THREAD_COUNT*CALL_COUNT, THREAD_COUNT*CALL_COUNT, THREAD_COUNT*CALL_COUNT))
   {

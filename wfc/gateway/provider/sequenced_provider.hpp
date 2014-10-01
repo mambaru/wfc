@@ -11,72 +11,92 @@ namespace wfc{ namespace gateway{
 /*
  * Не важно сколько активных клиентов, следующий после ответа 
  */
+#warning СДЕЛАТЬ НОРМАЛЬНУЮ СТАТУ
 template<typename Itf>  
 class sequenced_provider
   : public basic_provider<Itf, sequenced_provider, std::recursive_mutex>
 {
   typedef sequenced_provider<Itf> self;
   typedef basic_provider<Itf, sequenced_provider, std::recursive_mutex> super;
+  typedef std::chrono::high_resolution_clock clock_t;
+  typedef clock_t::time_point time_point_t;
   
   static const size_t null_id = static_cast<size_t>(-1);
+
 public:
   
   typedef typename super::interface_type interface_type;
   typedef typename super::mutex_type mutex_type;
-  typedef std::function<void()> post_function;
+  typedef std::function<bool()> post_function;
   typedef std::queue< post_function > delayed_queue;
 
-  //int warning_count = 0;
   sequenced_provider(const provider_config& conf)
     : super(conf)
+    , _time_point( std::chrono::milliseconds(0) )
     , _wait_client_id(null_id)
     , _wait_call_id(0)
     , _call_id_counter(0)
     , _lost_call(0)
     , _lost_callback(0)
+    , _dropped(0)
+    , _lock_counter(0)
   {
   }
   
   size_t lost_call() const 
   {
-    std::lock_guard<mutex_type> lk( super::_mutex ); //!
+    ::wfc::read_lock<mutex_type> lk( super::_mutex );
     return _lost_call;
   }
   
   size_t lost_callback() const 
   {
-    std::lock_guard<mutex_type> lk( super::_mutex );
+    ::wfc::read_lock<mutex_type> lk( super::_mutex );
     return _lost_callback;
   }
+  
+  size_t dropped() const
+  {
+    ::wfc::read_lock<mutex_type> lk( super::_mutex );
+    return _dropped;
+  }
+
+  size_t queue_size() const
+  {
+    ::wfc::read_lock<mutex_type> lk( super::_mutex );
+    return _queue.size();
+  }
+
 
   virtual void shutdown(size_t client_id)
   {
-    std::lock_guard<mutex_type> lk( super::_mutex ); //!
-    
-    //std::cout << "shutdown { " << client_id << std::endl;
+    std::lock_guard<mutex_type> lk( super::_mutex );
     
     super::shutdown_(client_id);
     
     if ( _wait_client_id == client_id )
     {
-      ++_lost_call;
-      //DAEMON_LOG_WARNING(":" /*<< ++warning_count*/ << " provider(mode=sequenced): закрытие соединения при ожидании подверждения удаленного вызова. Информация об успешном/неуспешном вызове отсутствует.")
+      DAEMON_LOG_WARNING( 
+        "provider(mode=sequenced): закрытие соединения при ожидании подверждения удаленного вызова. "
+        "Информация о выполнении вызова отсутствует. ")
       _wait_client_id = null_id;
       _wait_call_id = 0;
-      this->process_queue_();
+      if ( this->process_queue_() )
+      {
+        // Увеличить счетчик повторных вызовов
+      };
     }
   }
 
   virtual void startup(size_t client_id, std::shared_ptr<interface_type> ptr )
   {
     std::lock_guard<mutex_type> lk( super::_mutex );
-    // std::cout << "startup { " << client_id << std::endl;
     super::startup_(client_id, std::move(ptr) );
     if ( _wait_client_id == null_id )
+    {
       this->process_queue_();
-    // std::cout << "} startup " << client_id << std::endl;
+    }
   }
-
   
   template<typename Req, typename Callback, typename... Args>
   void post( 
@@ -86,8 +106,12 @@ public:
     Args... args
   )
   {
-     
     std::lock_guard<mutex_type> lk( super::_mutex );
+    
+    if ( !super::_conf.enabled )
+      return;
+
+    this->check_timeout_();
     
     post_function f = this->wrap_(mem_ptr, std::move(req), std::move(callback), std::forward<Args>(args)...); 
     
@@ -95,15 +119,6 @@ public:
     
     if ( _wait_client_id != null_id )
       return;
-    
-    /*
-    size_t size = _queue.size();
-    if ( size != 1 )
-    {
-      DAEMON_LOG_FATAL("Fail queue size: " << size)
-      abort();
-    }
-    */
     
     if ( _queue.size() != 1 )
     {
@@ -118,7 +133,7 @@ private:
   
   
   template<typename Req, typename Callback, typename... Args>
-  static void send_( 
+  static bool send_( 
     std::shared_ptr<self> pthis,
     size_t call_id,
     void (interface_type::*mem_ptr)(Req, Callback, Args... args), 
@@ -133,17 +148,18 @@ private:
       abort();
     }
      
-    // вызов только из кретической секции
+    bool ready = false;
+    // вызов только из критической секции
     pthis->_wait_client_id = null_id;
     if ( auto cli = pthis->get_( pthis->_wait_client_id ) )
     {
       try
       {
         pthis->_wait_call_id = call_id;
-        // std::cout << "send_ ready!!!" << pthis->_wait_client_id << std::endl;
         pthis->_mutex.unlock();
         (cli.get()->*mem_ptr)( std::move(*req), std::move(callback), std::forward<Args>(args)... );
         pthis->_mutex.lock();
+        ready = true;
       } 
       catch ( ... )
       {
@@ -154,12 +170,10 @@ private:
     else
     {
       pthis->_wait_client_id = null_id;
-      std::cout << "send_ NOT ready!!! " << pthis->_call_id_counter << std::endl;
     }
-  
+    return ready;
   }
-  
-  
+    
   template<typename Req, typename Callback, typename... Args>
   post_function wrap_( 
     void (interface_type::*mem_ptr)(Req, Callback, Args... args), 
@@ -191,61 +205,111 @@ private:
     auto pthis = this->shared_from_this();
     return [pthis, call_id, callback](Resp resp, Args... args)
     {
-      
-      
       if ( callback!=nullptr)
+      {
         callback( std::move(resp), std::forward<Args>(args)... );
-
-      std::lock_guard<mutex_type> lk(pthis->_mutex); //!
+      }
       
+      ++pthis->_lock_counter;
+      
+      std::lock_guard<mutex_type> lk(pthis->_mutex); 
+     
+      if ( pthis->_conf.timeout_ms!=0 )
+      {
+        time_point_t now = clock_t::now();
+      }
       
       if ( pthis->_wait_call_id != call_id )
       {
+        --pthis->_lock_counter;
         ++pthis->_lost_callback;
-        DAEMON_LOG_WARNING("" << " екправильный call_id " << pthis->_wait_call_id << " " << call_id)
-        //abort();
+        DAEMON_LOG_WARNING("provider(mode=sequenced): идентификатор ответа не соответствует запросу. "
+                           "При переоткрытии объекта во время ожидания ответа был отправлен новый запрос. "
+                           "Это ответ на первый запрос - игнорируеться. Запрос на объект был доставлен дважды. ")
        return;
       }
 
-      pthis->_queue.pop();
+      bool flag = pthis->_wait_client_id != null_id;
+      
+      pthis->pop_();
+
+      if ( flag && pthis->_lock_counter == 1 )
+      {
+        // При синхронных ответах и post из нескольких потоках, возможна бесконечная рекурсия pthis->process_queue_
+        // Поэтому если кто-то ожидает мьютекс, то очередь не обрабатываем
+        pthis->process_queue_();
+      }
+      else if ( !flag )
+      {
+        COMMON_LOG_MESSAGE("provider(mode=sequenced): получение ответа после отключения последнего объекта.")
+      }
+
+      --pthis->_lock_counter;
+      /*
+      
+      
       
       if ( pthis->_wait_client_id == null_id )
       {
+        --pthis->_lock_counter;
         DAEMON_LOG_WARNING("" << " _wait_client_id сброшен callback: pthis->_wait_client_id == null_id")
        return;
-        //abort();
       }
+      
+      pthis->_queue.pop();
       
       pthis->_wait_client_id = null_id;
       pthis->_wait_call_id = 0;
-      pthis->process_queue_();
+      if ( pthis->_lock_counter == 1 )
+        pthis->process_queue_();
+      --pthis->_lock_counter;
+      */
       
     };
   }
+  
+  void pop_()
+  {
+    _queue.pop();
+    _wait_client_id = null_id;
+    _wait_call_id = 0;
+    //_time_point = std::chrono::milliseconds(0);
+  }
 
-  void process_queue_()
+  bool process_queue_()
   {
     if ( _queue.empty() )
-      return;
+      return false;
+
     auto f = _queue.front();
-    f();
-    
-    //std::cout << "process_queue_ { size=" << _queue.size() << std::endl;
-    //auto f = _queue.front();
-    //this->_mutex.unlock();
-    //f();
-    //this->_mutex.lock();
-    //std::cout << "} process_queue_" << std::endl;
+    return f();
   }
-  
+
+  void check_timeout_()
+  {
+    if ( super::_conf.timeout_ms!=0 && !_queue.empty())
+    {
+      time_point_t now = clock_t::now();
+    
+      if ( super::_conf.timeout_ms <= std::chrono::duration_cast < std::chrono::milliseconds>( now - _time_point ).count() )
+      {
+        ++_dropped;
+        this->pop_();
+        DAEMON_LOG_WARNING("Сброс ожидания запроса по timeout");
+      }
+    }
+  }
+
 private:
+  time_point_t _time_point;
   size_t _wait_client_id;
   size_t _wait_call_id;
   size_t _call_id_counter;
   delayed_queue _queue;
-  
   size_t _lost_call;
   size_t _lost_callback;
+  size_t _dropped;
+  std::atomic<size_t> _lock_counter;
 };
 
 }}

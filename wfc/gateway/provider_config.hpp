@@ -19,7 +19,7 @@ struct provider_config
   bool enabled = true;
   provider_mode mode = provider_mode::simple; // TODO: в конфиг
   bool sequence_mode = true;                  // TODO: удалить
-  time_t timeout = 60;                        // TODO: в конфиг.  после timeout (callback(null) для всех)
+  time_t timeout_ms = 0;                        // TODO: в конфиг.  после timeout (callback(null) для всех)
   size_t queue_limit = 1024*1024;
   size_t queue_warning = 1024*10;
 };
