@@ -72,6 +72,12 @@ public:
     ::wfc::read_lock<mutex_type> lk(_mutex);
     this->base_()->startup(clinet_id, std::move(ptr) );
   }
+  
+  size_t ready_count() const
+  {
+    ::wfc::read_lock<mutex_type> lk(_mutex);
+    return this->base_()->ready_count();
+  }
 
   void shutdown(size_t clinet_id) 
   {
