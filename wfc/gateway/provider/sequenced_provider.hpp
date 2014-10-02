@@ -11,7 +11,10 @@ namespace wfc{ namespace gateway{
 /*
  * Не важно сколько активных клиентов, следующий после ответа 
  */
-#warning СДЕЛАТЬ НОРМАЛЬНУЮ СТАТУ
+
+
+
+
 template<typename Itf>  
 class sequenced_provider
   : public basic_provider<Itf, sequenced_provider, std::recursive_mutex>
@@ -25,6 +28,7 @@ class sequenced_provider
 
 public:
   
+  
   typedef typename super::interface_type interface_type;
   typedef typename super::mutex_type mutex_type;
   typedef std::function<bool()> post_function;
@@ -36,17 +40,11 @@ public:
     , _wait_client_id(null_id)
     , _wait_call_id(0)
     , _call_id_counter(0)
-    , _lost_call(0)
+    , _recall_count(0)
     , _lost_callback(0)
-    , _dropped(0)
+    , _timeout_dropped(0)
     , _lock_counter(0)
   {
-  }
-  
-  size_t lost_call() const 
-  {
-    ::wfc::read_lock<mutex_type> lk( super::_mutex );
-    return _lost_call;
   }
   
   size_t lost_callback() const 
@@ -54,11 +52,17 @@ public:
     ::wfc::read_lock<mutex_type> lk( super::_mutex );
     return _lost_callback;
   }
-  
-  size_t dropped() const
+
+  size_t recall_count() const 
   {
     ::wfc::read_lock<mutex_type> lk( super::_mutex );
-    return _dropped;
+    return _recall_count;
+  }
+
+  size_t timeout_dropped() const
+  {
+    ::wfc::read_lock<mutex_type> lk( super::_mutex );
+    return _timeout_dropped;
   }
 
   size_t queue_size() const
@@ -83,9 +87,33 @@ public:
       _wait_call_id = 0;
       if ( this->process_queue_() )
       {
-        // Увеличить счетчик повторных вызовов
+        ++_recall_count;
       };
     }
+  }
+  
+  bool check() const
+  {
+    std::lock_guard<mutex_type> lk( super::_mutex );
+    if ( !_queue.empty() && super::ready_count_() )
+    {
+      if ( _wait_client_id == null_id || _wait_call_id == 0)
+      {
+        std::cout << "_wait_client_id: " << _wait_client_id << std::endl;
+        std::cout << "_wait_call_id: " << _wait_call_id << std::endl;
+        abort();
+        return false;
+      }
+    }
+    else 
+    {
+      if ( _wait_client_id != null_id || _wait_call_id != 0)
+      {
+        abort();
+        return false;
+      }
+    }
+    return true;
   }
 
   virtual void startup(size_t client_id, std::shared_ptr<interface_type> ptr )
@@ -94,7 +122,10 @@ public:
     super::startup_(client_id, std::move(ptr) );
     if ( _wait_client_id == null_id )
     {
-      this->process_queue_();
+      if ( this->process_queue_() )
+      {
+        ++_recall_count;
+      }
     }
   }
   
@@ -233,6 +264,7 @@ private:
       
       pthis->pop_();
 
+      // _lock_counter возможно не срабатывает и очередь повисает
       if ( flag && pthis->_lock_counter == 1 )
       {
         // При синхронных ответах и post из нескольких потоках, возможна бесконечная рекурсия pthis->process_queue_
@@ -293,7 +325,7 @@ private:
     
       if ( super::_conf.timeout_ms <= std::chrono::duration_cast < std::chrono::milliseconds>( now - _time_point ).count() )
       {
-        ++_dropped;
+        ++_timeout_dropped;
         this->pop_();
         DAEMON_LOG_WARNING("Сброс ожидания запроса по timeout");
       }
@@ -306,9 +338,14 @@ private:
   size_t _wait_call_id;
   size_t _call_id_counter;
   delayed_queue _queue;
-  size_t _lost_call;
+  
+  // Повторные вызовы
+  size_t _recall_count;
+  // Потерянные вызовы
   size_t _lost_callback;
-  size_t _dropped;
+  // сброшенные по timeout
+  size_t _timeout_dropped;
+  
   std::atomic<size_t> _lock_counter;
 };
 

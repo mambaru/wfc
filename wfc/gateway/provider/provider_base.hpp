@@ -23,7 +23,9 @@ public:
   virtual ~iprovider(){}
 
   virtual void reconfigure(const provider_config& conf) = 0;
-    
+  
+  virtual size_t ready_count() const  = 0;
+  
   virtual interface_ptr get(size_t& client_id) const  = 0;
   
   virtual interface_ptr get() const  = 0;
@@ -61,6 +63,12 @@ public:
   provider_base(const provider_config& conf)
   {
     this->reconfigure(conf);
+  }
+  
+  virtual size_t ready_count() const 
+  {
+    ::wfc::read_lock<mutex_type> lk(_mutex);
+    return this->ready_count_();
   }
   
   virtual void reconfigure(const provider_config& conf)
@@ -121,6 +129,11 @@ public:
 
 
 protected:
+  
+  size_t ready_count_() const 
+  {
+    return this->_clients.size();
+  }
   
   void startup_(size_t client_id, std::shared_ptr<interface_type> ptr )
   {
