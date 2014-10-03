@@ -43,6 +43,7 @@ public:
     , _recall_count(0)
     , _lost_callback(0)
     , _timeout_dropped(0)
+    , _delayed_pop(false)
     , _lock_counter(0)
   {
   }
@@ -69,6 +70,20 @@ public:
   {
     ::wfc::read_lock<mutex_type> lk( super::_mutex );
     return _queue.size();
+  }
+
+  virtual void startup(size_t client_id, std::shared_ptr<interface_type> ptr )
+  {
+    std::lock_guard<mutex_type> lk( super::_mutex );
+    super::startup_(client_id, std::move(ptr) );
+    if ( _wait_client_id == null_id )
+    {
+      if ( this->process_queue_() )
+      {
+        // не правильно считает
+        // ++_recall_count;
+      }
+    }
   }
 
 
@@ -116,18 +131,6 @@ public:
     return true;
   }
 
-  virtual void startup(size_t client_id, std::shared_ptr<interface_type> ptr )
-  {
-    std::lock_guard<mutex_type> lk( super::_mutex );
-    super::startup_(client_id, std::move(ptr) );
-    if ( _wait_client_id == null_id )
-    {
-      if ( this->process_queue_() )
-      {
-        ++_recall_count;
-      }
-    }
-  }
   
   template<typename Req, typename Callback, typename... Args>
   void post( 
@@ -162,6 +165,8 @@ public:
 
 private:
   
+  bool _recursive_flag = false;
+  
   
   template<typename Req, typename Callback, typename... Args>
   static bool send_( 
@@ -187,9 +192,19 @@ private:
       try
       {
         pthis->_wait_call_id = call_id;
+        // pthis->_recursive_flag = true;
         pthis->_mutex.unlock();
         (cli.get()->*mem_ptr)( std::move(*req), std::move(callback), std::forward<Args>(args)... );
         pthis->_mutex.lock();
+        /*
+        if ( !_recursive_flag )
+        {
+          pthis->pop_();
+          pthis->process_queue_();
+        }
+        
+        _recursive_flag = false;
+        */
         ready = true;
       } 
       catch ( ... )
@@ -228,14 +243,98 @@ private:
     );
   }
   
+  int x =  0;
+  void result_ready_()
+  {
+    if ( super::_conf.timeout_ms!=0 )
+      _time_point = clock_t::now();
+    
+    this->pop_();
+    this->process_queue_();
+  }
+  
   template<typename Resp, typename ...Args>
   std::function<void(Resp, Args...)>
   wrap_callback_(std::function<void(Resp, Args...)> callback) 
   {
+    //static std::atomic<int> x(0);
+    
     auto call_id = this->_call_id_counter;
     auto pthis = this->shared_from_this();
     return [pthis, call_id, callback](Resp resp, Args... args)
     {
+      {
+        std::lock_guard<mutex_type> lk(pthis->_mutex); 
+        
+        if ( pthis->_wait_call_id != call_id )
+          return;
+        
+        if ( pthis->_recursive_flag )
+          pthis->_recursive_flag = false;
+        else
+          pthis->result_ready_();
+      }
+      if ( callback!=nullptr )
+        callback( std::move(resp), std::forward<Args>(args)... );
+
+      return;
+        
+
+      
+      
+      bool ready = false;
+      ++pthis->_lock_counter;
+      {
+        std::lock_guard<mutex_type> lk(pthis->_mutex); 
+        std::cout << std::this_thread::get_id() << " { " << pthis->_lock_counter << std::endl;
+        
+        if ( pthis->_delayed_pop )
+        {
+          ready = true;
+          pthis->_delayed_pop = false;
+          std::cout << "delay Off" << std::endl;
+        }
+        else
+        {
+          if ( pthis->_wait_call_id == call_id )
+          {
+            ready = (pthis->_lock_counter == 1);
+            if ( !ready )
+            {
+              pthis->_delayed_pop = true;
+              std::cout << "delay On pthis->_lock_counter == " << pthis->_lock_counter<< std::endl;
+            }
+          }
+        }
+
+        if (ready)
+        {
+          if ( pthis->_conf.timeout_ms!=0 )
+            pthis->_time_point = clock_t::now();
+          pthis->pop_();
+          std::cout << "\tprocess {" << std::endl;
+          pthis->process_queue_();
+          std::cout << "\t} process" << std::endl;
+        }
+
+        --pthis->_lock_counter;
+        std::cout <<  "}" << std::this_thread::get_id() << " queue.size=" << pthis->_queue.size() << " " << ready << " " << pthis->_lock_counter  << std::endl;
+      }
+ 
+ 
+      if ( ready && callback!=nullptr)
+      {
+        callback( std::move(resp), std::forward<Args>(args)... );
+      }
+      return;
+      
+      
+      
+      
+      ///////////////////////
+      ///////////////////////
+      
+      // В конце, если это не повторный вызов!!!
       if ( callback!=nullptr)
       {
         callback( std::move(resp), std::forward<Args>(args)... );
@@ -243,14 +342,10 @@ private:
       
       ++pthis->_lock_counter;
       
-      std::lock_guard<mutex_type> lk(pthis->_mutex); 
+      std::lock_guard<mutex_type> lk1(pthis->_mutex); 
      
-      if ( pthis->_conf.timeout_ms!=0 )
-      {
-        time_point_t now = clock_t::now();
-      }
       
-      if ( pthis->_wait_call_id != call_id )
+      if ( pthis->_wait_call_id != call_id && !pthis->_delayed_pop)
       {
         --pthis->_lock_counter;
         ++pthis->_lost_callback;
@@ -263,9 +358,19 @@ private:
       bool flag = pthis->_wait_client_id != null_id;
       
       pthis->pop_();
+      
+      if ( pthis->_lock_counter != 1 )
+      {
+        std::cout << "-----------> pthis->_lock_counter: " << pthis->_lock_counter << std::endl;
+        // abort();
+      }
+      else
+      {
+        //std::cout << "----------- "<< std::endl;
+      }
 
       // _lock_counter возможно не срабатывает и очередь повисает
-      if ( flag && pthis->_lock_counter == 1 )
+      if ( flag /*&& pthis->_lock_counter == 1*/ )
       {
         // При синхронных ответах и post из нескольких потоках, возможна бесконечная рекурсия pthis->process_queue_
         // Поэтому если кто-то ожидает мьютекс, то очередь не обрабатываем
@@ -308,13 +413,32 @@ private:
     //_time_point = std::chrono::milliseconds(0);
   }
 
-  bool process_queue_()
+  int process_queue_()
   {
-    if ( _queue.empty() )
-      return false;
+    int result = 0;
+    while ( !_queue.empty() )
+    {
+      _recursive_flag = true;
+      _queue.front()();
+      if ( !_recursive_flag )
+      {
+        this->pop_();
+      }
+      else
+      {
+        _recursive_flag = false;
+        break;
+      }
+    }
+    return result;
+      
+    
 
+      /*
     auto f = _queue.front();
-    return f();
+    _recursive_flag = true;
+     = f();
+     */
   }
 
   void check_timeout_()
@@ -345,7 +469,8 @@ private:
   size_t _lost_callback;
   // сброшенные по timeout
   size_t _timeout_dropped;
-  
+
+  bool _delayed_pop;
   std::atomic<size_t> _lock_counter;
 };
 

@@ -226,7 +226,7 @@ void simple_test1()
 
       std::cout << post_flag << "-" << t->queue.size() <<  "-" << provider.get_sequenced()->queue_size() << std::endl;
       */
-      std::cout << post_flag << "-" << t->queue.size() <<  "-" << provider.get_sequenced()->queue_size() << std::endl;
+      //std::cout << post_flag << "-" << t->queue.size() <<  "-" << provider.get_sequenced()->queue_size() << std::endl;
       debug += t->callback_one();
       if ( !provider.get_sequenced()->check() )
       {
