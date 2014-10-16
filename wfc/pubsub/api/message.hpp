@@ -47,7 +47,7 @@ struct message
   data_ptr content /*= nullptr*/;
 
   /** ключ доступа для client-side*/
-  key_t key /*= 0*/;
+  key_ptr key /*= nullptr*/;
   
   message()    
     : action(actions::publish)
@@ -57,7 +57,7 @@ struct message
     , cursor(1)
     , identity("")
     , content(nullptr)
-    , key("")
+    , key(nullptr)
  {};
 
   message(const message& other)
@@ -68,9 +68,10 @@ struct message
     , cursor( other.cursor )
     , identity( other.identity )
     , content( nullptr )
-    , key( other.key )
+    , key( nullptr )
   {
     this->update_content(other);
+    this->update_key(other);
   }
 
   
@@ -108,7 +109,7 @@ struct message
     this->cursor = other.cursor;
     this->identity = other.identity;
     this->update_content(other);
-    this->key = other.key;
+    this->update_key(other);
     return *this;
   }
 
@@ -214,7 +215,7 @@ struct message
     birthtime = m.birthtime;
     lifetime = m.lifetime;
     this->update_content( m );
-    key = m.key;
+    this->update_key( m );
   }
 
   void modify(const message& m)
@@ -222,7 +223,7 @@ struct message
     limit = m.limit;
     // content = m.content;
     this->update_content( m );
-    key = m.key;
+    this->update_key( m );
   }
   
   void update_content(const message& m)
@@ -243,6 +244,25 @@ struct message
       content.reset();
     }
     
+  }
+
+  void update_key(const message& m)
+  {
+    if ( m.key != nullptr )
+    {
+      if ( key == nullptr )
+      {
+        key = std::make_unique<key_t>( m.key->begin(), m.key->end() );
+      }
+      else
+      {
+        key->assign( m.key->begin(), m.key->end() );
+      }
+    }
+    else
+    {
+      key.reset();
+    }
   }
 
 };
