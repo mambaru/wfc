@@ -41,6 +41,7 @@ public:
   sequenced_provider( ::wfc::io_service& io, const provider_config& conf)
     : super(conf)
     , _io_service(io)
+    , _io_work(io)
     , _deadline_timer(io)
     , _wait_client_id(null_id)
     , _wait_call_id(0)
@@ -48,9 +49,9 @@ public:
     , _recall_count(0)
     , _orphan_count(0)
     , _drop_count(0)
-    , _time_point( std::chrono::milliseconds(0) )
-    , _delayed_pop(false)
-    , _lock_counter(0)
+    //, _time_point( std::chrono::milliseconds(0) )
+    // , _delayed_pop(false)
+    //, _lock_counter(0)
   {
   }
   
@@ -149,7 +150,7 @@ public:
     if ( !super::_conf.enabled )
       return;
 
-    this->check_timeout_();
+    //this->check_timeout_();
     
     post_function f = this->wrap_(mem_ptr, std::move(req), std::move(callback), std::forward<Args>(args)...); 
     
@@ -172,8 +173,29 @@ public:
 
 private:
   
-  bool _recursive_flag = false;
-  
+  // bool _recursive_flag = false;
+
+  static void deadline_( 
+    std::shared_ptr<self> pthis,
+    size_t client_id, 
+    size_t call_id)
+  {
+    std::lock_guard<mutex_type> lk( pthis->_mutex );
+    
+    std::cout <<  "deadline_" <<  std::endl;
+    if (client_id != pthis->_wait_client_id 
+        || call_id != pthis->_wait_call_id)
+    {
+      // TODO: log
+      return;
+    }
+    
+    ++pthis->_drop_count;
+    // TODO: log
+    pthis->result_ready_();
+  }
+    
+
   
   template<typename Req, typename Callback, typename... Args>
   static bool send_( 
@@ -196,6 +218,7 @@ private:
     pthis->_wait_client_id = null_id;
     if ( auto cli = pthis->get_( pthis->_wait_client_id ) )
     {
+      size_t client_id = pthis->_wait_client_id;
       pthis->_wait_call_id = call_id;
       pthis->_mutex.unlock();
       
@@ -203,6 +226,16 @@ private:
       {
         // Копируем запрос, т.к. возможен повторный вызов
         auto req_for_send = std::make_unique<typename Req::element_type>(**req);
+        if (pthis->_conf.timeout_ms != 0 )
+        {
+          pthis->_deadline_timer.expires_from_now(boost::posix_time::milliseconds(pthis->_conf.timeout_ms));
+          pthis->_deadline_timer.async_wait( std::bind(
+              &sequenced_provider<Itf>::deadline_, 
+              pthis, 
+              client_id, 
+              call_id
+          ) );
+        }
         (cli.get()->*mem_ptr)( std::move(req_for_send), std::move(callback), std::forward<Args>(args)... );
       } 
       catch ( ... )
@@ -245,15 +278,13 @@ private:
   
   void result_ready_()
   {
-    if ( super::_conf.timeout_ms!=0 )
-      _time_point = clock_t::now();
-    
     this->pop_();
     this->process_queue_();
   }
   
+  
   template<typename Resp, typename... Args>
-  static void callback_( 
+  static void mt_confirm_( 
     std::shared_ptr<self> pthis,
     size_t call_id,
     std::function<void(Resp, Args...)> callback,
@@ -282,10 +313,9 @@ private:
     auto call_id = this->_call_id_counter;
     auto pthis = this->shared_from_this();
 
-    auto callback_fun = &sequenced_provider<Itf>::callback_<Resp, Args...>;
+    auto callback_fun = &sequenced_provider<Itf>::mt_confirm_<Resp, Args...>;
     return [callback_fun, pthis, call_id, callback](Resp resp, Args... args)
     {
-      typedef std::shared_ptr<Resp> responce_ptr;
       auto presp = std::make_shared<Resp>(std::move(resp) );
       pthis->_io_service.post( std::bind(
         callback_fun,
@@ -348,23 +378,15 @@ private:
   int process_queue_()
   {
     int result = 0;
-    while ( !_queue.empty() )
+    if ( !_queue.empty() )
     {
-      _recursive_flag = true;
       _queue.front()();
       ++result;
-      if ( !_recursive_flag )
-      {
-        this->pop_();
-      }
-      else
-      {
-        _recursive_flag = false;
-      }
     }
     return result;
   }
 
+  /*
   void check_timeout_()
   {
     if ( super::_conf.timeout_ms!=0 && !_queue.empty())
@@ -379,11 +401,13 @@ private:
       }
     }
   }
+  */
 
 private:
   ::wfc::io_service& _io_service;
+  ::wfc::io_service::work _io_work;
   ::boost::asio::deadline_timer _deadline_timer;
-  time_point_t _time_point;
+ // time_point_t _time_point;
   size_t _wait_client_id;
   size_t _wait_call_id;
   size_t _call_id_counter;
@@ -396,8 +420,8 @@ private:
   // сброшенные по timeout
   size_t _drop_count;
 
-  bool _delayed_pop;
-  std::atomic<size_t> _lock_counter;
+  //bool _delayed_pop;
+  // std::atomic<size_t> _lock_counter;
 };
 
 }}
