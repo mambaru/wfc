@@ -34,10 +34,10 @@ public:
   typedef iprovider<Itf> provider_base_type;
   typedef provider_base_type* provider_base_ptr;
 
-  provider(const provider_config& conf)
+  provider(::wfc::io_service& io, const provider_config& conf)
     : _conf(conf)
     , _simple( std::make_shared<simple_provider_t>(conf) )
-    , _sequenced( std::make_shared<sequenced_provider_t>(conf) )
+    , _sequenced( std::make_shared<sequenced_provider_t>(io, conf) )
   {
   }
   
@@ -45,7 +45,12 @@ public:
   {
     return _sequenced;
   }
-  
+
+  simple_provider_ptr get_simple() const 
+  {
+    return _simple;
+  }
+
   void reconfigure(const provider_config& conf)
   {
     std::lock_guard<mutex_type> lk(_mutex); 
