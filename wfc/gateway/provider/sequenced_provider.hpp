@@ -5,6 +5,8 @@
 #include <wfc/memory.hpp>
 #include <wfc/logger.hpp>
 #include <wfc/io_service.hpp>
+
+#include <boost/asio.hpp>
 #include <memory>
 #include <queue>
 
@@ -39,13 +41,14 @@ public:
   sequenced_provider( ::wfc::io_service& io, const provider_config& conf)
     : super(conf)
     , _io_service(io)
-    , _time_point( std::chrono::milliseconds(0) )
+    , _deadline_timer(io)
     , _wait_client_id(null_id)
     , _wait_call_id(0)
     , _call_id_counter(0)
     , _recall_count(0)
     , _orphan_count(0)
     , _drop_count(0)
+    , _time_point( std::chrono::milliseconds(0) )
     , _delayed_pop(false)
     , _lock_counter(0)
   {
@@ -251,14 +254,24 @@ private:
   
   template<typename Resp, typename... Args>
   static void callback_( 
-    std::shared_ptr<self> /*pthis*/,
-    size_t /*call_id*/,
-    std::function<void(Resp, Args...)> /*callback*/,
-    std::shared_ptr<Resp> /*resp*/, 
-    Args... /*args*/
+    std::shared_ptr<self> pthis,
+    size_t call_id,
+    std::function<void(Resp, Args...)> callback,
+    std::shared_ptr<Resp> resp, 
+    Args... args
   )
   {
-    
+    {
+      std::lock_guard<mutex_type> lk(pthis->_mutex); 
+
+      if ( pthis->_wait_call_id != call_id )
+        return;
+        
+      pthis->result_ready_();
+    }
+      
+    if ( callback!=nullptr )
+      callback( std::move(*resp), std::forward<Args>(args)... );
   }
 
   
@@ -266,23 +279,40 @@ private:
   std::function<void(Resp, Args...)>
   wrap_callback_(std::function<void(Resp, Args...)> callback) 
   {
-    typedef std::function<void(Resp, Args...)> callback_type;
-    //static std::atomic<int> x(0);
-    
     auto call_id = this->_call_id_counter;
     auto pthis = this->shared_from_this();
-    
-    /*callback_type result = std::bind(
-      &sequenced_provider<Itf>::callback_<Resp, Args...>,
-      pthis,
-      call_id,
-      callback
-    );
-    
-    return result;*/
 
-    return [pthis, call_id, callback](Resp resp, Args... args)
+    auto callback_fun = &sequenced_provider<Itf>::callback_<Resp, Args...>;
+    return [callback_fun, pthis, call_id, callback](Resp resp, Args... args)
     {
+      typedef std::shared_ptr<Resp> responce_ptr;
+      auto presp = std::make_shared<Resp>(std::move(resp) );
+      pthis->_io_service.post( std::bind(
+        callback_fun,
+        pthis,
+        call_id,
+        callback,
+        presp,
+        std::forward<Args>(args)...
+      ) );
+    };
+
+      /*
+      pthis->_io_service.post([pthis, presp, call_id, callback]()
+      {
+        std::lock_guard<mutex_type> lk(pthis->_mutex); 
+
+        if ( pthis->_wait_call_id != call_id )
+          return;
+        
+        pthis->result_ready_();
+      }
+      
+      if ( callback!=nullptr )
+        callback( std::move(resp), std::forward<Args>(args)... );
+      });
+      */
+      /*
       {
         std::lock_guard<mutex_type> lk(pthis->_mutex); 
 
@@ -304,6 +334,7 @@ private:
 
       return;
     };
+    */
   }
   
   void pop_()
@@ -351,6 +382,7 @@ private:
 
 private:
   ::wfc::io_service& _io_service;
+  ::boost::asio::deadline_timer _deadline_timer;
   time_point_t _time_point;
   size_t _wait_client_id;
   size_t _wait_call_id;

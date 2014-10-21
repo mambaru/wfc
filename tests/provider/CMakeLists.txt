@@ -1,0 +1,3 @@
+add_executable(provider_test provider_test.cpp)
+add_test(provider_test provider_test)
+target_link_libraries(provider_test pthread boost_system)
