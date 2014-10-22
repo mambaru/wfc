@@ -182,7 +182,7 @@ private:
   {
     std::lock_guard<mutex_type> lk( pthis->_mutex );
     
-    std::cout <<  "deadline_" <<  std::endl;
+    
     if (client_id != pthis->_wait_client_id 
         || call_id != pthis->_wait_call_id)
     {
@@ -281,8 +281,7 @@ private:
     this->pop_();
     this->process_queue_();
   }
-  
-  
+    
   template<typename Resp, typename... Args>
   static void mt_confirm_( 
     std::shared_ptr<self> pthis,

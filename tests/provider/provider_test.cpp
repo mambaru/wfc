@@ -42,6 +42,10 @@ struct ireceiver
   virtual void method3(request_ptr req, callback3 callback, int, std::string ) = 0;
 };
 
+///
+/// счетчики
+/// 
+
 struct receiver_counters
 {
   receiver_counters()
@@ -80,8 +84,61 @@ struct receiver_counters
   std::atomic<int> callback_counter3;
 };
 
+struct source_counters
+{
+  source_counters()
+    : send_counter1(0)
+    , send_counter2(0)
+    , send_counter3(0)
+    , response_counter1(0)
+    , response_counter2(0)
+    , response_counter3(0)
+  {}
+  
+  source_counters(const source_counters& other)
+    : send_counter1(other.send_counter1.load())
+    , send_counter2(other.send_counter2.load())
+    , send_counter3(other.send_counter3.load())
+    , response_counter1(other.response_counter1.load())
+    , response_counter2(other.response_counter2.load())
+    , response_counter3(other.response_counter3.load())
+  {}
 
-/// receiver handler
+  void operator += (const source_counters& other)
+  {
+    send_counter1 += other.send_counter1.load();
+    send_counter2  += other.send_counter2.load();
+    send_counter3 +=  other.send_counter3.load();
+    response_counter1 += other.response_counter1.load();
+    response_counter2 += other.response_counter2.load();
+    response_counter3 += other.response_counter3.load();
+  }
+
+  
+  std::atomic<int> send_counter1;
+  std::atomic<int> send_counter2;
+  std::atomic<int> send_counter3;
+  std::atomic<int> response_counter1;
+  std::atomic<int> response_counter2;
+  std::atomic<int> response_counter3;
+};
+
+struct provider_counters
+{
+  // Повторные вызовы
+  int recall_count = -1;
+  // Сброшенные по timeout
+  int drop_count = -1;
+  // Потерянные callback's
+  int orphan_count = -1;
+  // размер очереди
+  int queue_size = -1;
+};
+
+
+///
+/// Обработчик "удаленых" запросов
+///
 class receiver
   : public receiver_counters
   , public ireceiver
@@ -94,94 +151,95 @@ public:
 
   virtual ~receiver()
   {
-    std::cout << "~receiver()" << std::endl;
   }
   
 ///
 /// options
 ///
+
+  /// В async_mode = true ответы отправляет не сразу, а по запросу. см. callback_one
   bool async_mode = false;
   
   void method1(std::unique_ptr<request> req, callback1 callback )
   {
-      try{
-    response resp;
-    resp.src_id = req->src_id;
-    resp.dst_id = 1;
-    resp.count = req->count;
-    ++this->call_counter1;
-    
-    delayed_func f = [this, resp, callback]()
+    try
     {
-      ++(this->callback_counter1);
-      callback( std::make_unique<response>(resp) );
-    };
-    
-    if (async_mode) push_(f);
-    else f();
-      }
-      catch(...)
+      response resp;
+      resp.src_id = req->src_id;
+      resp.dst_id = 1;
+      resp.count = req->count;
+      ++this->call_counter1;
+      
+      delayed_func f = [this, resp, callback]()
       {
-        std::cout << "abort1 " << std::endl;
-        abort();
+        ++(this->callback_counter1);
+        callback( std::make_unique<response>(resp) );
+      };
+      
+      if (async_mode) 
+      {
+        push_(f);
       }
-
+      else f();
+    }
+    catch(...)
+    {
+      std::cout << "abort1 " << std::endl;
+      abort();
+    }
   }
 
   void method2(std::unique_ptr<request> req, callback2 callback )
   {
-      try{
-    response resp;
-    resp.src_id = req->src_id;
-    resp.dst_id = 2;
-    resp.count = req->count;
-    ++this->call_counter2;
-    
-    delayed_func f = [this, resp, callback]()
+    try
     {
+      response resp;
+      resp.src_id = req->src_id;
+      resp.dst_id = 2;
+      resp.count = req->count;
+      ++this->call_counter2;
       
-      ++(this->callback_counter2);
-      callback( std::make_unique<response>(resp), 33, 44 );
-    };
-    
-    if (async_mode) push_(f);
-    else f();
-    }
-      catch(...)
+      delayed_func f = [this, resp, callback]()
       {
-        std::cout << "abort2 " << std::endl;
-        abort();
-      }
-
-   
+        
+        ++(this->callback_counter2);
+        callback( std::make_unique<response>(resp), 33, 44 );
+      };
+      
+      if (async_mode) push_(f);
+      else f();
+    }
+    catch(...)
+    {
+      std::cout << "abort2 " << std::endl;
+      abort();
+    }
   }
 
   void method3(std::unique_ptr<request> req, callback3 callback, int p1, std::string p2 )
   {
-   
-      try{
-    response resp;
-    resp.src_id = req->src_id;
-    resp.dst_id = 3;
-    resp.count = req->count;
-    ++this->call_counter3;
-    
-    delayed_func f = [this, resp, callback, p1, p2]()
+    try
     {
-      ++(this->callback_counter3);
-      callback( std::make_unique<response>(resp), p1, p2 );
-    };
-    
-    if (async_mode) push_(f);
-    else f();
-          }
-      catch(...)
+      response resp;
+      resp.src_id = req->src_id;
+      resp.dst_id = 3;
+      resp.count = req->count;
+      ++this->call_counter3;
+      
+      delayed_func f = [this, resp, callback, p1, p2]()
       {
-        std::cout << "abort3 " << std::endl;
-        abort();
-      }
-
-
+        ++(this->callback_counter3);
+        callback( std::make_unique<response>(resp), p1, p2 );
+      };
+      
+      if (async_mode) push_(f);
+      else f();
+    }
+    catch(...)
+    {
+      std::cout << "abort3 " << std::endl;
+      abort();
+    }
   }
 
 ///
@@ -223,18 +281,6 @@ public:
   mutex_type mutex;
   callback_queue queue;
 
-///
-/// verified counters
-///
-  /*
-  std::atomic<int> call_counter1;
-  std::atomic<int> call_counter2;
-  std::atomic<int> call_counter3;
-
-  std::atomic<int> callback_counter1;
-  std::atomic<int> callback_counter2;
-  std::atomic<int> callback_counter3;
-  */
 };
 
 /// 
@@ -246,45 +292,6 @@ typedef ::wfc::gateway::provider_mode provider_mode;
 typedef ::wfc::gateway::provider<ireceiver>  provider_type;
 typedef std::shared_ptr<provider_type>  provider_ptr;
 
-struct source_counters
-{
-  source_counters()
-    : send_counter1(0)
-    , send_counter2(0)
-    , send_counter3(0)
-    , response_counter1(0)
-    , response_counter2(0)
-    , response_counter3(0)
-  {}
-  
-  source_counters(const source_counters& other)
-    : send_counter1(other.send_counter1.load())
-    , send_counter2(other.send_counter2.load())
-    , send_counter3(other.send_counter3.load())
-    , response_counter1(other.response_counter1.load())
-    , response_counter2(other.response_counter2.load())
-    , response_counter3(other.response_counter3.load())
-  {}
-
-  void operator += (const source_counters& other)
-  {
-    send_counter1 += other.send_counter1.load();
-    send_counter2  += other.send_counter2.load();
-    send_counter3 +=  other.send_counter3.load();
-    response_counter1 += other.response_counter1.load();
-    response_counter2 += other.response_counter2.load();
-    response_counter3 += other.response_counter3.load();
-  }
-
-  
-  std::atomic<int> send_counter1;
-  std::atomic<int> send_counter2;
-  std::atomic<int> send_counter3;
-  std::atomic<int> response_counter1;
-  std::atomic<int> response_counter2;
-  std::atomic<int> response_counter3;
-  
-};
 
 class source
   : public source_counters
@@ -341,12 +348,16 @@ public:
 
   void send_all(int mpr)
   {
+    //std::cout << "send_all-1" << std::endl;
     if ( mpr > 0 )
       this->send_method1();
+    //std::cout << "send_all-2" << std::endl;
     if ( mpr > 1 )
       this->send_method2();
+    //std::cout << "send_all-3" << std::endl;
     if ( mpr > 2 )
       this->send_method3();
+    //std::cout << "send_all-ok" << std::endl;
   }
 ///
 ///
@@ -366,6 +377,7 @@ public:
   {
     return static_cast<source_counters>(*this);
   }
+  
 };
 
 ///
@@ -384,39 +396,31 @@ struct toster_config
   int request_per_thread = 1000;
   // Число потоков делающих запросы
   int requester_threads_per_dst  = 3;
+  // Таймауты между запросами
   int request_timeout_ms = 0;
   // Число потоков активирующие callback на receiver в асинхронном режиме
   int callback_threads  = 3;
+  // Таймауты между перед отправкой ответа в async_mode
   int callback_timeout_ms = 1000;
   // таймаут разрыв (0-не используеться). На каждый источнико свой поток
   int shutdown_timeout_ms = 100000;
-  int shutdown_time_ms = 500; // сколько быть в shutdown
+  // сколько быть в shutdown
+  int shutdown_time_ms = 500; 
   // Конфигурация провайдера;
   provider_config provider;
 };
 
-struct provider_counters
-{
-  // Повторные вызовы
-  int recall_count = -1;
-  // Сброшенные по timeout
-  int drop_count = -1;
-  // Потерянные callback's
-  int orphan_count = -1;
-  // размер очереди
-  int queue_size = -1;
-};
 
+///
+/// тостер
+///
 class toster
 {
 public:
-  toster_config conf;
+  
   typedef std::shared_ptr<receiver> receiver_ptr;
   typedef std::shared_ptr<source> source_ptr;
-  
   typedef ::wfc::rwlock<std::mutex> barier_type;
-  ::wfc::io_service _io_service;
-  barier_type barier;
   toster(const toster_config& conf)
     : conf(conf)
     , ready_time(0)
@@ -424,7 +428,7 @@ public:
   {
     barier.lock();
     // Провайдер
-    _provider = std::make_shared<provider_type>(_io_service, conf.provider);
+    _provider = std::make_shared<provider_type>(io_service, conf.provider);
     
     // Отправитель
     for (int i = 0; i < conf.src_cout; ++i)
@@ -438,15 +442,19 @@ public:
         _threads.push_back( std::thread([this, src]()
         {
           ::wfc::read_lock<barier_type> lk(this->barier);
+          //std::cout << "send..." << std::endl;
           for (int i=0; i < this->conf.request_per_thread; ++i)
           {
+            //std::cout << "send... " << i << std::endl;
             src->send_all(this->conf.method_per_request);
+            //std::cout << "send... " << i << " ok"<< std::endl;
             if ( this->conf.request_timeout_ms > 0 )
             {
               usleep(this->conf.request_timeout_ms);
             }
           }
           --this->send_ready;
+          //std::cout << "send... ready" << std::endl;
         }));
       }
     }
@@ -500,16 +508,19 @@ public:
   
   void run()
   {
-    std::thread th([this]() { this->_io_service.run(); });
+    std::thread th([this]() { this->io_service.run(); });
     barier.unlock();
     for ( auto& th : _threads)
+    {
       th.join();
+      //std::cout << "th.join()" << std::endl;
+    }
       /*while (1)
     {
       std::cout <<  _provider->get_sequenced()->queue_size() <<  std::endl;
       sleep(1);
     };*/
-    this->_io_service.stop();
+    this->io_service.stop();
     th.join();  
   }
   
@@ -518,15 +529,17 @@ public:
     if ( _provider->get_sequenced()->queue_size() != 0 )
     {
       // TODO: сделат общмй метод queue_size
-     // std::cout <<  "get_sequenced()->queue_size() " <<  _provider->get_sequenced()->queue_size() <<  std::endl;
+      //std::cout <<  "get_sequenced()->queue_size() " <<  _provider->get_sequenced()->queue_size() <<  std::endl;
       return false;
     }
+    
     if ( this->send_ready != 0 )
       return false;
+    //std::cout <<  "ready?" <<  std::endl;
     time_t now = time(0);
     if ( ready_time == 0 )
     {
-      ready_time = now + 2;
+      ready_time = now + 1 /*+ 2*/;
       return false;
     }
     return now > ready_time;
@@ -570,13 +583,23 @@ public:
     return pc;
   }
   
-  
+  toster_config conf;
+  ::wfc::io_service io_service;
+
+  // Для таймаута завершения после отправки всех сообщений
+  // Для некоторых тестов не можем сравнивать количетво отправленных и полученных,
+  // т.к. допустимы потери
   std::atomic<time_t> ready_time;
+  // 0 - все данные отправленны
   std::atomic<int> send_ready;
+  // список получателей
   std::list<receiver_ptr> _receivers;
+  // список отправителей
   std::list<source_ptr> _sources;
+  // провайдер
   provider_ptr _provider;
   std::list<std::thread> _threads;
+  barier_type barier;
 };
 
 ///
@@ -618,6 +641,7 @@ void check_basic(const toster_config& conf, const source_counters& sc, const rec
     abort();
 }
 
+// Проверки для простого режима
 void simple_check(const toster_config& conf, const source_counters& sc, const receiver_counters& rc, const provider_counters& pc)
 {
   if ( pc.queue_size!=0 )
@@ -631,17 +655,7 @@ void simple_check(const toster_config& conf, const source_counters& sc, const re
 
 void squence_check(const toster_config& conf, const source_counters& sc, const receiver_counters& rc, const provider_counters& pc)
 {
-  //simple_check(conf, sc, rc, pc);
-  /*
-  if ( pc.queue_size!=0 )
-    abort();
-    
-  check_basic(conf, sc, rc);
-  auto send_total = sc.send_counter1 + sc.send_counter2 + sc.send_counter3;
-  auto  response_total = sc.response_counter1 + sc.response_counter2 + sc.response_counter3;
-  if ( send_total != pc.drop_count + response_total)
-    abort();
-    */
+  simple_check(conf, sc, rc, pc);
   std::cout <<  pc.recall_count <<  std::endl;
   std::cout <<  pc.drop_count <<  std::endl;
   std::cout <<  pc.orphan_count <<  std::endl;
@@ -670,9 +684,23 @@ void simple_test_multi()
 {
   std::cout << "simple_test_multi()" << std::endl;
   toster_config conf;
+  conf.dst_async_mode = false;
+  conf.dst_cout = 4;
+  conf.src_cout = 6;
+  conf.method_per_request = 3;
+  conf.request_per_thread = 1000;
+  conf.requester_threads_per_dst  = 3;
+  conf.request_timeout_ms = 0;
+  conf.callback_threads  = 3;
+  conf.callback_timeout_ms = 1000;
+  conf.shutdown_timeout_ms = 100000;
+  conf.shutdown_time_ms = 500; 
+  conf.provider.mode = provider_mode::simple;
+  /*
   conf.provider.mode = provider_mode::simple;
   conf.src_cout = 4;
   conf.dst_cout = 6;
+  */
   toster t(conf);
   t.run();
   auto sc = t.get_source_counters();
@@ -815,14 +843,14 @@ void sequence_test_multi()
 void sequence_test()
 {
   std::cout << "sequence_test()" << std::endl;
-  //basic_sequence_test();
+  basic_sequence_test();
   sequence_test_multi();
 }
 
 int main()
 {
-  //default_test();
-  //simple_test();
-  sequence_test();
+  // default_test();
+  simple_test();
+  //sequence_test();
   return 0;
 }
