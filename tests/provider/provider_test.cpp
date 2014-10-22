@@ -385,7 +385,7 @@ public:
 ///
 struct toster_config
 {
-  bool dst_async_mode = false;
+  // bool dst_async_mode = false;
   // Кол-во источников
   int  dst_cout = 1;
   // Кол-во получателе
@@ -465,7 +465,7 @@ public:
       receiver *pdst = new receiver;
       auto dst = std::shared_ptr<receiver>(pdst);
       //auto dst = std::make_shared<receiver>();
-      dst->async_mode = conf.dst_async_mode;
+      dst->async_mode = conf.callback_timeout_ms != 0;
       _receivers.push_back(dst);
       _provider->startup(client_id, dst);
       _threads.push_back(std::thread([this, dst]()
@@ -653,7 +653,7 @@ void simple_check(const toster_config& conf, const source_counters& sc, const re
     abort();
 }
 
-void squence_check(const toster_config& conf, const source_counters& sc, const receiver_counters& rc, const provider_counters& pc)
+void sequence_check(const toster_config& conf, const source_counters& sc, const receiver_counters& rc, const provider_counters& pc)
 {
   simple_check(conf, sc, rc, pc);
   std::cout <<  pc.recall_count <<  std::endl;
@@ -676,166 +676,243 @@ void default_test()
   check_basic(conf, sc, rc);
 }
 
-/// 
-/// Тесты: mode == simple
-///
-
-void simple_test_multi()
+toster_config default_config()
 {
-  std::cout << "simple_test_multi()" << std::endl;
   toster_config conf;
-  conf.dst_async_mode = false;
-  conf.dst_cout = 4;
-  conf.src_cout = 6;
+  conf.dst_cout = 2;
+  conf.src_cout = 3;
   conf.method_per_request = 3;
   conf.request_per_thread = 1000;
   conf.requester_threads_per_dst  = 3;
   conf.request_timeout_ms = 0;
   conf.callback_threads  = 3;
-  conf.callback_timeout_ms = 1000;
-  conf.shutdown_timeout_ms = 100000;
-  conf.shutdown_time_ms = 500; 
+  conf.callback_timeout_ms = 0;
+  conf.shutdown_timeout_ms = 0;
+  conf.shutdown_time_ms = 0; 
   conf.provider.mode = provider_mode::simple;
-  /*
+  return conf;
+}
+
+/// 
+/// Тесты: mode == simple
+///
+
+toster_config simple_config()
+{
+  auto conf = default_config();
   conf.provider.mode = provider_mode::simple;
-  conf.src_cout = 4;
-  conf.dst_cout = 6;
-  */
+  return conf;
+}
+
+
+// Синхронный режим, несколько получателей и отправителей
+// без задержек запросов
+// без shutdown
+void simple_test1()
+{
+  std::cout << "simple_test1()" << std::endl;
+  auto conf = simple_config();
   toster t(conf);
   t.run();
   auto sc = t.get_source_counters();
   auto rc = t.get_receiver_counters();
   auto pc = t.get_provider_counters();
+  if ( pc.drop_count != 0 )
+  {
+    std::cout << "pc.drop_count=" << pc.drop_count << std::endl;
+    abort();
+  }
+
   simple_check(conf, sc, rc, pc);
 }
 
-void simple_test_multi_async()
+// Acинхронный режим, несколько получателей и отправителей
+// без задержек запросов
+// без shutdown
+void simple_test2()
 {
-  std::cout << "simple_test_multi_async()" << std::endl;
-  toster_config conf;
-  conf.dst_async_mode = true;
-  conf.provider.mode = provider_mode::simple;
-  conf.src_cout = 4;
-  conf.dst_cout = 6;
+  std::cout << "simple_test2()" << std::endl;
+  auto conf = simple_config();
+  conf.callback_timeout_ms = 10000;
   toster t(conf);
   t.run();
   auto sc = t.get_source_counters();
   auto rc = t.get_receiver_counters();
   auto pc = t.get_provider_counters();
+  if ( pc.drop_count != 0 )
+  {
+    std::cout << "pc.drop_count=" << pc.drop_count << std::endl;
+    abort();
+  }
+
   simple_check(conf, sc, rc, pc);
 }
 
-void simple_test_multi_shutdown()
+// cинхронный режим, несколько получателей и отправителей
+// с задержкой запросов
+// с shutdown
+void simple_test3()
 {
-  std::cout << "simple_test_multi_shutdown()" << std::endl;
-  toster_config conf;
-  conf.provider.mode = provider_mode::simple;
-  conf.src_cout = 4;
-  conf.dst_cout = 6;
+  std::cout << "simple_test3()" << std::endl;
+  auto conf = simple_config();
   conf.request_timeout_ms = 100;
   conf.shutdown_timeout_ms = 10000;
   conf.shutdown_time_ms = 500; // сколько быть в shutdown
-
   toster t(conf);
   t.run();
   auto sc = t.get_source_counters();
   auto rc = t.get_receiver_counters();
   auto pc = t.get_provider_counters();
-  if ( pc.drop_count == 0 ) // Плохо настроили для этого режима 
+  if ( pc.drop_count == 0 )
+  {
+    // Плохо настроили, должны быть потери
+    std::cout << "pc.drop_count=" << pc.drop_count << std::endl;
     abort();
-  std::cout << "pc.drop_count=" << pc.drop_count << std::endl;
+  }
+
   simple_check(conf, sc, rc, pc);
 }
 
-void simple_test_multi_shutdown_async()
+
+// Acинхронный режим, несколько получателей и отправителей
+// с задержкой запросов
+// с shutdown
+void simple_test4()
 {
-  std::cout << "simple_test_multi_shutdown_async()" << std::endl;
-  toster_config conf;
-  conf.provider.mode = provider_mode::simple;
-  conf.src_cout = 4;
-  conf.dst_cout = 6;
-  conf.dst_async_mode = true;
+  std::cout << "simple_test4()" << std::endl;
+  auto conf = simple_config();
+  conf.callback_timeout_ms = 10000;
   conf.request_timeout_ms = 100;
   conf.shutdown_timeout_ms = 10000;
   conf.shutdown_time_ms = 500; // сколько быть в shutdown
-
   toster t(conf);
   t.run();
   auto sc = t.get_source_counters();
   auto rc = t.get_receiver_counters();
   auto pc = t.get_provider_counters();
-  if ( pc.drop_count == 0 ) // Плохо настроили для этого режима 
+  if ( pc.drop_count == 0 )
+  {
+    // Плохо настроили, должны быть потери
+    std::cout << "pc.drop_count=" << pc.drop_count << std::endl;
     abort();
-  std::cout << "pc.drop_count=" << pc.drop_count << std::endl;
+  }
   simple_check(conf, sc, rc, pc);
 }
+
 
 void simple_test()
 {
   std::cout << "simple_test()" << std::endl;
-  simple_test_multi();
-  simple_test_multi_async();
-  simple_test_multi_shutdown();
-  simple_test_multi_shutdown_async();
+  simple_test1();
+  simple_test2();
+  simple_test3();
+  simple_test4();
 }
 
 /// 
 /// Тесты: mode == sequence
 ///
 
-void basic_sequence_test()
+toster_config sequence_config()
 {
-  std::cout << "basic_sequence_test()" << std::endl;
-  toster_config conf;
+  auto conf = default_config();
   conf.provider.mode = provider_mode::sequenced;
-  conf.request_per_thread = 10000;
-  conf.src_cout = 4;
-  conf.dst_cout = 6;
-  conf.requester_threads_per_dst  = 3;
-  conf.callback_threads  = 3;
-  
-  conf.request_timeout_ms = 0;
-  conf.shutdown_timeout_ms = 0;
-  conf.shutdown_time_ms = 0; // сколько быть в shutdown
-
-
-  toster t(conf);
-  t.run();
-  auto sc = t.get_source_counters();
-  auto rc = t.get_receiver_counters();
-  auto pc = t.get_provider_counters();
-  simple_check(conf, sc, rc, pc);
-
+  return conf;
 }
 
-void sequence_test_multi()
+
+// Синхронный режим, несколько получателей и отправителей
+// без задержек запросов
+// без shutdown
+void sequence_test1()
 {
-  std::cout << "sequence_test_multi()" << std::endl;
-  toster_config conf;
-  conf.provider.mode = provider_mode::sequenced;
-  conf.provider.timeout_ms = 1000;
-  conf.src_cout = 4;
-  conf.dst_cout = 2;
-  
-  
-  conf.dst_async_mode = true;
-    
-  conf.request_timeout_ms = 100;
-  conf.callback_timeout_ms = 100;
-  conf.shutdown_timeout_ms = 1000;
-  conf.shutdown_time_ms = 500; // сколько быть в shutdown
-
-  // conf.shutdown_timeout_ms = 5000;
-  // conf.shutdown_time_ms = 5000; // сколько быть в shutdown
-
+  std::cout << "sequence_test1()" << std::endl;
+  auto conf = sequence_config();
   toster t(conf);
   t.run();
   auto sc = t.get_source_counters();
   auto rc = t.get_receiver_counters();
   auto pc = t.get_provider_counters();
-  //simple_check(conf, sc, rc, pc);
-  squence_check(conf, sc, rc, pc);
-  std::cout << "sequence_test_multi() Done" << std::endl;
+  if ( pc.drop_count != 0 )
+  {
+    std::cout << "pc.drop_count=" << pc.drop_count << std::endl;
+    abort();
+  }
+
+  sequence_check(conf, sc, rc, pc);
+}
+
+// Acинхронный режим, несколько получателей и отправителей
+// без задержек запросов
+// без shutdown
+void sequence_test2()
+{
+  std::cout << "sequence_test2()" << std::endl;
+  auto conf = sequence_config();
+  conf.callback_timeout_ms = 10000;
+  toster t(conf);
+  t.run();
+  auto sc = t.get_source_counters();
+  auto rc = t.get_receiver_counters();
+  auto pc = t.get_provider_counters();
+  if ( pc.drop_count != 0 )
+  {
+    std::cout << "pc.drop_count=" << pc.drop_count << std::endl;
+    abort();
+  }
+
+  sequence_check(conf, sc, rc, pc);
+}
+
+// cинхронный режим, несколько получателей и отправителей
+// с задержкой запросов
+// с shutdown
+void sequence_test3()
+{
+  std::cout << "sequence_test3()" << std::endl;
+  auto conf = sequence_config();
+  conf.request_timeout_ms = 100;
+  conf.shutdown_timeout_ms = 10000;
+  conf.shutdown_time_ms = 500; // сколько быть в shutdown
+  toster t(conf);
+  t.run();
+  auto sc = t.get_source_counters();
+  auto rc = t.get_receiver_counters();
+  auto pc = t.get_provider_counters();
+  if ( pc.drop_count == 0 )
+  {
+    // Плохо настроили, должны быть потери
+    std::cout << "pc.drop_count=" << pc.drop_count << std::endl;
+    abort();
+  }
+
+  sequence_check(conf, sc, rc, pc);
+}
+
+
+// Acинхронный режим, несколько получателей и отправителей
+// с задержкой запросов
+// с shutdown
+void sequence_test4()
+{
+  std::cout << "sequence_test4()" << std::endl;
+  auto conf = sequence_config();
+  conf.callback_timeout_ms = 10000;
+  conf.request_timeout_ms = 100;
+  conf.shutdown_timeout_ms = 10000;
+  conf.shutdown_time_ms = 500; // сколько быть в shutdown
+  toster t(conf);
+  t.run();
+  auto sc = t.get_source_counters();
+  auto rc = t.get_receiver_counters();
+  auto pc = t.get_provider_counters();
+  if ( pc.drop_count == 0 )
+  {
+    // Плохо настроили, должны быть потери
+    std::cout << "pc.drop_count=" << pc.drop_count << std::endl;
+    abort();
+  }
+  sequence_check(conf, sc, rc, pc);
 }
 
 
@@ -843,14 +920,16 @@ void sequence_test_multi()
 void sequence_test()
 {
   std::cout << "sequence_test()" << std::endl;
-  basic_sequence_test();
-  sequence_test_multi();
+  sequence_test1();
+  sequence_test2();
+  sequence_test3();
+  sequence_test4();
 }
 
 int main()
 {
   // default_test();
-  simple_test();
-  //sequence_test();
+  // simple_test();
+  sequence_test();
   return 0;
 }
