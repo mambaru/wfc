@@ -148,23 +148,25 @@ protected:
   {
     this->_clients.erase(client_id);
     this->_cli_itr = this->_clients.begin();
-    auto shs = _shudown_handlers;
-    _mutex.unlock();
-
-    for ( auto& sh: shs )
+    if ( !_shudown_handlers.empty() )
     {
-      try 
-      { 
-        sh( client_id ); 
-      } 
-      catch(...)
+      auto shs = _shudown_handlers;
+      _mutex.unlock();
+      for ( auto& sh: shs )
       {
-        DAEMON_LOG_FATAL("provider_base::shutdown_[shudown_handler]: unhandled exception")
-        abort();
+        try 
+        { 
+          sh( client_id ); 
+        } 
+        catch(...)
+        {
+          DAEMON_LOG_FATAL("provider_base::shutdown_[shudown_handler]: unhandled exception")
+          abort();
+        }
       }
+      
+      _mutex.lock();
     }
-    
-    _mutex.lock();
   }
   
   interface_ptr get_(size_t& client_id) const
@@ -193,7 +195,7 @@ private:
   mutable client_iterator _cli_itr;
 };
 
-template<typename Itf, template<typename> class Derived, typename Mutex = ::wfc::spinlock >  
+template<typename Itf, template<typename> class Derived, typename Mutex = /*::wfc::spinlock*/ std::mutex >  
 class basic_provider
   : public provider_base<Itf, Mutex>
   , public std::enable_shared_from_this< Derived<Itf> >
