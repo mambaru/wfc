@@ -705,6 +705,8 @@ toster_config simple_config()
 }
 
 
+
+
 // Синхронный режим, несколько получателей и отправителей
 // без задержек запросов
 // без shutdown
@@ -849,7 +851,7 @@ void sequence_test2()
 {
   std::cout << "sequence_test2()" << std::endl;
   auto conf = sequence_config();
-  conf.callback_timeout_ms = 10000;
+  conf.callback_timeout_ms = 1000;
   toster t(conf);
   t.run();
   auto sc = t.get_source_counters();
@@ -871,6 +873,7 @@ void sequence_test3()
 {
   std::cout << "sequence_test3()" << std::endl;
   auto conf = sequence_config();
+  conf.provider.timeout_ms = 1000;
   conf.request_timeout_ms = 100;
   conf.shutdown_timeout_ms = 10000;
   conf.shutdown_time_ms = 500; // сколько быть в shutdown
@@ -879,13 +882,20 @@ void sequence_test3()
   auto sc = t.get_source_counters();
   auto rc = t.get_receiver_counters();
   auto pc = t.get_provider_counters();
+
+  std::cout << "pc.drop_count=" << pc.drop_count << std::endl;
+  std::cout << "pc.recall_count=" << pc.recall_count << std::endl;
+
   if ( pc.drop_count == 0 )
   {
     // Плохо настроили, должны быть потери
-    std::cout << "pc.drop_count=" << pc.drop_count << std::endl;
     abort();
   }
-
+  
+  if ( pc.recall_count == 0 )
+  {
+    abort();
+  }
   sequence_check(conf, sc, rc, pc);
 }
 
@@ -897,7 +907,8 @@ void sequence_test4()
 {
   std::cout << "sequence_test4()" << std::endl;
   auto conf = sequence_config();
-  conf.callback_timeout_ms = 10000;
+  conf.provider.timeout_ms = 1000;
+  conf.callback_timeout_ms = 100;
   conf.request_timeout_ms = 100;
   conf.shutdown_timeout_ms = 10000;
   conf.shutdown_time_ms = 500; // сколько быть в shutdown

@@ -12,13 +12,6 @@
 
 namespace wfc{ namespace gateway{ 
 
-/*
- * Не важно сколько активных клиентов, следующий после ответа 
- */
-
-
-
-
 template<typename Itf>  
 class sequenced_provider
   : public basic_provider<Itf, sequenced_provider, std::recursive_mutex>
@@ -27,11 +20,10 @@ class sequenced_provider
   typedef basic_provider<Itf, sequenced_provider, std::recursive_mutex> super;
   typedef std::chrono::high_resolution_clock clock_t;
   typedef clock_t::time_point time_point_t;
-  
+
   static const size_t null_id = static_cast<size_t>(-1);
 
 public:
-  
   
   typedef typename super::interface_type interface_type;
   typedef typename super::mutex_type mutex_type;
@@ -49,9 +41,6 @@ public:
     , _recall_count(0)
     , _orphan_count(0)
     , _drop_count(0)
-    //, _time_point( std::chrono::milliseconds(0) )
-    // , _delayed_pop(false)
-    //, _lock_counter(0)
   {
   }
   
@@ -86,11 +75,7 @@ public:
     super::startup_(client_id, ptr);
     if ( _wait_client_id == null_id )
     {
-      if ( this->process_queue_() )
-      {
-        // не правильно считает
-        // ++_recall_count;
-      }
+      _recall_count += this->process_queue_();
     }
   }
 
@@ -108,34 +93,9 @@ public:
         "Информация о выполнении вызова отсутствует. ")
       _wait_client_id = null_id;
       _wait_call_id = 0;
-      if ( this->process_queue_() )
-      {
-        ++_recall_count;
-      };
+      _recall_count += this->process_queue_();
     }
   }
-  
-  bool check() const
-  {
-    std::lock_guard<mutex_type> lk( super::_mutex );
-    if ( !_queue.empty() && super::ready_count_() )
-    {
-      if ( _wait_client_id == null_id || _wait_call_id == 0)
-      {
-        return false;
-      }
-    }
-    else 
-    {
-      if ( _wait_client_id != null_id || _wait_call_id != 0)
-      {
-        abort();
-        return false;
-      }
-    }
-    return true;
-  }
-
   
   template<typename Req, typename Callback, typename... Args>
   void post( 
@@ -150,8 +110,6 @@ public:
     if ( !super::_conf.enabled )
       return;
 
-    //this->check_timeout_();
-    
     post_function f = this->wrap_(mem_ptr, std::move(req), std::move(callback), std::forward<Args>(args)...); 
     
     _queue.push( f );
@@ -161,7 +119,6 @@ public:
       return;
     }
       
-    
     if ( _queue.size() != 1 )
     {
       // Проверить наличие коннектов. Если есть то fail
@@ -173,8 +130,6 @@ public:
 
 private:
   
-  // bool _recursive_flag = false;
-
   static void deadline_( 
     std::shared_ptr<self> pthis,
     size_t client_id, 
@@ -295,8 +250,10 @@ private:
       std::lock_guard<mutex_type> lk(pthis->_mutex); 
 
       if ( pthis->_wait_call_id != call_id )
+      {
+        ++pthis->_orphan_count;
         return;
-        
+      }
       pthis->result_ready_();
     }
       
@@ -325,45 +282,6 @@ private:
         std::forward<Args>(args)...
       ) );
     };
-
-      /*
-      pthis->_io_service.post([pthis, presp, call_id, callback]()
-      {
-        std::lock_guard<mutex_type> lk(pthis->_mutex); 
-
-        if ( pthis->_wait_call_id != call_id )
-          return;
-        
-        pthis->result_ready_();
-      }
-      
-      if ( callback!=nullptr )
-        callback( std::move(resp), std::forward<Args>(args)... );
-      });
-      */
-      /*
-      {
-        std::lock_guard<mutex_type> lk(pthis->_mutex); 
-
-        if ( pthis->_wait_call_id != call_id )
-          return;
-        
-        if ( pthis->_recursive_flag )
-        {
-          pthis->_recursive_flag = false;
-        }
-        else
-        {
-          pthis->result_ready_();
-        }
-      }
-      
-      if ( callback!=nullptr )
-        callback( std::move(resp), std::forward<Args>(args)... );
-
-      return;
-    };
-    */
   }
   
   void pop_()
@@ -371,42 +289,25 @@ private:
     _queue.pop();
     _wait_client_id = null_id;
     _wait_call_id = 0;
-    //_time_point = std::chrono::milliseconds(0);
   }
 
   int process_queue_()
   {
     int result = 0;
-    if ( !_queue.empty() )
+    while ( !_queue.empty() )
     {
       _queue.front()();
       ++result;
+      if ( super::_conf.mode == provider_mode::sequenced )
+        break;
     }
     return result;
   }
-
-  /*
-  void check_timeout_()
-  {
-    if ( super::_conf.timeout_ms!=0 && !_queue.empty())
-    {
-      time_point_t now = clock_t::now();
-    
-      if ( super::_conf.timeout_ms <= std::chrono::duration_cast < std::chrono::milliseconds>( now - _time_point ).count() )
-      {
-        ++_drop_count;
-        this->pop_();
-        DAEMON_LOG_WARNING("Сброс ожидания запроса по timeout");
-      }
-    }
-  }
-  */
 
 private:
   ::wfc::io_service& _io_service;
   ::wfc::io_service::work _io_work;
   ::boost::asio::deadline_timer _deadline_timer;
- // time_point_t _time_point;
   size_t _wait_client_id;
   size_t _wait_call_id;
   size_t _call_id_counter;
@@ -418,9 +319,6 @@ private:
   size_t _orphan_count;
   // сброшенные по timeout
   size_t _drop_count;
-
-  //bool _delayed_pop;
-  // std::atomic<size_t> _lock_counter;
 };
 
 }}
