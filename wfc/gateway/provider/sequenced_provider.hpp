@@ -196,45 +196,22 @@ public:
       auto result = f();
       auto itr = _callclipost.find(result.second);
       if ( itr != _callclipost.end() )
-        std::get<1>(itr->second) = f;
-      else
       {
-        std::cout << "wait limit! " <<  super::_conf.wait_limit << std::endl;
-        std::cout << "_clicall.size() " <<  _clicall.size() << std::endl;
-        //abort();
-        _queue.push_back( f );
+        std::get<1>(itr->second) = f;
+        return;
       }
-
     }
-    else if ( _queue.size() < super::_conf.queue_limit )
+    
+    if ( _queue.size() < super::_conf.queue_limit )
     {
       _queue.push_back( f );
     }
     else
     {
-      /*
-      std::cout << "-drop-2- " << super::_conf.wait_limit << " " << super::_conf.queue_limit << std::endl;
-      std::cout << "-drop-3- " << _clicall.size() << " " << _queue.size() << std::endl;
-      */
       ++_drop_count;
-      // Потерянный вызов (TODO warning в LOG)
+      DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен queue_limit=" << super::_conf.queue_limit 
+                         << ". Всего потеряно drop_count=" << this->_drop_count )
     }
-    /*
-    _queue.push( f );
-    
-    if ( _wait_client_id != null_id )
-    {
-      return;
-    }
-      
-    if ( _queue.size() != 1 )
-    {
-      // Проверить наличие коннектов. Если есть то fail
-      return;
-    }
-    
-    f();
-    */
   }
 
 private:
