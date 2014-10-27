@@ -134,6 +134,8 @@ struct provider_counters
   int orphan_count = -1;
   // размер очереди
   int queue_size = -1;
+  // размер очереди
+  int wait_count = -1;
 };
 
 
@@ -578,6 +580,7 @@ public:
       pc.drop_count = _provider->get_sequenced()->drop_count();
       pc.orphan_count = _provider->get_sequenced()->orphan_count();
       pc.queue_size = _provider->get_sequenced()->queue_size();
+      pc.wait_count = _provider->get_sequenced()->wait_count();
       
     }
       
@@ -664,6 +667,7 @@ void sequence_check(const toster_config& conf, const source_counters& sc, const 
   std::cout << "pc.drop_count=" <<  pc.drop_count <<  std::endl;
   std::cout << "pc.orphan_count=" <<  pc.orphan_count <<  std::endl;
   std::cout << "pc.queue_size=" << pc.queue_size <<  std::endl;
+  std::cout << "pc.wait_count=" << pc.wait_count <<  std::endl;
   simple_check(conf, sc, rc, pc);
 }
 
