@@ -47,7 +47,15 @@ struct message_json
         json::member<n_lifetime, message, time_t, &message::lifetime >,
         json::member<n_cursor, message, cursor_t, &message::cursor >,
         json::member<n_identity, message, identity_t, &message::identity >,
-        json::member<n_key, message, key_t, &message::key, json::raw_value<key_t> >,
+        json::member<
+          n_key,
+          message,
+          key_ptr,
+          &message::key,
+          json::pointer<
+            key_ptr,
+            json::raw_value<key_t> >
+        >,
         json::member<
           n_content, 
           message, 
