@@ -47,12 +47,19 @@ public:
     // , _wait_client_id(null_id)
     // , _wait_call_id(0)
     , _call_id_counter(0)
+    , _post_count(0)
     , _recall_count(0)
     , _orphan_count(0)
     , _drop_count(0)
   {
   }
   
+  size_t post_count() const 
+  {
+    ::wfc::read_lock<mutex_type> lk( super::_mutex );
+    return _post_count;
+  }
+
   size_t orphan_count() const 
   {
     ::wfc::read_lock<mutex_type> lk( super::_mutex );
@@ -190,6 +197,13 @@ public:
       auto itr = _callclipost.find(result.second);
       if ( itr != _callclipost.end() )
         std::get<1>(itr->second) = f;
+      else
+      {
+        std::cout << "wait limit! " <<  super::_conf.wait_limit << std::endl;
+        std::cout << "_clicall.size() " <<  _clicall.size() << std::endl;
+        //abort();
+        _queue.push_back( f );
+      }
 
     }
     else if ( _queue.size() < super::_conf.queue_limit )
@@ -198,8 +212,10 @@ public:
     }
     else
     {
+      /*
       std::cout << "-drop-2- " << super::_conf.wait_limit << " " << super::_conf.queue_limit << std::endl;
       std::cout << "-drop-3- " << _clicall.size() << " " << _queue.size() << std::endl;
+      */
       ++_drop_count;
       // Потерянный вызов (TODO warning в LOG)
     }
@@ -311,8 +327,9 @@ private:
           ) );
         }
         std::cout << "{{{" << std::endl;
+        ++(pthis->_post_count);
         (cli.get()->*mem_ptr)( std::move(req_for_send), std::move(callback), std::forward<Args>(args)... );
-        std::cout << "}}}" << std::endl;
+        std::cout << "}}} " << pthis->_post_count << std::endl;
       } 
       catch ( ... )
       {
@@ -322,6 +339,10 @@ private:
       }
       //pthis->_mutex.lock();
       //ready = true;
+    }
+    else
+    {
+      std::cout << "FUCK" << std::endl;
     }
     return result;
     
@@ -535,6 +556,7 @@ private:
   clicall_set _clicall;
   delayed_queue _queue;
   
+  size_t _post_count;
   // Повторные вызовы
   size_t _recall_count;
   // Потерянные вызовы
