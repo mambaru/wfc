@@ -1,7 +1,7 @@
 #pragma once
 
-#include <wfc/gateway/provider/provider_base.hpp>
-#include <wfc/gateway/provider_config.hpp>
+#include <wfc/provider/basic_provider.hpp>
+#include <wfc/provider/provider_config.hpp>
 #include <wfc/memory.hpp>
 #include <wfc/logger.hpp>
 #include <wfc/io_service.hpp>
@@ -12,14 +12,14 @@
 #include <map>
 #include <set>
 
-namespace wfc{ namespace gateway{ 
+namespace wfc{ namespace provider{ 
 
 template<typename Itf>  
-class sequenced_provider
-  : public basic_provider<Itf, sequenced_provider, std::recursive_mutex>
+class provider
+  : public basic_provider<Itf, provider, std::recursive_mutex>
 {
-  typedef sequenced_provider<Itf> self;
-  typedef basic_provider<Itf, sequenced_provider, std::recursive_mutex> super;
+  typedef provider<Itf> self;
+  typedef basic_provider<Itf, provider, std::recursive_mutex> super;
   typedef std::chrono::high_resolution_clock clock_t;
   typedef clock_t::time_point time_point_t;
 
@@ -39,13 +39,10 @@ public:
   typedef std::set<clicall_pair> clicall_set;
   typedef std::deque< post_function > delayed_queue;
 
-  sequenced_provider( ::wfc::io_service& io, const provider_config& conf)
+  provider( ::wfc::io_service& io, const provider_config& conf)
     : super(conf)
     , _io_service(io)
     , _io_work(io)
-    //, _deadline_timer(io)
-    // , _wait_client_id(null_id)
-    // , _wait_call_id(0)
     , _call_id_counter(0)
     , _post_count(0)
     , _recall_count(0)
@@ -92,14 +89,12 @@ public:
     return _clicall.size();
   }
 
-  
   virtual void startup(size_t client_id, std::shared_ptr<interface_type> ptr )
   {
     std::lock_guard<mutex_type> lk( super::_mutex );
     super::startup_(client_id, ptr);
     this->process_queue_();
   }
-
 
   virtual void shutdown(size_t client_id)
   {
@@ -116,6 +111,7 @@ public:
       auto itr2 = _callclipost.find( itr->second );
       if ( itr2 != _callclipost.end() )
       {
+        // Дупустимо переполнение очереди на wait_limit
         _queue.push_front( std::get<1>(itr2->second) );
         _callclipost.erase(itr2);
         _clicall.erase(itr++);
@@ -127,12 +123,22 @@ public:
       }
 
       DAEMON_LOG_WARNING( 
-        "provider(mode=sequenced): закрытие соединения при ожидании подверждения удаленного вызова. "
+        "provider: закрытие соединения при ожидании подверждения удаленного вызова. "
         "Информация о выполнении вызова отсутствует.")
       ++_recall_count; // !!!Счетчик будующих повторных вызовов
     }
-    
     this->process_queue_();
+  }
+  
+  template<typename R, typename Resp, typename ... Args> 
+  void callback_null_(std::function<R(Resp, Args ...)> callback)
+  {
+    std::cout << "callback_null_"  << std::endl;
+    if ( callback!=nullptr)
+    {
+      std::cout << "callback_null_!!!"  << std::endl;
+      callback( nullptr, Args()... );
+    }
   }
   
   template<typename Req, typename Callback, typename... Args>
@@ -143,20 +149,24 @@ public:
     Args... args
   )
   {
-    std::lock_guard<mutex_type> lk( super::_mutex );
-    
     if ( !super::_conf.enabled )
+    {
+      callback_null_( std::move(callback) );
       return;
+    }
+
+    std::lock_guard<mutex_type> lk( super::_mutex );
     
     if ( super::_conf.wait_limit==0 && super::_conf.queue_limit==0 )
     {
       // Простой режим
-      if ( auto cli = super::get() )
+      if ( auto cli = super::get_() )
       {
         (cli.get()->*mem_ptr)( std::move(req), std::move(callback), std::forward<Args>(args)... );
       }
       else
       {
+        callback_null_( std::move(callback) );
         ++_drop_count;
       }
       return;
@@ -182,6 +192,7 @@ public:
     }
     else
     {
+      callback_null_(callback);
       ++_drop_count;
       DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен queue_limit=" << super::_conf.queue_limit 
                          << ". Всего потеряно drop_count=" << this->_drop_count )
@@ -190,19 +201,27 @@ public:
 
 private:
   
+  template<typename Callback>
   static void deadline_( 
     std::shared_ptr<self> pthis,
     size_t client_id, 
-    size_t call_id)
+    size_t call_id,
+    Callback callback
+  )
   {
     std::lock_guard<mutex_type> lk( pthis->_mutex );
+    
+    std::cout << "deadline_ " << call_id << " " << pthis->_callclipost.size() << std::endl;
+    if ( pthis->_callclipost.size() )
+    {
+      auto temp = *(pthis->_callclipost.begin());
+      std::cout << temp.first << " " << std::get<0>(temp.second) << std::endl;
+    }
     auto call_itr = pthis->_callclipost.find(call_id);
     if ( call_itr == pthis->_callclipost.end() )
-    {
-      // был shutdown и инфу удалили
       return;
-    }
     
+    std::cout << "deadline_ " << call_id << std::endl;
     auto cli_itr = pthis->_clicall.find( { std::get<0>(call_itr->second), call_itr->first});
     if ( cli_itr == pthis->_clicall.end() )
     {
@@ -211,14 +230,18 @@ private:
 
     if ( client_id != cli_itr->first )
     {
+      std::cout << "?? deadline_ " << call_id << std::endl;
       // abort() ???
       return;
     }
     
+    pthis->callback_null_(callback);
     // TODO: в лог
     pthis->_callclipost.erase(call_itr);
     pthis->_clicall.erase(cli_itr);
     ++pthis->_drop_count;
+    
+    pthis->process_queue_();
 
     
   }
@@ -228,14 +251,16 @@ private:
   template<typename Req, typename Callback, typename... Args>
   static clicall_pair send_( 
     std::shared_ptr<self> pthis,
-    size_t call_id,
+    //size_t call_id,
     void (interface_type::*mem_ptr)(Req, Callback, Args... args), 
     std::shared_ptr<Req> req, 
     Callback callback, 
     Args... args
   )
   {
-    
+    size_t call_id = ++pthis->_call_id_counter;
+    std::cout << "send_ " << call_id  << std::endl;
+    auto wcallback = pthis->wrap_callback_(call_id, callback);
     // Здесь инкремент call_id
     // TODO: проверку что режим соблюдаеться
     clicall_pair result = {pthis->null_id, call_id};
@@ -260,14 +285,15 @@ private:
           
           timer->expires_from_now(boost::posix_time::milliseconds(pthis->_conf.wait_timeout_ms));
           timer->async_wait( std::bind(
-              &sequenced_provider<Itf>::deadline_, 
+              &provider<Itf>::deadline_<Callback>, 
               pthis, 
               result.first, 
-              call_id
+              call_id,
+              callback // <- не обернутый callback
           ) );
         }
         ++(pthis->_post_count);
-        (cli.get()->*mem_ptr)( std::move(req_for_send), std::move(callback), std::forward<Args>(args)... );
+        (cli.get()->*mem_ptr)( std::move(req_for_send), std::move(wcallback), std::forward<Args>(args)... );
       } 
       catch ( ... )
       {
@@ -294,17 +320,18 @@ private:
   {
     auto preq = std::make_shared<Req>( std::move(req) );
     auto pthis = super::shared_from_this();
-    size_t call_id = ++this->_call_id_counter;
+    //size_t call_id = ++this->_call_id_counter;
     
     //TODO: после отправки обновить мапу функцией отправки!
     
     return std::bind(
-      &sequenced_provider<Itf>::send_<Req, Callback, Args...>,
+      &provider<Itf>::send_<Req, Callback, Args...>,
       pthis,
-      call_id,
+      //call_id,
       mem_ptr, 
       preq, 
-      this->wrap_callback_(call_id, callback), 
+      callback,
+      //this->wrap_callback_(call_id, callback), 
       std::forward<Args>(args)...
     );
   }
@@ -326,10 +353,12 @@ private:
   {
     {
       std::lock_guard<mutex_type> lk(pthis->_mutex); 
+      std::cout << "mt_confirm_ {" << call_id  << std::endl;
       auto call_itr = pthis->_callclipost.find(call_id);
       if ( call_itr == pthis->_callclipost.end() )
       {
         ++pthis->_orphan_count;
+        std::cout << "}mt_confirm_" << call_id  << std::endl;
         return;
       }
       
@@ -341,10 +370,11 @@ private:
       pthis->_callclipost.erase(call_itr);
       pthis->_clicall.erase({std::get<0>(call_itr->second),call_id});
       
-      //std::cout << "confirm!" << std::endl;
-      // TODO: stop timer, и в отдельную функцию
       
+      // TODO: stop timer, и в отдельную функцию
+      std::cout << "mt_confirm_ {{" << call_id  << std::endl;
       pthis->result_ready_();
+      std::cout << "}}mt_confirm_" << call_id  << std::endl;
       /*
       if ( pthis->_wait_call_id != call_id )
       {
@@ -357,6 +387,7 @@ private:
       
     if ( callback!=nullptr )
       callback( std::move(*resp), std::forward<Args>(args)... );
+    std::cout << "}mt_confirm_" << call_id  << std::endl;
   }
 
   
@@ -364,10 +395,13 @@ private:
   std::function<void(Resp, Args...)>
   wrap_callback_(size_t call_id, std::function<void(Resp, Args...)> callback) 
   {
+    if ( super::_conf.mode < provider_mode::insured )
+      return std::move(callback);
     auto pthis = this->shared_from_this();
-    auto callback_fun = &sequenced_provider<Itf>::mt_confirm_<Resp, Args...>;
+    auto callback_fun = &provider<Itf>::mt_confirm_<Resp, Args...>;
     return [callback_fun, pthis, call_id, callback](Resp resp, Args... args)
     {
+      std::cout << "io_serice::post..." << std::endl;
       auto presp = std::make_shared<Resp>(std::move(resp) );
       pthis->_io_service.post( std::bind(
         callback_fun,
@@ -395,6 +429,7 @@ private:
     int count = 0;
     while ( !_queue.empty() )
     {
+      
       if ( _callclipost.size() >= super::_conf.wait_limit )
         break;
 
@@ -407,7 +442,9 @@ private:
       
       auto result = f();
       if ( result.first == null_id )
+      {
         break;
+      }
       _queue.pop_front();
       auto itr = _callclipost.find(result.second);
       if ( itr != _callclipost.end() )

@@ -3,7 +3,7 @@
 
 #include <unistd.h>
 #include <algorithm>
-#include <wfc/gateway/provider/provider.hpp>
+#include <wfc/provider/provider.hpp>
 #include <wfc/memory.hpp>
 #include <wfc/thread/rwlock.hpp>
 
@@ -94,6 +94,9 @@ struct source_counters
     , response_counter1(0)
     , response_counter2(0)
     , response_counter3(0)
+    , null_response_counter1(0)
+    , null_response_counter2(0)
+    , null_response_counter3(0)
   {}
   
   source_counters(const source_counters& other)
@@ -103,6 +106,9 @@ struct source_counters
     , response_counter1(other.response_counter1.load())
     , response_counter2(other.response_counter2.load())
     , response_counter3(other.response_counter3.load())
+    , null_response_counter1(other.null_response_counter1.load())
+    , null_response_counter2(other.null_response_counter2.load())
+    , null_response_counter3(other.null_response_counter3.load())
   {}
 
   void operator += (const source_counters& other)
@@ -113,6 +119,9 @@ struct source_counters
     response_counter1 += other.response_counter1.load();
     response_counter2 += other.response_counter2.load();
     response_counter3 += other.response_counter3.load();
+    null_response_counter1 += other.null_response_counter1.load();
+    null_response_counter2 += other.null_response_counter2.load();
+    null_response_counter3 += other.null_response_counter3.load();
   }
 
   
@@ -122,6 +131,9 @@ struct source_counters
   std::atomic<int> response_counter1;
   std::atomic<int> response_counter2;
   std::atomic<int> response_counter3;
+  std::atomic<int> null_response_counter1;
+  std::atomic<int> null_response_counter2;
+  std::atomic<int> null_response_counter3;
 };
 
 struct provider_counters
@@ -175,15 +187,20 @@ public:
       
       delayed_func f = [this, resp, callback]()
       {
+        std::cout << "response-> " << (callback==nullptr)  << std::endl;
         ++(this->callback_counter1);
-        callback( std::make_unique<response>(resp) );
+        if ( callback )
+          callback( std::make_unique<response>(resp) );
       };
       
       if (async_mode) 
       {
         push_(f);
       }
-      else f();
+      else 
+      {
+        f();
+      }
     }
     catch(...)
     {
@@ -206,7 +223,8 @@ public:
       {
         
         ++(this->callback_counter2);
-        callback( std::make_unique<response>(resp), 33, 44 );
+        if ( callback )
+          callback( std::make_unique<response>(resp), 33, 44 );
       };
       
       if (async_mode) push_(f);
@@ -232,7 +250,8 @@ public:
       delayed_func f = [this, resp, callback, p1, p2]()
       {
         ++(this->callback_counter3);
-        callback( std::make_unique<response>(resp), p1, p2 );
+        if ( callback )
+          callback( std::make_unique<response>(resp), p1, p2 );
       };
       
       if (async_mode) push_(f);
@@ -264,6 +283,7 @@ public:
       f = queue.front();
       queue.pop();
     }
+    std::cout << "callback now" << std::endl;
     f();
     // std::cout << "}test::callback_one()" << std::endl;
     return true;
@@ -290,9 +310,9 @@ public:
 /// отправитель
 /// 
 
-typedef ::wfc::gateway::provider_config provider_config;
-typedef ::wfc::gateway::provider_mode provider_mode;
-typedef ::wfc::gateway::provider<ireceiver>  provider_type;
+typedef ::wfc::provider::provider_config provider_config;
+typedef ::wfc::provider::provider_mode provider_mode;
+typedef ::wfc::provider::provider<ireceiver>  provider_type;
 typedef std::shared_ptr<provider_type>  provider_ptr;
 
 
@@ -309,6 +329,12 @@ public:
     req.src_id = 1;
     ireceiver::callback1 callback = [this, req](response_ptr resp)
     {
+      std::cout << "send-response1 " << (resp == nullptr) << " " << this->response_counter1<< std::endl;
+      if ( resp == nullptr )
+      {
+        ++(this->null_response_counter1);
+        return;
+      }
       ++(this->response_counter1);
       this->check_result( req, *resp);
     };
@@ -322,6 +348,11 @@ public:
     req.src_id = 2;
     ireceiver::callback2 callback = [this, req](response_ptr resp, int p1, int p2)
     {
+      if ( resp == nullptr )
+      {
+        ++(this->null_response_counter2);
+        return;
+      }
       ++(this->response_counter2);
       this->check_result( req, *resp);
       if ( p1 != 33 )
@@ -339,6 +370,12 @@ public:
     req.src_id = 3;
     ireceiver::callback3 callback = [this, req](response_ptr resp, int p1, std::string p2)
     {
+      if ( resp == nullptr )
+      {
+        ++(this->null_response_counter3);
+        return;
+      }
+
       ++(this->response_counter3);
       this->check_result( req, *resp);
       if ( p1 != 42 )
@@ -351,7 +388,7 @@ public:
 
   void send_all(int mpr)
   {
-    //std::cout << "send_all-1" << std::endl;
+    //std::cout << "send_all-" << mpr << std::endl;
     if ( mpr > 0 )
       this->send_method1();
     //std::cout << "send_all-2" << std::endl;
@@ -453,11 +490,11 @@ public:
             //std::cout << "send... " << i << " ok"<< std::endl;
             if ( this->conf.request_timeout_ms > 0 )
             {
-              usleep(this->conf.request_timeout_ms);
+              usleep(this->conf.request_timeout_ms*1000);
             }
           }
           --this->send_ready;
-          //std::cout << "send... ready" << std::endl;
+          std::cout << "send... ready" << std::endl;
         }));
       }
     }
@@ -480,7 +517,9 @@ public:
           {
             if ( this->conf.callback_timeout_ms > 0 )
             {
-              usleep(this->conf.callback_timeout_ms);
+              
+              usleep(this->conf.callback_timeout_ms*1000);
+              
             }
           }
         }
@@ -499,9 +538,9 @@ public:
           while ( !this->ready() )
           {
             this->_provider->shutdown(client_id);
-            usleep(this->conf.shutdown_time_ms);
+            usleep(this->conf.shutdown_time_ms*1000);
             this->_provider->startup(client_id, dst);
-            usleep(this->conf.shutdown_timeout_ms);
+            usleep(this->conf.shutdown_timeout_ms*1000);
           }
         }));
       }
@@ -516,7 +555,7 @@ public:
     for ( auto& th : _threads)
     {
       th.join();
-      //std::cout << "th.join()" << std::endl;
+      std::cout << "th.join()" << std::endl;
     }
       /*while (1)
     {
@@ -524,12 +563,14 @@ public:
       sleep(1);
     };*/
     this->io_service.stop();
+    std::cout << "last th.join()" << std::endl;
     th.join();  
+    std::cout << "th ready" << std::endl;
   }
   
   bool ready()
   {
-    if ( _provider->get_sequenced()->queue_size() != 0 )
+    if ( _provider->queue_size() != 0 )
     {
       // TODO: сделат общмй метод queue_size
       //std::cout <<  "get_sequenced()->queue_size() " <<  _provider->get_sequenced()->queue_size() <<  std::endl;
@@ -567,22 +608,22 @@ public:
   provider_counters get_provider_counters() const
   {
     provider_counters pc;
-    if ( conf.provider.mode == provider_mode::simple)
+    /*if ( conf.provider.mode == provider_mode::simple)
     {
       pc.recall_count = 0;
-      pc.drop_count = _provider->get_simple()->drop_count();
+      pc.drop_count = _provider->drop_count();
       pc.orphan_count = 0;
       pc.queue_size = 0;
     }
     else if ( conf.provider.mode == provider_mode::sequenced)
-    {
-      pc.recall_count = _provider->get_sequenced()->recall_count();
-      pc.drop_count = _provider->get_sequenced()->drop_count();
-      pc.orphan_count = _provider->get_sequenced()->orphan_count();
-      pc.queue_size = _provider->get_sequenced()->queue_size();
-      pc.wait_count = _provider->get_sequenced()->wait_count();
+    {*/
+      pc.recall_count = _provider->recall_count();
+      pc.drop_count = _provider->drop_count();
+      pc.orphan_count = _provider->orphan_count();
+      pc.queue_size = _provider->queue_size();
+      pc.wait_count = _provider->wait_count();
       
-    }
+    //}
       
     return pc;
   }
@@ -653,12 +694,21 @@ void simple_check(const toster_config& conf, const source_counters& sc, const re
   check_basic(conf, sc, rc);
   auto send_total = sc.send_counter1 + sc.send_counter2 + sc.send_counter3;
   auto  response_total = sc.response_counter1 + sc.response_counter2 + sc.response_counter3;
+  auto  null_response_total = sc.null_response_counter1 + sc.null_response_counter2 + sc.null_response_counter3;
 
   std::cout << "send_total = " <<  send_total <<  std::endl;
   std::cout << "response_total=" <<  response_total <<  std::endl;
+  std::cout << "pc.drop_count=" <<  pc.drop_count <<  std::endl;
 
-  if ( send_total != pc.drop_count + response_total)
+  if ( send_total != response_total)
     abort();
+  if ( pc.drop_count != null_response_total)
+    abort();
+
+  // Все профукали, надо поднастроить
+  if ( response_total == null_response_total)
+    abort();
+
 }
 
 void sequence_check(const toster_config& conf, const source_counters& sc, const receiver_counters& rc, const provider_counters& pc)
@@ -677,6 +727,7 @@ void sequence_check(const toster_config& conf, const source_counters& sc, const 
 
 void default_test()
 {
+  std::cout << "default_test()" << std::endl;
   toster_config conf;
   toster t(conf);
   t.run();
@@ -717,9 +768,6 @@ toster_config simple_config()
   conf.provider.mode = provider_mode::simple;
   return conf;
 }
-
-
-
 
 // Синхронный режим, несколько получателей и отправителей
 // без задержек запросов
@@ -825,6 +873,132 @@ void simple_test()
   simple_test4();
 }
 
+
+toster_config insured_config()
+{
+  auto conf = default_config();
+  conf.provider.mode = provider_mode::insured;
+  conf.provider.wait_limit = 1;
+  conf.provider.wait_warning = 1;
+  conf.provider.queue_limit = 1000000; // 0 - 
+  conf.provider.queue_warning = 1000;
+  
+  return conf;
+}
+
+
+// Синхронный режим, несколько получателей и отправителей
+// без задержек запросов
+// без shutdown
+void insured_test1()
+{
+  std::cout << "insured_test1()" << std::endl;
+  auto conf = insured_config();
+  toster t(conf);
+  t.run();
+  auto sc = t.get_source_counters();
+  auto rc = t.get_receiver_counters();
+  auto pc = t.get_provider_counters();
+  if ( pc.drop_count != 0 )
+  {
+    std::cout << "pc.drop_count=" << pc.drop_count << std::endl;
+    abort();
+  }
+
+  sequence_check(conf, sc, rc, pc);
+}
+
+// Acинхронный режим, несколько получателей и отправителей
+// без задержек запросов
+// без shutdown
+void insured_test2()
+{
+  std::cout << "insured_test2()" << std::endl;
+  auto conf = insured_config();
+  conf.callback_timeout_ms = 1000;
+  toster t(conf);
+  t.run();
+  auto sc = t.get_source_counters();
+  auto rc = t.get_receiver_counters();
+  auto pc = t.get_provider_counters();
+  if ( pc.drop_count != 0 )
+  {
+    std::cout << "pc.drop_count=" << pc.drop_count << std::endl;
+    abort();
+  }
+
+  sequence_check(conf, sc, rc, pc);
+}
+
+// cинхронный режим, несколько получателей и отправителей
+// с задержкой запросов
+// с shutdown
+void insured_test3()
+{
+  std::cout << "insured_test3()" << std::endl;
+  auto conf = insured_config(); 
+  conf.provider.mode = provider_mode::insured;
+  conf.provider.wait_limit = 32;
+  conf.provider.wait_timeout_ms = 30000;
+  conf.request_timeout_ms = 100;
+  conf.shutdown_timeout_ms = 10000;
+  conf.shutdown_time_ms = 50; // сколько быть в shutdown
+  toster t(conf);
+  t.run();
+  auto sc = t.get_source_counters();
+  auto rc = t.get_receiver_counters();
+  auto pc = t.get_provider_counters();
+
+  std::cout << "pc.drop_count=" << pc.drop_count << std::endl;
+  std::cout << "pc.recall_count=" << pc.recall_count << std::endl;
+
+  
+  if ( pc.recall_count == 0 )
+  {
+    // Плохо настроили, должны быть повторные вызовы
+    abort();
+  }
+  sequence_check(conf, sc, rc, pc);
+}
+
+
+// Acинхронный режим, несколько получателей и отправителей
+// с задержкой запросов
+// с shutdown
+void insured_test4()
+{
+  std::cout << "insured_test4()" << std::endl;
+  auto conf = insured_config();
+  conf.provider.wait_timeout_ms = 1000;
+  conf.callback_timeout_ms = 100;
+  conf.request_timeout_ms = 100;
+  conf.shutdown_timeout_ms = 10000;
+  conf.shutdown_time_ms = 1000; // сколько быть в shutdown
+  toster t(conf);
+  t.run();
+  auto sc = t.get_source_counters();
+  auto rc = t.get_receiver_counters();
+  auto pc = t.get_provider_counters();
+  if ( pc.drop_count == 0 )
+  {
+    // Плохо настроили, должны быть потери
+    std::cout << "pc.drop_count=" << pc.drop_count << std::endl;
+    abort();
+  }
+  sequence_check(conf, sc, rc, pc);
+}
+
+
+
+void insured_test()
+{
+  std::cout << "insured_test()" << std::endl;
+  insured_test1();
+  insured_test2();
+  insured_test3();
+  insured_test4();
+}
+
 /// 
 /// Тесты: mode == sequence
 ///
@@ -892,14 +1066,6 @@ void sequence_test3()
 {
   std::cout << "sequence_test3()" << std::endl;
   auto conf = sequence_config(); 
-  conf.src_cout = 1; 
-  conf.dst_cout = 1;
-  conf.method_per_request = 1;
-  conf.requester_threads_per_dst  = 1;
-  conf.callback_threads  = 1;
-
-  
-  
   conf.provider.wait_timeout_ms = 10000;
   conf.request_timeout_ms = 100;
   conf.shutdown_timeout_ms = 10000;
@@ -913,17 +1079,12 @@ void sequence_test3()
   std::cout << "pc.drop_count=" << pc.drop_count << std::endl;
   std::cout << "pc.recall_count=" << pc.recall_count << std::endl;
 
-  /*
-  if ( pc.drop_count == 0 )
-  {
-    // Плохо настроили, должны быть потери
-    abort();
-  }
   
   if ( pc.recall_count == 0 )
   {
+    // Плохо настроили, должны быть повторные вызовы
     abort();
-  }*/
+  }
   sequence_check(conf, sc, rc, pc);
 }
 
@@ -935,22 +1096,25 @@ void sequence_test4()
 {
   std::cout << "sequence_test4()" << std::endl;
   auto conf = sequence_config();
-  conf.provider.wait_timeout_ms = 1000;
-  conf.callback_timeout_ms = 100;
-  conf.request_timeout_ms = 100;
-  conf.shutdown_timeout_ms = 10000;
-  conf.shutdown_time_ms = 500; // сколько быть в shutdown
+  //conf.request_per_thread = 1;
+  //conf.method_per_request = 1;
+  
+  conf.provider.wait_timeout_ms = 50;
+  conf.callback_timeout_ms = 55;
+  conf.request_timeout_ms = 20;
+  //conf.shutdown_timeout_ms = 10000;
+  //conf.shutdown_time_ms = 10000; // сколько быть в shutdown
   toster t(conf);
   t.run();
   auto sc = t.get_source_counters();
   auto rc = t.get_receiver_counters();
   auto pc = t.get_provider_counters();
-  /*if ( pc.drop_count == 0 )
+  if ( pc.drop_count == 0 )
   {
     // Плохо настроили, должны быть потери
     std::cout << "pc.drop_count=" << pc.drop_count << std::endl;
-    abort();
-  }*/
+    //abort();
+  }
   sequence_check(conf, sc, rc, pc);
 }
 
@@ -961,14 +1125,15 @@ void sequence_test()
   std::cout << "sequence_test()" << std::endl;
   //sequence_test1();
   //sequence_test2();
-  sequence_test3();
- // sequence_test4();
+  //sequence_test3();
+  sequence_test4();
 }
 
 int main()
 {
-  // default_test();
-  // simple_test();
+  //default_test();
+  //simple_test();
   sequence_test();
+  //insured_test();
   return 0;
 }
