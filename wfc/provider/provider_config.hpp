@@ -3,6 +3,10 @@
 #include <cstddef>
 #include <ctime>
 
+#define WFC_PROVIDER_DEFAULT_QUEUE_LIMIT   1048576
+#define WFC_PROVIDER_DEFAULT_QUEUE_WARNING 1024
+#define WFC_PROVIDER_DEFAULT_MAX_WAIT 128
+
 namespace wfc{ namespace provider{ 
 
 enum class provider_mode 
@@ -26,13 +30,12 @@ struct provider_config
 {
   bool enabled = true;
   provider_mode mode = provider_mode::_auto_; // TODO: в конфиг
-  size_t wait_limit = 1;    // 1 - sequenced моде, 0 - надежно без гаранитии доставки
-  size_t queue_limit = 1024; // 0 - 
+  size_t max_waiting = WFC_PROVIDER_DEFAULT_MAX_WAIT;    // 1 - sequenced моде, 0 - надежно без гаранитии доставки
+  size_t queue_limit = WFC_PROVIDER_DEFAULT_QUEUE_LIMIT; // 0 - 
 
   time_t wait_timeout_ms = 0;                        // TODO: в конфиг.  после timeout (callback(null) для всех)
 
-  size_t wait_warning = 0;
-  size_t queue_warning = 1024;
+  size_t queue_warning = WFC_PROVIDER_DEFAULT_QUEUE_WARNING;
 };
 
 }}
