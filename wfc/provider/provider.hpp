@@ -133,10 +133,8 @@ public:
   template<typename R, typename Resp, typename ... Args> 
   void callback_null_(std::function<R(Resp, Args ...)> callback)
   {
-    std::cout << "callback_null_"  << std::endl;
     if ( callback!=nullptr)
     {
-      std::cout << "callback_null_!!!"  << std::endl;
       callback( nullptr, Args()... );
     }
   }
@@ -157,7 +155,7 @@ public:
 
     std::lock_guard<mutex_type> lk( super::_mutex );
     
-    if ( super::_conf.wait_limit==0 && super::_conf.queue_limit==0 )
+    if ( super::_conf.max_waiting==0 && super::_conf.queue_limit==0 )
     {
       // Простой режим
       if ( auto cli = super::get_() )
@@ -175,7 +173,7 @@ public:
     // Далее нужна обертка
     post_function f = this->wrap_(mem_ptr, std::move(req), std::move(callback), std::forward<Args>(args)...); 
     
-    if ( _clicall.size() < super::_conf.wait_limit  )
+    if ( _clicall.size() < super::_conf.max_waiting  )
     {
       auto result = f();
       auto itr = _callclipost.find(result.second);
@@ -211,17 +209,10 @@ private:
   {
     std::lock_guard<mutex_type> lk( pthis->_mutex );
     
-    std::cout << "deadline_ " << call_id << " " << pthis->_callclipost.size() << std::endl;
-    if ( pthis->_callclipost.size() )
-    {
-      auto temp = *(pthis->_callclipost.begin());
-      std::cout << temp.first << " " << std::get<0>(temp.second) << std::endl;
-    }
     auto call_itr = pthis->_callclipost.find(call_id);
     if ( call_itr == pthis->_callclipost.end() )
       return;
     
-    std::cout << "deadline_ " << call_id << std::endl;
     auto cli_itr = pthis->_clicall.find( { std::get<0>(call_itr->second), call_itr->first});
     if ( cli_itr == pthis->_clicall.end() )
     {
@@ -230,8 +221,7 @@ private:
 
     if ( client_id != cli_itr->first )
     {
-      std::cout << "?? deadline_ " << call_id << std::endl;
-      // abort() ???
+      abort();
       return;
     }
     
@@ -259,7 +249,6 @@ private:
   )
   {
     size_t call_id = ++pthis->_call_id_counter;
-    std::cout << "send_ " << call_id  << std::endl;
     auto wcallback = pthis->wrap_callback_(call_id, callback);
     // Здесь инкремент call_id
     // TODO: проверку что режим соблюдаеться
@@ -353,12 +342,10 @@ private:
   {
     {
       std::lock_guard<mutex_type> lk(pthis->_mutex); 
-      std::cout << "mt_confirm_ {" << call_id  << std::endl;
       auto call_itr = pthis->_callclipost.find(call_id);
       if ( call_itr == pthis->_callclipost.end() )
       {
         ++pthis->_orphan_count;
-        std::cout << "}mt_confirm_" << call_id  << std::endl;
         return;
       }
       
@@ -372,9 +359,7 @@ private:
       
       
       // TODO: stop timer, и в отдельную функцию
-      std::cout << "mt_confirm_ {{" << call_id  << std::endl;
       pthis->result_ready_();
-      std::cout << "}}mt_confirm_" << call_id  << std::endl;
       /*
       if ( pthis->_wait_call_id != call_id )
       {
@@ -387,7 +372,6 @@ private:
       
     if ( callback!=nullptr )
       callback( std::move(*resp), std::forward<Args>(args)... );
-    std::cout << "}mt_confirm_" << call_id  << std::endl;
   }
 
   
@@ -401,7 +385,6 @@ private:
     auto callback_fun = &provider<Itf>::mt_confirm_<Resp, Args...>;
     return [callback_fun, pthis, call_id, callback](Resp resp, Args... args)
     {
-      std::cout << "io_serice::post..." << std::endl;
       auto presp = std::make_shared<Resp>(std::move(resp) );
       pthis->_io_service.post( std::bind(
         callback_fun,
@@ -430,7 +413,7 @@ private:
     while ( !_queue.empty() )
     {
       
-      if ( _callclipost.size() >= super::_conf.wait_limit )
+      if ( _callclipost.size() >= super::_conf.max_waiting )
         break;
 
       auto f = _queue.front();
@@ -451,7 +434,7 @@ private:
         std::get<1>(itr->second) = f;
       else
         abort();
-      if ( super::_conf.wait_limit == 0 )
+      if ( super::_conf.max_waiting == 0 )
         continue;
     }
     return count;

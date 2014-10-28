@@ -49,7 +49,7 @@ public:
     switch ( _conf.mode )
     {
       case provider_mode::_auto_: 
-        if ( _conf.wait_limit == 1)
+        if ( _conf.max_waiting == 1)
         {
           _conf.mode = provider_mode::sequenced;
           if ( conf.queue_limit == 0 )
@@ -57,7 +57,7 @@ public:
             _conf.queue_limit = 1024;
           }
         }
-        else if ( _conf.wait_limit == 0)
+        else if ( _conf.max_waiting == 0)
         {
           if ( _conf.queue_limit==0 )
           {
@@ -79,24 +79,24 @@ public:
         break;
       case provider_mode::simple: 
         _conf.queue_limit = 0;
-        _conf.wait_limit = 0;
+        _conf.max_waiting = 0;
         break;
       case provider_mode::connectify: 
         if ( _conf.queue_limit == 0 )
           _conf.queue_limit = 1024;
-        _conf.wait_limit = 0;
+        _conf.max_waiting = 0;
         break;
       case provider_mode::insured:
         if ( _conf.queue_limit == 0 )
           _conf.queue_limit = 1024;
-        if ( _conf.wait_limit == 0)
-          _conf.wait_limit = 1024;
+        if ( _conf.max_waiting == 0)
+          _conf.max_waiting = 1024;
         break;
       case provider_mode::sequenced: 
         if ( _conf.queue_limit == 0 )
           _conf.queue_limit = 1024;
-        if ( _conf.wait_limit != 1 )
-          _conf.wait_limit = 1;
+        if ( _conf.max_waiting != 1 )
+          _conf.max_waiting = 1;
         break;
     }
     // TODO: в лог текущий режим
