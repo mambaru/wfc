@@ -9,7 +9,7 @@ struct global;
 struct istartup
 {
   virtual ~istartup() {}
-  virtual bool startup(int argc, char* argv[] /*std::weak_ptr<global> g*/) = 0;
+  virtual bool startup(int argc, char* argv[]) = 0;
 };
 
 }

@@ -6,7 +6,7 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-message(STATUS "---!---> ${CMAKE_CXX_COMPILER_VERSION}")
+#message(STATUS "---!---> ${CMAKE_CXX_COMPILER_VERSION}")
 
 IF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
     exec_program(
@@ -22,7 +22,6 @@ IF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
     message(STATUS "C++ compiler version: ${gcc_compiler_version} major: ${gcc_major_version} minor: ${gcc_minor_version} number: ${gcc_version_number} [${CMAKE_CXX_COMPILER}]")
 
     SET(CMAKE_CXX_STANDARD    "-std=c++0x")
-    #if ( ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER "4.8.0" )
     if ( NOT ${gcc_version_number} LESS 4008 )
       SET(CMAKE_CXX_STANDARD    "${CMAKE_CXX_STANDARD} -ftemplate-backtrace-limit=0")
     endif()

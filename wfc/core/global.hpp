@@ -36,7 +36,6 @@ struct global
   std::weak_ptr< iconfig >         config;
   std::weak_ptr< logger_registry > loggers;
   std::weak_ptr< module_registry > modules;
-  //std::weak_ptr< ::wfc::io_service > io_service;
   ::wfc::io_service& io_service;
   
   std::weak_ptr< pubsub_registry > pubsubs;
