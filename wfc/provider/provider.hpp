@@ -155,19 +155,20 @@ public:
 
     std::lock_guard<mutex_type> lk( super::_mutex );
     
-    if ( super::_conf.max_waiting==0 && super::_conf.queue_limit==0 )
+    if ( super::_conf.max_waiting==0  )
     {
       // Простой режим
       if ( auto cli = super::get_() )
       {
         (cli.get()->*mem_ptr)( std::move(req), std::move(callback), std::forward<Args>(args)... );
+        return;
       }
-      else
+      else if (super::_conf.queue_limit==0)
       {
         callback_null_( std::move(callback) );
         ++_drop_count;
+        return;
       }
-      return;
     }
 
     // Далее нужна обертка
@@ -250,39 +251,48 @@ private:
   {
     size_t call_id = ++pthis->_call_id_counter;
     auto wcallback = pthis->wrap_callback_(call_id, callback);
-    // Здесь инкремент call_id
-    // TODO: проверку что режим соблюдаеться
     clicall_pair result = {pthis->null_id, call_id};
-    //size_t client_id = null_id;
     if ( auto cli = pthis->get_( result.first ) )
     {
-      /*auto cli_itr =*/ pthis->_clicall.insert({result.first, call_id});
-      auto call_itr = pthis->_callclipost.insert({call_id, clipost{result.first, nullptr, nullptr}}).first;
       std::shared_ptr<deadline_timer> timer;
-      if (pthis->_conf.wait_timeout_ms != 0 )
+      
+      if (pthis->_conf.max_waiting != 0 )
       {
-        timer = std::make_shared<deadline_timer>(pthis->_io_service);
-        std::get<2>(call_itr->second) = timer;
+        pthis->_clicall.insert({result.first, call_id});
+        auto call_itr = pthis->_callclipost.insert({call_id, clipost{result.first, nullptr, nullptr}}).first;
+        
+        if (pthis->_conf.wait_timeout_ms != 0 )
+        {
+          timer = std::make_shared<deadline_timer>(pthis->_io_service);
+          std::get<2>(call_itr->second) = timer;
+        }
       }
-      //pthis->_mutex.unlock();
+      
       try
       {
-        // Копируем запрос, т.к. возможен повторный вызов
-        auto req_for_send = std::make_unique<typename Req::element_type>(**req);
-        if (timer)
+        if (pthis->_conf.max_waiting != 0 )
         {
-          
-          timer->expires_from_now(boost::posix_time::milliseconds(pthis->_conf.wait_timeout_ms));
-          timer->async_wait( std::bind(
-              &provider<Itf>::deadline_<Callback>, 
-              pthis, 
-              result.first, 
-              call_id,
-              callback // <- не обернутый callback
-          ) );
+          // Копируем запрос, т.к. возможен повторный вызов
+          auto req_for_send = std::make_unique<typename Req::element_type>(**req);
+          if (timer)
+          {
+            timer->expires_from_now(boost::posix_time::milliseconds(pthis->_conf.wait_timeout_ms));
+            timer->async_wait( std::bind(
+                &provider<Itf>::deadline_<Callback>, 
+                pthis, 
+                result.first, 
+                call_id,
+                callback // <- не обернутый callback
+            ) );
+          }
+          ++(pthis->_post_count);
+          (cli.get()->*mem_ptr)( std::move(req_for_send), std::move(wcallback), std::forward<Args>(args)... );
         }
-        ++(pthis->_post_count);
-        (cli.get()->*mem_ptr)( std::move(req_for_send), std::move(wcallback), std::forward<Args>(args)... );
+        else
+        {
+          ++(pthis->_post_count);
+          (cli.get()->*mem_ptr)( std::move(*req), std::move(wcallback), std::forward<Args>(args)... );
+        }
       } 
       catch ( ... )
       {
@@ -379,7 +389,7 @@ private:
   std::function<void(Resp, Args...)>
   wrap_callback_(size_t call_id, std::function<void(Resp, Args...)> callback) 
   {
-    if ( super::_conf.mode < provider_mode::insured )
+    if ( super::_conf.max_waiting == 0 )
       return std::move(callback);
     auto pthis = this->shared_from_this();
     auto callback_fun = &provider<Itf>::mt_confirm_<Resp, Args...>;
@@ -409,11 +419,12 @@ private:
 
   int process_queue_()
   {
+    //std::cout << "int process_queue_() " << _queue.size() << std::endl;
     int count = 0;
     while ( !_queue.empty() )
     {
       
-      if ( _callclipost.size() >= super::_conf.max_waiting )
+      if ( super::_conf.max_waiting!=0 &&_callclipost.size() >= super::_conf.max_waiting )
         break;
 
       auto f = _queue.front();
@@ -429,13 +440,18 @@ private:
         break;
       }
       _queue.pop_front();
-      auto itr = _callclipost.find(result.second);
-      if ( itr != _callclipost.end() )
-        std::get<1>(itr->second) = f;
-      else
-        abort();
-      if ( super::_conf.max_waiting == 0 )
-        continue;
+      
+      if ( super::_conf.max_waiting != 0 )
+      {
+        auto itr = _callclipost.find(result.second);
+        if ( itr != _callclipost.end() )
+          std::get<1>(itr->second) = f;
+        else
+          abort();
+      }
+      
+      /*if ( super::_conf.max_waiting == 0 )
+        continue;*/
     }
     return count;
   }
