@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <algorithm>
 #include <wfc/provider/provider.hpp>
+#include <wfc/provider/provider_config_json.hpp>
 #include <wfc/memory.hpp>
 #include <wfc/thread/rwlock.hpp>
 

@@ -200,44 +200,6 @@ public:
 
 private:
   
-  template<typename Callback>
-  static void mt_deadline_( 
-    std::shared_ptr<self> pthis,
-    size_t client_id, 
-    size_t call_id,
-    Callback callback
-  )
-  {
-    std::lock_guard<mutex_type> lk( pthis->_mutex );
-    
-    auto call_itr = pthis->_callclipost.find(call_id);
-    if ( call_itr == pthis->_callclipost.end() )
-      return;
-    
-    auto cli_itr = pthis->_clicall.find( { std::get<0>(call_itr->second), call_itr->first});
-    if ( cli_itr == pthis->_clicall.end() )
-    {
-      DAEMON_LOG_FATAL("provider::process_queue_: ошибка логики")
-      abort();
-    }
-
-    if ( client_id != cli_itr->first )
-    {
-      DAEMON_LOG_FATAL("provider::process_queue_: ошибка логики")
-      abort();
-      return;
-    }
-    
-    DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен wait_timeout_ms=" << super::_conf.wait_timeout_ms
-                        << ". Всего потеряно drop_count=" << this->_drop_count )
-
-    pthis->callback_null_(callback);
-    pthis->_callclipost.erase(call_itr);
-    pthis->_clicall.erase(cli_itr);
-    ++pthis->_drop_count;
-    pthis->process_queue_();
-  }
-  
   template<typename Req, typename Callback, typename... Args>
   static clicall_pair send_( 
     std::shared_ptr<self> pthis,
@@ -304,34 +266,7 @@ private:
     }
     return result;
   }
-    
-  template<typename Req, typename Callback, typename... Args>
-  post_function wrap_( 
-    void (interface_type::*mem_ptr)(Req, Callback, Args... args), 
-    Req req, 
-    Callback callback, 
-    Args... args
-  )
-  {
-    auto preq = std::make_shared<Req>( std::move(req) );
-    auto pthis = super::shared_from_this();
-    
-    return std::bind(
-      &provider<Itf>::send_<Req, Callback, Args...>,
-      pthis,
-      mem_ptr, 
-      preq, 
-      callback,
-      std::forward<Args>(args)...
-    );
-  }
   
-  void result_ready_()
-  {
-    this->pop_();
-    this->process_queue_();
-  }
-    
   template<typename Resp, typename... Args>
   static void mt_confirm_( 
     std::shared_ptr<self> pthis,
@@ -362,6 +297,66 @@ private:
       
     if ( callback!=nullptr )
       callback( std::move(*resp), std::forward<Args>(args)... );
+  }
+
+
+  template<typename Callback>
+  static void mt_deadline_( 
+    std::shared_ptr<self> pthis,
+    size_t client_id, 
+    size_t call_id,
+    Callback callback
+  )
+  {
+    std::lock_guard<mutex_type> lk( pthis->_mutex );
+    
+    auto call_itr = pthis->_callclipost.find(call_id);
+    if ( call_itr == pthis->_callclipost.end() )
+      return;
+    
+    auto cli_itr = pthis->_clicall.find( { std::get<0>(call_itr->second), call_itr->first});
+    if ( cli_itr == pthis->_clicall.end() )
+    {
+      DAEMON_LOG_FATAL("provider::process_queue_: ошибка логики")
+      abort();
+    }
+
+    if ( client_id != cli_itr->first )
+    {
+      DAEMON_LOG_FATAL("provider::process_queue_: ошибка логики")
+      abort();
+      return;
+    }
+    
+    DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен wait_timeout_ms=" << pthis->_conf.wait_timeout_ms
+                        << ". Всего потеряно drop_count=" << pthis->_drop_count )
+
+    pthis->callback_null_(callback);
+    pthis->_callclipost.erase(call_itr);
+    pthis->_clicall.erase(cli_itr);
+    ++pthis->_drop_count;
+    pthis->process_queue_();
+  }
+  
+  template<typename Req, typename Callback, typename... Args>
+  post_function wrap_( 
+    void (interface_type::*mem_ptr)(Req, Callback, Args... args), 
+    Req req, 
+    Callback callback, 
+    Args... args
+  )
+  {
+    auto preq = std::make_shared<Req>( std::move(req) );
+    auto pthis = super::shared_from_this();
+    
+    return std::bind(
+      &provider<Itf>::send_<Req, Callback, Args...>,
+      pthis,
+      mem_ptr, 
+      preq, 
+      callback,
+      std::forward<Args>(args)...
+    );
   }
   
   template<typename Resp, typename ...Args>
@@ -433,6 +428,7 @@ private:
   }
 
 private:
+  
   ::wfc::io_service& _io_service;
   ::wfc::io_service::work _io_work;
   size_t _call_id_counter;

@@ -12,7 +12,6 @@ template<typename I>
 class registry
 {
   typedef std::recursive_mutex mutex_type;
-  //typedef std::mutex mutex_type;
 public:
   typedef std::map< std::string, std::weak_ptr<I> > registry_map;
 
