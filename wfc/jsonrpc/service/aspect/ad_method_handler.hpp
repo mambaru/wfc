@@ -47,5 +47,3 @@ struct ad_method_handler
 };
 
 }} // wfc::jsonrpc
-
-

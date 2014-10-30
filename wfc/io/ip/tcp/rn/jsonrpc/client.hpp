@@ -19,14 +19,14 @@ class client
 public:
   typedef client_options options_type;
   ~client();
-  client(io_service& io, const options_type& conf, std::shared_ptr<wfc::jsonrpc::service> service);
+  client(io_service& io, const options_type& conf, std::shared_ptr< ::wfc::jsonrpc::service > service);
   void start();
   void stop(std::function<void()> finalize);
   void shutdown();
 
 private:
-  std::shared_ptr<wfc::io::ip::tcp::rn::client> _client;
-  std::shared_ptr<wfc::jsonrpc::service> _service;
+  std::shared_ptr< ::wfc::io::ip::tcp::rn::client > _client;
+  std::shared_ptr< ::wfc::jsonrpc::service > _service;
   
 };
   
