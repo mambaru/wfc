@@ -21,22 +21,30 @@ class worker_manager
 
   struct iterator_holder
   {
-    // iterator_holder( typename worker_list::iterator itr):itr(itr){}
-    void init( typename worker_list::const_iterator itr) { _itr =itr; }
-    typename worker_list::const_iterator inc(typename worker_list::const_iterator beg, typename worker_list::const_iterator end) const
+    void init( typename worker_list::const_iterator itr)
+    {
+      _itr =itr; 
+    }
+    
+    typename worker_list::const_iterator 
+    inc(
+      typename worker_list::const_iterator beg, 
+      typename worker_list::const_iterator end
+    ) const
     {
       if (beg==end) return beg;
       std::lock_guard<spinlock> lk(_mutex);
       if (_itr == end) _itr = beg;
       return _itr++;
     }
+    
   private:
+    
     mutable typename worker_list::const_iterator _itr;
     mutable spinlock _mutex;
   };
   
-  
-  typedef std::pair<worker_list, /*typename worker_list::iterator*/iterator_holder > pair_worker_list;
+  typedef std::pair<worker_list, iterator_holder > pair_worker_list;
   typedef std::map< std::string, pair_worker_list> method_map;
   typedef std::list< std::thread > thread_list;
   typedef std::shared_ptr< ::wfc::io_service> io_service_ptr;
@@ -68,7 +76,6 @@ private:
   typedef std::lock_guard<mutex_type> lock_guard;
   mutable mutex_type _mutex;
 };
-
 
 }} // wfc
 

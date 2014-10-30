@@ -6,6 +6,8 @@
 #include <wfc/logger.hpp>
 #include <wfc/io_service.hpp>
 
+#include <fas/integral/int_.hpp>
+
 #include <boost/asio.hpp>
 #include <memory>
 #include <deque>
@@ -14,6 +16,19 @@
 
 namespace wfc{ namespace provider{ 
 
+  /*
+template<typename Callback>
+struct callback_type_1
+
+  
+  template<typename Resp, typename ...Args>
+  struct callback_type_1
+  {
+    typedef std::function<void(Resp, Args...)> type;
+  };
+  */
+
+  
 template<typename Itf>  
 class provider
   : public basic_provider<Itf, provider, std::recursive_mutex>
@@ -133,7 +148,7 @@ public:
   }
   
   template<typename R, typename Resp, typename ... Args> 
-  void callback_null_(std::function<R(Resp, Args ...)> callback)
+  void callback_null_(std::function<R(Resp, Args ...)>&& callback)
   {
     if ( callback!=nullptr)
     {
@@ -142,8 +157,30 @@ public:
   }
   
   template<typename Req, typename Callback, typename... Args>
-  void post( 
+  void post(
     void (interface_type::*mem_ptr)(Req, Callback, Args... args), 
+    Req req, 
+    Callback callback, 
+    Args... args
+  )
+  {
+    this->post_<1>( mem_ptr, std::move(req), std::move(callback), std::forward<Args>(args)...);
+  }
+
+  template<typename Req, typename OrigCallback, typename Callback, typename... Args>
+  void post_ex(
+    void (interface_type::*mem_ptr)(Req, OrigCallback, Args... args), 
+    Req req, 
+    Callback callback, 
+    Args... args
+  )
+  {
+    this->post_<2>( mem_ptr, std::move(req), std::move(callback), std::forward<Args>(args)...);
+  }
+
+  template<int N, typename Req, typename OrigCallback, typename Callback, typename... Args>
+  void post_( 
+    void (interface_type::*mem_ptr)(Req, OrigCallback, Args... args), 
     Req req, 
     Callback callback, 
     Args... args
@@ -159,10 +196,12 @@ public:
     
     if ( super::_conf.max_waiting==0  )
     {
+      size_t client_id = 0;
       // Простой режим
-      if ( auto cli = super::get_() )
+      if ( auto cli = super::get_(client_id) )
       {
-        (cli.get()->*mem_ptr)( std::move(req), std::move(callback), std::forward<Args>(args)... );
+        size_t call_id = ++this->_call_id_counter;
+        (cli.get()->*mem_ptr)( std::move(req), this->wrap_callback_<OrigCallback>( fas::int_<N>(), client_id, call_id, callback ), std::forward<Args>(args)... );
         return;
       }
       else if (super::_conf.queue_limit==0)
@@ -174,9 +213,10 @@ public:
         return;
       }
     }
+    
 
     // Далее нужна обертка
-    post_function f = this->wrap_(mem_ptr, std::move(req), std::move(callback), std::forward<Args>(args)...); 
+    post_function f = this->wrap_<N>(mem_ptr, std::move(req), std::move(callback), std::forward<Args>(args)...); 
     
     if ( _clicall.size() < super::_conf.max_waiting  )
     {
@@ -191,7 +231,7 @@ public:
     }
     else
     {
-      callback_null_(callback);
+      callback_null_(std::move(callback) );
       ++_drop_count;
       DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен queue_limit=" << super::_conf.queue_limit 
                          << ". Всего потеряно drop_count=" << this->_drop_count )
@@ -200,20 +240,22 @@ public:
 
 private:
   
-  template<typename Req, typename Callback, typename... Args>
+  template<int N, typename Req, typename OrigCallback, typename Callback, typename... Args>
   static clicall_pair send_( 
     std::shared_ptr<self> pthis,
-    void (interface_type::*mem_ptr)(Req, Callback, Args... args), 
+    void (interface_type::*mem_ptr)(Req, OrigCallback, Args... args), 
     std::shared_ptr<Req> req, 
     Callback callback, 
     Args... args
   )
   {
     size_t call_id = ++pthis->_call_id_counter;
-    auto wcallback = pthis->wrap_callback_(call_id, callback);
+    
     clicall_pair result = {pthis->null_id, call_id};
     if ( auto cli = pthis->get_( result.first ) )
     {
+      OrigCallback wcallback = pthis->wrap_callback_<OrigCallback>( fas::int_<N>(), result.first, call_id, callback);
+      
       std::shared_ptr<deadline_timer> timer;
       
       if (pthis->_conf.max_waiting != 0 )
@@ -331,16 +373,16 @@ private:
     DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен wait_timeout_ms=" << pthis->_conf.wait_timeout_ms
                         << ". Всего потеряно drop_count=" << pthis->_drop_count )
 
-    pthis->callback_null_(callback);
+    pthis->callback_null_( std::move(callback) );
     pthis->_callclipost.erase(call_itr);
     pthis->_clicall.erase(cli_itr);
     ++pthis->_drop_count;
     pthis->process_queue_();
   }
   
-  template<typename Req, typename Callback, typename... Args>
+  template<int N, typename Req, typename OrigCallback, typename Callback, typename... Args>
   post_function wrap_( 
-    void (interface_type::*mem_ptr)(Req, Callback, Args... args), 
+    void (interface_type::*mem_ptr)(Req, OrigCallback, Args... args), 
     Req req, 
     Callback callback, 
     Args... args
@@ -350,7 +392,7 @@ private:
     auto pthis = super::shared_from_this();
     
     return std::bind(
-      &provider<Itf>::send_<Req, Callback, Args...>,
+      &provider<Itf>::send_<N, Req, OrigCallback, Callback, Args...>,
       pthis,
       mem_ptr, 
       preq, 
@@ -359,9 +401,51 @@ private:
     );
   }
   
+  /*
   template<typename Resp, typename ...Args>
   std::function<void(Resp, Args...)>
-  wrap_callback_(size_t call_id, std::function<void(Resp, Args...)> callback) 
+  callback_detect_1(std::function<void(Resp, Args...)>);
+
+  template<typename Resp, typename ...Args>
+  std::function<void(Resp, Args...)>
+  callback_detect_2(std::function<void(Resp, size_t, Args...)>);
+  
+  
+
+  template<typename Callback>
+  decltype(callback_detect_1(Callback()))
+  wrap_callback_(
+    fas::int_<1>, 
+    size_t client_id, 
+    size_t call_id, 
+    Callback callback
+  ) 
+  {
+    return this->wrap_callback_1(client_id, call_id, callback);
+  }
+
+  template<typename Callback>
+  decltype(callback_detect_2(Callback()))
+  wrap_callback_(
+    fas::int_<2>, 
+    size_t client_id, 
+    size_t call_id, 
+    Callback callback
+  )
+  {
+    return this->wrap_callback_2(client_id, call_id, callback);
+  }*/
+  
+  
+  template<typename OrigCallback, typename Resp, typename ...Args>
+  //std::function<void(Resp, Args...)>
+  OrigCallback
+  wrap_callback_(
+    fas::int_<1>, 
+    size_t /*client_id*/, 
+    size_t call_id, 
+    std::function<void(Resp, Args...)> callback
+  ) 
   {
     if ( super::_conf.max_waiting == 0 )
       return std::move(callback);
@@ -380,7 +464,43 @@ private:
       ) );
     };
   }
-  
+
+  template<typename OrigCallback, typename Resp, typename ...Args>
+  //std::function<void(Resp, Args...)>
+  OrigCallback
+  wrap_callback_(
+    fas::int_<2>, 
+    size_t client_id, 
+    size_t call_id, 
+    std::function<void(Resp, size_t, Args...)> callback
+  ) 
+  {
+    if ( super::_conf.max_waiting == 0 )
+    {
+      if (callback==nullptr)
+        return nullptr;
+      
+      return [client_id, callback](Resp resp, Args... args)
+      {
+        callback( std::move(resp), client_id, std::forward<Args>(args)...);
+      };
+    }
+    auto pthis = this->shared_from_this();
+    auto callback_fun = &provider<Itf>::mt_confirm_<Resp, size_t, Args...>;
+    return [callback_fun, pthis, client_id, call_id, callback](Resp resp, Args... args)
+    {
+      auto presp = std::make_shared<Resp>(std::move(resp) );
+      pthis->_io_service.post( std::bind(
+        callback_fun,
+        pthis,
+        call_id,
+        callback,
+        presp,
+        client_id, std::forward<Args>(args)...
+      ) );
+    };
+  }
+
   bool update_waiting_(const clicall_pair& result, const post_function& f)
   {
     if ( result.first == null_id )
@@ -408,7 +528,7 @@ private:
     while ( !_queue.empty() )
     {
       
-      if ( super::_conf.max_waiting!=0 &&_callclipost.size() >= super::_conf.max_waiting )
+      if ( super::_conf.max_waiting!=0 && _callclipost.size() >= super::_conf.max_waiting )
         break;
 
       auto f = _queue.front();

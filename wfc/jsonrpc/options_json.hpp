@@ -9,7 +9,6 @@
 
 namespace wfc{ namespace jsonrpc{
 
-  //wfc::json::member<n_size, generate, size_t, &generate::size>
 struct options_json
 {
   JSON_NAME(workers)
@@ -51,23 +50,5 @@ struct options_json
   typedef type::serializer serializer;
   typedef type::target target;
 };
-  /*
-struct options
-  : worker_options
-{
-  struct worker
-  {
-    struct strand
-    {
-      int count = 1;
-      std::vector<std::string> methods = {"*"};
-    };
-    
-    int threads = 0;
-    std::vector<strand> strands = {strand()};
-  };
-  std::vector< worker> workers = { worker() };
-};
-*/
 
 }}

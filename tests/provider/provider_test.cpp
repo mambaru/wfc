@@ -464,7 +464,14 @@ public:
       if ( p2 != 44 )
         abort();
     };
-    provider->post(&ireceiver::method2, std::make_unique<request>(req), callback);
+    
+    std::function<void(response_ptr,  size_t, int , int )> wcallback = [callback](response_ptr resp,  size_t, int p1, int p2)
+      {
+        if (callback!=nullptr)
+          callback(std::move(resp), p1, p2);
+          
+      };
+    provider->post_ex(&ireceiver::method2, std::make_unique<request>(req), wcallback);
   }
 
   void send_method3()

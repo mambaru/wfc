@@ -86,20 +86,6 @@ void service::start()
   }
 }
 
-/*
-jsonrpc_options service::create_jsonrpc_options()
-{
-  ::wfc::jsonrpc::options opt;
-  ::wfc::jsonrpc::options::worker wrk;
-  ::wfc::jsonrpc::options::worker::strand stn;
-  stn.count = 1;
-  stn.methods.push_back("*");
-  wrk.strands.push_back(stn);
-  wrk.threads = 1;
-  opt.workers.push_back(wrk);
-  return opt;
-}
-*/
 service_config service::create_config(std::string type)
 {
   service_config conf;
