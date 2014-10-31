@@ -16,7 +16,7 @@ author=`git log -1 --pretty=format:"Author: %cn <%ce>" .`
 date=`git log -1 --pretty=format:"Date: %cd" .`
 message=`git log -1 --pretty=%B .`
 
-h_file="build_info.h"
+h_file="$1_build_info.h"
 c_file="$path/$1_build_info.c"
 o_file="$path/$1_build_info.o"
 a_file="$path/$1_build_info.a"
