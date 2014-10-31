@@ -3,7 +3,7 @@
 #include <wfc/core/icore.hpp>
 #include <wfc/core/global.hpp>
 #include <iostream>
-#include "build_info.h"
+#include "wfc_build_info.h"
 
 namespace wfc{
 
