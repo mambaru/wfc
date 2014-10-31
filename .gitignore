@@ -18,6 +18,6 @@ autom4te.cache
 CMakeFiles
 CMakeCache.txt
 *.kate-swp
-build_info.h
+*build_info.h
 config.h
 Makefile
