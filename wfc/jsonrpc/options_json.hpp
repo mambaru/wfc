@@ -1,11 +1,10 @@
 #pragma once
 
-//#include <wfc/jsonrpc/worker_options.hpp>
+#include <wfc/jsonrpc/options.hpp>
+#include <wfc/json.hpp>
 #include <vector>
 #include <string>
 
-#include <wfc/json/json.hpp>
-#include <wfc/json/name.hpp>
 
 namespace wfc{ namespace jsonrpc{
 
