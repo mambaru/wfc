@@ -40,6 +40,9 @@ SET(
   gateway/rn/jsonrpc/gateway.cpp
   gateway/rn/jsonrpc/gateway_list.cpp
 
+  gateway/tcp_client.cpp
+  gateway/gateway.cpp
+
   system/detail/aligned_allocator.cpp
 )
 
