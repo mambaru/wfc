@@ -130,7 +130,8 @@ public:
   {
     ++tmp;
 #warning DEBUG
-    if ( tmp < 1000 ) DAEMON_LOG_MESSAGE("DEBUG -1-: service_base::send_request N" << tmp);
+    if ( tmp < 1000000 )
+      DAEMON_LOG_MESSAGE("DEBUG -1-: service_base::send_request N" << tmp);
     
     if (_active)
     {
@@ -139,17 +140,19 @@ public:
       {
         if ( auto wrk = this->get_worker(name) )
         {
-          if ( tmp < 1000 ) DAEMON_LOG_MESSAGE("DEBUG -2.1-: service_base::send_request N" << tmp);
+          if ( tmp < 1000000 ) 
+            DAEMON_LOG_MESSAGE("DEBUG -2.1-: service_base::send_request N" << tmp);
           wrk->post([this, io_id, requester, name,  serializer]()
           {
-            if ( this->tmp < 1000 ) DAEMON_LOG_MESSAGE("DEBUG -2.2-: service_base::send_request N" << this->tmp);
+            if ( this->tmp < 1000000 ) 
+              DAEMON_LOG_MESSAGE("DEBUG -2.2-: service_base::send_request N" << this->tmp);
             auto d = serializer(name, requester.first);
             requester.second( std::move(d) );
           });
         }
         else if ( this->options().workers.empty() )
         {
-          if ( tmp < 1000 ) DAEMON_LOG_MESSAGE("DEBUG -3-: service_base::send_request N" << tmp);
+          if ( tmp < 1000000 ) DAEMON_LOG_MESSAGE("DEBUG -3-: service_base::send_request N" << tmp);
           auto d = serializer(name, requester.first);
           requester.second( std::move(d) );
         }
