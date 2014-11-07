@@ -52,7 +52,7 @@ struct mem_fun_handler2
           {
             #warning DEBUG
             DAEMON_LOG_MESSAGE("тестовый mem_fun_handler2 N "<< this->tmp)
-            pthis->tmp++;
+            this->tmp++;
           }
           
           if ( auto ptr = pthis.get() )
