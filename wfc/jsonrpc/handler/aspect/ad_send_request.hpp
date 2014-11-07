@@ -27,15 +27,25 @@ struct ad_send_request
     if ( tmp < 10000 )
     {
 #warning DEBUG
-      DAEMON_LOG_MESSAGE("DEBUG /handler/aspect/ad_send_request N " << tmp++);
+      DAEMON_LOG_MESSAGE("DEBUG: /handler/aspect/ad_send_request N " << tmp++);
+    }
+    
+    if ( t.send_request == nullptr )
+    {
+      DAEMON_LOG_FATAL("/handler/aspect/ad_send_request t.send_request == nullptr" )
+      abort();
     }
     
     t.send_request(
       name,
       std::move(result_handler), 
-      [p, ser](const char* name, typename T::call_id_t id) 
+      [p, ser, this](const char* name, typename T::call_id_t id) 
         -> typename T::data_ptr
       {
+        if ( tmp < 10000 )
+        {
+          DAEMON_LOG_MESSAGE("DEBUG: /handler/aspect/ad_send_request serializer!!! N " << this->tmp);
+        }
         return ser(name, std::move(*p), id);
       }
     );
