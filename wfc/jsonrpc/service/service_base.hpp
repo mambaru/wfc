@@ -120,6 +120,7 @@ public:
     }
   };
   
+  int tmp = 0;
   void send_request(
     io_id_t io_id,
     const char* name,
@@ -127,6 +128,10 @@ public:
     request_serializer_t serializer
   )
   {
+    ++tmp;
+#warning DEBUG
+    if ( tmp < 1000 ) DAEMON_LOG_MESSAGE("DEBUG -1-: service_base::send_request N" << tmp);
+    
     if (_active)
     {
       auto requester = this->registry().add_result_handler( io_id, result_handler );
@@ -134,14 +139,17 @@ public:
       {
         if ( auto wrk = this->get_worker(name) )
         {
+          if ( tmp < 1000 ) DAEMON_LOG_MESSAGE("DEBUG -2.1-: service_base::send_request N" << tmp);
           wrk->post([this, io_id, requester, name,  serializer]()
           {
+            if ( this->tmp < 1000 ) DAEMON_LOG_MESSAGE("DEBUG -2.2-: service_base::send_request N" << this->tmp);
             auto d = serializer(name, requester.first);
             requester.second( std::move(d) );
           });
         }
         else if ( this->options().workers.empty() )
         {
+          if ( tmp < 1000 ) DAEMON_LOG_MESSAGE("DEBUG -3-: service_base::send_request N" << tmp);
           auto d = serializer(name, requester.first);
           requester.second( std::move(d) );
         }
