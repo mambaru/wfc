@@ -35,24 +35,41 @@ struct mem_fun_handler2
   typedef std::unique_ptr< ::wfc::jsonrpc::error> json_error_ptr;
   typedef std::function< void(responce_ptr, json_error_ptr) > jsonrpc_callback;
 
+  int tmp = 0;
   template<typename T>
   void operator()(T& t, request_ptr req, jsonrpc_callback cb) const
   {
     if ( auto i = t.target() )
     {
-      std::shared_ptr<Itf> self = t.shared_from_this();
+      std::shared_ptr<Itf> pthis = t.shared_from_this();
       (i.get()->*mem_ptr)( 
         std::move(req), 
         mem_fun_make_callback( std::move(cb)),
         t.get_io_id(),
-        [self](request2_ptr req, std::function< void(responce2_ptr) > callback)
+        [pthis](request2_ptr req, std::function< void(responce2_ptr) > callback)
         {
-          (self.get()->*mem_ptr2)( std::move(req), callback);
+          if ( pthis->tmp < 10 )
+          {
+            #warning DEBUG
+            DAEMON_LOG_MESSAGE("тестовый mem_fun_handler2 N "<< pthis->tmp)
+            pthis->tmp++;
+          }
+          
+          if ( auto ptr = pthis.get() )
+          {
+            (ptr->*mem_ptr2)( std::move(req), callback);
+          }
+          else
+          {
+            DAEMON_LOG_FATAL("mem_fun_handler2: pthis = nullptr");
+            abort();
+          }
         }
       );
     }
     else 
     {
+      DAEMON_LOG_ERROR("mem_fun_handler2: Service Unavailable");
       mem_fun_service_unavailable( std::move(cb) );
     }
   }
