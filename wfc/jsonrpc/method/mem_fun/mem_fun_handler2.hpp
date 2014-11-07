@@ -35,7 +35,7 @@ struct mem_fun_handler2
   typedef std::unique_ptr< ::wfc::jsonrpc::error> json_error_ptr;
   typedef std::function< void(responce_ptr, json_error_ptr) > jsonrpc_callback;
 
-  int tmp = 0;
+  mutable int tmp = 0;
   template<typename T>
   void operator()(T& t, request_ptr req, jsonrpc_callback cb) const
   {
