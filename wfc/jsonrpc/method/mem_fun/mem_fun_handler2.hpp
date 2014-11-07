@@ -46,12 +46,12 @@ struct mem_fun_handler2
         std::move(req), 
         mem_fun_make_callback( std::move(cb)),
         t.get_io_id(),
-        [pthis](request2_ptr req, std::function< void(responce2_ptr) > callback)
+        [pthis, this](request2_ptr req, std::function< void(responce2_ptr) > callback)
         {
-          if ( pthis->tmp < 10 )
+          if ( this->tmp < 10 )
           {
             #warning DEBUG
-            DAEMON_LOG_MESSAGE("тестовый mem_fun_handler2 N "<< pthis->tmp)
+            DAEMON_LOG_MESSAGE("тестовый mem_fun_handler2 N "<< this->tmp)
             pthis->tmp++;
           }
           
