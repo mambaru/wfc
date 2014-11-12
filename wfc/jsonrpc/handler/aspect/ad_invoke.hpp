@@ -64,7 +64,7 @@ struct ad_invoke
               std::make_unique<procedure_not_found>(), 
               std::move(outgoing_handler) 
            );
-    };
+    }
   }
 
 };

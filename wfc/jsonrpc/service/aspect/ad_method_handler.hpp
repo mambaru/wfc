@@ -15,6 +15,7 @@ struct ad_method_handler
     auto handler = t.registry().get_jsonrpc_handler(io_id);
     if ( handler == nullptr)
     {
+      
       // Если обработчик не был создан create_handler
       // который вызываеться при новом коннекте 
       // то при каждом запросе создаем временный 
@@ -22,6 +23,7 @@ struct ad_method_handler
       // !!! handler = t.clone_prototype();
       handler = t.get_prototype();
     }
+    
     
     if ( auto wrk = t.get_worker( holder.method() ) )
     {

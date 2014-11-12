@@ -14,8 +14,6 @@ io_registry::io_registry()
   
 void io_registry::set_io(io_id_t io_id, std::shared_ptr<handler_interface> jsonrpc_handler, outgoing_handler_t outgoing_handler)
 {
-//#warning
-//  this->check();
   lock_guard lk(_mutex);
   auto result = _io_map.insert( std::make_pair( io_id, io_info(jsonrpc_handler, outgoing_handler) ) );
   if ( !result.second )

@@ -37,6 +37,7 @@ void service::create_handler( io_id_t io_id,  outgoing_handler_t writer, add_shu
 
 void service::operator()( data_ptr d,  io_id_t io_id,  outgoing_handler_t outgoing_handler)
 {
+  
   /*if ( _threads == 0  )
   {
     */

@@ -8,7 +8,6 @@ namespace wfc{ namespace jsonrpc{
   
 struct ad_send_request
 {
-  mutable int tmp = 0;
   template<typename T, typename Params, typename Serializer>
   void operator()(
     T& t,
@@ -24,12 +23,6 @@ struct ad_send_request
       p = std::make_shared<Params>( std::move(params) );
     }
     
-    if ( tmp < 10000 )
-    {
-#warning DEBUG
-      DAEMON_LOG_MESSAGE("DEBUG: /handler/aspect/ad_send_request N " << tmp++);
-    }
-    
     if ( t.send_request == nullptr )
     {
       DAEMON_LOG_FATAL("/handler/aspect/ad_send_request t.send_request == nullptr" )
@@ -42,10 +35,6 @@ struct ad_send_request
       [p, ser, this](const char* name, typename T::call_id_t id) 
         -> typename T::data_ptr
       {
-        if ( tmp < 10000 )
-        {
-          DAEMON_LOG_MESSAGE("DEBUG: /handler/aspect/ad_send_request serializer!!! N " << this->tmp);
-        }
         return ser(name, std::move(*p), id);
       }
     );
