@@ -12,7 +12,10 @@ struct ad_write_handler
   void operator()(T& t, typename T::data_ptr d, boost::system::error_code ec, std::size_t bytes_transferred)
   {
     if ( !t.status() )
+    {
+      DAEMON_LOG_FATAL("wfc::io::writer::ad_write_handler !t.status()")
       return;
+    }
     
     if ( !ec )
     {

@@ -35,7 +35,6 @@ struct mem_fun_handler2
   typedef std::unique_ptr< ::wfc::jsonrpc::error> json_error_ptr;
   typedef std::function< void(responce_ptr, json_error_ptr) > jsonrpc_callback;
 
-  mutable int tmp = 0;
   template<typename T>
   void operator()(T& t, request_ptr req, jsonrpc_callback cb) const
   {
@@ -48,13 +47,6 @@ struct mem_fun_handler2
         t.get_io_id(),
         [pthis, this](request2_ptr req, std::function< void(responce2_ptr) > callback)
         {
-          if ( this->tmp < 10 )
-          {
-            #warning DEBUG
-            DAEMON_LOG_MESSAGE("тестовый mem_fun_handler2 N "<< this->tmp)
-            this->tmp++;
-          }
-          
           if ( auto ptr = pthis.get() )
           {
             (ptr->*mem_ptr2)( std::move(req), callback);
