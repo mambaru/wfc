@@ -245,7 +245,6 @@ void pubsub_gateway::describe(request_describe_ptr, describe_callback, size_t)
 
 void pubsub_gateway::publish(request_publish_ptr req, publish_callback cb)
 {
-  std::cout << "pubsub pubsub_gateway::publish()" << std::endl;
   if ( req!=nullptr && req->content!=nullptr)  
   {
     TRACE_LOG_MESSAGE("pubsub_gateway::publish: [[" << std::string( req->content->begin(), req->content->end() ) << "]")
@@ -349,7 +348,6 @@ void pubsub_gateway::load(request_multi_load_ptr, multi_load_callback )
 
 void pubsub_gateway::query(request_query_ptr req, query_callback cb)
 {
-  std::cout << "pubsub pubsub_gateway::query()" << std::endl;
   if ( req!=nullptr && req->content!=nullptr)  
   {
     TRACE_LOG_MESSAGE("pubsub_gateway::query: [[" << std::string( req->content->begin(), req->content->end() ) << "]")
@@ -398,7 +396,7 @@ void pubsub_gateway::query(request_query_ptr req, query_callback cb)
     }
   
     typedef ::wfc::jsonrpc::outgoing_notify_json< 
-      ::wfc::json::raw_value< ::wfc::io::data_type> 
+      ::wfc::json::raw_value< ::wfc::io::data_type > 
     >::serializer serializer;
   
     if ( notify.params!=nullptr )
