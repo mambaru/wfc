@@ -8,8 +8,8 @@ namespace wfc{ namespace jsonrpc{
 
 struct error_json
 {
-  FAS_NAME(code)
-  FAS_NAME(message)
+  JSON_NAME(code)
+  JSON_NAME(message)
   
   typedef json::object<
     error, 

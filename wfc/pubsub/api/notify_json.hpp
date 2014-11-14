@@ -11,8 +11,8 @@ namespace request
 {
   struct notify_json
   {
-    FAS_NAME(channel)
-    FAS_NAME(content)
+    JSON_NAME(channel)
+    JSON_NAME(content)
     typedef
       json::object<
         notify,
@@ -30,8 +30,8 @@ namespace response
 {
   struct notify_json
   {
-    FAS_NAME(channel)
-    FAS_NAME(status)
+    JSON_NAME(channel)
+    JSON_NAME(status)
     typedef
       json::object<
         notify,

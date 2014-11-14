@@ -15,18 +15,18 @@ namespace wfc{ namespace pubsub{
 
 struct message_json
 {
-  FAS_NAME(publish)
-  FAS_NAME(modify)
-  FAS_NAME(update)
-  FAS_NAME(replace)
-  FAS_NAME(remove)
-  FAS_NAME(action)
-  FAS_NAME(limit)
-  FAS_NAME(lifetime)
-  FAS_NAME(cursor)
-  FAS_NAME(identity)
-  FAS_NAME(key)
-  FAS_NAME(content)
+  JSON_NAME(publish)
+  JSON_NAME(modify)
+  JSON_NAME(update)
+  JSON_NAME(replace)
+  JSON_NAME(remove)
+  JSON_NAME(action)
+  JSON_NAME(limit)
+  JSON_NAME(lifetime)
+  JSON_NAME(cursor)
+  JSON_NAME(identity)
+  JSON_NAME(key)
+  JSON_NAME(content)
 
 
   typedef fas::type_list_n<

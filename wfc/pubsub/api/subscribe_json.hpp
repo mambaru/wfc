@@ -10,7 +10,7 @@ namespace request
 {
   struct subscribe_json
   {
-    FAS_NAME(channel)
+    JSON_NAME(channel)
     
     /*
     typedef

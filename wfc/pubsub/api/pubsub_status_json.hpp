@@ -11,13 +11,13 @@ namespace wfc{ namespace pubsub{
 
 struct pubsub_status_json
 {
-  FAS_NAME(ready)
-  FAS_NAME(forbidden)
-  FAS_NAME(bad_gateway)
-  FAS_NAME(not_found)
-  FAS_NAME(internal_error)
-  FAS_NAME(not_support)
-  FAS_NAME(wait)
+  JSON_NAME(ready)
+  JSON_NAME(forbidden)
+  JSON_NAME(bad_gateway)
+  JSON_NAME(not_found)
+  JSON_NAME(internal_error)
+  JSON_NAME(not_support)
+  JSON_NAME(wait)
 
   
   typedef fas::type_list_n<
