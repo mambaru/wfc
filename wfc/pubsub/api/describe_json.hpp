@@ -10,7 +10,7 @@ namespace request
 {
   struct describe_json
   {
-    FAS_NAME(channel)
+    JSON_NAME(channel)
     
     typedef json::member_value<
       describe,

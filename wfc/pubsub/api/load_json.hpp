@@ -11,10 +11,10 @@ namespace request
 {
   struct load_json
   {
-    FAS_NAME(channel)
-    FAS_NAME(cursor)
-    FAS_NAME(limit)
-    FAS_NAME(load_params)
+    JSON_NAME(channel)
+    JSON_NAME(cursor)
+    JSON_NAME(limit)
+    JSON_NAME(load_params)
     typedef
       json::object<
         load,
@@ -34,7 +34,7 @@ namespace response
 {
   struct load_json
   {
-    FAS_NAME(status)
+    JSON_NAME(status)
     typedef
       json::object<
         load,

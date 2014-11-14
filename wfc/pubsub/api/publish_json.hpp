@@ -11,7 +11,7 @@ namespace request
 {
   struct publish_json
   {
-    FAS_NAME(channel)
+    JSON_NAME(channel)
     typedef
       json::object<
         publish,

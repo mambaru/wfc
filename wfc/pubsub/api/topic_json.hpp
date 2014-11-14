@@ -16,8 +16,8 @@ namespace wfc{ namespace pubsub{
 
 struct topic_json
 {
-  FAS_NAME(channel)
-  FAS_NAME(messages)
+  JSON_NAME(channel)
+  JSON_NAME(messages)
 
   typedef json::object<
     topic,

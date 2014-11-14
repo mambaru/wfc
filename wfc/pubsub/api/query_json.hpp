@@ -11,8 +11,8 @@ namespace request
 {
   struct query_json
   {
-    FAS_NAME(channel)
-    FAS_NAME(content)
+    JSON_NAME(channel)
+    JSON_NAME(content)
     typedef
       json::object<
         query,
@@ -32,9 +32,9 @@ namespace response
 {
   struct query_json
   {
-    FAS_NAME(channel)
-    FAS_NAME(status)
-    FAS_NAME(content)
+    JSON_NAME(channel)
+    JSON_NAME(status)
+    JSON_NAME(content)
     typedef
       json::object<
         query,

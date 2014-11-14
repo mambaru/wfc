@@ -15,9 +15,9 @@ struct outgoing_request_json
   typedef typename request_type::version_type version_type;
   typedef ::wfc::json::pointer<std::unique_ptr<target>, T> params_json;
   
-  FAS_NAME(method)
-  FAS_NAME(params)
-  FAS_NAME(id)
+  JSON_NAME(method)
+  JSON_NAME(params)
+  JSON_NAME(id)
 
   typedef ::wfc::json::object<
     request_type,
