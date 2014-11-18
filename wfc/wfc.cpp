@@ -39,7 +39,7 @@ int wfc::run(int argc, char* argv[])
   });
 
   
-  if ( auto startup = _global->startup.lock() )
+  if ( auto startup = _global->startup )
   {
     if ( !startup->startup(argc, argv) )
       return 0;
@@ -51,7 +51,7 @@ int wfc::run(int argc, char* argv[])
   
   int status = 0;
 
-  if ( auto core = _global->core.lock() )
+  if ( auto core = _global->core )
     status = core->run(_global);
   
   std::clog << "wfc::run finalize ... " << std::endl;

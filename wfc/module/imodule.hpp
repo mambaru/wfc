@@ -32,7 +32,7 @@ struct imodule
   virtual std::string generate(const std::string& type) const = 0;
   virtual bool parse_config(const std::string& conf) = 0;
   
-  virtual void create( const std::string& name, std::weak_ptr<global> g ) = 0;
+  virtual void create( const std::string& name, std::shared_ptr<global> g ) = 0;
   virtual void configure(const std::string& conf) = 0;
   virtual void initialize() = 0;
   virtual void start() = 0;

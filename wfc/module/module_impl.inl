@@ -33,7 +33,7 @@ bool module::parse_config(const std::string& confstr)
   return _impl->parse_config(confstr);
 }
   
-void module::create( const std::string& name, std::weak_ptr< ::wfc::global> g )
+void module::create( const std::string& name, std::shared_ptr< ::wfc::global> g )
 {
   _impl->create(name, g);
 }

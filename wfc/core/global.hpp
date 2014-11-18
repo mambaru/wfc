@@ -31,16 +31,16 @@ struct global
   std::string wfc_version;
   std::string instance_name;
   
-  std::weak_ptr< istartup >        startup;
-  std::weak_ptr< icore >           core;
-  std::weak_ptr< iconfig >         config;
-  std::weak_ptr< logger_registry > loggers;
-  std::weak_ptr< module_registry > modules;
+  std::shared_ptr< istartup >        startup;
+  std::shared_ptr< icore >           core;
+  std::shared_ptr< iconfig >         config;
+  std::shared_ptr< logger_registry > loggers;
+  std::shared_ptr< module_registry > modules;
   ::wfc::io_service& io_service;
   
-  std::weak_ptr< pubsub_registry > pubsubs;
+  std::shared_ptr< pubsub_registry > pubsubs;
 
-  static std::weak_ptr<global>   static_global;
+  static std::shared_ptr<global>   static_global;
   
   global(::wfc::io_service& io_service)
     : io_service(io_service)

@@ -93,7 +93,7 @@ public:
     return true;
   }
   
-  virtual void create( const std::string& name, std::weak_ptr<global> g )
+  virtual void create( const std::string& name, std::shared_ptr<global> g )
   {
     _name = name;
     _global = g;

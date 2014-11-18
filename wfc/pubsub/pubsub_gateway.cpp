@@ -30,7 +30,7 @@ void pubsub_gateway::initialize( std::shared_ptr< ::wfc::jsonrpc::service> jsonr
   
   if ( auto g = _global.lock() )
   {
-    if ( auto ps = g->pubsubs.lock() )
+    if ( auto ps = g->pubsubs )
     {
       _incoming_target = ps->get( _options.incoming_target );
       _outgoing_target = ps->get( _options.outgoing_target );

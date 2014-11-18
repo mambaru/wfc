@@ -18,7 +18,7 @@ public:
 
   virtual bool parse_config(const std::string& confstr);
   
-  virtual void create( const std::string& name, std::weak_ptr< ::wfc::global> g );
+  virtual void create( const std::string& name, std::shared_ptr< ::wfc::global> g );
   
   virtual void configure(const std::string& conf);
   

@@ -6,11 +6,11 @@ namespace wfc{
 logstream global_log(const std::string& name, const std::string& ident)
 {
   std::shared_ptr<ilogger> logger_ptr = nullptr;
-  if (auto g = global::static_global.lock())
+  if (auto g = global::static_global)
   {
-    if (auto lr = g->loggers.lock())
+    if (auto lr = g->loggers)
     {
-      logger_ptr = lr->get(name).lock();
+      logger_ptr = lr->get(name);
     }
   }
   
