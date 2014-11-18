@@ -38,28 +38,28 @@ void module::create( const std::string& name, std::shared_ptr< ::wfc::global> g 
   _impl->create(name, g);
 }
   
-void module::configure(const std::string& conf)
+void module::configure(const std::string& conf, const std::string& arg)
 {
-  _impl->configure(conf);
+  _impl->configure(conf, arg);
 }
   
-void module::initialize()
+void module::initialize(const std::string& arg)
 {
-  _impl->initialize();
+  _impl->initialize(arg);
 }
   
-void module::start()
+void module::start(const std::string& arg)
 {
-  _impl->start();
+  _impl->start(arg);
 }
 
-void module::stop()
+void module::stop(const std::string& arg)
 {
-  _impl->stop();
+  _impl->stop(arg);
 }
   
-void module::shutdown()
+void module::shutdown(const std::string& arg)
 {
-  _impl->shutdown();
+  _impl->shutdown(arg);
 }
   

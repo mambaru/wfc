@@ -20,15 +20,15 @@ public:
   
   virtual void create( const std::string& name, std::shared_ptr< ::wfc::global> g );
   
-  virtual void configure(const std::string& conf);
+  virtual void configure(const std::string& conf, const std::string& arg);
   
-  virtual void initialize();
+  virtual void initialize(const std::string& arg);
   
-  virtual void start();
+  virtual void start(const std::string& arg);
   
-  virtual void stop();
+  virtual void stop(const std::string& arg);
   
-  virtual void shutdown();
+  virtual void shutdown(const std::string& arg);
 
 private:
 

@@ -33,11 +33,11 @@ struct imodule
   virtual bool parse_config(const std::string& conf) = 0;
   
   virtual void create( const std::string& name, std::shared_ptr<global> g ) = 0;
-  virtual void configure(const std::string& conf) = 0;
-  virtual void initialize() = 0;
-  virtual void start() = 0;
-  virtual void stop() = 0;
-  virtual void shutdown() = 0;
+  virtual void configure(const std::string& conf, const std::string& arg) = 0;
+  virtual void initialize(const std::string& arg) = 0;
+  virtual void start(const std::string& arg) = 0;
+  virtual void stop(const std::string& arg) = 0;
+  virtual void shutdown(const std::string& arg) = 0;
 
   // virtual void idle() = 0;
 };

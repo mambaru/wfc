@@ -15,8 +15,10 @@
 #include <chrono>
 #include <functional>
 
-namespace wfc{
 
+#include <wfc/core/module_options.hpp>
+namespace wfc{
+  
 struct global
 { 
   typedef registry<imodule> module_registry;
@@ -30,6 +32,7 @@ struct global
   std::string program_version;
   std::string wfc_version;
   std::string instance_name;
+  module_options options;
   
   std::shared_ptr< istartup >        startup;
   std::shared_ptr< icore >           core;

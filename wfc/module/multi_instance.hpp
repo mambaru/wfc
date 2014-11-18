@@ -99,7 +99,7 @@ public:
     _global = g;
   }
   
-  virtual void configure(const std::string& conf)
+  virtual void configure(const std::string& conf, const std::string& )
   {
     _config.clear();
     module_config_json::serializer()(_config, conf.begin(), conf.end());
@@ -150,7 +150,7 @@ public:
     }
   }
   
-  virtual void initialize()
+  virtual void initialize(const std::string&)
   {
     for (const auto &n : _instance_map)
     {
@@ -159,7 +159,7 @@ public:
     }
   }
   
-  virtual void start()
+  virtual void start(const std::string&)
   {
     for (const auto &n : _instance_map)
     {
@@ -168,7 +168,7 @@ public:
     }
   }
   
-  virtual void stop()
+  virtual void stop(const std::string&)
   {
     for (auto &n : _instance_map)
     {
@@ -179,7 +179,7 @@ public:
     _instance_map.clear();
   }
   
-  virtual void shutdown()
+  virtual void shutdown(const std::string&)
   {
     for (auto &n : _instance_map)
     {
@@ -194,7 +194,7 @@ private:
   std::string _name;
   module_config _config;
   instance_map _instance_map;
-  std::weak_ptr<global> _global;
+  std::shared_ptr<global> _global;
 };
 
 }
