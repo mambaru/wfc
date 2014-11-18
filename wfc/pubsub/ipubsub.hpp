@@ -8,7 +8,7 @@
 #include <wfc/pubsub/api/describe.hpp>
 #include <wfc/pubsub/api/query.hpp>
 #include <wfc/pubsub/api/notify.hpp>
-#include <wfc/callback/callback_status.hpp>
+//#include <wfc/callback/callback_status.hpp>
 
 #include <functional>
 #include <memory>

@@ -12,7 +12,7 @@
 #include <wfc/io/context.hpp>
 #include <wfc/io/types.hpp>
 
-#include <wfc/callback/callback_owner.hpp>
+#include <wfc/core/callback_owner.hpp>
 
 #include <wfc/thread/rwlock.hpp>
 #include <wfc/thread/spinlock.hpp>

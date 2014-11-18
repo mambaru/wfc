@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
-#include <wfc/callback/callback_status.hpp>
+//#include <wfc/callback/callback_status.hpp>
 #include <atomic>
 
 namespace wfc{ namespace io{ 

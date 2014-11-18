@@ -6,14 +6,16 @@
 #include <wfc/core/iconfig.hpp>
 #include <wfc/core/icore.hpp>
 #include <wfc/core/istartup.hpp>
+#include <wfc/core/fire_list.hpp>
 #include <wfc/logger/ilogger.hpp>
-#include <wfc/callback/callback_list.hpp>
+//#include <wfc/callback/callback_list.hpp>
 #include <wfc/pubsub/ipubsub.hpp>
 
 #include <wfc/io_service.hpp>
 #include <memory>
 #include <chrono>
 #include <functional>
+#include <list>
 
 
 #include <wfc/core/module_options.hpp>
@@ -24,9 +26,8 @@ struct global
   typedef registry<imodule> module_registry;
   typedef registry<ilogger> logger_registry;
   typedef registry<pubsub::ipubsub> pubsub_registry;
-  
-  typedef std::function<callback_status()> idle_callback;
-  callback_list<idle_callback> idle;
+  typedef std::function<void()> idle_handler;
+  fire_list< idle_handler > idle;
 
   std::string program_name;
   std::string program_version;

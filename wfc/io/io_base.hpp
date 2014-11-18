@@ -6,10 +6,10 @@
 #include <wfc/io/types.hpp>
 #include <wfc/io_service.hpp>
 
-#include <wfc/callback/callback_owner.hpp>
+//#include <wfc/callback/callback_owner.hpp>
 #include <fas/aop.hpp>
 #include <functional>
-
+#include <list>
 #include <mutex>              
 #include <condition_variable>
 
