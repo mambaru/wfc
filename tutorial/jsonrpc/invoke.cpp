@@ -32,6 +32,7 @@ int main(int , char* [])
 {
   
   typedef wfc::jsonrpc::invoke< wfc::json::value<int>, wfc::json::value<int>, foo_handler > foo_invoke;
+  foo_invoke();
   /*
   context ctx;
   foo_invoke foo;
