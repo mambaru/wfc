@@ -1,5 +1,6 @@
 #pragma once
 
+#include <wfc/core/iinterface.hpp>
 #include <memory>
 #include <string>
 
@@ -7,7 +8,7 @@ namespace wfc{
 
 struct global;
 
-struct imodule
+struct imodule: iinterface
 {
   enum class priority
   {

@@ -9,20 +9,26 @@ namespace wfc{
 
 wfc::wfc(std::string program_version, std::initializer_list< std::pair< std::string, std::shared_ptr<imodule> > > modules )
   : _program_version(program_version)
-  , _module_list(modules)
+  //, _module_list(modules)
 {
-  
+  _global = std::make_shared<global>(_io_service);
+  for (const auto& p: modules)
+    _global->registry.set(p.first, p.second);
 }
 
 int wfc::run(int argc, char* argv[])
 {
-  _global = std::make_shared<global>(_io_service);
+  //_global = std::make_shared<global>(_io_service);
   global::static_global = _global;
+  /*
   _modules = std::make_shared<global::module_registry>();
   _loggers = std::make_shared<global::logger_registry>();
   _pubsubs = std::make_shared<global::pubsub_registry>();
+  **/
   _global->program_version = _program_version;
   _global->wfc_version = wfc_build_info_string;
+  
+  /*
   _global->modules = _modules;
   _global->loggers = _loggers;
   _global->pubsubs = _pubsubs;
@@ -31,10 +37,11 @@ int wfc::run(int argc, char* argv[])
   {
     _modules->set(m.first, m.second);
   }
+  */
    
-  _modules->for_each([this](const std::string& name, std::weak_ptr<imodule> module)
+  _global->registry.for_each<imodule>([this](const std::string& name, std::shared_ptr<imodule> module)
   {
-    if (auto m = module.lock())
+    if (auto m = module)
       m->create(name,  _global);
   });
 
@@ -56,7 +63,8 @@ int wfc::run(int argc, char* argv[])
   
   std::clog << "wfc::run finalize ... " << std::endl;
   
-  _pubsubs->clear();
+  _global->registry.clear();
+  /*_pubsubs->clear();
   _pubsubs.reset();
   
   _loggers.reset();
@@ -64,6 +72,7 @@ int wfc::run(int argc, char* argv[])
   _module_list.clear();
   _modules->clear();
   _modules.reset();
+  */
   
   global::static_global.reset();
   _global.reset();

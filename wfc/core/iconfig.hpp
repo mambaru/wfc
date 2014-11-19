@@ -1,10 +1,11 @@
 #pragma once
 
+#include <wfc/core/iinterface.hpp>
 #include <string>
 
 namespace wfc{
 
-struct iconfig
+struct iconfig: iinterface
 {
   virtual ~iconfig() {}
   virtual void reconfigure() = 0;

@@ -23,9 +23,6 @@ namespace wfc{
   
 struct global
 { 
-  typedef registry<imodule> module_registry;
-  typedef registry<ilogger> logger_registry;
-  typedef registry<pubsub::ipubsub> pubsub_registry;
   typedef std::function<void()> idle_handler;
   fire_list< idle_handler > idle;
 
@@ -38,11 +35,11 @@ struct global
   std::shared_ptr< istartup >        startup;
   std::shared_ptr< icore >           core;
   std::shared_ptr< iconfig >         config;
-  std::shared_ptr< logger_registry > loggers;
-  std::shared_ptr< module_registry > modules;
-  ::wfc::io_service& io_service;
   
-  std::shared_ptr< pubsub_registry > pubsubs;
+  typedef interface_registry registry_type;
+  registry_type registry;
+
+  ::wfc::io_service& io_service;
 
   static std::shared_ptr<global>   static_global;
   

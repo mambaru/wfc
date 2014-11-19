@@ -30,13 +30,13 @@ void pubsub_gateway::initialize( std::shared_ptr< ::wfc::jsonrpc::service> jsonr
   
   if ( auto g = _global.lock() )
   {
-    if ( auto ps = g->pubsubs )
-    {
-      _incoming_target = ps->get( _options.incoming_target );
-      _outgoing_target = ps->get( _options.outgoing_target );
+    /*if ( auto ps = g->pubsubs )
+    {*/
+      _incoming_target = g->registry.get<ipubsub>( _options.incoming_target );
+      _outgoing_target = g->registry.get<ipubsub>( _options.outgoing_target );
       if ( !_options.pubsub_name.empty() )
-        ps->set(_options.pubsub_name, this->shared_from_this() );
-    }
+        g->registry.set(_options.pubsub_name, this->shared_from_this() );
+    /*}*/
   }
   
   _jsonrpc->create_handler

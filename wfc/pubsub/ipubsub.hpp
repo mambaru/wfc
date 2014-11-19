@@ -1,5 +1,7 @@
 #pragma once
 
+#include <wfc/core/iinterface.hpp>
+
 #include <wfc/pubsub/api/publish.hpp>
 #include <wfc/pubsub/api/multi_publish.hpp>
 #include <wfc/pubsub/api/load.hpp>
@@ -15,7 +17,7 @@
 
 namespace wfc{ namespace pubsub{
 
-struct ipubsub
+struct ipubsub: iinterface
 {
   virtual ~ipubsub(){};
 

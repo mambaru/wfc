@@ -1,11 +1,13 @@
 #pragma once
 
+#include <wfc/core/iinterface.hpp>
+
 #include <sstream>
 #include <string>
 
 namespace wfc{
   
-struct ilogger
+struct ilogger: iinterface
 {
   virtual ~ilogger(){}
   //virtual void initialize(const std::string& name, std::stringstream& str) = 0;

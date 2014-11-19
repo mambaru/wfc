@@ -3,15 +3,17 @@
 
 namespace wfc{
 
-logstream global_log(const std::string& name, const std::string& ident)
+logstream global_log(const std::string& name, const std::string& ident, const std::string& logger)
 {
   std::shared_ptr<ilogger> logger_ptr = nullptr;
   if (auto g = global::static_global)
   {
-    if (auto lr = g->loggers)
+    logger_ptr = g->registry.get<ilogger>(logger);
+    /*if (auto lr = g->loggers)
     {
       logger_ptr = lr->get(name);
     }
+    */
   }
   
   return logstream( 
