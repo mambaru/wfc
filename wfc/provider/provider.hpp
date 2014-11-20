@@ -14,6 +14,12 @@
 #include <map>
 #include <set>
 
+#define PROVIDER_SHOW_COUNTERS(pthis) std::endl                                     \
+  << "post: " << pthis->_post_count << ", confirm: "<< pthis->_confirm_count        \
+  << ", drop_wait: " << pthis->_drop_count_wait << ", drop_limit: " << pthis->_drop_count_limit        \
+  << ",  recall: " << pthis->_recall_count << ",  orphan: " << pthis->_orphan_count 
+ 
+
 namespace wfc{ namespace provider{ 
 
   /*
@@ -60,9 +66,11 @@ public:
     , _io_work(io)
     , _call_id_counter(0)
     , _post_count(0)
+    , _confirm_count(0)
     , _recall_count(0)
     , _orphan_count(0)
-    , _drop_count(0)
+    , _drop_count_wait(0)
+    , _drop_count_limit(0)
   {
   }
   
@@ -87,7 +95,12 @@ public:
   size_t drop_count() const
   {
     ::wfc::read_lock<mutex_type> lk( super::_mutex );
-    return _drop_count;
+    return drop_count_();
+  }
+
+  size_t drop_count_() const
+  {
+    return _drop_count_wait + _drop_count_limit;
   }
 
   // Размер очереди
@@ -141,7 +154,8 @@ public:
       DAEMON_LOG_WARNING( 
         "provider: закрытие соединения при ожидании подверждения удаленного вызова. "
         "Информация о выполнении вызова отсутствует. При востановлении соединения будет сделан повторный вызов. "
-        "Всего повторных вызовов " << _recall_count
+        "Всего повторных вызовов " << this->_recall_count << 
+        PROVIDER_SHOW_COUNTERS(this)
       )
     }
     this->process_queue_();
@@ -207,9 +221,11 @@ public:
       else if (super::_conf.queue_limit==0)
       {
         callback_null_( std::move(callback) );
-        ++_drop_count;
+        ++_drop_count_limit;
         DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен queue_limit=" << super::_conf.queue_limit 
-                         << ". Всего потеряно drop_count=" << this->_drop_count )
+                         << ". Всего потеряно drop_count=" << this->drop_count_()
+                         << PROVIDER_SHOW_COUNTERS(this)
+        ) //
         return;
       }
     }
@@ -228,13 +244,20 @@ public:
     if ( _queue.size() < super::_conf.queue_limit )
     {
       _queue.push_back( f );
+      if ( _queue.size() > super::_conf.queue_warning )
+      {
+        DAEMON_LOG_WARNING("wfc::provider: Превышен queue_warning=" << super::_conf.queue_warning 
+                         << ". Всего потеряно drop_count=" << this->drop_count_()
+                         << PROVIDER_SHOW_COUNTERS(this))
+      }
     }
     else
     {
       callback_null_(std::move(callback) );
-      ++_drop_count;
+      ++_drop_count_limit;
       DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен queue_limit=" << super::_conf.queue_limit 
-                         << ". Всего потеряно drop_count=" << this->_drop_count )
+                         << ". Всего потеряно drop_count=" << this->drop_count_()
+                         << PROVIDER_SHOW_COUNTERS(this) )
     }
   }
 
@@ -327,6 +350,7 @@ private:
         return;
       }
       
+      ++pthis->_confirm_count;
       if ( std::get<2>(call_itr->second) )
       {
         std::get<2>(call_itr->second)->cancel();
@@ -370,13 +394,14 @@ private:
       return;
     }
     
+    ++pthis->_drop_count_wait;
     DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен wait_timeout_ms=" << pthis->_conf.wait_timeout_ms
-                        << ". Всего потеряно drop_count=" << pthis->_drop_count )
+                        << ". Всего потеряно drop_count=" << pthis->drop_count_()
+                        << PROVIDER_SHOW_COUNTERS(pthis) )
 
     pthis->callback_null_( std::move(callback) );
     pthis->_callclipost.erase(call_itr);
     pthis->_clicall.erase(cli_itr);
-    ++pthis->_drop_count;
     pthis->process_queue_();
   }
   
@@ -557,12 +582,15 @@ private:
   delayed_queue _queue;
   
   size_t _post_count;
+  size_t _confirm_count;
   // Повторные вызовы
   size_t _recall_count;
   // Потерянные вызовы (ответы пришедшие после recall или когда отвалились по timeout)
   size_t _orphan_count;
   // сброшенные по timeout
-  size_t _drop_count;
+  size_t _drop_count_wait;
+  size_t _drop_count_limit;
+  
 };
 
 }}
