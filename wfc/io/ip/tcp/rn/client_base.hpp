@@ -34,15 +34,12 @@ template<typename A = fas::aspect<> >
 class client_base
   : public ::wfc::io::basic_io< typename fas::merge_aspect<A, client_aspect>::type >
   , public std::enable_shared_from_this< client_base<A> >
-  //public wfc::io::connection::connection< typename fas::merge_aspect<A, client_aspect>::type >
 {
-  //typedef wfc::io::connection::connection< typename fas::merge_aspect<A, client_aspect>::type > super;
 public:
   typedef client_base<A> self;
   typedef ::wfc::io::basic_io< typename fas::merge_aspect<A, client_aspect>::type > super;
   typedef typename super::options_type options_type;
   typedef typename super::aspect::template advice_cast<_connection_type_>::type connection_type; 
-  //typedef typename super::descriptor_type descriptor_type;
   typedef typename connection_type::descriptor_type socket_type;
   typedef std::shared_ptr<socket_type> socket_ptr;
 
@@ -51,31 +48,9 @@ public:
   typedef boost::asio::deadline_timer reconnect_timer;
   reconnect_timer _reconnect_timer;
   wfc::io::incoming_handler_t _handler;
-
-  // TODO: сделать массив
   std::shared_ptr<connection_type> _connection;
   
-  
-  /*
-  options_type init_options(options_type conf)
-  {
-    auto startup = conf.connection.startup_handler;
-    conf.connection.startup_handler = [this, startup]( ::wfc::io::io_id_t id, ::wfc::io::callback clb, ::wfc::io::add_shutdown_handler add)
-    {
-      auto add_handler = [this](::wfc::io::io_id_t id) 
-      {
-        DAEMON_LOG_WARNING("Connection " << id << " closed. Reconnect...")
-        this->post( std::bind( &self::connect, this) );
-      };
-      
-      add(add_handler);
-      startup( id, clb, add);
-    };
-    return conf;
-  }
-  */
-  
-  client_base(wfc::io_service& io, const options_type& conf/*, ::wfc::io::incoming_handler handler = nullptr*/)
+  client_base(wfc::io_service& io, const options_type& conf)
     : super( io, update_options(this, conf))
     , _reconnect_timer(io)
     , _handler( conf.incoming_handler ) // TODO: убрать 

@@ -18,6 +18,7 @@ class client
 {
 public:
   typedef client_options options_type;
+  typedef ::wfc::jsonrpc::service rpc_type;
   ~client();
   client(io_service& io, const options_type& conf, std::shared_ptr< ::wfc::jsonrpc::service > service);
   void start();

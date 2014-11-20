@@ -16,19 +16,6 @@
 
 namespace wfc{ namespace provider{ 
 
-  /*
-template<typename Callback>
-struct callback_type_1
-
-  
-  template<typename Resp, typename ...Args>
-  struct callback_type_1
-  {
-    typedef std::function<void(Resp, Args...)> type;
-  };
-  */
-
-  
 template<typename Itf>  
 class provider
   : public basic_provider<Itf, provider, std::recursive_mutex>
@@ -220,9 +207,12 @@ public:
     
     if ( _clicall.size() < super::_conf.max_waiting  )
     {
-      auto result = f();
-      if ( this->update_waiting_(result, f) )
-        return;
+      if ( 0 != super::ready_count_() )
+      {
+        auto result = f();
+        if ( this->update_waiting_(result, f) )
+          return;
+      }
     }
     
     if ( _queue.size() < super::_conf.queue_limit )

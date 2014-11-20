@@ -26,14 +26,22 @@ class client;
 
 namespace wfc{ namespace gateway{
   
-
-
 class tcp_client
 {
+  typedef ::wfc::io::ip::tcp::rn::jsonrpc::client client_item_type;
+  typedef client_list<client_item_type> client_type;
+  typedef std::shared_ptr<client_type>  client_ptr;
+  typedef std::list<client_ptr> list_type;
+  
+  typedef client_item_type::options_type client_item_options;
+  typedef client_options<client_item_options> options_type;
+  
+  /*
   typedef ::wfc::jsonrpc::service jsonrpc_type;
   typedef ::wfc::io::ip::tcp::rn::jsonrpc::client client_tcp_type;
   typedef std::shared_ptr<client_tcp_type> client_tcp_ptr;
   typedef std::shared_ptr<jsonrpc_type> jsonrpc_ptr;
+  */
   
 public:
   
