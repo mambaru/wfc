@@ -224,7 +224,16 @@ private:
       if ( auto cli = super::get_(client_id) )
       {
         size_t call_id = ++this->_call_id_counter;
-        (cli.get()->*mem_ptr)( std::move(req), this->wrap_callback_<OrigCallback>( fas::int_<N>(), client_id, call_id, callback ), std::forward<Args>(args)... );
+        (cli.get()->*mem_ptr)( 
+          std::move(req), 
+          this->wrap_callback_<OrigCallback>( 
+            fas::int_<N>(), 
+            client_id, 
+            call_id, 
+            callback 
+          ), 
+          std::forward<Args>(args)... 
+        );
         return;
       }
       else if (super::_conf.queue_limit==0)
@@ -239,7 +248,6 @@ private:
       }
     }
     
-
     // Далее нужна обертка
     post_function f = this->wrap_<N>(mem_ptr, std::move(req), callback, std::forward<Args>(args)...); 
     
@@ -357,6 +365,7 @@ private:
     Args... args
   )
   {
+    DAEMON_LOG_MESSAGE("-DEBUG- mt_confirm_ call_id=" << call_id)
     {
       std::lock_guard<mutex_type> lk(pthis->_mutex); 
       auto call_itr = pthis->_callclipost.find(call_id);
@@ -390,6 +399,7 @@ private:
     const Callback& callback
   )
   {
+    DAEMON_LOG_MESSAGE("-DEBUG- mt_deadline_ call_id=" << call_id)
     std::lock_guard<mutex_type> lk( pthis->_mutex );
     
     auto call_itr = pthis->_callclipost.find(call_id);
