@@ -103,6 +103,7 @@ public:
 
   virtual void startup(size_t client_id, std::shared_ptr<interface_type> ptr )
   {
+    DAEMON_LOG_MESSAGE( "-DEBUG-: wfc::provider::startup client_id=" << client_id )
     std::lock_guard<mutex_type> lk( super::_mutex );
     super::startup_(client_id, ptr);
     this->process_queue_();
@@ -110,6 +111,8 @@ public:
 
   virtual void shutdown(size_t client_id)
   {
+    DAEMON_LOG_MESSAGE( "-DEBUG-: wfc::provider::shutdown client_id=" << client_id )
+    
     std::lock_guard<mutex_type> lk( super::_mutex );
 
     super::shutdown_(client_id);
@@ -130,6 +133,8 @@ public:
       }
       else
       {
+        DAEMON_LOG_MESSAGE( "-DEBUG- FATAL!!! : wfc::provider::shutdown client_id=" << client_id )
+        //!!! abort() ???
         itr++;
         continue;
       }
