@@ -130,11 +130,9 @@ private:
   }
   
 private:
-  
   std::shared_ptr< ::wfc::global> _global;
-  
+
   ::wfc::io_service& _io_service;
-  
   options_type _conf;
   rpc_ptr _rpc;
   client_list _client_list;
