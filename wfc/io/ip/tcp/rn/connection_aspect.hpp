@@ -35,13 +35,13 @@ struct ad_on_read_error
       {
         if ( outgoing_buffer_size!=0 )
         {
-          COMMON_LOG_WARNING("connection closed with outgoing_buffer_size" << outgoing_buffer_size)
+          COMMON_LOG_WARNING("connection closed with outgoing_buffer_size=" << outgoing_buffer_size)
         }
         t.self_stop(t, nullptr);
       }
       else
       {
-        DAEMON_LOG_ERROR("io shutdown not impl. outgoing_buffer_size" << outgoing_buffer_size)
+        DAEMON_LOG_ERROR("io shutdown not impl. outgoing_buffer_size=" << outgoing_buffer_size)
         t.self_stop(t, nullptr); // TODO: shutdown
       }
     }
