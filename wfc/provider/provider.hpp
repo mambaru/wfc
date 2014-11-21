@@ -135,7 +135,7 @@ public:
   }
   
   template<typename R, typename Resp, typename ... Args> 
-  void callback_null_(std::function<R(Resp, Args ...)>&& callback)
+  void callback_null_(const std::function<R(Resp, Args ...)>& callback)
   {
     if ( callback!=nullptr)
     {
@@ -221,7 +221,7 @@ public:
     }
     else
     {
-      callback_null_(std::move(callback) );
+      callback_null_( callback );
       ++_drop_count;
       DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен queue_limit=" << super::_conf.queue_limit 
                          << ". Всего потеряно drop_count=" << this->_drop_count )
@@ -235,7 +235,7 @@ private:
     std::shared_ptr<self> pthis,
     void (interface_type::*mem_ptr)(Req, OrigCallback, Args... args), 
     std::shared_ptr<Req> req, 
-    Callback callback, 
+    const Callback& callback, 
     Args... args
   )
   {
@@ -303,7 +303,7 @@ private:
   static void mt_confirm_( 
     std::shared_ptr<self> pthis,
     size_t call_id,
-    std::function<void(Resp, Args...)> callback,
+    const std::function<void(Resp, Args...)>& callback,
     std::shared_ptr<Resp> resp, 
     Args... args
   )
@@ -337,7 +337,7 @@ private:
     std::shared_ptr<self> pthis,
     size_t client_id, 
     size_t call_id,
-    Callback callback
+    const Callback& callback
   )
   {
     std::lock_guard<mutex_type> lk( pthis->_mutex );
@@ -374,7 +374,7 @@ private:
   post_function wrap_( 
     void (interface_type::*mem_ptr)(Req, OrigCallback, Args... args), 
     Req req, 
-    Callback callback, 
+    const Callback& callback, 
     Args... args
   )
   {
@@ -434,7 +434,7 @@ private:
     fas::int_<1>, 
     size_t /*client_id*/, 
     size_t call_id, 
-    std::function<void(Resp, Args...)> callback
+    const std::function<void(Resp, Args...)>& callback
   ) 
   {
     if ( super::_conf.max_waiting == 0 )
