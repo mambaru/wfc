@@ -54,7 +54,7 @@ public:
           _conf.mode = provider_mode::sequenced;
           if ( conf.queue_limit == 0 )
           {
-            _conf.queue_limit = 1024;
+            _conf.queue_limit = WFC_PROVIDER_DEFAULT_QUEUE_LIMIT;
           }
         }
         else if ( _conf.max_waiting == 0)
@@ -73,7 +73,7 @@ public:
           _conf.mode = provider_mode::insured;
           if ( _conf.queue_limit==0 )
           {
-            _conf.queue_limit=1024;
+            _conf.queue_limit=WFC_PROVIDER_DEFAULT_QUEUE_LIMIT;
           }
         }
         break;
@@ -83,18 +83,18 @@ public:
         break;
       case provider_mode::connectify: 
         if ( _conf.queue_limit == 0 )
-          _conf.queue_limit = 1024;
+          _conf.queue_limit = WFC_PROVIDER_DEFAULT_QUEUE_LIMIT;
         _conf.max_waiting = 0;
         break;
       case provider_mode::insured:
         if ( _conf.queue_limit == 0 )
-          _conf.queue_limit = 1024;
+          _conf.queue_limit = WFC_PROVIDER_DEFAULT_QUEUE_LIMIT;
         if ( _conf.max_waiting == 0)
-          _conf.max_waiting = 1024;
+          _conf.max_waiting = WFC_PROVIDER_DEFAULT_MAX_WAIT;
         break;
       case provider_mode::sequenced: 
         if ( _conf.queue_limit == 0 )
-          _conf.queue_limit = 1024;
+          _conf.queue_limit = WFC_PROVIDER_DEFAULT_QUEUE_LIMIT;
         if ( _conf.max_waiting != 1 )
           _conf.max_waiting = 1;
         break;

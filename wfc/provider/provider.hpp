@@ -14,6 +14,13 @@
 #include <map>
 #include <set>
 
+#define PROVIDER_SHOW_COUNTERS(pthis) std::endl                                                 \
+  << "post: " << pthis->_post_count << ", confirm: "<< pthis->_confirm_count                    \
+  << ", queue: " << pthis->queue_size_() << ", wait: "<< pthis->wait_count_()                   \
+  << ", drop_wait: " << pthis->_drop_count_wait << ", drop_limit: " << pthis->_drop_count_limit \
+  << ",  recall: " << pthis->_recall_count << ",  orphan: " << pthis->_orphan_count << ",  orphan_deadline: " << pthis->_orphan_deadline
+ 
+
 namespace wfc{ namespace provider{ 
 
 template<typename Itf>  
@@ -47,9 +54,12 @@ public:
     , _io_work(io)
     , _call_id_counter(0)
     , _post_count(0)
+    , _confirm_count(0)
     , _recall_count(0)
     , _orphan_count(0)
-    , _drop_count(0)
+    , _orphan_deadline(0)
+    , _drop_count_wait(0)
+    , _drop_count_limit(0)
   {
   }
   
@@ -74,22 +84,22 @@ public:
   size_t drop_count() const
   {
     ::wfc::read_lock<mutex_type> lk( super::_mutex );
-    return _drop_count;
+    return drop_count_();
   }
 
   // Размер очереди
   size_t queue_size() const
   {
     ::wfc::read_lock<mutex_type> lk( super::_mutex );
-    return _queue.size();
+    return queue_size_();
   }
 
   // Число запросов ожидающих подверждения
   size_t wait_count() const
   {
-    ::wfc::read_lock<mutex_type> lk( super::_mutex );
-    return _clicall.size();
+    return this->wait_count_();
   }
+
 
   virtual void startup(size_t client_id, std::shared_ptr<interface_type> ptr )
   {
@@ -128,7 +138,8 @@ public:
       DAEMON_LOG_WARNING( 
         "provider: закрытие соединения при ожидании подверждения удаленного вызова. "
         "Информация о выполнении вызова отсутствует. При востановлении соединения будет сделан повторный вызов. "
-        "Всего повторных вызовов " << _recall_count
+        "Всего повторных вызовов " << this->_recall_count << 
+        PROVIDER_SHOW_COUNTERS(this)
       )
     }
     this->process_queue_();
@@ -164,6 +175,26 @@ public:
   {
     this->post_<2>( mem_ptr, std::move(req), std::move(callback), std::forward<Args>(args)...);
   }
+  
+private:
+  
+  size_t queue_size_() const
+  {
+    return _queue.size();
+  }
+
+  size_t wait_count_() const
+  {
+    return _clicall.size();
+  }
+
+  size_t drop_count_() const
+  {
+    return _drop_count_wait + _drop_count_limit;
+  }
+
+  
+private:
 
   template<int N, typename Req, typename OrigCallback, typename Callback, typename... Args>
   void post_( 
@@ -175,7 +206,7 @@ public:
   {
     if ( !super::_conf.enabled )
     {
-      callback_null_( std::move(callback) );
+      callback_null_( callback );
       return;
     }
 
@@ -193,17 +224,19 @@ public:
       }
       else if (super::_conf.queue_limit==0)
       {
-        callback_null_( std::move(callback) );
-        ++_drop_count;
+        callback_null_( callback );
+        ++_drop_count_limit;
         DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен queue_limit=" << super::_conf.queue_limit 
-                         << ". Всего потеряно drop_count=" << this->_drop_count )
+                         << ". Всего потеряно drop_count=" << this->drop_count_()
+                         << PROVIDER_SHOW_COUNTERS(this)
+        ) //
         return;
       }
     }
     
 
     // Далее нужна обертка
-    post_function f = this->wrap_<N>(mem_ptr, std::move(req), std::move(callback), std::forward<Args>(args)...); 
+    post_function f = this->wrap_<N>(mem_ptr, std::move(req), callback, std::forward<Args>(args)...); 
     
     if ( _clicall.size() < super::_conf.max_waiting  )
     {
@@ -213,22 +246,33 @@ public:
         if ( this->update_waiting_(result, f) )
           return;
       }
+      else
+      {
+        DAEMON_LOG_MESSAGE("wfc::provider: нет активного соединения. Запрос будет отправлен в очередь")
+      }
     }
     
     if ( _queue.size() < super::_conf.queue_limit )
     {
       _queue.push_back( f );
+      if ( _queue.size() > super::_conf.queue_warning )
+      {
+        DAEMON_LOG_WARNING("wfc::provider: Превышен queue_warning=" << super::_conf.queue_warning 
+                         << ". Всего потеряно drop_count=" << this->drop_count_()
+                         << PROVIDER_SHOW_COUNTERS(this))
+      }
     }
     else
     {
       callback_null_( callback );
-      ++_drop_count;
+      ++_drop_count_limit;
       DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен queue_limit=" << super::_conf.queue_limit 
-                         << ". Всего потеряно drop_count=" << this->_drop_count )
+                         << ". Всего потеряно drop_count=" << this->drop_count_()
+                         << PROVIDER_SHOW_COUNTERS(this) )
     }
   }
 
-private:
+
   
   template<int N, typename Req, typename OrigCallback, typename Callback, typename... Args>
   static clicall_pair send_( 
@@ -317,6 +361,7 @@ private:
         return;
       }
       
+      ++pthis->_confirm_count;
       if ( std::get<2>(call_itr->second) )
       {
         std::get<2>(call_itr->second)->cancel();
@@ -344,9 +389,12 @@ private:
     
     auto call_itr = pthis->_callclipost.find(call_id);
     if ( call_itr == pthis->_callclipost.end() )
+    {
+      ++pthis->_orphan_deadline;
       return;
+    }
     
-    auto cli_itr = pthis->_clicall.find( { std::get<0>(call_itr->second), call_itr->first});
+    auto cli_itr = pthis->_clicall.find( { std::get<0>(call_itr->second), call_itr->first} );
     if ( cli_itr == pthis->_clicall.end() )
     {
       DAEMON_LOG_FATAL("provider::process_queue_: ошибка логики")
@@ -360,13 +408,14 @@ private:
       return;
     }
     
+    ++pthis->_drop_count_wait;
     DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен wait_timeout_ms=" << pthis->_conf.wait_timeout_ms
-                        << ". Всего потеряно drop_count=" << pthis->_drop_count )
+                        << ". Всего потеряно drop_count=" << pthis->drop_count_()
+                        << PROVIDER_SHOW_COUNTERS(pthis) )
 
     pthis->callback_null_( std::move(callback) );
     pthis->_callclipost.erase(call_itr);
     pthis->_clicall.erase(cli_itr);
-    ++pthis->_drop_count;
     pthis->process_queue_();
   }
   
@@ -391,44 +440,8 @@ private:
     );
   }
   
-  /*
-  template<typename Resp, typename ...Args>
-  std::function<void(Resp, Args...)>
-  callback_detect_1(std::function<void(Resp, Args...)>);
-
-  template<typename Resp, typename ...Args>
-  std::function<void(Resp, Args...)>
-  callback_detect_2(std::function<void(Resp, size_t, Args...)>);
-  
-  
-
-  template<typename Callback>
-  decltype(callback_detect_1(Callback()))
-  wrap_callback_(
-    fas::int_<1>, 
-    size_t client_id, 
-    size_t call_id, 
-    Callback callback
-  ) 
-  {
-    return this->wrap_callback_1(client_id, call_id, callback);
-  }
-
-  template<typename Callback>
-  decltype(callback_detect_2(Callback()))
-  wrap_callback_(
-    fas::int_<2>, 
-    size_t client_id, 
-    size_t call_id, 
-    Callback callback
-  )
-  {
-    return this->wrap_callback_2(client_id, call_id, callback);
-  }*/
-  
   
   template<typename OrigCallback, typename Resp, typename ...Args>
-  //std::function<void(Resp, Args...)>
   OrigCallback
   wrap_callback_(
     fas::int_<1>, 
@@ -456,7 +469,6 @@ private:
   }
 
   template<typename OrigCallback, typename Resp, typename ...Args>
-  //std::function<void(Resp, Args...)>
   OrigCallback
   wrap_callback_(
     fas::int_<2>, 
@@ -475,8 +487,11 @@ private:
         callback( std::move(resp), client_id, std::forward<Args>(args)...);
       };
     }
+    
     auto pthis = this->shared_from_this();
+    
     auto callback_fun = &provider<Itf>::mt_confirm_<Resp, size_t, Args...>;
+    
     return [callback_fun, pthis, client_id, call_id, callback](Resp resp, Args... args)
     {
       auto presp = std::make_shared<Resp>(std::move(resp) );
@@ -532,6 +547,7 @@ private:
       
       if ( !this->update_waiting_(result, f) )
         break;
+      
       _queue.pop_front();
     }
     return count;
@@ -547,12 +563,16 @@ private:
   delayed_queue _queue;
   
   size_t _post_count;
+  size_t _confirm_count;
   // Повторные вызовы
   size_t _recall_count;
   // Потерянные вызовы (ответы пришедшие после recall или когда отвалились по timeout)
   size_t _orphan_count;
+  size_t _orphan_deadline; // Удалить, нафиг не нужно. Для отладки
   // сброшенные по timeout
-  size_t _drop_count;
+  size_t _drop_count_wait;
+  size_t _drop_count_limit;
+  
 };
 
 }}
