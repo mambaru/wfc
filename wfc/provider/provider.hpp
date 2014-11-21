@@ -365,7 +365,7 @@ private:
     Args... args
   )
   {
-    DAEMON_LOG_MESSAGE("-DEBUG- mt_confirm_ call_id=" << call_id)
+    DAEMON_LOG_MESSAGE("-DEBUG- mt_confirm_ call_id=" << call_id << " this=" << size_t(pthis->get()))
     {
       std::lock_guard<mutex_type> lk(pthis->_mutex); 
       auto call_itr = pthis->_callclipost.find(call_id);
@@ -399,7 +399,7 @@ private:
     const Callback& callback
   )
   {
-    DAEMON_LOG_MESSAGE("-DEBUG- mt_deadline_ call_id=" << call_id)
+    DAEMON_LOG_MESSAGE("-DEBUG- mt_deadline_ call_id=" << call_id << " this=" << size_t(pthis->get()))
     std::lock_guard<mutex_type> lk( pthis->_mutex );
     
     auto call_itr = pthis->_callclipost.find(call_id);
