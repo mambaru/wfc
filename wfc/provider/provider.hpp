@@ -190,6 +190,12 @@ private:
 
   size_t wait_count_() const
   {
+    if ( _clicall.size() != _callclipost.size() )
+    {
+      DAEMON_LOG_FATAL("provider::process_queue_: ошибка логики")
+      abort();
+    }
+
     return _clicall.size();
   }
 
@@ -317,14 +323,22 @@ private:
           auto req_for_send = std::make_unique<typename Req::element_type>(**req);
           if (timer)
           {
+            auto client_id = result.first;
             timer->expires_from_now(boost::posix_time::milliseconds(pthis->_conf.wait_timeout_ms));
-            timer->async_wait( std::bind(
+            timer->async_wait( 
+              [pthis, client_id, call_id, callback]( const ::boost::system::error_code& ec)
+              {
+                if ( ec == boost::asio::error::operation_aborted )
+                  return;
+                pthis->mt_deadline_<Callback>(client_id, call_id, std::move(callback));
+              }
+            /*std::bind(
                 &provider<Itf>::mt_deadline_<Callback>, 
                 pthis, 
                 result.first, 
                 call_id,
                 callback // <- не обернутый callback
-            ) );
+            )*/ );
           }
           ++(pthis->_post_count);
           (cli.get()->*mem_ptr)( std::move(req_for_send), std::move(wcallback), std::forward<Args>(args)... );
@@ -461,7 +475,8 @@ private:
     auto callback_fun = &provider<Itf>::mt_confirm_<Resp, Args...>;
     return [callback_fun, pthis, call_id, callback](Resp resp, Args... args)
     {
-      auto presp = std::make_shared<Resp>(std::move(resp) );
+      auto presp = std
+      ::make_shared<Resp>(std::move(resp) );
       pthis->_io_service.post( std::bind(
         callback_fun,
         pthis,
