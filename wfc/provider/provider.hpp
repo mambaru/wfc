@@ -338,7 +338,7 @@ private:
               {
                 if ( ec == boost::asio::error::operation_aborted )
                   return;
-                pthis->mt_deadline_<Callback>(client_id, call_id, std::move(callback));
+                self::mt_deadline_<Callback>(pthis, client_id, call_id, std::move(callback));
               }
             /*std::bind(
                 &provider<Itf>::mt_deadline_<Callback>, 
@@ -379,7 +379,7 @@ private:
     Args... args
   )
   {
-    DAEMON_LOG_MESSAGE("-DEBUG- mt_confirm_ call_id=" << call_id << " this=" << size_t(pthis->get()))
+    DAEMON_LOG_MESSAGE("-DEBUG- mt_confirm_ call_id=" << call_id << " this=" << size_t(reinterpret_cast<const char*>(pthis.get())))
     {
       std::lock_guard<mutex_type> lk(pthis->_mutex); 
       auto call_itr = pthis->_callclipost.find(call_id);
@@ -413,7 +413,7 @@ private:
     const Callback& callback
   )
   {
-    DAEMON_LOG_MESSAGE("-DEBUG- mt_deadline_ call_id=" << call_id << " this=" << size_t(pthis->get()))
+    DAEMON_LOG_MESSAGE("-DEBUG- mt_deadline_ call_id=" << call_id << " this=" << size_t(reinterpret_cast<const char*>(pthis.get())))
     std::lock_guard<mutex_type> lk( pthis->_mutex );
     
     auto call_itr = pthis->_callclipost.find(call_id);
