@@ -103,7 +103,6 @@ public:
 
   virtual void startup(size_t client_id, std::shared_ptr<interface_type> ptr )
   {
-    DAEMON_LOG_MESSAGE( "-DEBUG-: wfc::provider::startup client_id=" << client_id )
     std::lock_guard<mutex_type> lk( super::_mutex );
     super::startup_(client_id, ptr);
     this->process_queue_();
@@ -111,8 +110,6 @@ public:
 
   virtual void shutdown(size_t client_id)
   {
-    DAEMON_LOG_MESSAGE( "-DEBUG-: wfc::provider::shutdown client_id=" << client_id )
-    
     std::lock_guard<mutex_type> lk( super::_mutex );
 
     super::shutdown_(client_id);
@@ -126,17 +123,23 @@ public:
       auto itr2 = _callclipost.find( itr->second );
       if ( itr2 != _callclipost.end() )
       {
-        // Дупустимо переполнение очереди на wait_limit
-        _queue.push_front( std::get<1>(itr2->second) );
-        _callclipost.erase(itr2);
-        _clicall.erase(itr++);
+        if ( auto f = std::get<1>(itr2->second) )
+        {
+          // Дупустимо переполнение очереди на wait_limit
+          _queue.push_front( std::get<1>(itr2->second) );
+          _callclipost.erase(itr2);
+          _clicall.erase(itr++);
+        }
+        else
+        {
+          
+        }
       }
       else
       {
-        DAEMON_LOG_MESSAGE( "-DEBUG- FATAL!!! : wfc::provider::shutdown client_id=" << client_id )
-        //!!! abort() ???
-        itr++;
-        continue;
+        DAEMON_LOG_FATAL("Ошибка логики. В списке ожидания не найден объект по call_id=" 
+                    << itr->second << ". wfc::provider::shutdown client_id=" << client_id )
+        abort();
       }
 
       ++_recall_count; // !!!Счетчик будующих повторных вызовов
@@ -246,10 +249,13 @@ private:
       {
         callback_null_( callback );
         ++_drop_count_limit;
-        DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен queue_limit=" << super::_conf.queue_limit 
-                         << ". Всего потеряно drop_count=" << this->drop_count_()
-                         << PROVIDER_SHOW_COUNTERS(this)
-        ) //
+        if ( super::_conf.queue_warning <= super::_conf.queue_limit)
+        {
+          DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен queue_limit=" << super::_conf.queue_limit 
+                              << ". Всего потеряно drop_count=" << this->drop_count_()
+                              << PROVIDER_SHOW_COUNTERS(this)
+          ) //
+        }
         return;
       }
     }
@@ -274,7 +280,7 @@ private:
     if ( _queue.size() < super::_conf.queue_limit )
     {
       _queue.push_back( f );
-      if ( _queue.size() > super::_conf.queue_warning )
+      if ( _queue.size() > super::_conf.queue_warning && super::_conf.queue_warning <= super::_conf.queue_limit)
       {
         DAEMON_LOG_WARNING("wfc::provider: Превышен queue_warning=" << super::_conf.queue_warning 
                          << ". Всего потеряно drop_count=" << this->drop_count_()
@@ -285,9 +291,12 @@ private:
     {
       callback_null_( callback );
       ++_drop_count_limit;
-      DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен queue_limit=" << super::_conf.queue_limit 
-                         << ". Всего потеряно drop_count=" << this->drop_count_()
-                         << PROVIDER_SHOW_COUNTERS(this) )
+      if ( super::_conf.queue_warning <= super::_conf.queue_limit )
+      {
+        DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен queue_limit=" << super::_conf.queue_limit 
+                            << ". Всего потеряно drop_count=" << this->drop_count_()
+                            << PROVIDER_SHOW_COUNTERS(this) )
+      }
     }
   }
 
@@ -340,13 +349,7 @@ private:
                   return;
                 self::mt_deadline_<Callback>(pthis, client_id, call_id, std::move(callback));
               }
-            /*std::bind(
-                &provider<Itf>::mt_deadline_<Callback>, 
-                pthis, 
-                result.first, 
-                call_id,
-                callback // <- не обернутый callback
-            )*/ );
+            );
           }
           ++(pthis->_post_count);
           (cli.get()->*mem_ptr)( std::move(req_for_send), std::move(wcallback), std::forward<Args>(args)... );
@@ -379,7 +382,6 @@ private:
     Args... args
   )
   {
-    DAEMON_LOG_MESSAGE("-DEBUG- mt_confirm_ call_id=" << call_id << " this=" << size_t(reinterpret_cast<const char*>(pthis.get())))
     {
       std::lock_guard<mutex_type> lk(pthis->_mutex); 
       auto call_itr = pthis->_callclipost.find(call_id);
@@ -413,7 +415,6 @@ private:
     const Callback& callback
   )
   {
-    DAEMON_LOG_MESSAGE("-DEBUG- mt_deadline_ call_id=" << call_id << " this=" << size_t(reinterpret_cast<const char*>(pthis.get())))
     std::lock_guard<mutex_type> lk( pthis->_mutex );
     
     auto call_itr = pthis->_callclipost.find(call_id);
@@ -567,7 +568,7 @@ private:
         break;
 
       auto f = _queue.front();
-      if ( f==nullptr )
+      if ( f == nullptr )
       {
         DAEMON_LOG_FATAL("provider::process_queue_: ошибка логики")
         abort();
