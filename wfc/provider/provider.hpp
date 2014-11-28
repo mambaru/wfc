@@ -234,7 +234,7 @@ private:
   {
     if ( _clicall.size() != _callclipost.size() )
     {
-      DAEMON_LOG_FATAL("provider::process_queue_: ошибка логики")
+      DAEMON_LOG_FATAL("provider::wait_count_: index error. _clicall.size()=" << _clicall.size() << " _callclipost.size()" << _callclipost.size())
       abort();
     }
 
@@ -346,8 +346,19 @@ private:
       
       if (pthis->_conf.max_waiting != 0 )
       {
-        pthis->_clicall.insert({result.first, call_id});
-        auto call_itr = pthis->_callclipost.insert({call_id, clipost{result.first, nullptr, nullptr}}).first;
+        if ( !pthis->_clicall.insert({result.first, call_id}).second )
+        {
+          DAEMON_LOG_FATAL("wfc::provider: insert to set fail! client_id=" << result.first << " call_id=" << call_id)
+          abort();
+        }
+        
+        auto respair = pthis->_callclipost.insert({call_id, clipost{result.first, nullptr, nullptr}});
+        if ( !respair.second )
+        {
+          DAEMON_LOG_FATAL("wfc::provider: insert to map fail! client_id=" << result.first << " call_id=" << call_id)
+          abort();
+        }
+        auto call_itr = respair.first;
         
         if (pthis->_conf.wait_timeout_ms != 0 )
         {
@@ -462,13 +473,13 @@ private:
     auto cli_itr = pthis->_clicall.find( { std::get<0>(call_itr->second), call_itr->first} );
     if ( cli_itr == pthis->_clicall.end() )
     {
-      DAEMON_LOG_FATAL("provider::process_queue_: ошибка логики")
+      DAEMON_LOG_FATAL("provider::mt_deadline_: ошибка логики")
       abort();
     }
 
     if ( client_id != cli_itr->first )
     {
-      DAEMON_LOG_FATAL("provider::process_queue_: ошибка логики")
+      DAEMON_LOG_FATAL("provider::mt_deadline_: ошибка логики")
       abort();
       return;
     }
