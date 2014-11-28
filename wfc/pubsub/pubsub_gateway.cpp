@@ -154,8 +154,20 @@ void pubsub_gateway::process_outgoing_( ::wfc::io::data_ptr d )
         typedef ::wfc::jsonrpc::outgoing_result_json< 
           ::wfc::json::raw_value< ::wfc::io::data_type> 
         >::serializer serializer;
-        result.result = std::move(resp->content);
+        
         result.id = std::make_unique<data_type>(call_id->begin(), call_id->end());
+        
+        if ( resp != nullptr )
+        {
+          result.result = std::move(resp->content);
+          if ( result.result == nullptr )
+          {
+            static const char* empty_object = WFC_JSON_EMPTY_OBJECT_STRING;
+            static const size_t empty_object_size = strlen(empty_object);
+            result.result = std::make_unique<data_type>();
+            result.result->assign(empty_object, empty_object + empty_object_size);
+          }
+        }
         
         auto data = std::make_unique< data_type >();
         if ( result.result!=nullptr )
@@ -167,32 +179,8 @@ void pubsub_gateway::process_outgoing_( ::wfc::io::data_ptr d )
           data->reserve( 64 );
         }
           
-        serializer()(result, std::back_inserter( *data ) );
+        serializer()(result, std::inserter( *data, data->end() ) );
         (*(pthis->_jsonrpc))( std::move(data), pthis->get_id(), nullptr );
-        /*
-
-        typedef ::wfc::jsonrpc::outgoing_result_json< 
-          ::wfc::json::raw_value< ::wfc::io::data_type> 
-        >::serializer serializer;
-  
-        if ( notify.params!=nullptr )
-        {
-          data->reserve(notify.params->size() + 200 );
-        }
-        notify.method.assign(req->channel.begin() + _options.incoming_channel.size() + 1, req->channel.end());
-        */
-        
-        /*
-        auto data = std::make_unique< data_type >();
-        typedef response::query_json::serializer serializer;
-        serializer()(*resp, std::back_inserter( *data ) );
-        */
-        
-        //pthis->_jsonrpc( std::move(data), super::get_id(), nullptr );
-        /// 
-        /// TODO: result SERIALIZERRR !
-        /// 
-        
       } );
     }
     else
@@ -369,21 +357,26 @@ void pubsub_gateway::query(request_query_ptr req, query_callback cb)
   
   wfc::io::outgoing_handler_t io_cb = nullptr;
   
-  if ( cb != nullptr ) io_cb = [cb](wfc::io::data_ptr d)
+  if ( cb != nullptr ) 
   {
-    ::wfc::jsonrpc::incoming_holder holder( std::move(d) );
-    holder.parse();
-    auto resp = std::make_unique<response::query>();
-    if ( holder.is_response() )
+    io_cb = [cb](wfc::io::data_ptr d)
     {
-      resp->status = status::ready;
-    }
-    else
-    {
-      resp->status = status::internal_error;
-    }
-    cb( std::move(resp) );
-  };
+      ::wfc::jsonrpc::incoming_holder holder( std::move(d) );
+      holder.parse();
+      auto resp = std::make_unique<response::query>();
+      if ( holder.is_response() )
+      {
+        resp->status = status::ready;
+      }
+      else
+      {
+        resp->status = status::internal_error;
+      }
+    
+      cb( std::move(resp) );
+    };
+  }
+  
   
   auto data = std::make_unique< ::wfc::io::data_type >();
   

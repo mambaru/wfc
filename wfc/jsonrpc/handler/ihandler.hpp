@@ -56,6 +56,7 @@ struct ihandler: ihandler_t<ihandler_base>
   
   send_request_t send_request = nullptr;
   send_notify_t  send_notify = nullptr;
+  //bool null_result_to_empty_object = false;
   
 };
 

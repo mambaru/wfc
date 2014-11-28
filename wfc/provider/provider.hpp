@@ -14,12 +14,12 @@
 #include <map>
 #include <set>
 
-#define PROVIDER_SHOW_COUNTERS(pthis) std::endl                                                 \
-  << "post: " << pthis->_post_count << ", confirm: "<< pthis->_confirm_count                    \
-  << ", queue: " << pthis->queue_size_() << ", wait: "<< pthis->wait_count_()                   \
-  << ", drop_wait: " << pthis->_drop_count_wait << ", drop_limit: " << pthis->_drop_count_limit \
+#define PROVIDER_SHOW_COUNTERS(pthis) ""\
+  << ". post: " << pthis->_post_count << ", confirm: "<< pthis->_confirm_count << ", bad_gateway: " << pthis->_bad_gateway_count          \
+  << ", queue: " << pthis->queue_size_() << ", wait: "<< pthis->wait_count_()          \
+  << ", drop_total: " << pthis->drop_count_() << ", drop_timeout: " << pthis->_drop_count_wait << ", drop_limit: " << pthis->_drop_count_limit \
   << ",  recall: " << pthis->_recall_count << ",  orphan: " << pthis->_orphan_count << ",  orphan_deadline: " << pthis->_orphan_deadline
- 
+
 
 namespace wfc{ namespace provider{ 
 
@@ -60,6 +60,8 @@ public:
     , _orphan_deadline(0)
     , _drop_count_wait(0)
     , _drop_count_limit(0)
+    , _bad_gateway_count(0)
+    , _logtm(0)
   {
   }
   
@@ -132,6 +134,9 @@ public:
         }
         else
         {
+          DAEMON_LOG_FATAL("Ошибка логики. Нулевой запрос по call_id=" 
+                    << itr->second << ". wfc::provider::shutdown client_id=" << client_id )
+          abort();
           
         }
       }
@@ -143,12 +148,7 @@ public:
       }
 
       ++_recall_count; // !!!Счетчик будующих повторных вызовов
-      DAEMON_LOG_WARNING( 
-        "provider: закрытие соединения при ожидании подверждения удаленного вызова. "
-        "Информация о выполнении вызова отсутствует. При востановлении соединения будет сделан повторный вызов. "
-        "Всего повторных вызовов " << this->_recall_count << 
-        PROVIDER_SHOW_COUNTERS(this)
-      )
+      this->log_if_( log::recall_warn);
     }
     this->process_queue_();
   }
@@ -185,6 +185,45 @@ public:
   }
   
 private:
+  
+  enum class log
+  {
+    drop_timeout,
+    drop_limit,
+    limit_warn,
+    recall_warn,
+    bad_gateway
+  };
+  
+  void log_if_(log type, bool logtm = false)
+  {
+    
+    if (logtm)
+    {
+      time_t now = time(0);
+      if ( !(_logtm < now) )
+        return;
+      _logtm = now;
+    }
+    
+    switch(type)
+    {
+      case log::drop_timeout:
+        DAEMON_LOG_WARNING("wfc::provider: lost message. Drop by wait timeout. wait_timeout_ms=" << super::_conf.wait_timeout_ms << PROVIDER_SHOW_COUNTERS(this) )
+        break;
+      case log::drop_limit:
+        DAEMON_LOG_WARNING("wfc::provider: lost message. Drop by queue_limit. queue_limit=" << super::_conf.queue_limit << PROVIDER_SHOW_COUNTERS(this) )
+        break;
+      case log::limit_warn:
+        DAEMON_LOG_WARNING("wfc::provider: queue size limit warning. queue_warning=" << super::_conf.queue_warning << PROVIDER_SHOW_COUNTERS(this))
+        break;
+      case log::recall_warn:
+        DAEMON_LOG_WARNING("wfc::provider: connection was closed while waiting for response. When you restore connection will be re-sending a message" << PROVIDER_SHOW_COUNTERS(this) )
+      case log::bad_gateway:
+        DAEMON_LOG_WARNING("wfc::provider: bad gateway. Re-sending a message" << PROVIDER_SHOW_COUNTERS(this) )
+        break;
+    }
+  }
   
   size_t queue_size_() const
   {
@@ -249,13 +288,7 @@ private:
       {
         callback_null_( callback );
         ++_drop_count_limit;
-        if ( super::_conf.queue_warning <= super::_conf.queue_limit)
-        {
-          DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен queue_limit=" << super::_conf.queue_limit 
-                              << ". Всего потеряно drop_count=" << this->drop_count_()
-                              << PROVIDER_SHOW_COUNTERS(this)
-          ) //
-        }
+        this->log_if_( log::drop_limit, true);
         return;
       }
     }
@@ -273,30 +306,21 @@ private:
       }
       else
       {
-        DAEMON_LOG_MESSAGE("wfc::provider: нет активного соединения. Запрос будет отправлен в очередь")
+        DAEMON_LOG_MESSAGE("wfc::provider: No connection. The request will be sent to the queue.")
       }
     }
     
     if ( _queue.size() < super::_conf.queue_limit )
     {
       _queue.push_back( f );
-      if ( _queue.size() > super::_conf.queue_warning && super::_conf.queue_warning <= super::_conf.queue_limit)
-      {
-        DAEMON_LOG_WARNING("wfc::provider: Превышен queue_warning=" << super::_conf.queue_warning 
-                         << ". Всего потеряно drop_count=" << this->drop_count_()
-                         << PROVIDER_SHOW_COUNTERS(this))
-      }
+      if ( _queue.size() > super::_conf.queue_warning )
+        this->log_if_( log::limit_warn, true);
     }
     else
     {
       callback_null_( callback );
       ++_drop_count_limit;
-      if ( super::_conf.queue_warning <= super::_conf.queue_limit )
-      {
-        DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен queue_limit=" << super::_conf.queue_limit 
-                            << ". Всего потеряно drop_count=" << this->drop_count_()
-                            << PROVIDER_SHOW_COUNTERS(this) )
-      }
+      this->log_if_(log::drop_limit, true);
     }
   }
 
@@ -382,6 +406,7 @@ private:
     Args... args
   )
   {
+    // TODO: if *resp == nullptr значит был bad_gateway, т.е. нужно перепослать
     {
       std::lock_guard<mutex_type> lk(pthis->_mutex); 
       auto call_itr = pthis->_callclipost.find(call_id);
@@ -391,7 +416,17 @@ private:
         return;
       }
       
-      ++pthis->_confirm_count;
+      if ( *resp != nullptr )
+      {
+        ++pthis->_confirm_count;
+      }
+      else
+      {
+        ++pthis->_bad_gateway_count;
+        pthis->_queue.push_front( std::get<1>(call_itr->second) );
+        pthis->log_if_(log::bad_gateway);
+      }
+      
       if ( std::get<2>(call_itr->second) )
       {
         std::get<2>(call_itr->second)->cancel();
@@ -439,9 +474,7 @@ private:
     }
     
     ++pthis->_drop_count_wait;
-    DAEMON_LOG_WARNING("wfc::provider потеряный запрос. Превышен wait_timeout_ms=" << pthis->_conf.wait_timeout_ms
-                        << ". Всего потеряно drop_count=" << pthis->drop_count_()
-                        << PROVIDER_SHOW_COUNTERS(pthis) )
+    pthis->log_if_( log::drop_timeout );
 
     pthis->callback_null_( std::move(callback) );
     pthis->_callclipost.erase(call_itr);
@@ -486,8 +519,7 @@ private:
     auto callback_fun = &provider<Itf>::mt_confirm_<Resp, Args...>;
     return [callback_fun, pthis, call_id, callback](Resp resp, Args... args)
     {
-      auto presp = std
-      ::make_shared<Resp>(std::move(resp) );
+      auto presp = std::make_shared<Resp>(std::move(resp) );
       pthis->_io_service.post( std::bind(
         callback_fun,
         pthis,
@@ -603,7 +635,9 @@ private:
   // сброшенные по timeout
   size_t _drop_count_wait;
   size_t _drop_count_limit;
+  size_t _bad_gateway_count;
   
+  time_t _logtm;
 };
 
 }}
