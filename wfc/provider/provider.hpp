@@ -26,7 +26,7 @@ namespace wfc{ namespace provider{
 class wait_map
 {
   typedef std::mutex mutex_type;
-  const size_t null_id = static_cast<size_t>(-1);
+  //const size_t null_id = static_cast<size_t>(-1);
 public:
   
   typedef size_t client_id_t;
@@ -204,7 +204,7 @@ class provider
   typedef std::chrono::high_resolution_clock clock_t;
   typedef clock_t::time_point time_point_t;
 
-  const size_t null_id = static_cast<size_t>(-1);
+  //const size_t null_id = static_cast<size_t>(-1);
 
 public:
 
@@ -282,16 +282,16 @@ public:
   {
     std::lock_guard<mutex_type> lk( super::_mutex );
     super::startup_(client_id, ptr);
+    DAEMON_LOG_MESSAGE("::wfc::provider::startup new connecion with client_id=" << client_id << " queue size=" << _queue.size() );
     this->process_queue_();
   }
 
   virtual void shutdown(size_t client_id)
   {
     std::lock_guard<mutex_type> lk( super::_mutex );
-
     super::shutdown_(client_id);
-    
     auto erased = _wait_map.erase_client(client_id);
+    DAEMON_LOG_MESSAGE("::wfc::provider::shutdown connecion with client_id=" << client_id << " queue size=" << _queue.size() << " waits for =" << erased.size() );
     for (auto& e : erased)
     {
       if ( auto f = e->post_fun )
@@ -908,6 +908,10 @@ private:
         break;
       
       _queue.pop_front();
+      
+      if ( _queue.size() > super::_conf.queue_warning )
+        this->log_if_( log::limit_warn, true);
+
     }
     return count;
   }
