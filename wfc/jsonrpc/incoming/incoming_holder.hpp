@@ -6,9 +6,13 @@
 #include <wfc/memory.hpp>
 
 #include <chrono>
+#include <cstring>
+
+#define WFC_JSON_EMPTY_OBJECT_STRING "\"~~wfc-empty-object~~\""
 
 namespace wfc{ namespace jsonrpc{
 
+  
 class incoming_holder
 {
 public:
@@ -71,6 +75,12 @@ public:
     if ( 'n'==*_incoming.result.first)
       return nullptr; // is null 
     auto result = std::make_unique<typename J::target>();
+    if ( '"'==_incoming.result.first[0] && '~'==_incoming.result.first[1])
+    {
+      if ( 0 == std::strncmp( &(_incoming.result.first[0]), WFC_JSON_EMPTY_OBJECT_STRING, std::strlen(WFC_JSON_EMPTY_OBJECT_STRING) ) )
+        return std::move(result);
+    }
+    
     typename J::serializer()(*result, _incoming.result.first, _incoming.result.second);
     return std::move(result);
   }
