@@ -22,6 +22,30 @@
 
 
 namespace wfc{ namespace provider{ 
+  
+class wait_map
+{
+  typedef std::mutex mutex_type;
+public:
+  typedef size_t client_id_t;
+  typedef size_t call_id_t;
+  typedef std::pair<client_id_t, call_id_t> clicall_pair;
+  typedef std::function<clicall_pair()> post_function;
+  typedef ::boost::asio::deadline_timer deadline_timer;
+  typedef std::shared_ptr<deadline_timer> timer_ptr;
+  struct info
+  {
+    client_id_t client_id;
+    post_function post_fun;
+    timer_ptr timer;
+  };
+  
+private:
+  typedef std::map<call_id_t, info> callclipost_map;
+  typedef std::set<clicall_pair> clicall_set;
+  
+  mutable mutex_type _mutex;
+};
 
 template<typename Itf>  
 class provider
@@ -343,6 +367,7 @@ private:
       OrigCallback wcallback = pthis->wrap_callback_<OrigCallback>( fas::int_<N>(), result.first, call_id, callback);
       
       std::shared_ptr<deadline_timer> timer;
+      std::function<void(const ::boost::system::error_code&)> timer_fun;
       
       if (pthis->_conf.max_waiting != 0 )
       {
@@ -376,15 +401,12 @@ private:
           if (timer)
           {
             auto client_id = result.first;
-            timer->expires_from_now(boost::posix_time::milliseconds(pthis->_conf.wait_timeout_ms));
-            timer->async_wait( 
-              [pthis, client_id, call_id, callback]( const ::boost::system::error_code& ec)
-              {
-                if ( ec == boost::asio::error::operation_aborted )
-                  return;
-                self::mt_deadline_<Callback>(pthis, client_id, call_id, std::move(callback));
-              }
-            );
+            timer_fun = [pthis, client_id, call_id, callback]( const ::boost::system::error_code& ec)
+            {
+              if ( ec == boost::asio::error::operation_aborted )
+                return;
+              self::mt_deadline_<Callback>(pthis, client_id, call_id, std::move(callback));
+            };
           }
           ++(pthis->_post_count);
           (cli.get()->*mem_ptr)( std::move(req_for_send), std::move(wcallback), std::forward<Args>(args)... );
@@ -399,6 +421,12 @@ private:
       {
         DAEMON_LOG_ERROR("provider::send_: unhandled exception")
         throw;
+      }
+      
+      if ( timer )
+      {
+        timer->expires_from_now(boost::posix_time::milliseconds(pthis->_conf.wait_timeout_ms));
+        timer->async_wait( timer_fun );
       }
     }
     else
