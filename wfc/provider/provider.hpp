@@ -26,26 +26,174 @@ namespace wfc{ namespace provider{
 class wait_map
 {
   typedef std::mutex mutex_type;
+  const size_t null_id = static_cast<size_t>(-1);
 public:
+  
   typedef size_t client_id_t;
   typedef size_t call_id_t;
-  typedef std::pair<client_id_t, call_id_t> clicall_pair;
-  typedef std::function<clicall_pair()> post_function;
+  //typedef std::pair<client_id_t, call_id_t> clicall_pair;
+  
   typedef ::boost::asio::deadline_timer deadline_timer;
   typedef std::shared_ptr<deadline_timer> timer_ptr;
+  struct info;
+  typedef std::shared_ptr<info> info_ptr;
+  typedef std::function<info_ptr()> post_function;
+  
   struct info
   {
     client_id_t client_id;
+    call_id_t   call_id;
     post_function post_fun;
     timer_ptr timer;
   };
   
+  struct by_call_cli
+  {
+    bool operator()( const info_ptr& left,  const wait_map::info_ptr& right) const
+    {
+      /*if ( !(left->call_id < right->call_id) )
+        return false;
+      return left->client_id < right->client_id;
+      */
+      return left->call_id < right->call_id;
+    }
+  };
+
+  struct by_cli_call
+  {
+    bool operator()( const info_ptr& left,  const info_ptr& right)  const
+    {
+      if ( left->client_id < right->client_id )
+        return true;
+      if ( left->client_id > right->client_id )
+        return false;
+      return left->call_id < right->call_id;
+      /*
+      if ( !(left->client_id  < right->client_id ) )
+        return false;
+      return left->call_id < right->call_id;
+      */
+    }
+  };
+
+  info_ptr erase_call(call_id_t call_id)
+  {
+    auto k = std::make_shared<info>(info{0, call_id, nullptr, nullptr});
+    auto itr = _call_cli.find(k);
+    if ( itr == _call_cli.end() )
+      return nullptr;
+    k = *itr;
+    _call_cli.erase(k);
+    _cli_call.erase(k);
+    this->check_();
+    return k;
+    
+  }
+  
+  std::vector<info_ptr> erase_client(client_id_t client_id)
+  {
+    std::vector<info_ptr> result;
+    auto k = std::make_shared<info>(info{client_id, 0, nullptr, nullptr});
+    auto beg = _cli_call.lower_bound(k);
+    k->client_id += 1;
+    auto end = _cli_call.lower_bound(k);
+    result.reserve( std::distance(beg, end) );
+    auto itr = beg;
+    for (; itr!=end; )
+    {
+      auto itr2 = _call_cli.find( *itr );
+      if ( itr2 != _call_cli.end() )
+      {
+        result.push_back( *itr );
+        _call_cli.erase(itr2);
+        _cli_call.erase(itr++);
+        
+      }
+      else
+      {
+        DAEMON_LOG_FATAL("Ошибка логики. В списке ожидания не найден объект по call_id=" 
+                    << (*itr)->call_id << ". wfc::provider::shutdown client_id=" << client_id )
+        abort();
+      }
+    }
+    this->check_();
+    
+    /*
+    
+    auto beg = _clicall.lower_bound({client_id, 0});
+    auto end = _clicall.upper_bound({client_id, null_id});
+    result.reserve( std::distance(beg, end) );
+    auto itr = beg;
+    for (; itr!=end; ++itr)
+    {
+      if ( itr->first != client_id )
+        break;
+      auto itr2 = _callclipost.find( itr->second );
+      if ( itr2 != _callclipost.end() )
+      {
+        result.push_back(itr2->second);
+      }
+      else
+      {
+        DAEMON_LOG_FATAL("Ошибка логики. В списке ожидания не найден объект по call_id=" 
+                    << itr->second << ". wfc::provider::shutdown client_id=" << client_id )
+        abort();
+      }
+    }
+    _clicall.erase(beg, itr);
+    */
+    return std::move(result);
+  }
+  
+  info_ptr insert(client_id_t client_id, call_id_t call_id )
+  {
+    
+    auto k = std::make_shared<info>(info{client_id, call_id, nullptr, nullptr});
+    if ( !_cli_call.insert(k).second)
+    {
+      DAEMON_LOG_FATAL("Ошибка логики. Пара client_id+call_id существует");
+      abort();
+    }
+
+    if ( !_call_cli.insert(k).second)
+    {
+      DAEMON_LOG_FATAL("Ошибка логики. Пара call_id+client_id существует");
+      abort();
+    }
+     return k;  
+  }
+  
+  size_t size() const
+  {
+    this->check_();
+    return _cli_call.size();
+  }
+  
 private:
+  void check_() const
+  {
+    if ( _cli_call.size() != _call_cli.size() )
+    {
+      DAEMON_LOG_FATAL("provider::wait_count_: index error. _clicall.size()=" << _cli_call.size() << " _callclipost.size()" << _call_cli.size())
+      abort();
+    }
+  }
+  
+private:
+  typedef std::set<info_ptr, by_call_cli> index_by_call_cli;
+  typedef std::set<info_ptr, by_cli_call> index_by_cli_call;
+  
+  index_by_call_cli _call_cli; 
+  index_by_cli_call _cli_call;
+  /*
   typedef std::map<call_id_t, info> callclipost_map;
   typedef std::set<clicall_pair> clicall_set;
-  
-  mutable mutex_type _mutex;
+  callclipost_map _callclipost;
+  clicall_set _clicall;
+  */
+  //mutable mutex_type _mutex;
 };
+
 
 template<typename Itf>  
 class provider
@@ -59,18 +207,21 @@ class provider
   const size_t null_id = static_cast<size_t>(-1);
 
 public:
+
+  typedef wait_map::info wait_info;
+  typedef wait_map::info_ptr info_ptr;
   
   typedef typename super::interface_type interface_type;
   typedef typename super::mutex_type mutex_type;
-  typedef std::pair<size_t, size_t> clicall_pair;
-  typedef std::function<clicall_pair()> post_function;
+  //typedef std::pair<size_t, size_t> clicall_pair;
+  typedef std::function<info_ptr()> post_function;
   typedef ::boost::asio::deadline_timer deadline_timer;
   typedef std::shared_ptr<deadline_timer> timer_ptr;
   typedef std::tuple<size_t, post_function, timer_ptr> clipost;
-  typedef std::map<size_t, clipost> callclipost_map;
-  
-  typedef std::set<clicall_pair> clicall_set;
+  //typedef std::map<size_t, clipost> callclipost_map;
+  //typedef std::set<clicall_pair> clicall_set;
   typedef std::deque< post_function > delayed_queue;
+  
 
   provider( ::wfc::io_service& io, const provider_config& conf)
     : super(conf)
@@ -139,7 +290,25 @@ public:
     std::lock_guard<mutex_type> lk( super::_mutex );
 
     super::shutdown_(client_id);
+    
+    auto erased = _wait_map.erase_client(client_id);
+    for (auto& e : erased)
+    {
+      if ( auto f = e->post_fun )
+      {
+        _queue.push_front( f );
+        ++_recall_count; // !!!Счетчик будующих повторных вызовов
+        this->log_if_( log::recall_warn);
+      }
+      else
+      {
+        // Может и не аборт 
+        DAEMON_LOG_FATAL("Ошибка логики. Нулевой запрос по call_id=X" /*<< e->second*/ << ". wfc::provider::shutdown client_id=" << client_id )
+        abort();
+      }
+    }
 
+    /*
     auto beg = _clicall.lower_bound({client_id, 0});
     auto end = _clicall.upper_bound({client_id, null_id});
     for (auto itr = beg; itr!=end; )
@@ -155,6 +324,7 @@ public:
           _queue.push_front( std::get<1>(itr2->second) );
           _callclipost.erase(itr2);
           _clicall.erase(itr++);
+          this->wait_check_();
         }
         else
         {
@@ -174,6 +344,7 @@ public:
       ++_recall_count; // !!!Счетчик будующих повторных вызовов
       this->log_if_( log::recall_warn);
     }
+    */
     this->process_queue_();
   }
   
@@ -256,15 +427,24 @@ private:
 
   size_t wait_count_() const
   {
+    return _wait_map.size();
+    /*
+    this->wait_check_();
+    return _clicall.size();
+    */
+  }
+
+  /*
+  void wait_check_() const
+  {
     if ( _clicall.size() != _callclipost.size() )
     {
       DAEMON_LOG_FATAL("provider::wait_count_: index error. _clicall.size()=" << _clicall.size() << " _callclipost.size()" << _callclipost.size())
       abort();
     }
-
-    return _clicall.size();
   }
-
+  */
+  
   size_t drop_count_() const
   {
     return _drop_count_wait + _drop_count_limit;
@@ -281,6 +461,7 @@ private:
     Args... args
   )
   {
+    
     if ( !super::_conf.enabled )
     {
       callback_null_( callback );
@@ -320,7 +501,7 @@ private:
     // Далее нужна обертка
     post_function f = this->wrap_<N>(mem_ptr, std::move(req), callback, std::forward<Args>(args)...); 
     
-    if ( _clicall.size() < super::_conf.max_waiting  )
+    if ( _wait_map.size() < super::_conf.max_waiting  )
     {
       if ( 0 != super::ready_count_() )
       {
@@ -351,7 +532,7 @@ private:
 
   
   template<int N, typename Req, typename OrigCallback, typename Callback, typename... Args>
-  static clicall_pair send_( 
+  static info_ptr send_( 
     std::shared_ptr<self> pthis,
     void (interface_type::*mem_ptr)(Req, OrigCallback, Args... args), 
     std::shared_ptr<Req> req, 
@@ -359,30 +540,43 @@ private:
     Args... args
   )
   {
+    
+    
     size_t call_id = ++pthis->_call_id_counter;
     
-    clicall_pair result = {pthis->null_id, call_id};
-    if ( auto cli = pthis->get_( result.first ) )
+    // clicall_pair result = {pthis->null_id, call_id};
+    info_ptr inf = nullptr;
+    size_t client_id = 0;
+    if ( auto cli = pthis->get_( client_id /*result.first*/ ) )
     {
-      OrigCallback wcallback = pthis->wrap_callback_<OrigCallback>( fas::int_<N>(), result.first, call_id, callback);
+      OrigCallback wcallback = pthis->wrap_callback_<OrigCallback>( fas::int_<N>(), client_id, call_id, callback);
       
-      std::shared_ptr<deadline_timer> timer;
+      //std::shared_ptr<deadline_timer> timer;
+      //info_ptr inf;
       std::function<void(const ::boost::system::error_code&)> timer_fun;
       
       if (pthis->_conf.max_waiting != 0 )
       {
+        inf = pthis->_wait_map.insert(/*result.first*/client_id, call_id);
+        if (pthis->_conf.wait_timeout_ms != 0 )
+        {
+          inf->timer = std::make_shared<deadline_timer>(pthis->_io_service);
+        }
+        
+        /*
         if ( !pthis->_clicall.insert({result.first, call_id}).second )
         {
           DAEMON_LOG_FATAL("wfc::provider: insert to set fail! client_id=" << result.first << " call_id=" << call_id)
           abort();
         }
-        
         auto respair = pthis->_callclipost.insert({call_id, clipost{result.first, nullptr, nullptr}});
         if ( !respair.second )
         {
           DAEMON_LOG_FATAL("wfc::provider: insert to map fail! client_id=" << result.first << " call_id=" << call_id)
           abort();
         }
+        pthis->wait_check_();
+        
         auto call_itr = respair.first;
         
         if (pthis->_conf.wait_timeout_ms != 0 )
@@ -390,6 +584,7 @@ private:
           timer = std::make_shared<deadline_timer>(pthis->_io_service);
           std::get<2>(call_itr->second) = timer;
         }
+        */
       }
       
       try
@@ -398,9 +593,9 @@ private:
         {
           // Копируем запрос, т.к. возможен повторный вызов
           auto req_for_send = std::make_unique<typename Req::element_type>(**req);
-          if (timer)
+          if (inf->timer)
           {
-            auto client_id = result.first;
+            //auto client_id = result.first;
             timer_fun = [pthis, client_id, call_id, callback]( const ::boost::system::error_code& ec)
             {
               if ( ec == boost::asio::error::operation_aborted )
@@ -423,17 +618,17 @@ private:
         throw;
       }
       
-      if ( timer )
+      if ( inf!=nullptr &&  inf->timer!=nullptr )
       {
-        timer->expires_from_now(boost::posix_time::milliseconds(pthis->_conf.wait_timeout_ms));
-        timer->async_wait( timer_fun );
+        inf->timer->expires_from_now(boost::posix_time::milliseconds(pthis->_conf.wait_timeout_ms));
+        inf->timer->async_wait( timer_fun );
       }
     }
     else
     {
       DAEMON_LOG_WARNING("provider::send_: соединение потеряно")
     }
-    return result;
+    return inf;
   }
   
   template<typename Resp, typename... Args>
@@ -448,6 +643,36 @@ private:
     // TODO: if *resp == nullptr значит был bad_gateway, т.е. нужно перепослать
     {
       std::lock_guard<mutex_type> lk(pthis->_mutex); 
+      
+      if ( auto inf = pthis->_wait_map.erase_call(call_id) )
+      {
+        if ( *resp != nullptr )
+        {
+          ++pthis->_confirm_count;
+        }
+        else
+        {
+          ++pthis->_bad_gateway_count;
+          pthis->_queue.push_front( inf->post_fun );
+          pthis->log_if_(log::bad_gateway);
+        }
+        
+        if ( inf->timer )
+        {
+          inf->timer->cancel();
+          inf->timer=nullptr;
+        }
+       
+        pthis->process_queue_();
+      }
+      else
+      {
+        ++pthis->_orphan_count;
+        return;
+      }
+      
+      
+      /*
       auto call_itr = pthis->_callclipost.find(call_id);
       if ( call_itr == pthis->_callclipost.end() )
       {
@@ -473,7 +698,9 @@ private:
       }
       pthis->_callclipost.erase(call_itr);
       pthis->_clicall.erase({std::get<0>(call_itr->second),call_id});
+      pthis->wait_check_();
       pthis->process_queue_();
+      */
     }
       
     if ( callback!=nullptr )
@@ -484,13 +711,28 @@ private:
   template<typename Callback>
   static void mt_deadline_( 
     std::shared_ptr<self> pthis,
-    size_t client_id, 
+    size_t /*client_id*/, 
     size_t call_id,
     const Callback& callback
   )
   {
     std::lock_guard<mutex_type> lk( pthis->_mutex );
     
+    if ( auto inf = pthis->_wait_map.erase_call(call_id) )
+    {
+      ++pthis->_drop_count_wait;
+      pthis->log_if_( log::drop_timeout );
+      pthis->callback_null_( std::move(callback) );
+      pthis->process_queue_();
+    }
+    else
+    {
+      ++pthis->_orphan_deadline;
+      return;
+    }
+      
+
+    /*
     auto call_itr = pthis->_callclipost.find(call_id);
     if ( call_itr == pthis->_callclipost.end() )
     {
@@ -518,7 +760,9 @@ private:
     pthis->callback_null_( std::move(callback) );
     pthis->_callclipost.erase(call_itr);
     pthis->_clicall.erase(cli_itr);
-    pthis->process_queue_();
+    pthis->wait_check_();
+    */
+    //pthis->process_queue_();
   }
   
   template<int N, typename Req, typename OrigCallback, typename Callback, typename... Args>
@@ -608,7 +852,20 @@ private:
     };
   }
 
-  bool update_waiting_(const clicall_pair& result, const post_function& f)
+  bool update_waiting_(info_ptr inf, const post_function& f)
+  {
+    if ( super::_conf.max_waiting == 0 )
+      return true;
+    
+    if ( inf == nullptr )
+      return false;
+    
+    inf->post_fun = std::move(f);
+    
+    return true;
+  }
+  
+  /*bool update_waiting_(const clicall_pair& result, const post_function& f)
   {
     if ( result.first == null_id )
       return false;
@@ -628,14 +885,14 @@ private:
     }
     return true;
   }
-  
+  */
   int process_queue_()
   {
     int count = 0;
     while ( !_queue.empty() )
     {
       
-      if ( super::_conf.max_waiting!=0 && _callclipost.size() >= super::_conf.max_waiting )
+      if ( super::_conf.max_waiting!=0 && _wait_map.size() >= super::_conf.max_waiting )
         break;
 
       auto f = _queue.front();
@@ -660,8 +917,8 @@ private:
   ::wfc::io_service& _io_service;
   ::wfc::io_service::work _io_work;
   size_t _call_id_counter;
-  callclipost_map _callclipost;
-  clicall_set _clicall;
+  // callclipost_map _callclipost;
+  // clicall_set _clicall;
   delayed_queue _queue;
   
   size_t _post_count;
@@ -677,6 +934,8 @@ private:
   size_t _bad_gateway_count;
   
   time_t _logtm;
+  
+  wait_map _wait_map;
 };
 
 }}

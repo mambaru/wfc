@@ -28,6 +28,8 @@ public:
   
   virtual size_t ready_count() const  = 0;
   
+  virtual interface_ptr find(size_t client_id) const  = 0;
+  
   virtual interface_ptr get(size_t& client_id) const  = 0;
   
   virtual interface_ptr get() const  = 0;
