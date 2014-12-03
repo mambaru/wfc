@@ -34,9 +34,7 @@ template<typename A = fas::aspect<> >
 class client_base
   : public ::wfc::io::basic_io< typename fas::merge_aspect<A, client_aspect>::type >
   , public std::enable_shared_from_this< client_base<A> >
-  //public wfc::io::connection::connection< typename fas::merge_aspect<A, client_aspect>::type >
 {
-  //typedef wfc::io::connection::connection< typename fas::merge_aspect<A, client_aspect>::type > super;
 public:
   typedef client_base<A> self;
   typedef ::wfc::io::basic_io< typename fas::merge_aspect<A, client_aspect>::type > super;
@@ -50,35 +48,11 @@ public:
   
   typedef boost::asio::deadline_timer reconnect_timer;
   reconnect_timer _reconnect_timer;
-  wfc::io::incoming_handler_t _handler;
-
-  // TODO: сделать массив
   std::shared_ptr<connection_type> _connection;
   
-  
-  /*
-  options_type init_options(options_type conf)
-  {
-    auto startup = conf.connection.startup_handler;
-    conf.connection.startup_handler = [this, startup]( ::wfc::io::io_id_t id, ::wfc::io::callback clb, ::wfc::io::add_shutdown_handler add)
-    {
-      auto add_handler = [this](::wfc::io::io_id_t id) 
-      {
-        DAEMON_LOG_WARNING("Connection " << id << " closed. Reconnect...")
-        this->post( std::bind( &self::connect, this) );
-      };
-      
-      add(add_handler);
-      startup( id, clb, add);
-    };
-    return conf;
-  }
-  */
-  
-  client_base(wfc::io_service& io, const options_type& conf/*, ::wfc::io::incoming_handler handler = nullptr*/)
+  client_base(wfc::io_service& io, const options_type& conf)
     : super( io, update_options(this, conf))
     , _reconnect_timer(io)
-    , _handler( conf.incoming_handler ) // TODO: убрать 
   {
     super::create(*this);
     if ( conf.connection.incoming_handler ==nullptr )
@@ -108,10 +82,7 @@ public:
       if ( !ec )
       {
         COMMON_LOG_MESSAGE( "Client " << pthis->options().host << ":" << pthis->options().port << " connected!" )
-        // TODO: для connection отдельный handler
-          
         auto opt = pthis->options().connection;
-        //opt.incoming_handler = this->_handler;
 
         if ( opt.incoming_handler == nullptr )
           abort();
@@ -125,8 +96,10 @@ public:
                             << ec.message() << " " << pthis->options().reconnect_timeout << " seconds to reconnect." )
           
         pthis->_reconnect_timer.expires_from_now( boost::posix_time::seconds( pthis->options().reconnect_timeout) );
-        pthis->_reconnect_timer.async_wait([pthis, ep, psock](const boost::system::error_code& ) 
+        pthis->_reconnect_timer.async_wait([pthis, ep, psock](const boost::system::error_code& ec) 
         {
+          if ( ec == boost::asio::error::operation_aborted )
+            return;
           pthis->connect();
         });
       }
@@ -137,7 +110,12 @@ public:
   {
     super::start(*this);
     this->_reconnect_timer.expires_from_now( boost::posix_time::seconds( this->options().reconnect_timeout) );
-    this->_reconnect_timer.async_wait( [this](const boost::system::error_code& ) {this->connect();} );
+    this->_reconnect_timer.async_wait( [this](const boost::system::error_code& ec) 
+    {
+      if ( ec == boost::asio::error::operation_aborted )
+        return;
+      this->connect();
+    });
   }
   
 };
