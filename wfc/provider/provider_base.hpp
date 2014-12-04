@@ -31,7 +31,7 @@ public:
   typedef std::map<size_t, interface_ptr> client_map;
   typedef typename client_map::const_iterator client_iterator;
 
-  provider_base(const provider_config& conf)
+  provider_base(const provider_config& conf /*, std::function<bool(size_t)> = nullptr*/ )
   {
     this->reconfigure(conf);
   }
@@ -54,7 +54,7 @@ public:
           _conf.mode = provider_mode::sequenced;
           if ( conf.queue_limit == 0 )
           {
-            _conf.queue_limit = 1024;
+            _conf.queue_limit = WFC_PROVIDER_DEFAULT_QUEUE_LIMIT;
           }
         }
         else if ( _conf.max_waiting == 0)
@@ -73,7 +73,7 @@ public:
           _conf.mode = provider_mode::insured;
           if ( _conf.queue_limit==0 )
           {
-            _conf.queue_limit=1024;
+            _conf.queue_limit=WFC_PROVIDER_DEFAULT_QUEUE_LIMIT;
           }
         }
         break;
@@ -83,24 +83,30 @@ public:
         break;
       case provider_mode::connectify: 
         if ( _conf.queue_limit == 0 )
-          _conf.queue_limit = 1024;
+          _conf.queue_limit = WFC_PROVIDER_DEFAULT_QUEUE_LIMIT;
         _conf.max_waiting = 0;
         break;
       case provider_mode::insured:
         if ( _conf.queue_limit == 0 )
-          _conf.queue_limit = 1024;
+          _conf.queue_limit = WFC_PROVIDER_DEFAULT_QUEUE_LIMIT;
         if ( _conf.max_waiting == 0)
-          _conf.max_waiting = 1024;
+          _conf.max_waiting = WFC_PROVIDER_DEFAULT_MAX_WAIT;
         break;
       case provider_mode::sequenced: 
         if ( _conf.queue_limit == 0 )
-          _conf.queue_limit = 1024;
+          _conf.queue_limit = WFC_PROVIDER_DEFAULT_QUEUE_LIMIT;
         if ( _conf.max_waiting != 1 )
           _conf.max_waiting = 1;
         break;
     }
     // TODO: в лог текущий режим
     
+  }
+  
+  virtual interface_ptr find(size_t client_id) const
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    return this->find_(client_id);
   }
   
   virtual interface_ptr get(size_t& client_id) const
@@ -227,6 +233,19 @@ protected:
       _mutex.lock();
     }
   }
+
+  interface_ptr find_(size_t client_id) const
+  {
+    if ( !_conf.enabled || _clients.empty() )
+      return nullptr;
+    
+    auto itr = _clients.find(client_id);
+    if ( itr == _clients.end() )
+      return nullptr;
+    
+    return itr->second;
+  }
+
   
   interface_ptr get_(size_t& client_id) const
   {

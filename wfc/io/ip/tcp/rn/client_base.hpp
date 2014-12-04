@@ -47,13 +47,11 @@ public:
   
   typedef boost::asio::deadline_timer reconnect_timer;
   reconnect_timer _reconnect_timer;
-  wfc::io::incoming_handler_t _handler;
   std::shared_ptr<connection_type> _connection;
   
   client_base(wfc::io_service& io, const options_type& conf)
     : super( io, update_options(this, conf))
     , _reconnect_timer(io)
-    , _handler( conf.incoming_handler ) // TODO: убрать 
   {
     super::create(*this);
     if ( conf.connection.incoming_handler ==nullptr )
@@ -83,10 +81,7 @@ public:
       if ( !ec )
       {
         COMMON_LOG_MESSAGE( "Client " << pthis->options().host << ":" << pthis->options().port << " connected!" )
-        // TODO: для connection отдельный handler
-          
         auto opt = pthis->options().connection;
-        //opt.incoming_handler = this->_handler;
 
         if ( opt.incoming_handler == nullptr )
           abort();
@@ -100,8 +95,10 @@ public:
                             << ec.message() << " " << pthis->options().reconnect_timeout << " seconds to reconnect." )
           
         pthis->_reconnect_timer.expires_from_now( boost::posix_time::seconds( pthis->options().reconnect_timeout) );
-        pthis->_reconnect_timer.async_wait([pthis, ep, psock](const boost::system::error_code& ) 
+        pthis->_reconnect_timer.async_wait([pthis, ep, psock](const boost::system::error_code& ec) 
         {
+          if ( ec == boost::asio::error::operation_aborted )
+            return;
           pthis->connect();
         });
       }
@@ -112,7 +109,12 @@ public:
   {
     super::start(*this);
     this->_reconnect_timer.expires_from_now( boost::posix_time::seconds( this->options().reconnect_timeout) );
-    this->_reconnect_timer.async_wait( [this](const boost::system::error_code& ) {this->connect();} );
+    this->_reconnect_timer.async_wait( [this](const boost::system::error_code& ec) 
+    {
+      if ( ec == boost::asio::error::operation_aborted )
+        return;
+      this->connect();
+    });
   }
   
 };
