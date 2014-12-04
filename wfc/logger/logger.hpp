@@ -9,7 +9,7 @@ inline void only_for_log( Args&& ... ){}
 
 }
 
-#ifndef DISABLE_ALL_LOG
+#ifndef WFC_DISABLE_ALL_LOG
 # define WRITE_LOG(C, E, X) ::wfc::global_log(#C, E,"log-"#C) << X << std::endl;
 # define COMMON_LOG_PROGRESS( X ) ::wfc::global_log("common", "progress", "log-common") << X << "\r";
 #else

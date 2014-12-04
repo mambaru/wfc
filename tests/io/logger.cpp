@@ -28,17 +28,17 @@ public:
   test_logger()
   {
     std::cout << "test_logger()" << std::endl;
-    reg = std::make_shared<wfc::registry< wfc::ilogger> >();
+    reg = std::make_shared< wfc::interface_registry >();
     log = std::make_shared<logger>();
     global = std::make_shared<wfc::global>(_io_service) ;
     wfc::global::static_global = global;
-    global->loggers = reg;
+    //global->registry.set<wfc::ilogger>(loggers = reg;
     reg->set("common", log);
     reg->set("trace", log);
   }
   
 private:
-  std::shared_ptr< wfc::registry< wfc::ilogger> > reg;
+  std::shared_ptr< wfc::interface_registry > reg;
   std::shared_ptr< logger > log;
   std::shared_ptr< wfc::global > global;
 };

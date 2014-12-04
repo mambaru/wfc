@@ -18,15 +18,15 @@ public:
     
   }
   
-  int run( /*int argc, char* argv[],*/ std::weak_ptr<global> g )
+  int run( /*int argc, char* argv[],*/ std::shared_ptr<global> g )
   {
-    if ( auto gl = g.lock() )
+    if ( auto gl = g )
     {
-      if ( auto gm = gl->modules.lock() )
+      //if ( auto& gm = gl->registry )
       {
-        gm->for_each([](const std::string& /*name*/, std::weak_ptr<imodule> module ){
-          if ( auto m = module.lock() )
-            m->start();
+        gl->registry.for_each<imodule>([](const std::string& /*name*/, std::shared_ptr<imodule> module ){
+          if ( auto m = module )
+            m->start("");
         });
       }
     }
@@ -52,7 +52,7 @@ public:
   virtual std::string generate(const std::string& /*type*/) const { return std::string();}
   virtual bool parse_config(const std::string& /*conf*/) { return true;}
 
-  virtual void create( const std::string&,  std::weak_ptr<global> g )
+  virtual void create( const std::string&,  std::shared_ptr<global> g )
   {
     std::cout << "create" << std::endl;
     _global = g;
@@ -61,27 +61,27 @@ public:
       gl->core = _core;
   }
   
-  virtual void configure(const std::string& /*conf*/)
+  virtual void configure(const std::string& /*conf*/, const std::string& /*arg*/)
   {
     
   }
   
-  virtual void initialize()
+  virtual void initialize(const std::string& /*arg*/)
   {
     
   }
   
-  virtual void start()
+  virtual void start(const std::string& /*arg*/)
   {
     std::cout << "start" << std::endl;
   }
   
-  virtual void stop()
+  virtual void stop(const std::string& /*arg*/)
   {
     
   }
   
-    virtual void shutdown()
+  virtual void shutdown(const std::string& /*arg*/)
   {
 
   }
@@ -118,32 +118,32 @@ public:
   virtual std::string generate(const std::string& /*type*/) const { return std::string();}
   virtual bool parse_config(const std::string& /*conf*/) { return true;}
 
-  virtual void create( const std::string&,  std::weak_ptr<global> /*g*/ )
+  virtual void create( const std::string&,  std::shared_ptr<global> /*g*/ )
   {
     std::cout << "create" << std::endl;
   }
 
-  virtual void configure(const std::string& /*conf*/)
+  virtual void configure(const std::string& /*conf*/, const std::string& /*arg*/)
   {
 
   }
 
-  virtual void initialize()
+  virtual void initialize(const std::string& /*arg*/)
   {
 
   }
 
-  virtual void start()
+  virtual void start(const std::string& /*arg*/)
   {
     std::cout << "start" << std::endl;
   }
 
-  virtual void stop()
+  virtual void stop(const std::string& /*arg*/)
   {
 
   }
 
-  virtual void shutdown()
+  virtual void shutdown(const std::string& /*arg*/)
   {
 
   }

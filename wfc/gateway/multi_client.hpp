@@ -8,7 +8,7 @@
 #include <wfc/io_service.hpp>
 #include <wfc/core/global.hpp>
 #include <wfc/pubsub/pubsub_gateway.hpp>
-#include <list>
+#include <vector>
 
 #include <wfc/json/json.hpp>
 #include <wfc/json/name.hpp>
@@ -38,14 +38,14 @@ public:
   typedef Client client_type;
   typedef typename client_type::rpc_type rpc_type;
   typedef typename client_type::options_type client_options_type;
-  typedef multi_client_options<options_type> options_type;
+  typedef multi_client_options<client_options_type> options_type;
   typedef std::shared_ptr<client_type> client_ptr;
-  typedef std::shared_ptr<rpc_type> rpc_ptr;
-  typedef std::list< client_ptr > client_list;
+  typedef typename client_type::rpc_ptr rpc_ptr;
+  typedef std::vector< client_ptr > client_list;
   
   multi_client( std::shared_ptr<::wfc::global> g, const options_type& conf)  
-    : _global(global)
-    , _io_service( global->io_service )
+    : _global(g)
+    , _io_service( g->io_service )
     , _conf( conf )
   {
   }
@@ -55,7 +55,7 @@ public:
     , _conf( conf )
     , _rpc(rpc)
   {
-    this->recreate_(io);
+    this->recreate_();
   }
 
   void reconfigure(const options_type& conf)
@@ -66,7 +66,7 @@ public:
   void initialize(rpc_ptr rpc)
   {
     _rpc = rpc;
-    this->recreate_(io);
+    this->recreate_();
   }
   
   void start()
@@ -78,11 +78,11 @@ public:
   }
 
   
-  void stop()
+  void stop(std::function<void()> finalize)
   {
     for (auto& i: _client_list)
     {
-      i->stop();
+      i->stop(finalize);
     }
   }
 
@@ -96,7 +96,7 @@ public:
 
 private:
   
-  void recreate_( ::wfc::io_service& io)
+  void recreate_( /*::wfc::io_service& io*/)
   {
     if ( _conf.enabled && _conf.count > 0 )
     {
@@ -104,7 +104,7 @@ private:
       {
         for (size_t i = _conf.count; i < _client_list.size(); i++ )
         {
-          _client_list[i].stop();
+          _client_list[i]->stop(nullptr);
         }
         _client_list.resize(_conf.count);
       }
@@ -114,7 +114,7 @@ private:
         while ( _client_list.size() < _conf.count )
         {
           _client_list.push_back(
-            std::make_shared<client_type>( io, conf, _rpc )
+            std::make_shared<client_type>( _io_service, _conf, _rpc )
           );
         }
       }
@@ -123,7 +123,7 @@ private:
     {
       for (auto& cli: _client_list)
       {
-        cli->stop();
+        cli->stop(nullptr);
       }
       _client_list.clear();
     }

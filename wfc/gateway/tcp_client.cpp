@@ -13,13 +13,13 @@ void tcp_client::create(wfc::io_service& io, const tcp_options& conf)
     for (size_t i=0; i < conf.count; ++i )
     {
       _tcp_clients.push_back(
-          std::make_shared<client_tcp_type>( io, conf, _jsonrpc )
+          std::make_shared<client_type>( io, conf, _jsonrpc )
       );
     }
   }
 }
   
-tcp_client::tcp_client(wfc::io_service& io, const tcp_options& conf, jsonrpc_ptr jsonrpc)
+tcp_client::tcp_client(wfc::io_service& io, const tcp_options& conf, rpc_ptr jsonrpc)
   : _io_service(io)
   , _conf( conf )
   , _jsonrpc(jsonrpc)
@@ -39,7 +39,7 @@ void tcp_client::reconfigure(const tcp_options& conf)
   _conf = conf;
 }
   
-void tcp_client::initialize( jsonrpc_ptr jsonrpc )
+void tcp_client::initialize( rpc_ptr jsonrpc )
 {
   // TODO: мягкий перезапуск
   _jsonrpc = jsonrpc;

@@ -7,10 +7,10 @@
 #include <iostream>
 
 #include <wfc/core/iinterface.hpp>
+#include <wfc/logger.hpp>
 
 namespace wfc{
 
-// template<typename I>
 class interface_registry
 {
   typedef std::recursive_mutex mutex_type;
@@ -21,18 +21,32 @@ public:
   template<typename I>
   std::shared_ptr<I> get(const std::string& name) const
   {
-    std::lock_guard<mutex_type> lk(_mutex);
-    auto itr = _registry_map.find(name);
-    if ( itr == _registry_map.end() )
+    std::shared_ptr<I> result = nullptr;
     {
-      return std::shared_ptr<I>(); 
+      std::lock_guard<mutex_type> lk(_mutex);
+      auto itr = _registry_map.find(name);
+      if ( itr == _registry_map.end() )
+      {
+        return result; 
+      }
+      result = std::dynamic_pointer_cast<I>(itr->second);
     }
-    return std::dynamic_pointer_cast<I>(itr->second);
+    if (result == nullptr)
+    {
+      DAEMON_LOG_FATAL("wfc::registry::get: invalid interface for " << name )
+      abort();
+    }
+    
+    return result;
   }
 
-  //template<typename I>
   void set(const std::string& name, std::shared_ptr<iinterface> item )
   {
+    if (name.empty() )
+    {
+      DAEMON_LOG_FATAL("wfc::registry::set: empty name " )
+      abort();
+    }
     std::lock_guard<mutex_type> lk(_mutex);
     _registry_map[name] = item;
   }

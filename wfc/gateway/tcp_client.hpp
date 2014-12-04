@@ -14,14 +14,20 @@
 #include <wfc/json/name.hpp>
 
 #include <wfc/gateway/tcp_options.hpp>
+#include <wfc/gateway/multi_client.hpp>
+#include <wfc/gateway/multi_client_options.hpp>
+
+#include <wfc/io/ip/tcp/rn/jsonrpc/client.hpp>
 
 namespace wfc{ namespace jsonrpc{
 class service;
 }}
 
+/*
 namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{ namespace jsonrpc{
 class client;
 }}}}}}
+*/
 
 
 namespace wfc{ namespace gateway{
@@ -29,12 +35,13 @@ namespace wfc{ namespace gateway{
 class tcp_client
 {
   typedef ::wfc::io::ip::tcp::rn::jsonrpc::client client_item_type;
-  typedef client_list<client_item_type> client_type;
+  typedef multi_client<client_item_type> client_type;
   typedef std::shared_ptr<client_type>  client_ptr;
   typedef std::list<client_ptr> list_type;
-  
-  typedef client_item_type::options_type client_item_options;
-  typedef client_options<client_item_options> options_type;
+  typedef client_item_type::rpc_ptr rpc_ptr;
+  /*typedef client_item_type::options_type client_item_options;
+  typedef multi_client_options<client_item_options> options_type;*/
+  typedef client_type::options_type options_type;
   
   /*
   typedef ::wfc::jsonrpc::service jsonrpc_type;
@@ -47,11 +54,11 @@ public:
   
   tcp_client( std::weak_ptr< ::wfc::global> g, const tcp_options& conf);
   
-  tcp_client( ::wfc::io_service& io, const tcp_options& conf, jsonrpc_ptr jsonrpc);
+  tcp_client( ::wfc::io_service& io, const tcp_options& conf, rpc_ptr jsonrpc);
   
   void reconfigure(const tcp_options& conf);
   
-  void initialize(jsonrpc_ptr jsonrpc);
+  void initialize(rpc_ptr jsonrpc);
   
   void start();
   
@@ -69,8 +76,8 @@ private:
   
   tcp_options _conf;
   
-  jsonrpc_ptr _jsonrpc;
-  std::list< client_tcp_ptr > _tcp_clients;
+  rpc_ptr _jsonrpc;
+  std::list< client_ptr > _tcp_clients;
 };
 
 }}
