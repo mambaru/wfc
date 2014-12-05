@@ -32,7 +32,7 @@ struct ad_method_handler
         [&t, io_id, ph, handler, outgoing_handler]()
         {
           // Проверяем, что пока дошла очередь, клиент не отвалился
-          if ( t.registry().has_io(io_id) )
+          if ( ph->is_notify() || t.registry().has_io(io_id) )
           {
             handler->invoke( std::move(*ph), outgoing_handler );
           }
