@@ -64,6 +64,8 @@ public:
   
   std::shared_ptr<handler_interface> erase_io( io_id_t io_id );
   
+  bool has_io( io_id_t io_id ) const;
+  
   std::pair<call_id_t, outgoing_handler_t>
   add_result_handler(io_id_t io_id, result_handler_t result_handler);
 
