@@ -22,6 +22,12 @@ void io_registry::set_io(io_id_t io_id, std::shared_ptr<handler_interface> jsonr
     abort();
   }
 }
+
+bool io_registry::has_io( io_id_t io_id ) const
+{
+  read_lock lk(_mutex);
+  return _io_map.find(io_id)!=_io_map.end();
+}
   
 auto io_registry::erase_io( io_id_t io_id ) 
 -> std::shared_ptr<handler_interface>
