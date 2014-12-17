@@ -27,6 +27,7 @@ struct provider_config_json
 
   JSON_NAME(enabled)
   JSON_NAME(mode)
+  JSON_NAME(threads)
   JSON_NAME(max_waiting)
   JSON_NAME(queue_limit)
   JSON_NAME(wait_timeout_ms)
@@ -37,6 +38,7 @@ struct provider_config_json
     fas::type_list_n<
       wj::member<n_enabled,       provider_config, bool,          &provider_config::enabled>,
       wj::member<n_mode,          provider_config, provider_mode, &provider_config::mode, mode_enum_json>,
+      wj::member<n_threads,       provider_config, int,           &provider_config::threads>,
       wj::member<n_max_waiting,   provider_config, size_t,        &provider_config::max_waiting>,
       wj::member<n_queue_limit,   provider_config, size_t,        &provider_config::queue_limit>,
       wj::member<n_wait_timeout_ms,    provider_config, time_t,   &provider_config::wait_timeout_ms>, 

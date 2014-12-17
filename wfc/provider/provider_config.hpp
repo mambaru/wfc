@@ -30,6 +30,7 @@ struct provider_config
 {
   bool enabled = true;
   provider_mode mode = provider_mode::_auto_;
+  int threads = 0;
   size_t max_waiting = WFC_PROVIDER_DEFAULT_MAX_WAIT;
   size_t queue_limit = WFC_PROVIDER_DEFAULT_QUEUE_LIMIT;
   time_t wait_timeout_ms = 0;
