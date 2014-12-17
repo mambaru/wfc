@@ -257,6 +257,7 @@ public:
       for (int i = 0; i < conf.threads; ++i)
       {
         _threads.push_back(std::thread([this](){
+          ::wfc::io_service::work wrk( *this->_io_service_ptr);
           this->_io_service_ptr->run();
         }));
       }
