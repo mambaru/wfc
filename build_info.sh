@@ -14,7 +14,7 @@ branch="Branch: `git branch | grep '\*' | grep -o '[^ *].\+$' `"
 commit=`git log -1 --pretty=format:"commit %H" . `
 author=`git log -1 --pretty=format:"Author: %cn <%ce>" .`
 date=`git log -1 --pretty=format:"Date: %cd" .`
-message=`git log -1 --pretty=%B .`
+message=`git log -1 --pretty=format:"%s" .`
 
 h_file="$1_build_info.h"
 c_file="$path/$1_build_info.c"

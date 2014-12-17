@@ -29,9 +29,17 @@ struct ad_method_handler
     {
       auto ph = std::make_shared<incoming_holder>(std::move(holder) );
       wrk->post(  
-        [&t, ph, handler, outgoing_handler]()
+        [&t, io_id, ph, handler, outgoing_handler]()
         {
-          handler->invoke( std::move(*ph), outgoing_handler );
+          // Проверяем, что пока дошла очередь, клиент не отвалился
+          if ( ph->is_notify() || t.registry().has_io(io_id) )
+          {
+            handler->invoke( std::move(*ph), outgoing_handler );
+          }
+          else
+          {
+            COMMON_LOG_WARNING("wfc::jsonrpc::ad_method_handler: connection was reset when request queued");
+          }
         }
       );
     }
