@@ -27,9 +27,9 @@ tcp_client::tcp_client(wfc::io_service& io, const tcp_options& conf, rpc_ptr jso
   this->create( io, conf);
 }
   
-tcp_client::tcp_client(std::weak_ptr< wfc::global > global, const tcp_options& conf)
+tcp_client::tcp_client(std::shared_ptr< wfc::global > global, const tcp_options& conf)
   : _global(global)
-  , _io_service( global.lock()->io_service )
+  , _io_service( global->io_service )
   , _conf( conf )
 {
 }

@@ -1,0 +1,36 @@
+{
+  "values":{
+    "v-set-params1":{"key":"key-2", "value":"value-1"}, 
+    "v-key1":"42",
+    "v-rnd1":"randint(1, 100)",  
+    "v-inc1":"$$range(100, 200)", 
+    "v-key2":"key-$$strrand(100, 100)-$$rand(0, 100000)"
+  }, 
+  
+  "params":{
+    "p-set1":"$v-set1", 
+    "p-set2":{"key":"key1", "value":"value-1"}, 
+    "p-set3":{"key":"$$v-rnd1", "value":"$$v-rnd1"}, 
+    "p-inc1":{"key":"$$v-inc1", "value":"$$v-inc1"}
+  }, 
+  
+  "results":{
+    "r-set":{"status":true}
+    
+  }, 
+  
+  "queries":{
+    "set1":["set", "$$p-set1", "$$r-set"], 
+    "set2":["set", "$$p-set1", null]
+  }, 
+  
+  "notification":{
+    "n-set1":["set", "$p-set1"]
+  }, 
+  
+  "sequences":{
+    "seq1": { 
+      "sequence":["$set1", "$set2"]
+    }
+  }
+}

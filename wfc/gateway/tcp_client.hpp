@@ -19,10 +19,11 @@
 
 #include <wfc/io/ip/tcp/rn/jsonrpc/client.hpp>
 
+/*
 namespace wfc{ namespace jsonrpc{
 class service;
 }}
-
+*/
 /*
 namespace wfc{ namespace io{ namespace ip{ namespace tcp{ namespace rn{ namespace jsonrpc{
 class client;
@@ -39,20 +40,11 @@ class tcp_client
   typedef std::shared_ptr<client_type>  client_ptr;
   typedef std::list<client_ptr> list_type;
   typedef client_item_type::rpc_ptr rpc_ptr;
-  /*typedef client_item_type::options_type client_item_options;
-  typedef multi_client_options<client_item_options> options_type;*/
   typedef client_type::options_type options_type;
-  
-  /*
-  typedef ::wfc::jsonrpc::service jsonrpc_type;
-  typedef ::wfc::io::ip::tcp::rn::jsonrpc::client client_tcp_type;
-  typedef std::shared_ptr<client_tcp_type> client_tcp_ptr;
-  typedef std::shared_ptr<jsonrpc_type> jsonrpc_ptr;
-  */
   
 public:
   
-  tcp_client( std::weak_ptr< ::wfc::global> g, const tcp_options& conf);
+  tcp_client( std::shared_ptr< ::wfc::global> g, const tcp_options& conf);
   
   tcp_client( ::wfc::io_service& io, const tcp_options& conf, rpc_ptr jsonrpc);
   
@@ -70,7 +62,7 @@ private:
   
 private:
   
-  std::weak_ptr< ::wfc::global> _global;
+  std::shared_ptr< ::wfc::global> _global;
   
   ::wfc::io_service& _io_service;
   
