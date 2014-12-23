@@ -11,6 +11,8 @@
 #include <boost/asio.hpp>
 #include <memory>
 #include <deque>
+#include <list>
+#include <thread>
 #include <map>
 #include <set>
 
@@ -222,6 +224,17 @@ public:
   //typedef std::set<clicall_pair> clicall_set;
   typedef std::deque< post_function > delayed_queue;
   
+  ~provider()
+  {
+    if ( this->_io_service_ptr!=nullptr )
+    {
+      this->_io_service_ptr->stop();
+      for( auto& t: _threads)
+      {
+        t.join();
+      }
+    }
+  }
 
   provider( ::wfc::io_service& io, const provider_config& conf)
     : super(conf)
@@ -238,6 +251,24 @@ public:
     , _bad_gateway_count(0)
     , _logtm(0)
   {
+    if ( conf.threads > 0 )
+    {
+      this->_io_service_ptr = std::make_shared< ::wfc::io_service >();
+      for (int i = 0; i < conf.threads; ++i)
+      {
+        _threads.push_back(std::thread([this](){
+          ::wfc::io_service::work wrk( *this->_io_service_ptr);
+          this->_io_service_ptr->run();
+        }));
+      }
+    }
+  }
+  
+  ::wfc::io_service& get_io_service() const
+  {
+    if ( _io_service_ptr != nullptr )
+      return *_io_service_ptr;
+    return _io_service;
   }
   
   size_t post_count() const 
@@ -560,7 +591,7 @@ private:
         inf = pthis->_wait_map.insert(/*result.first*/client_id, call_id);
         if (pthis->_conf.wait_timeout_ms != 0 )
         {
-          inf->timer = std::make_shared<deadline_timer>(pthis->_io_service);
+          inf->timer = std::make_shared<deadline_timer>(pthis->get_io_service());
         }
         
         /*
@@ -803,7 +834,7 @@ private:
     return [callback_fun, pthis, call_id, callback](Resp resp, Args... args)
     {
       auto presp = std::make_shared<Resp>(std::move(resp) );
-      pthis->_io_service.post( std::bind(
+      pthis->get_io_service().post( std::bind(
         callback_fun,
         pthis,
         call_id,
@@ -841,7 +872,7 @@ private:
     return [callback_fun, pthis, client_id, call_id, callback](Resp resp, Args... args)
     {
       auto presp = std::make_shared<Resp>(std::move(resp) );
-      pthis->_io_service.post( std::bind(
+      pthis->get_io_service().post( std::bind(
         callback_fun,
         pthis,
         call_id,
@@ -919,6 +950,8 @@ private:
 private:
   
   ::wfc::io_service& _io_service;
+  std::shared_ptr< ::wfc::io_service > _io_service_ptr;
+  std::list< std::thread > _threads;
   ::wfc::io_service::work _io_work;
   size_t _call_id_counter;
   // callclipost_map _callclipost;
