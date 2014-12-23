@@ -96,7 +96,7 @@ public:
 
 private:
   
-  void recreate_( /*::wfc::io_service& io*/)
+  void recreate_()
   {
     if ( _conf.enabled && _conf.count > 0 )
     {
@@ -110,7 +110,6 @@ private:
       }
       else
       {
-        //for ( size_t i=0; i < _conf.count; ++i )
         while ( _client_list.size() < _conf.count )
         {
           _client_list.push_back(
