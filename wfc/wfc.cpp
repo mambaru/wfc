@@ -13,7 +13,7 @@ wfc::wfc(std::string program_version, std::initializer_list< std::pair< std::str
 {
   _global = std::make_shared<global>(_io_service);
   for (const auto& p: modules)
-    _global->registry.set(p.first, p.second);
+    _global->registry.set("module", p.first, p.second);
 }
 
 int wfc::run(int argc, char* argv[])
@@ -39,14 +39,15 @@ int wfc::run(int argc, char* argv[])
   }
   */
    
-  _global->registry.for_each<imodule>([this](const std::string& name, std::shared_ptr<imodule> module)
+  _global->registry.for_each<imodule>([this](const std::string& /*prefix*/, const std::string& name, std::shared_ptr<imodule> module)
   {
     if (auto m = module)
       m->create(name,  _global);
   });
 
   
-  if ( auto startup = _global->startup )
+  //if ( auto startup = _global->startup )
+  if ( auto startup = _global->registry.get<istartup>("startup") )
   {
     if ( !startup->startup(argc, argv) )
       return 0;
@@ -58,8 +59,11 @@ int wfc::run(int argc, char* argv[])
   
   int status = 0;
 
-  if ( auto core = _global->core )
+  // if ( auto core = _global->core )
+  if ( auto core = _global->registry.get<icore>("core") )
+  {
     status = core->run(_global);
+  }
   
   std::clog << "wfc::run finalize ... " << std::endl;
   

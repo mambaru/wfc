@@ -43,7 +43,7 @@ public:
   typedef typename client_type::rpc_ptr rpc_ptr;
   typedef std::vector< client_ptr > client_list;
   
-  multi_client( std::shared_ptr<::wfc::global> g, const options_type& conf)  
+  multi_client( std::shared_ptr< ::wfc::global > g, const options_type& conf)  
     : _global(g)
     , _io_service( g->io_service )
     , _conf( conf )

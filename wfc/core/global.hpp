@@ -32,9 +32,11 @@ struct global
   std::string instance_name;
   module_options options;
   
+  /*
   std::shared_ptr< istartup >        startup;
   std::shared_ptr< icore >           core;
   std::shared_ptr< iconfig >         config;
+  */
   
   typedef interface_registry registry_type;
   registry_type registry;

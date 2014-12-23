@@ -11,6 +11,7 @@ include_directories(../faslib/)
 SET(
   wfc_source_list
   wfc.cpp
+  module/module.cpp
   thread/delayed_queue.cpp
   core/global.cpp
   logger/global_log.cpp

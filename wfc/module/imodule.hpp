@@ -39,8 +39,6 @@ struct imodule: iinterface
   virtual void start(const std::string& arg) = 0;
   virtual void stop(const std::string& arg) = 0;
   virtual void shutdown(const std::string& arg) = 0;
-
-  // virtual void idle() = 0;
 };
 
 }
