@@ -34,7 +34,7 @@ int main()
 
   reg.erase("i0");
   std::vector<number> v;
-  reg.for_each<number>([&v](const std::string&, std::shared_ptr<number> p){
+  reg.for_each<number>([&v](const std::string&, const std::string&, std::shared_ptr<number> p){
     if ( auto i = p )
       v.push_back(*i);
   });

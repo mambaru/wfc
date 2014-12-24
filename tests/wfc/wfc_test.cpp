@@ -24,7 +24,7 @@ public:
     {
       //if ( auto& gm = gl->registry )
       {
-        gl->registry.for_each<imodule>([](const std::string& /*name*/, std::shared_ptr<imodule> module ){
+        gl->registry.for_each<imodule>([](const std::string& /*prefix*/, const std::string& /*name*/, std::shared_ptr<imodule> module ){
           if ( auto m = module )
             m->start("");
         });
@@ -57,8 +57,9 @@ public:
     std::cout << "create" << std::endl;
     _global = g;
     _core = std::make_shared<core_moke>();
-    if ( auto gl = _global.lock() )
-      gl->core = _core;
+     _global->registry.set("core", _core);
+    //if ( auto gl = _global.lock() )
+    //  gl->core = _core;
   }
   
   virtual void configure(const std::string& /*conf*/, const std::string& /*arg*/)
@@ -93,7 +94,7 @@ public:
   }
 private:
   std::shared_ptr<core_moke> _core;
-  std::weak_ptr<global> _global;
+  std::shared_ptr<global> _global;
 };
 
 class module_moke: public imodule
