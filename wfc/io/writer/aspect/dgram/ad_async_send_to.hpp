@@ -28,9 +28,9 @@ struct ad_async_send_to
       pthis->get_aspect().template get<_write_handler_>()(*pthis, std::move(*dd), std::move(ec), bytes_transferred);
     };
     auto ep = t.get_aspect().template get<_remote_endpoint_>();
-    t.mutex().unlock();
+    //t.mutex().unlock();
     t.descriptor().async_send_to( ::boost::asio::buffer( **dd, transfer_size ), ep, callback);
-    t.mutex().lock();
+    //t.mutex().lock();
   }
 };
 

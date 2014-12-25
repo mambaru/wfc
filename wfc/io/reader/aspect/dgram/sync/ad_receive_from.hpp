@@ -29,9 +29,9 @@ struct ad_receive_from
       pthis->get_aspect().template get<_read_handler_>()(*pthis, std::move(*dd), std::move(ec), bytes_transferred);
     };
     
-    t.mutex().unlock();
+    //t.mutex().unlock();
     t.descriptor().async_receive_from( ::boost::asio::buffer( **dd ), *pep, callback);
-    t.mutex().lock();
+    //t.mutex().lock();
 
     /*
     if ( !t.status() )

@@ -26,9 +26,9 @@ struct ad_async_read_some
       pthis->get_aspect().template get<_read_handler_>()(*pthis, std::move(*dd), std::move(ec), bytes_transferred);
     };
     
-    t.mutex().unlock();
+    //t.mutex().unlock();
     t.descriptor().async_read_some( ::boost::asio::buffer( **dd ), callback);
-    t.mutex().lock();
+    //t.mutex().lock();
   }
 };
 

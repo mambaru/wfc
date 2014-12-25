@@ -25,14 +25,7 @@ struct ad_async_write_some
       typename T::lock_guard lk(pthis->mutex());
       pthis->get_aspect().template get<_write_handler_>()(*pthis, std::move(*dd), std::move(ec), bytes_transferred);
     };
-    t.mutex().unlock();
     t.descriptor().async_write_some( ::boost::asio::buffer( **dd, transfer_size ), callback);
-    t.mutex().lock();
-    /*
-    boost::system::error_code ec;
-    std::size_t bytes_transferred = t.descriptor().write_some( ::boost::asio::buffer( **dd, transfer_size ), ec);
-    pthis->get_aspect().template get<_write_handler_>()(*pthis, std::move(*dd), std::move(ec), bytes_transferred);
-    */
   }
 };
 
