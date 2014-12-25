@@ -1,6 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+## @package pyexample
+#  Documentation for this module.
+#
+#  More details.
+    
 import json
 import argparse
 import copy
@@ -8,6 +13,10 @@ import datetime
 import time
 import importlib
 
+## Documentation for a function.
+#  @param self The object pointer.
+#
+#  More details.
 def load_config(f):
   conf = json.load( f )
   for k in ["import", "values", "params", "results", "queries", "sequences"]:
@@ -16,11 +25,10 @@ def load_config(f):
   all=[]
   for k, v in conf["sequences"].iteritems():
     all+=v[:-1]
+  all += [u"объединение всех последовательностей"]
   conf["sequences"]["all"]=all
   return conf
     
-    
-
 def show_config(config):
   print( json.dumps(config, ensure_ascii=False, sort_keys=True) )
   
@@ -173,6 +181,7 @@ def next_config(orig_config, eval_modules, N = 0, start_dt = None):
   return config 
   
 def next_request(sequence, count, eval_modules):
+  '''@count'''
   count1 = 0
   for i in range( 0, len(sequence)-1, 2 ):
     count2 = 0

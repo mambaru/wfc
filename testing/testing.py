@@ -1,17 +1,23 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import os
 import sys
+
+sys.path.insert(0, '.')
+
+import os
 import json
 import argparse
 import socket
 import datetime
 import time
 from threading import Thread, Lock
+import importlib
+from options import options
+
 
 import config
-
+'''
 options = {
   'addr'     : '0.0.0.0',
   'port'     : '12345',
@@ -27,6 +33,7 @@ options = {
   'list'     : False,
   'type'     : 'probe'
 }
+'''
 
 
 class client:
@@ -96,7 +103,7 @@ class bench:
     pass
   
   def add(self, method, microseconds):
-    self.mutex.acquire()
+    #self.mutex.acquire()
     if not method in self.methods:
       class Object: pass
       stat = Object()
@@ -131,7 +138,7 @@ class bench:
       stat.start = finish
       
     self.count += 1
-    
+
     if self.count_max!=0 and self.count >= self.count_max:
       print("Done")
       sys.exit()
@@ -142,11 +149,11 @@ class bench:
         delta = now - self.start
         microseconds = delta.seconds*1000000 + delta.microseconds
         if microseconds < self.ts_min:
-          time.sleep(0.00001)
+          time.sleep( (self.ts_min-microseconds)/(1000000.0*50.0))
         else:
           break
     self.start = datetime.datetime.now()
-    self.mutex.release()
+    #self.mutex.release()
       
 
     
@@ -288,7 +295,7 @@ if __name__ == '__main__':
   parser.add_argument('-u', '--prot',  help="протокол", default=options['prot']) # TODO: сделать просто udp
   parser.add_argument('-r', '--rate',  help="скорость", type=int, default=options['rate'])
   parser.add_argument('-t', '--threads', type=int, help="число потоков", default=options['threads'])
-  parser.add_argument('-c', '--count', help="количество повторений на каждый поток", default=options['count'])
+  parser.add_argument('-c', '--count', type=int,help="количество повторений на каждый поток", default=options['count'])
   parser.add_argument('-P', '--pconn', help="persistent connect", action='store_true')
   parser.add_argument('-C', '--check', help="check results for requests", action='store_true')
   parser.add_argument('-T', '--trace', help="trace", action='store_true')
