@@ -14,34 +14,15 @@ import time
 from threading import Thread, Lock
 import importlib
 from options import options
-
-
 import config
-'''
-options = {
-  'addr'     : '0.0.0.0',
-  'port'     : '12345',
-  'file'     : './testing.json',
-  'prot'     : 'tcp',
-  'sequence' : 'all',
-  'threads'  : 0,
-  'rate'     : 0,
-  'count'    : 0,
-  'check'    : False,
-  'pconn'    : False,
-  'trace'    : False,
-  'list'     : False,
-  'type'     : 'probe'
-}
-'''
 
 
 class client:
-  # TODO: сделать UDP
-  def __init__(self, addr, port, pconn = False, prot="tcp"):
+
+  def __init__(self, addr, port, pconn = False, udp=False):
     self.addr = addr
     self.port = port
-    self.prot = prot
+    self.udp = udp
     self.buff = ""
     self.pconn = pconn
     if self.pconn:
@@ -72,7 +53,6 @@ class client:
       return None
     result = self.buff[:pos]
     self.buff = self.buff[pos+2:]
-    #print(len(self.buff))
     return result
     
   def recv(self):
@@ -255,10 +235,10 @@ def do_probe():
     if not k in ['modules', 'config', 'file']:
       print("\t{0:10}{1}".format(k,v) )
   print("\nОригинальный файл:")
-  config.show_config(options["config"])
+  config.show_json(options["config"])
   print("\nДля первой итерации:")
   conf = config.next_config(options["config"], options["modules"], 0, datetime.datetime.now())
-  config.show_config(conf)
+  config.show_json(conf)
   print("\nТестовый запрос для первой итерации:")
   
   cli = client( options['addr'], options['port'], pconn=False)
@@ -267,7 +247,7 @@ def do_probe():
   result = jrp.request(query['method'], query['params'])
 
 def main():
-  conf = config.load_config(options['file'])
+  conf = config.load_queries(options['file'])
 
   if options['list']:
     print("Список доступных последовательностей:")
@@ -324,13 +304,13 @@ if __name__ == '__main__':
   sys.exit(0)
   
   print(args.file)
-  conf = config.load_config(args.file)
-  config.show_config(conf)
+  conf = config.load_queries(args.file)
+  config.show_json(conf)
   
   print("---------------------")
   eval_modules = config.import_modules(conf)
   conf = config.next_config(conf, eval_modules, 33)
-  config.show_config(conf)
+  config.show_json(conf)
   print("=====================")
   
   
