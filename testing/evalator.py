@@ -19,212 +19,176 @@ import importlib
 #  Так-же проверяет и добавляет обязательные ключи и строит all последовательность,
 #  которя являеться объединением остальных
  
+
 class evalator:
   
-  def __init__(self, name = None):
-    # имя последовательности или запроса 
+  def __init__(self, fd, name = 'all'):
     self.name = name
-    # текущая копия queries
-    self.current = None
-    # текущая копия values
-    self.values  = None
-    self.params  = None
-    self.results  = None
-    self.queries  = None
-    self.target  = None
-    self.modules = None
-    self.start   = datetime.datetime.now()
+    
+    # счетчики
+    # номер итерации
     self.N = 0
+    # позиция в последовательности
     self.pos = 0
+    # счетчик последовательноси
     self.count1 = 0
+    # счетчик повторений 
     self.count2 = 0
     
-  def load(self, fd):
-    self.orig = json.load( fd )
+    # загрузка json файла
+    orig = json.load( fd )
     
-    for k in ['import', 'values', 'params', 'results', 'queries', 'sequences']:
-      if not k in self.orig:
-        self.orig[k]={}
-        
-    all=[]
-    for k, v in self.orig['sequences'].iteritems():
-      if len(v) > 2 :
-        all+=v[:-1]
-    all += [u"объединение всех последовательностей"]
-    self.orig['sequences']['all'] = all
-    
+    # загрузка модyлей 
     self.modules = {}
-    if "import" in self.orig:
-      for im in self.orig["import"]:
+    if "import" in orig:
+      for im in orig["import"]:
         self.modules[im] = importlib.import_module(im)
-  
-  def show(self):
-    if self.current != None:
-      print( json.dumps(self.current, ensure_ascii=False, sort_keys=True) )
-    else:
-      print( json.dumps(self.orig, ensure_ascii=False, sort_keys=True) )
 
-  def recreate(self):
-    self.reinit()
-    self.deep_eval(self.values)
-    self.replace()
-    self.deep_eval(self.target)
+    # в плоскую структуру
+    self.flat = {}
+    for k1, v1 in orig.iteritems():
+      if not k1 in ['import']:
+        for k2, v2 in v1.iteritems():
+          self.flat[k2]=v2
+          
+    # all объединение 
+    all=[]
+    names=[]
+    for k, v in self.flat.iteritems():
+      if isinstance(v, list):
+        if len(v) > 2 :
+          # TODO: проверка валиидности списка
+          names += [k]
+          all+=v[:-1]
+    all += [ u"union lists of [" + u",".join(names) + u"]" ]
+    self.flat['all']=all
     
+
+    # номер итерации
+    self.flat['N']=0
+    # позиция в списке
+    self.flat['P']=0
+    # счетчик прохода по списку (сколько раз прошли по списку)
+    self.flat['C']=0
+    # счетчик списка
+    self.flat['C1']=0
+    # счетчик повторений 
+    self.flat['C2']=0
+    now = datetime.datetime.now()
+    self.flat['start'] = time.mktime(now.timetuple())
+
   def next(self):
-    
-    if isinstance(self.target, dict):
-      self.recreate()
-      self.deep_replace(self.target, {"C1":0, "C2":0})
-      self.deep_eval(self.target)
-      return self.target
-    
-    if self.target and self.pos == len(self.target)-1:
-      self.pos = 0
-      self.count1 = 0
-      self.count2 = 0
+    # создаем объект и обновляем счетчики 
+    obj = self.create_()
+    obj = self.prepare_(obj, {})
+    return obj
 
-    self.recreate()
-    self.deep_replace(self.target[self.pos], {"C1": self.count1, "C2":self.count2} )
-    self.deep_eval(self.target[self.pos])
+  def prepare_(self, obj, dct ):
+    is_str =  isinstance(obj, str) or isinstance(obj, unicode)
     
-    if self.count2 == self.target[self.pos + 1]:
+    if is_str:
+      return self.prepare_string_(obj, dct)
+    elif isinstance(obj, list):
+      for i in range(len(obj)):
+        obj[i] = self.prepare_(obj[i])
+    elif isinstance(obj, dict):
+      keys = obj.keys()
+      for k in keys:
+        key = self.prepare_string_( k, dct)
+        val = self.prepare_(obj[k], dct)
+        if key != k:
+          del obj[k]
+        obj[key] = val
+    return obj
+
+  def prepare_string_(self, arg, dct ):
+    if len(arg) < 3:
+      return arg
+    elif arg[0]=='{' and arg[1]=='%':
+      return self.eval_(arg[2:-2], dct)
+    elif arg[0]=='$' and arg[1]=='{':
+      return self.sub_(arg[2:-1], dct)
+    return self.replace_(arg, dct)
       
-      self.count2 = 0
-      self.pos += 2
-      self.count1 += 1
+  def eval_(self, arg, dct ):
+    arg = self.replace_(arg, dct)
+    return eval(arg, self.modules)
 
-    self.count2 += 1
-    return self.target[self.pos]
+  def replace_(self, arg, dct ):
+    while True:
+      beg = arg.find('$')
+      if beg == -1:
+        return arg
+      end = beg+1
+      while end<len(arg) and arg[end].isalnum():
+        end +=1
+      arg = arg[:beg] + str(self.sub_(arg[beg+1:end], dct)) + arg[end:]
+    return arg
+  
+  def sub_(self, arg, dct):
+    if arg in dct:
+      return dct[arg]
+    if arg in self.flat:
+      val = copy.deepcopy(self.flat[arg])
+      val = self.prepare_(val, dct)
+      dct[arg] = val
+      return val
+    raise Exception("key '{0}' not found".format(arg))
 
-  def reinit(self):
-    cpy = copy.deepcopy(self.orig)
-    self.values  = cpy['values']
-    self.params  = cpy['params']
-    self.results  = cpy['results']
-    self.queries = cpy['queries']
-    
-    if self.name in self.orig['queries']:
-      self.target = self.orig['queries'][self.name]
-      self.queries = None
-    elif self.name in self.orig['sequences']:
-      self.target = self.orig['sequences'][self.name]
+  def create_(self):
+    obj = None
+    cur = self.flat[self.name]
+    if isinstance(cur, list):
+      # если нужно переходим на следующий элемент
+      if cur[ self.flat['P'] +1 ] == self.flat['C2']:
+        self.flat['P']+=2
+        self.flat['C2']=0
+      # если дошли до конца списка
+      if self.flat['P'] == len(cur)-1:
+        self.reset_(['P','C','C1','C2'])
+        self.flat['C'] += 1
+      obj = copy.deepcopy( cur[self.flat['P']] )
+      self.inc_(['N','C','C1','C2'])
     else:
-      raise Exception('target not found')
+      obj = copy.deepcopy(cur)
     
     now = datetime.datetime.now()
     unix_now = time.mktime(now.timetuple())
-    unix_start = time.mktime(self.start.timetuple())
-    self.values['N'] = self.N
-    self.values['timestamp'] = int(unix_now)
-    self.values['timespan'] = int(unix_now - unix_start)
-    self.N += 1
+    unix_start = self.flat['start']
+    self.flat['N'] += 1
+    self.flat['timestamp'] = int(unix_now)
+    self.flat['timespan'] = int(unix_now - unix_start)
+    return obj
+      
+
+  def reset_(self, keys):
+    for k in keys:
+      self.flat[k]=0
+
+  def inc_(self, keys):
+    for k in keys:
+      self.flat[k] += 1
+      
+      
+          
     
-  def replace(self):
-    self.deep_replace(self.params, self.values)
-    self.deep_replace(self.results, self.values)
-
-    if self.queries != None:
-      self.deep_replace(self.queries, self.params)
-      self.deep_replace(self.queries, self.results)
-      self.deep_replace(self.queries, self.values)
-      self.deep_replace(self.target, self.queries)
     
-    self.deep_replace(self.target, self.results)
-    self.deep_replace(self.target, self.values)
-    self.deep_replace(self.target, self.params)
 
-  def deep_eval(self, arg):
-    if isinstance(arg, dict):
-      self.eval_dict_(arg)
-    elif isinstance(arg, list):
-      self.eval_list_(arg)
-    else:
-      raise Exception("eval_foreach: type must be list or dict ")
-    
-  def deep_replace(self, arg, dct):
-    if isinstance(arg, dict):
-      self.replace_dict_(arg, dct)
-    elif isinstance(arg, list):
-      self.replace_list_(arg, dct)
-    else:
-      return self.replace_string_(arg, dct)
-    return arg
-    
-# private
 
-  def eval_value_(self, arg):
-    if not isinstance(arg, str) and not isinstance(arg, unicode):
-      return arg
-    
-    flag = True
-    while flag:
-      flag = False
-      k1 = "{%"
-      k2 = "%}"
-      pos1 = arg.find(k1)
-      flag = pos1 != -1
-      if flag:
-        pos2 = arg.find(k2, pos1)
-        flag = pos2 != -1
-      if flag:
-        py = arg[ pos1+2 : pos2]
-        res = eval(py, self.modules)
-        arg = arg[:pos1] + str(res) + arg[pos2+2:]
-    return arg
 
-  def eval_dict_(self, arg):
-    for k, v in arg.iteritems():
-      if isinstance(v, dict):
-        self.deep_eval(v)
-      else:
-        arg[k] = self.eval_value_(v)
-
-  def eval_list_(self, arg):
-    for i, v in enumerate(arg):
-      if isinstance(v, dict):
-        self.deep_eval(v)
-      else:
-        arg[i] = self.eval_value_(v)
-        
-  # replace 
-  
-  def replace_string_(self, arg, dct):
-    if not isinstance(arg, str) and not isinstance(arg, unicode):
-      return arg
-    keys = dct.keys()
-    keys.sort(reverse=True)
-    flag = True
-    while flag:
-      flag = False
-      for k in keys:
-        k1 = "$"+k
-        pos = arg.find(k1)
-        flag = pos!=-1
-        if flag:
-          arg = arg.replace(k1, str(dct[k]))
-        else:
-          k1 = "${"+k
-          pos1 = arg.find(k1)
-          if pos1!=-1:
-            return dct[k]
-    return arg
-
-  def replace_dict_(self, arg, dct):
-    for k, v in arg.iteritems():
-      newk = self.replace_string_(k, dct)
-      arg[newk] = self.deep_replace(v, dct)
-      if newk != k:
-        del arg[k]
-
-  def replace_list_(self, arg, dct):
-    for i, v in enumerate(arg):
-      arg[i] = self.deep_replace(v, dct)
 
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument("file", help="configuration file", type=argparse.FileType('r'))
   args = parser.parse_args()
+  el = evalator(args.file, "all")
+  for i in range(100):
+    cur = el.next()
+    print( json.dumps(cur, ensure_ascii=False, sort_keys=True) )
+
+    #print(cur)
+  '''
   el = evalator("all")
   el.load(args.file)
   el.show()
@@ -233,6 +197,7 @@ if __name__ == '__main__':
     print( json.dumps(trg, ensure_ascii=False, sort_keys=True) )
     
   print("####################################")
+  '''
   
   # el.show()
   

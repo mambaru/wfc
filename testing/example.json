@@ -3,36 +3,42 @@
 
   "values":
   {
-    "strrnd":"{%random.randint(1,10)%}+{%random.randint(1,10)%}+{%random.randint(1,10)%}",
-    "strrnd2": "{% ''.join(random.choice(string.ascii_uppercase) for _ in range(random.randint(1,20))) %}"
+    "strrnd":"{%random.randint(1,10) + random.randint(1,10) + random.randint(1,10)%}",
+    "strrnd2": "{% ''.join(random.choice(string.ascii_uppercase) for _ in range(random.randint(1,20))) %}", 
+    "true":"{% True if 1 > 0 else 2 %}"
   }, 
   
   "params":
   {
-    "p-set1":{"key":"key-$N-$C1-$C2", "value":"{%'$strrnd2'+'_'+str($timestamp)%}"}
+    "p-set1":{"key":"key-$N-$C1-$C2", "value":"{%'$strrnd2'+'_'+str($timestamp)%}",  "value2":"{%$strrnd%}"}
   }, 
 
   "results":
   {
-    "r-set": {"status":true}
+    "r-set": {"status": "${true}"}
   }, 
   
   "queries":
   {
     "q-set1":{
-      "method" : "set", 
+      "method" : "set1", 
+      "params" : "${p-set1}", 
+      "result" : "${r-set}"
+    },
+    "q-set2":{
+      "method" : "set2", 
       "params" : "${p-set1}", 
       "result" : "${r-set}"
     },
     "n-set1":{
-      "method" : "set", 
+      "method" : "set3", 
       "params" : "${p-set1}"
     }
   },
 
   "sequences":
   {
-    "seq1": ["${q-set1}", 3, "${q-set1}", 4, "тестовая последовательность 2"],
+    "seq1": ["${q-set1}", 3, "${q-set2}", 4, "тестовая последовательность 2"],
     "seq2": ["${n-set1}", 1, "тестовая последовательность 1"]
   }
 }
