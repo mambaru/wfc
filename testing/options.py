@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-options = {
+options = 
+{
   'addr'     : '0.0.0.0',
   'port'     : '12345',
   'file'     : './testing.json',

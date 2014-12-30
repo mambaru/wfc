@@ -83,7 +83,8 @@ class bench:
     pass
   
   def add(self, method, microseconds):
-    #self.mutex.acquire()
+    
+    # --------------------------------
     if not method in self.methods:
       class Object: pass
       stat = Object()
@@ -92,6 +93,8 @@ class bench:
       self.methods[method] = stat
     stat = self.methods[method]
     stat.data += [microseconds]
+    
+    # --------------------------------
     if len(stat.data) == self.arr_size:
       finish = datetime.datetime.now()
       delta = finish - stat.start
@@ -133,9 +136,6 @@ class bench:
         else:
           break
     self.start = datetime.datetime.now()
-    #self.mutex.release()
-      
-
     
   
 class jsonrpc:

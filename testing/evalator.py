@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-## @package pyexample
+## @package evalator
 #  Documentation for this module.
 #
 #  More details.
@@ -13,19 +13,15 @@ import datetime
 import time
 import importlib
 
-## Deserialize f to a Python object
-#  @param f a .read()-supporting file-like object containing a JSON document
-#
-#  Так-же проверяет и добавляет обязательные ключи и строит all последовательность,
-#  которя являеться объединением остальных
- 
-
 class evalator:
-  
+  ## Deserialize fd to a Python object
+  #     @param fd a .read()-supporting file-like object containing a JSON document
+  #     @param name имя последовательности или объекта запроса 
+  #
+  #  Так-же строит all последовательность, которя являеться объединением остальных
   def __init__(self, fd, name = 'all'):
+    # Имя объекта или последовательности
     self.name = name
-    
-    # счетчики
     # номер итерации
     self.N = 0
     # позиция в последовательности
@@ -34,12 +30,11 @@ class evalator:
     self.count1 = 0
     # счетчик повторений 
     self.count2 = 0
-    
     # загрузка json файла
     orig = json.load( fd )
-    
     # загрузка модyлей 
     self.modules = {}
+    
     if "import" in orig:
       for im in orig["import"]:
         self.modules[im] = importlib.import_module(im)
@@ -82,6 +77,10 @@ class evalator:
     obj = self.create_()
     obj = self.prepare_(obj, {})
     return obj
+  
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
   def prepare_(self, obj, dct ):
     is_str =  isinstance(obj, str) or isinstance(obj, unicode)
@@ -159,7 +158,6 @@ class evalator:
     self.flat['timestamp'] = int(unix_now)
     self.flat['timespan'] = int(unix_now - unix_start)
     return obj
-      
 
   def reset_(self, keys):
     for k in keys:
@@ -170,13 +168,9 @@ class evalator:
       self.flat[k] += 1
       
       
-          
-    
-    
-
-
-
-
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
@@ -186,27 +180,3 @@ if __name__ == '__main__':
   for i in range(100):
     cur = el.next()
     print( json.dumps(cur, ensure_ascii=False, sort_keys=True) )
-
-    #print(cur)
-  '''
-  el = evalator("all")
-  el.load(args.file)
-  el.show()
-  for i in range(100):
-    trg = el.next()
-    print( json.dumps(trg, ensure_ascii=False, sort_keys=True) )
-    
-  print("####################################")
-  '''
-  
-  # el.show()
-  
-  '''
-  args = parser.parse_args()
-  config = load_queries(args.file)
-  show_json(config)
-  print("---------------------")
-  eval_modules = import_modules(config)
-  config = next_config(config, eval_modules, 33)
-  show_json(config)
-  '''
