@@ -80,6 +80,9 @@ class bench:
       print( self.ts_min ) 
     self.count = 0
     self.start = datetime.datetime.now()
+    
+    print("µ - microsecond")
+    print("method(rate)\t0% µs(persec)\t50% µs(persec)\t80% µs(persec)\t95% µs(persec)\t99% µs(persec)\t100% µs(persec)")
     pass
   
   def add(self, method, microseconds):
@@ -264,12 +267,12 @@ def main():
     do_probe()
   elif test_type == "test":
     do_test()
-  
-  pass
 
 
 if __name__ == '__main__':
+  
   parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+  
   parser.add_argument('-a', '--addr',  help="server address", default=options['addr'])
   parser.add_argument('-p', '--port',  help="server port", type=int, default=options['port'])
   parser.add_argument('-u', '--prot',  help="протокол", default=options['prot']) # TODO: сделать просто udp
@@ -291,14 +294,14 @@ if __name__ == '__main__':
   options['prot']     = args.prot
   options['pconn']    = args.pconn
   options['trace']    = args.trace
-  options['rate']    = args.rate
+  options['rate']     = args.rate
   options['file']     = args.file
   options['sequence'] = args.sequence
   options['type']     = args.type
-  options['list']   = args.list
-  options['check']     = args.check
-  options['count']     = args.count
-  options['threads']     = args.threads
+  options['list']     = args.list
+  options['check']    = args.check
+  options['count']    = args.count
+  options['threads']  = args.threads
   
   main()
   sys.exit(0)

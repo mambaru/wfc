@@ -41,7 +41,8 @@ def import_modules(queries):
   return eval_modules
  
  
-class evalator:
+ 
+class evalator1:
   
   def __init__(self, name):
     # имя последовательности или запроса 
