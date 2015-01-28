@@ -76,6 +76,7 @@ class evalator:
     # создаем объект и обновляем счетчики 
     obj = self.create_()
     obj = self.prepare_(obj, {})
+    self.next_counters_()
     return obj
   
 #-------------------------------------------------------------------------------
@@ -134,20 +135,21 @@ class evalator:
       return val
     raise Exception("key '{0}' not found".format(arg))
 
-  def create_(self):
+  def create1_(self):
     obj = None
     cur = self.flat[self.name]
     if isinstance(cur, list):
       # если нужно переходим на следующий элемент
-      if cur[ self.flat['P'] +1 ] == self.flat['C2']:
-        self.flat['P']+=2
+      if cur[ self.flat['P']*2 +1 ] == self.flat['C2']:
+        self.flat['P']+=1
         self.flat['C2']=0
       # если дошли до конца списка
-      if self.flat['P'] == len(cur)-1:
+      if self.flat['P']*2 == len(cur)-1:
         self.reset_(['P','C','C1','C2'])
         self.flat['C'] += 1
-      obj = copy.deepcopy( cur[self.flat['P']] )
-      self.inc_(['N','C','C1','C2'])
+      obj = copy.deepcopy( cur[self.flat['P']*2] )
+      #self.inc_(['N','C','C1','C2'])
+      self.inc_(['C','C1','C2'])
     else:
       obj = copy.deepcopy(cur)
     
@@ -158,6 +160,39 @@ class evalator:
     self.flat['timestamp'] = int(unix_now)
     self.flat['timespan'] = int(unix_now - unix_start)
     return obj
+
+  
+  def create_(self):
+    obj = None
+    cur = self.flat[self.name]
+    if isinstance(cur, list):
+      obj = copy.deepcopy( cur[self.flat['P']*2] )
+    else:
+      obj = copy.deepcopy(cur)
+    
+    now = datetime.datetime.now()
+    unix_now = time.mktime(now.timetuple())
+    unix_start = self.flat['start']
+    self.flat['timestamp'] = int(unix_now)
+    self.flat['timespan'] = int(unix_now - unix_start)
+    return obj
+  
+  def next_counters_(self):
+    self.flat['N'] += 1
+    cur = self.flat[self.name]
+    if isinstance(cur, list):
+      self.inc_(['C1','C2'])
+      
+      # если нужно переходим на следующий элемент
+      if cur[ self.flat['P']*2 +1 ] == self.flat['C2']:
+        self.flat['P']+=1
+        self.flat['C2']=0
+      # если дошли до конца списка
+      if self.flat['P']*2 == len(cur)-1:
+        self.reset_(['P','C1','C2'])
+        self.flat['C'] += 1
+      
+
 
   def reset_(self, keys):
     for k in keys:
@@ -175,8 +210,10 @@ class evalator:
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument("file", help="configuration file", type=argparse.FileType('r'))
+  parser.add_argument("seq", nargs='?', help="sequence name", default="all")
+  parser.add_argument("count", nargs='?', help="sequence name", type=int, default=10)
   args = parser.parse_args()
-  el = evalator(args.file, "all")
-  for i in range(100):
+  el = evalator(args.file, args.seq)
+  for i in range(args.count):
     cur = el.next()
     print( json.dumps(cur, ensure_ascii=False, sort_keys=True) )

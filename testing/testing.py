@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import signal 
 
 sys.path.insert(0, '.')
 
@@ -22,7 +23,7 @@ class client:
   def __init__(self, addr, port, pconn = False, udp=False):
     self.addr = addr
     self.port = port
-    self.udp = udp
+    self.udp = False
     self.buff = ""
     self.pconn = pconn
     if self.pconn:
@@ -58,7 +59,10 @@ class client:
   def recv(self):
     result = self.parse()
     while result==None:
-      self.buff += self.cli.recv(4096)
+      res = self.cli.recv(4096)
+      if len(res) <= 0:
+        break
+      self.buff += res
       result = self.parse()
     if not self.pconn:
       self.close()
@@ -67,8 +71,9 @@ class client:
 
 class bench:
   
-  def __init__(self):
-    self.mutex = Lock()
+  def __init__(self, id, threads = 1):
+    self.id = id
+    self.threads = threads
     self.methods={}
     self.count_max = options["count"]
     self.rate_max = options["rate"]
@@ -81,17 +86,20 @@ class bench:
     self.count = 0
     self.start = datetime.datetime.now()
     
-    print("µ - microsecond")
-    print("method(rate)\t0% µs(persec)\t50% µs(persec)\t80% µs(persec)\t95% µs(persec)\t99% µs(persec)\t100% µs(persec)")
-    pass
+    if self.id==0:
+      print("µ - microsecond")
+      print("id: method(rate)\t0% µs(persec)\t50% µs(persec)\t80% µs(persec)\t95% µs(persec)\t99% µs(persec)\t100% µs(persec)")
+  
+  def is_finished(self):
+    return self.count_max!=0 and self.count >= self.count_max
   
   def add(self, method, microseconds):
-    
     # --------------------------------
     if not method in self.methods:
       class Object: pass
       stat = Object()
-      stat.data = []
+      #print (self.id, self.threads)
+      stat.data = [0 for x in xrange( (self.arr_size/self.threads) * self.id ) ]
       stat.start = datetime.datetime.now()
       self.methods[method] = stat
     stat = self.methods[method]
@@ -105,29 +113,30 @@ class bench:
       rate = self.arr_size*1000000/microseconds
       stat.data.sort()
       arr = stat.data
-      sec = 1000000
-      perc50 = self.arr_size*50/100
-      perc80 = self.arr_size*80/100
-      perc90 = self.arr_size*90/100
-      perc95 = self.arr_size*95/100
-      perc99 = self.arr_size*99/100
-      perc100 = self.arr_size-1
-      print("{0}({1})\t{2}({3})\t{4}({5})\t{6}({7})\t{8}({9})\t{10}({11})\t{12}({13})".format(
-        method, rate,
-        arr[0], sec/arr[0], 
-        arr[perc50], sec/arr[perc50], 
-        arr[perc80], sec/arr[perc80], 
-        arr[perc95], sec/arr[perc95], 
-        arr[perc99], sec/arr[perc99], 
-        arr[perc100],sec/arr[perc100]))
+      if arr[0]!=0:
+        sec = 1000000
+        perc50 = self.arr_size*50/100
+        perc80 = self.arr_size*80/100
+        perc90 = self.arr_size*90/100
+        perc95 = self.arr_size*95/100
+        perc99 = self.arr_size*99/100
+        perc100 = self.arr_size-1
+        print(str(self.id)+": {0}({1})\t{2}({3})\t{4}({5})\t{6}({7})\t{8}({9})\t{10}({11})\t{12}({13})".format(
+          method, rate,
+          arr[0], sec/arr[0], 
+          arr[perc50], sec/arr[perc50], 
+          arr[perc80], sec/arr[perc80], 
+          arr[perc95], sec/arr[perc95], 
+          arr[perc99], sec/arr[perc99], 
+          arr[perc100],sec/arr[perc100]))
       stat.data = []
       stat.start = finish
       
     self.count += 1
 
-    if self.count_max!=0 and self.count >= self.count_max:
-      print("Done")
-      sys.exit()
+    #if self.count_max!=0 and self.count >= self.count_max:
+    #  print("Done")
+    #  sys.exit()
 
     if self.rate_max != 0:
       while True:
@@ -138,8 +147,11 @@ class bench:
           time.sleep( (self.ts_min-microseconds)/(1000000.0*50.0))
         else:
           break
+
     self.start = datetime.datetime.now()
     
+    
+
   
 class jsonrpc:
   
@@ -161,11 +173,14 @@ class jsonrpc:
     start = datetime.datetime.now()
     self.cli.send(req_str)
     res_str = self.cli.recv()
+    if res_str == None:
+      return None
+    
     finish = datetime.datetime.now()
     #self.microseconds = time.mktime((finish - start).timetuple()) 
     delta = finish - start
     self.microseconds = delta.seconds*1000000 + delta.microseconds
-    if self.stat :
+    if self.stat != None:
       self.stat.add(method, self.microseconds)
       
     if self.trace :
@@ -175,41 +190,51 @@ class jsonrpc:
       raise Exception('jsonrpc error', result['error'])
     return result['result']
 
-'''
-  'addr'     : '0.0.0.0',
-  'port'     : '12345',
-  'file'     : './testing.json',
-  'prot'     : 'tcp',
-  'sequence' : 'all',
-  'pconn'    : True,
-  'trace'    : False
-  'type'     : 'probe'
-'''
+is_working = 0
+
 
 def do_thread(stat):
-  cli = client( options['addr'], options['port'], options['pconn'])
-  jrp = jsonrpc( cli, stat = stat, trace=options['trace'] )
-  orig = options["config"]
-  mods = options["modules"]
-  start = datetime.datetime.now()
-  itr = 0
-  while True:
-    conf = config.next_config(orig, mods, itr, start)
-    sequence = conf["sequences"][options["sequence"]]
-    itr += 1
-    i = 0
-    while True:
-      query = config.next_request(sequence, i, mods)
-      if query == None:
-        break
-      i+=1
-      # сделать notify и проверку результатов
-      result = jrp.request(query['method'], query['params'])
+  global is_working
+  is_working+=1
+  try:
+    cli = client( options['addr'], options['port'], options['pconn'])
+    jrp = jsonrpc( cli, stat = stat, trace=options['trace'] )
+    orig = options["config"]
+    mods = options["modules"]
+    start = datetime.datetime.now()
+    itr = 0
+    while is_working:
+      conf = config.next_config(orig, mods, itr, start)
+      sequence = conf["sequences"][options["sequence"]]
+      itr += 1
+      i = 0
+      while is_working:
+        query = config.next_request(sequence, i, mods)
+        if query == None or not is_working:
+          break
+        i+=1
+        # сделать notify и проверку результатов
+        result = jrp.request(query['method'], query['params'])
+        if stat.is_finished():
+          if is_working!=0:
+            is_working-=1
+          return
+  except IOError as e:
+    print "I/O error({0}): {1}".format(e.errno, e.strerror)
+  except ValueError:
+    print "Could not convert data to an integer."
+  except:
+    print "Unexpected error:", sys.exc_info()[0]
+    raise
+  if is_working!=0:
+    is_working-=1
     
 
-def do_test():  
-  stat = bench()
+def do_test():
+  global is_working
+
   if options["threads"] == 0:
+    stat = bench(0,1)
     do_thread(stat)
     return
   
@@ -217,19 +242,19 @@ def do_test():
   count = options["threads"]
   
   for t in xrange(count):
+    stat = bench(t, count)
     thread = Thread(target = do_thread, args = (stat,))
     threads.append( thread )
 
   for t in xrange(count):
-    #mutex.acquire()
-    #print "start", t
-    #mutex.release()
     threads[t].start()
+  
+  while is_working:
+    time.sleep(1)
 
   for t in xrange(count):
     threads[t].join()
-
-  
+    
 
 
 def do_probe():
@@ -249,7 +274,15 @@ def do_probe():
   query = config.next_request(conf["sequences"][options["sequence"]], 0, options["modules"])
   result = jrp.request(query['method'], query['params'])
 
+def signal_handler(signal, frame):
+  global is_working
+  print("STOP")
+  is_working = 0
+  
 def main():
+
+  signal.signal(signal.SIGINT, signal_handler)
+  
   conf = config.load_queries(options['file'])
 
   if options['list']:
@@ -273,25 +306,25 @@ if __name__ == '__main__':
   
   parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   
-  parser.add_argument('-a', '--addr',  help="server address", default=options['addr'])
-  parser.add_argument('-p', '--port',  help="server port", type=int, default=options['port'])
-  parser.add_argument('-u', '--prot',  help="протокол", default=options['prot']) # TODO: сделать просто udp
-  parser.add_argument('-r', '--rate',  help="скорость", type=int, default=options['rate'])
+  parser.add_argument('-a', '--addr',  help="Имя или Интернет адрес сервера", default=options['addr'])
+  parser.add_argument('-p', '--port',  help="Номер порта", type=int, default=options['port'])
+  parser.add_argument('-u', '--udp',   help="Использовать udp-протокол", default=options['udp'], action='store_true') 
+  parser.add_argument('-r', '--rate',  help="Количество запросов в секунду", type=int, default=options['rate'])
   parser.add_argument('-t', '--threads', type=int, help="число потоков", default=options['threads'])
-  parser.add_argument('-c', '--count', type=int,help="количество повторений на каждый поток", default=options['count'])
+  parser.add_argument('-c', '--count',   type=int,help="количество повторений на каждый поток", default=options['count'])
   parser.add_argument('-P', '--pconn', help="persistent connect", action='store_true')
   parser.add_argument('-C', '--check', help="check results for requests", action='store_true')
   parser.add_argument('-T', '--trace', help="trace", action='store_true')
   parser.add_argument('-f', '--file',  help="config file", type=argparse.FileType('r'), default=options['file'])
   parser.add_argument('-l', '--list',  help="отобразить список последовательностей и выйти", action='store_true')
   parser.add_argument('-s', '--sequence', help="бла-бла", default=options['sequence'])
-  parser.add_argument("type", nargs='?', help="бла-бла", choices=["probe", "test"], default=options['type'])
+  parser.add_argument("type", nargs='?',  help="бла-бла", choices=["probe", "test"], default=options['type'])
 
   args = parser.parse_args()
   
   options['addr']     = args.addr
   options['port']     = args.port
-  options['prot']     = args.prot
+  options['udp']      = args.udp
   options['pconn']    = args.pconn
   options['trace']    = args.trace
   options['rate']     = args.rate
@@ -302,6 +335,8 @@ if __name__ == '__main__':
   options['check']    = args.check
   options['count']    = args.count
   options['threads']  = args.threads
+  
+  
   
   main()
   sys.exit(0)

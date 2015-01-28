@@ -6,7 +6,7 @@ options =
   'addr'     : '0.0.0.0',
   'port'     : '12345',
   'file'     : './testing.json',
-  'prot'     : 'tcp',
+  'udp'      : False,
   'sequence' : 'all',
   'threads'  : 0,
   'rate'     : 0,
