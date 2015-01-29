@@ -19,17 +19,7 @@ class evalator:
   #     @param name имя последовательности или объекта запроса 
   #
   #  Так-же строит all последовательность, которя являеться объединением остальных
-  def __init__(self, fd, name = 'all'):
-    # Имя объекта или последовательности
-    self.name = name
-    # номер итерации
-    self.N = 0
-    # позиция в последовательности
-    self.pos = 0
-    # счетчик последовательноси
-    self.count1 = 0
-    # счетчик повторений 
-    self.count2 = 0
+  def __init__(self, fd, name = 'all', max_replay = 0):
     # загрузка json файла
     orig = json.load( fd )
     # загрузка модyлей 
@@ -41,38 +31,82 @@ class evalator:
 
     # в плоскую структуру
     self.flat = {}
+    # тестовые последовательности в формате [type, int, type, int, ..., "описание"]
+    self.lists = {}
     for k1, v1 in orig.iteritems():
-      if not k1 in ['import']:
+      #if not k1 in ['import'] :
+      if isinstance(v1, dict):
         for k2, v2 in v1.iteritems():
           self.flat[k2]=v2
-          
-    # all объединение 
-    all=[]
-    names=[]
-    for k, v in self.flat.iteritems():
-      if isinstance(v, list):
-        if len(v) > 2 :
-          # TODO: проверка валиидности списка
-          names += [k]
-          all+=v[:-1]
-    all += [ u"union lists of [" + u",".join(names) + u"]" ]
-    self.flat['all']=all
+      elif isinstance(v1, list):
+        self.lists[k1]=v1
+      else:
+        self.lists[k1]=[v1,1,""]
+    self.reset(name, max_replay)
     
+
+
+  def reset(self, name = 'all', max_replay = 0):
+    # Имя объекта или последовательности
+    self.name = name
+    # номер итерации
+    self.N = 0
+    # позиция в последовательности
+    self.pos = 0
+    # счетчик последовательноси
+    self.count1 = 0
+    # счетчик повторений 
+    self.count2 = 0
 
     # номер итерации
     self.flat['N']=0
     # позиция в списке
     self.flat['P']=0
     # счетчик прохода по списку (сколько раз прошли по списку)
-    self.flat['C']=0
+    self.flat['I']=0
     # счетчик списка
     self.flat['C1']=0
     # счетчик повторений 
     self.flat['C2']=0
-    now = datetime.datetime.now()
-    self.flat['start'] = time.mktime(now.timetuple())
+    self.max_replay = max_replay
+    self.replay_count = 0
 
+    now = datetime.datetime.now()
+    self.flat['startstamp'] = int(time.mktime(now.timetuple()))
+    self.next_time_()    
+
+    if name=="all":
+      # all объединение 
+      all=[]
+      names=[]
+      for k, v in self.flat.iteritems():
+        if isinstance(v, list):
+          if len(v) > 2 :
+            # TODO: проверка валиидности списка
+            names += [k]
+            all+=v[:-1]
+      all += [ u"union lists of [" + u",".join(names) + u"]" ]
+      self.flat['all']=all
+      
+    if self.name in self.lists:
+      self.cur_list = self.lists[self.name]
+    elif self.name in self.flat:
+      self.cur_list = [ self.flat[self.name], 1, "" ]
+    else:
+      raise "sequence '{0}' not found".format(self.name)
+
+  def next_time_(self):
+    now = datetime.datetime.now()
+    unix_now = time.mktime(now.timetuple())
+    unix_start = self.flat['startstamp']
+    self.flat['timestamp'] = int(unix_now)
+    self.flat['timespan'] = int(unix_now - unix_start)
+
+    
   def next(self):
+    if self.max_replay!=0 and self.replay_count==self.max_replay:
+      return None
+    
     # создаем объект и обновляем счетчики 
     obj = self.create_()
     obj = self.prepare_(obj, {})
@@ -90,7 +124,7 @@ class evalator:
       return self.prepare_string_(obj, dct)
     elif isinstance(obj, list):
       for i in range(len(obj)):
-        obj[i] = self.prepare_(obj[i])
+        obj[i] = self.prepare_(obj[i], dct)
     elif isinstance(obj, dict):
       keys = obj.keys()
       for k in keys:
@@ -134,7 +168,8 @@ class evalator:
       dct[arg] = val
       return val
     raise Exception("key '{0}' not found".format(arg))
-
+  
+  '''
   def create1_(self):
     obj = None
     cur = self.flat[self.name]
@@ -145,11 +180,11 @@ class evalator:
         self.flat['C2']=0
       # если дошли до конца списка
       if self.flat['P']*2 == len(cur)-1:
-        self.reset_(['P','C','C1','C2'])
-        self.flat['C'] += 1
+        self.reset_(['P','I','C1','C2'])
+        self.flat['I'] += 1
       obj = copy.deepcopy( cur[self.flat['P']*2] )
-      #self.inc_(['N','C','C1','C2'])
-      self.inc_(['C','C1','C2'])
+      #self.inc_(['N','I','C1','C2'])
+      self.inc_(['I','C1','C2'])
     else:
       obj = copy.deepcopy(cur)
     
@@ -160,29 +195,33 @@ class evalator:
     self.flat['timestamp'] = int(unix_now)
     self.flat['timespan'] = int(unix_now - unix_start)
     return obj
+  '''
 
   
   def create_(self):
     obj = None
-    cur = self.flat[self.name]
+    #cur = self.flat[self.name]
+    cur = self.cur_list
     if isinstance(cur, list):
       obj = copy.deepcopy( cur[self.flat['P']*2] )
     else:
       obj = copy.deepcopy(cur)
-    
+    self.next_time_()
+    '''
     now = datetime.datetime.now()
     unix_now = time.mktime(now.timetuple())
     unix_start = self.flat['start']
     self.flat['timestamp'] = int(unix_now)
     self.flat['timespan'] = int(unix_now - unix_start)
+    '''
     return obj
   
   def next_counters_(self):
     self.flat['N'] += 1
-    cur = self.flat[self.name]
+    # cur = self.flat[self.name]
+    cur = self.cur_list
     if isinstance(cur, list):
       self.inc_(['C1','C2'])
-      
       # если нужно переходим на следующий элемент
       if cur[ self.flat['P']*2 +1 ] == self.flat['C2']:
         self.flat['P']+=1
@@ -190,9 +229,11 @@ class evalator:
       # если дошли до конца списка
       if self.flat['P']*2 == len(cur)-1:
         self.reset_(['P','C1','C2'])
-        self.flat['C'] += 1
-      
-
+        self.flat['I'] += 1
+        self.replay_count += 1
+    else:
+      self.replay_count += 1
+      self.flat['I'] += 1
 
   def reset_(self, keys):
     for k in keys:
@@ -209,11 +250,14 @@ class evalator:
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
-  parser.add_argument("file", help="configuration file", type=argparse.FileType('r'))
-  parser.add_argument("seq", nargs='?', help="sequence name", default="all")
-  parser.add_argument("count", nargs='?', help="sequence name", type=int, default=10)
+  parser.add_argument("file", help="Файл с шаблонами генерации в формате json", type=argparse.FileType('r'))
+  parser.add_argument("seq", nargs='?', help="Имя последовательности или объекта", default="all")
+  parser.add_argument("count", nargs='?', help="Кол-во генерируемых объектов для вывода", type=int, default=1)
   args = parser.parse_args()
-  el = evalator(args.file, args.seq)
-  for i in range(args.count):
+  el = evalator(args.file, args.seq,args.count)
+  #for i in range(args.count):
+  while True:
     cur = el.next()
+    if cur == None:
+      break
     print( json.dumps(cur, ensure_ascii=False, sort_keys=True) )
