@@ -3,8 +3,10 @@
 
 import datetime
 import time
+from threading import Lock
 
 class Percentile:
+  show_mutex = Lock()
   def __init__(self, id, name, limit=1024):
     self.id = id
     self.name = name
@@ -62,6 +64,7 @@ class Percentile:
       microseconds = delta.seconds*1000000 + delta.microseconds
       rate = self.count*1000000/microseconds
     
+    Percentile.show_mutex.acquire()
     print(str(self.id)+": {0}({1},{2})\t{3}({4})\t{5}({6})\t{7}({8})\t{9}({10})\t{11}({12})\t{13}({14})".format(
       self.name, rate, self.count,
       self.time(0), self.rate(0), 
@@ -71,6 +74,7 @@ class Percentile:
       self.time(99), self.rate(99), 
       self.time(100), self.rate(100))
     )
+    Percentile.show_mutex.release()
 
     if reset:
       self.reset(last)

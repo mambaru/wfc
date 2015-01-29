@@ -6,7 +6,7 @@ import argparse
 import socket
 
 
-class client:
+class Client:
 
   def __init__(self, addr, port, pconn = False, udp=False):
     self.addr = addr
@@ -67,7 +67,7 @@ if __name__ == '__main__':
   parser.add_argument('-P', '--pconn', help="Использовать постоянное подключение", action='store_true')
   args = parser.parse_args()
 
-  cli = client(args.addr, args.port, pconn=args.pconn, udp=args.udp)
+  cli = Client(args.addr, args.port, pconn=args.pconn, udp=args.udp)
   
   while True:
     try:

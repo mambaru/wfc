@@ -13,12 +13,29 @@ from threading import Thread, Lock
 
 from options import options
 from evalator import evalator
-from client import client
+from client import Client
 from jsonrpc import jsonrpc
 from percentile import PercentileMethods
 
 is_working = 0
 request_counter = 0
+result_code = 0
+
+def to_json(obj):
+  return json.dumps(obj, ensure_ascii=False, sort_keys=True)
+
+
+def check_result(query, result):
+  global result_code
+  global is_working
+  if query["result"]!=result:
+    print("Неверный результат запроса '{0}'".format(query["method"]) )
+    print("params: {0}".format( to_json(query["params"]) ))
+    print("Полученный result: {0}".format( to_json(result)))
+    print("Ожидаемый  result: {0}".format( to_json(query["result"]) ))
+    result_code = 1
+    is_working = 0
+  
 
 def do_thread(args, stat):
   global is_working
@@ -26,21 +43,23 @@ def do_thread(args, stat):
   is_working+=1
   stat.show(timeout=1)
   try:
-    rate_max = options["rate"]
-    limit = options["limit"]
+    rate_max = args.rate
+    limit = args.limit
     call_count = rate_max-1
     start = datetime.datetime.now()
     
-    cli = client( options['addr'], options['port'], options['pconn'] , options['udp'])
-    jrp = jsonrpc( cli, stat = stat, trace=options['trace'] )
-    options['file'].seek(0)
-    v = evalator( options['file'], options['sequence'], options['count'])
+    cli = Client( args.addr, args.port, args.pconn , args.udp)
+    jrp = jsonrpc( cli, stat = stat, trace=args.trace )
+    args.file.seek(0)
+    v = evalator( args.file, args.sequence, args.count)
     while is_working and (request_counter < limit or limit==0):
       query = v.next()
       if not query:
         break
       if "result" in query:
         result = jrp.request(query['method'], query['params'])
+        if args.check :
+          check_result(query, result)
       else:
         jrp.notify(query['method'], query['params'])
       call_count+=1
@@ -69,13 +88,13 @@ def do_thread(args, stat):
 def do_test(args):
   global is_working
 
-  if options["threads"] == 0:
+  if args.threads == 0:
     stat = PercentileMethods(0)
     do_thread(args,stat)
     return
   
   threads = []
-  count = options["threads"]
+  count = args.threads
   
   for t in xrange(count):
     stat = PercentileMethods(t)
@@ -92,10 +111,6 @@ def do_test(args):
     threads[t].join()
     
 
-def show_json(obj):
-  print( json.dumps(obj, ensure_ascii=False, sort_keys=True) )
-
-
 def do_probe(args):
   print("Текуще настройки:")
   for k, v in options.iteritems():
@@ -106,7 +121,7 @@ def do_probe(args):
   v = evalator( f, args.sequence, 1)
   req = v.next()
   while req!=None:
-    show_json(req)
+    print( to_json(req) )
     req = v.next()
 
 def do_list(args):
@@ -140,19 +155,19 @@ if __name__ == '__main__':
 
   parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   
+  parser.add_argument('-f', '--file',  help="config file", type=argparse.FileType('r'), default=options['file'])
   parser.add_argument('-a', '--addr',  help="Имя или Интернет адрес сервера", default=options['addr'])
   parser.add_argument('-p', '--port',  help="Номер порта", type=int, default=options['port'])
   parser.add_argument('-u', '--udp',   help="Использовать udp-протокол", default=options['udp'], action='store_true') 
-  parser.add_argument('-r', '--rate',  help="Количество запросов в секунду", type=int, default=options['rate'])
+  parser.add_argument('-r', '--rate',  help="Ограничение скорости (запросов в секунду)", type=int, default=options['rate'])
   parser.add_argument('-t', '--threads', type=int, help="число потоков", default=options['threads'])
   parser.add_argument('-c', '--count',   type=int,help="количество повторений на каждый поток", default=options['count'])
   parser.add_argument('-P', '--pconn', help="persistent connect", action='store_true')
   parser.add_argument('-C', '--check', help="check results for requests", action='store_true')
   parser.add_argument('-T', '--trace', help="trace", action='store_true')
-  parser.add_argument('-f', '--file',  help="config file", type=argparse.FileType('r'), default=options['file'])
-  parser.add_argument('-l', '--list',  help="отобразить список последовательностей и выйти", action='store_true')
+  parser.add_argument('-l', '--limit',  help="Ограничение на общее количество запросов", action='store_true')
   parser.add_argument('-s', '--sequence', help="бла-бла", default=options['sequence'])
-  parser.add_argument("type", nargs='?',  help="бла-бла", choices=["probe", "test", "list"], default=options['type'])
+  parser.add_argument("type", nargs='?',  help="бла-бла", choices=["list", "probe", "test", "init", "bench", "stress"], default=options['type'])
 
   args = parser.parse_args()
   
@@ -165,10 +180,10 @@ if __name__ == '__main__':
   options['file']     = args.file
   options['sequence'] = args.sequence
   options['type']     = args.type
-  options['list']     = args.list
+  options['limit']    = args.limit
   options['check']    = args.check
   options['count']    = args.count
   options['threads']  = args.threads
   
   main(args)
-  
+  sys.exit(result_code)
