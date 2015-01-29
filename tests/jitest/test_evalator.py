@@ -86,13 +86,29 @@ def test7(v):
   check_exit(7, tst["startstamp"], unix_now)
   check_exit(7, tst["timestamp"], unix_now)
   check_exit(7, tst["timespan"], 0)
+  check_exit(7, tst["testtime"], unix_now)
   time.sleep(1)
   tst = v.next()
   check_exit(7, tst["startstamp"], unix_now)
   check_exit(7, tst["timestamp"], unix_now + 1)
   check_exit(7, tst["timespan"], 1)
+  check_exit(7, tst["testtime"], unix_now + 1)
 
 
+def test8(v):
+  v.reset('test-08', 1)
+  tst = v.next()
+  str0 = tst["tst0str"]
+  str1 = tst["tst1str"]
+  str2 = tst["tst2str"]
+  check_exit(8, str0, str1)
+  check_exit(8, str1, str2)
+
+def test9(v):
+  v.reset('val3', 1)
+  test_once(9, v, 1+2+3+4)
+  v.reset('obj3', 1)
+  test_once(9, v, {"key1":{"key1":{"key1":1+2+3+4}}})
     
 
 if __name__ == '__main__':
@@ -106,4 +122,6 @@ if __name__ == '__main__':
   test5(v)
   test6(v)
   test7(v)
+  test8(v)
+  test9(v)
   print("Done")

@@ -12,6 +12,8 @@ import copy
 import datetime
 import time
 import importlib
+import sys
+sys.path.insert(0, '.')
 
 class evalator:
   ## Deserialize fd to a Python object

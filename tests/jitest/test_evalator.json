@@ -1,21 +1,49 @@
 {
-  "import":[], 
-  "test-01-04":{
+  "import":["math", "random", "string"], 
+
+  "test-01-04":
+  {
     "test-01": "01", 
     "test-02": 2, 
     "test-03": [3], 
     "test-04": {"4":4}
   }, 
+
   "test-05":["${test-01}", 1, "${test-02}", 1, "${test-03}", 1, "${test-04}", 1, ""], 
-  "test-06-06":{
+
+  "test-06-06":
+  {
     "val-06":"$N-$P-$I-$C1-$C2"
   }, 
+
   "test-06":["${val-06}", 2, "${val-06}", 2, ""], 
-  "test-07":{
-    "test-07":{
+
+  "test-07-08":
+  {
+    "test-07":
+    {
       "startstamp":"${startstamp}", 
       "timestamp":"${timestamp}", 
-      "timespan":"${timespan}"
+      "timespan":"${timespan}",
+      "testtime":"{% $startstamp + $timespan %}"
+    },
+    
+    "strrnd": "{% ''.join(random.choice(string.ascii_uppercase) for _ in range(random.randint(1,20))) %}", 
+    "tststr": "$strrnd_$N",
+    "test-08":
+    {
+      "tst1str": "$strrnd_$N",
+      "tst2str": "$strrnd_$N",
+      "tst0str": "${tststr}"
     }
+  },
+  "test-09":
+  {
+    "val1":"{%1+2%}",
+    "val2":"{%3+4%}",
+    "val3":"{% $val1 + $val2 %}",
+    "obj1":{"key1":"${val3}"},
+    "obj2":{"key1":"${obj1}"},
+    "obj3":{"key1":"${obj2}"}
   }
 }

@@ -10,7 +10,10 @@ options =
   'sequence' : 'all',
   'threads'  : 0,
   'rate'     : 0,
+  # число проходов
   'count'    : 0,
+  # максимальное число запросов
+  'limit'    : 0,
   'check'    : False,
   'pconn'    : False,
   'trace'    : False,
