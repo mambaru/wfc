@@ -35,6 +35,13 @@ def check_result(query, result):
     print("Ожидаемый  result: {0}".format( to_json(query["result"]) ))
     result_code = 1
     is_working = 0
+  elif "error" in result:
+    print("Ошибка запроса '{0}'".format(query["method"]) )
+    print("params: {0}".format( to_json(query["params"]) ))
+    print("Полученный error: {0}".format( to_json(result)))
+    result_code = 2
+    is_working = 0
+    
   
 
 def do_thread(args, stat):
@@ -156,18 +163,21 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   
   parser.add_argument('-f', '--file',  help="config file", type=argparse.FileType('r'), default=options['file'])
+  parser.add_argument('-s', '--sequence', help="бла-бла", default=options['sequence'])
   parser.add_argument('-a', '--addr',  help="Имя или Интернет адрес сервера", default=options['addr'])
   parser.add_argument('-p', '--port',  help="Номер порта", type=int, default=options['port'])
+  parser.add_argument('-P', '--pconn', help="persistent connect", action='store_true')
   parser.add_argument('-u', '--udp',   help="Использовать udp-протокол", default=options['udp'], action='store_true') 
   parser.add_argument('-r', '--rate',  help="Ограничение скорости (запросов в секунду)", type=int, default=options['rate'])
-  parser.add_argument('-t', '--threads', type=int, help="число потоков", default=options['threads'])
-  parser.add_argument('-c', '--count',   type=int,help="количество повторений на каждый поток", default=options['count'])
-  parser.add_argument('-P', '--pconn', help="persistent connect", action='store_true')
+  parser.add_argument('-c', '--count', help="количество повторений на каждый поток", type=int, default=options['count'])
+  parser.add_argument('-l', '--limit', help="Ограничение на общее количество запросов", type=int,  default=options['limit'])
+  parser.add_argument('-t', '--threads', help="число потоков", type=int,  default=options['threads'])
+
   parser.add_argument('-C', '--check', help="check results for requests", action='store_true')
   parser.add_argument('-T', '--trace', help="trace", action='store_true')
-  parser.add_argument('-l', '--limit',  help="Ограничение на общее количество запросов", action='store_true')
-  parser.add_argument('-s', '--sequence', help="бла-бла", default=options['sequence'])
-  parser.add_argument("type", nargs='?',  help="бла-бла", choices=["list", "probe", "test", "init", "bench", "stress"], default=options['type'])
+  parser.add_argument('mode',   help="Режим работы (см. документацию)", nargs='?', 
+                      choices=["list", "probe", "ping", "test", "init", "bench", "stress"], 
+                      default=options['mode'])
 
   args = parser.parse_args()
   
@@ -177,7 +187,7 @@ if __name__ == '__main__':
   options['pconn']    = args.pconn
   options['trace']    = args.trace
   options['rate']     = args.rate
-  options['file']     = args.file
+  options['file']     = args.file.name
   options['sequence'] = args.sequence
   options['type']     = args.type
   options['limit']    = args.limit
