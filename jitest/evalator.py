@@ -13,17 +13,21 @@ import datetime
 import time
 import importlib
 import sys
+
 sys.path.insert(0, '.')
 
-class evalator:
+class Evalator:
+
   ## Deserialize fd to a Python object
   #     @param fd a .read()-supporting file-like object containing a JSON document
   #     @param name имя последовательности или объекта запроса 
   #
   #  Так-же строит all последовательность, которя являеться объединением остальных
   def __init__(self, fd, name = 'all', max_replay = 0):
+    
     # загрузка json файла
     orig = json.load( fd )
+    
     # загрузка модyлей 
     self.modules = {}
     
@@ -45,8 +49,6 @@ class evalator:
       else:
         self.lists[k1]=[v1,1,""]
     self.reset(name, max_replay)
-    
-
 
   def reset(self, name = 'all', max_replay = 0):
     # Имя объекта или последовательности
@@ -171,56 +173,18 @@ class evalator:
       return val
     raise Exception("key '{0}' not found".format(arg))
   
-  '''
-  def create1_(self):
-    obj = None
-    cur = self.flat[self.name]
-    if isinstance(cur, list):
-      # если нужно переходим на следующий элемент
-      if cur[ self.flat['P']*2 +1 ] == self.flat['C2']:
-        self.flat['P']+=1
-        self.flat['C2']=0
-      # если дошли до конца списка
-      if self.flat['P']*2 == len(cur)-1:
-        self.reset_(['P','I','C1','C2'])
-        self.flat['I'] += 1
-      obj = copy.deepcopy( cur[self.flat['P']*2] )
-      #self.inc_(['N','I','C1','C2'])
-      self.inc_(['I','C1','C2'])
-    else:
-      obj = copy.deepcopy(cur)
-    
-    now = datetime.datetime.now()
-    unix_now = time.mktime(now.timetuple())
-    unix_start = self.flat['start']
-    self.flat['N'] += 1
-    self.flat['timestamp'] = int(unix_now)
-    self.flat['timespan'] = int(unix_now - unix_start)
-    return obj
-  '''
-
-  
   def create_(self):
     obj = None
-    #cur = self.flat[self.name]
     cur = self.cur_list
     if isinstance(cur, list):
       obj = copy.deepcopy( cur[self.flat['P']*2] )
     else:
       obj = copy.deepcopy(cur)
     self.next_time_()
-    '''
-    now = datetime.datetime.now()
-    unix_now = time.mktime(now.timetuple())
-    unix_start = self.flat['start']
-    self.flat['timestamp'] = int(unix_now)
-    self.flat['timespan'] = int(unix_now - unix_start)
-    '''
     return obj
   
   def next_counters_(self):
     self.flat['N'] += 1
-    # cur = self.flat[self.name]
     cur = self.cur_list
     if isinstance(cur, list):
       self.inc_(['C1','C2'])
@@ -256,8 +220,7 @@ if __name__ == '__main__':
   parser.add_argument("seq", nargs='?', help="Имя последовательности или объекта", default="all")
   parser.add_argument("count", nargs='?', help="Кол-во генерируемых объектов для вывода", type=int, default=1)
   args = parser.parse_args()
-  el = evalator(args.file, args.seq,args.count)
-  #for i in range(args.count):
+  el = Evalator(args.file, args.seq,args.count)
   while True:
     cur = el.next()
     if cur == None:

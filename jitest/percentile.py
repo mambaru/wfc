@@ -48,7 +48,7 @@ class Percentile:
       return int(rate*100.0)/100.0
     return int(rate)
   
-  def show(self, reset = True, minitems=0):
+  def show(self, reset = True, minitems=10):
     
     if minitems!=0 and len(self.data) < minitems :
       return
@@ -82,7 +82,7 @@ class Percentile:
   @staticmethod
   def show_head(limit):
     print("µ - microsecond. array limit={0}".format(limit) )
-    print("id: method(rate)\t0% µs(persec)\t50% µs(persec)\t80% µs(persec)\t95% µs(persec)\t99% µs(persec)\t100% µs(persec)")
+    print("id: method(rate, count)\t0% µs(persec)\t50% µs(persec)\t80% µs(persec)\t95% µs(persec)\t99% µs(persec)\t100% µs(persec)")
 
 
 class PercentileMethods:
@@ -98,14 +98,15 @@ class PercentileMethods:
       self.methods[method]=Percentile(self.id, method, self.limit)
     self.methods[method].add(microseconds)
     
-  def show(self, timeout=0, reset=True, minitems=10):
+  def show(self, timeout=0, minitems=10, reset=True):
     if timeout!=0:
       if self.showtime == None:
         self.showtime = datetime.datetime.now()
       else:
         now = datetime.datetime.now()
         delta = now - self.showtime 
-        if delta.seconds < timeout:
+        #if delta.seconds < timeout:
+        if (delta.seconds + delta.microseconds/1000000.0) < timeout:
           return
         self.showtime = now
         

@@ -11,14 +11,18 @@ class Client:
   def __init__(self, addr, port, pconn = False, udp=False):
     self.addr = addr
     self.port = port
-    self.udp = False
+    self.udp = udp
     self.buff = ""
     self.pconn = pconn
     if self.pconn:
       self.connect()
   
   def connect(self):
-    self.cli = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
+    if self.udp:
+      self.cli = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    else:
+      self.cli = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     self.cli.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     self.cli.connect( (self.addr, self.port) )
     self.cli.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -34,6 +38,9 @@ class Client:
   def send(self, req):
     if not self.pconn:
       self.connect()
+    #if self.udp:
+    #  self.cli.sendto(req+"\r\n", (self.addr, self.port))
+    #else:
     self.cli.send(req+"\r\n")
 
   def parse(self):
@@ -47,6 +54,9 @@ class Client:
   def recv(self):
     result = self.parse()
     while result==None:
+      #if self.udp:
+      #  res = self.cli.recvfrom(4096)
+      #else:
       res = self.cli.recv(4096)
       if len(res) <= 0:
         break

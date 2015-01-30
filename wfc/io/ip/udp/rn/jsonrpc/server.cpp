@@ -5,6 +5,7 @@
 
 namespace wfc{ namespace io{ namespace ip{ namespace udp{ namespace rn{ namespace jsonrpc{
 
+#warning АХТУНГ!! udp работает только для пустого jsonrpc
 server::~server()
 {
 }

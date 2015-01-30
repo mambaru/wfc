@@ -29,7 +29,6 @@ class jsonrpc:
       return None
     
     finish = datetime.datetime.now()
-    #self.microseconds = time.mktime((finish - start).timetuple()) 
     delta = finish - start
     self.microseconds = delta.seconds*1000000 + delta.microseconds
     if self.stat != None:
