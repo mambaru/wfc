@@ -5,7 +5,8 @@
   {
     "strrnd":"{%random.randint(1,10) + random.randint(1,10) + random.randint(1,10)%}",
     "strrnd2": "{% ''.join(random.choice(string.ascii_uppercase) for _ in range(random.randint(1,20))) %}", 
-    "true":"{% True if 1 > 0 else 2 %}"
+    "true":"{% True if 1 > 0 else 2 %}", 
+    "key1": "{% random.key1=1 %}"
   }, 
   
   "params":

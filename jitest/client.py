@@ -38,9 +38,6 @@ class Client:
   def send(self, req):
     if not self.pconn:
       self.connect()
-    #if self.udp:
-    #  self.cli.sendto(req+"\r\n", (self.addr, self.port))
-    #else:
     self.cli.send(req+"\r\n")
 
   def parse(self):
@@ -54,9 +51,6 @@ class Client:
   def recv(self):
     result = self.parse()
     while result==None:
-      #if self.udp:
-      #  res = self.cli.recvfrom(4096)
-      #else:
       res = self.cli.recv(4096)
       if len(res) <= 0:
         break

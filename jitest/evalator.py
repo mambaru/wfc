@@ -26,6 +26,7 @@ class Evalator:
   def __init__(self, fd, name = 'all', max_replay = 0):
     
     # загрузка json файла
+    fd.seek(0)
     orig = json.load( fd )
     
     # загрузка модyлей 

@@ -22,22 +22,22 @@ request_counter = 0
 result_code = 0
 
 def to_json(obj):
-  return json.dumps(obj, ensure_ascii=False, sort_keys=True)
+  return json.dumps(obj, ensure_ascii=False, sort_keys=True).encode('utf8')
 
 def check_result(query, result):
   global result_code
   global is_working
   if query["result"]!=result:
-    print("Неверный результат запроса '{0}'".format(query["method"]) )
-    print("params: {0}".format( to_json(query["params"]) ))
-    print("Полученный result: {0}".format( to_json(result)))
-    print("Ожидаемый  result: {0}".format( to_json(query["result"]) ))
+    print(u"Неверный результат запроса '{0}'".format(query["method"]) )
+    print(u"params: {0}".format( to_json(query["params"]) ))
+    print(u"Полученный result: {0}".format( to_json(result)))
+    print(u"Ожидаемый  result: {0}".format( to_json(query["result"]) ))
     result_code = 1
     is_working = 0
   elif "error" in result:
-    print("Ошибка запроса '{0}'".format(query["method"]) )
-    print("params: {0}".format( to_json(query["params"]) ))
-    print("Полученный error: {0}".format( to_json(result)))
+    print(u"Ошибка запроса '{0}'".format(query["method"]) )
+    print(u"params: {0}".format( to_json(query["params"]) ))
+    print(u"Полученный error: {0}".format( to_json(result)))
     result_code = 2
     is_working = 0
     
@@ -45,16 +45,198 @@ def check_result(query, result):
 # ------------------------------------
 # ------------------------------------
 
-def send_request(jrp, query, check):
-  if "result" in query:
-    result = jrp.request(query['method'], query['params'])
-    if check:
-      check_result( query, result )
+def send_raw(cli, stat, query, args):
+  if isinstance(query, dict):
+    request = query["request"] if "request" in query else None
+    response = query["response"] if "response" in query else None
   else:
-    jrp.notify(query['method'], query['params'])
+    request = query
+    response = None
 
+def send_request(jrp, query, args):
+  if "method" in query:
+    # это jsonrpc
+    if "result" in query:
+      result = jrp.request(query['method'], query['params'])
+      if args.check:
+        check_result( query, result )
+    else:
+      jrp.notify(query['method'], query['params'])
+  else:
+    send_raw(jrp.cli, jrp.stat, query, args)
+
+class TextRequester:
+  def __init__(self, cli, stat, args):
+    self.name = name
+    self.cli = cli
+    self.stat = stat
+    self.trace = trace
+    self.check = check
+    
+  def request(self, query):
+    print("Обработка не JSONRPC запросов не реализована")
+    return 3
+    
+class JsonRequester:
+  def __init__(self, cli, stat, args):
+    self.name = name
+    self.cli = cli
+    self.stat = stat
+    self.trace = trace
+    self.check = check
+  def request(self, query):
+    print("Обработка JSONRPC запросов не реализована")
+    return 3
+  def is_valid(self, query):
+    return isinstance(query, dict) and "method" in query
+
+class CusomRequester:
+  def __init__(self, cli, stat, args):
+    self.args = args
+    self.cli = cli
+    self.stat = stat
+  def request(self, query):
+    print("Обработка JSONRPC запросов не реализована")
+    return 3
+  def is_valid(self, query):
+    return isinstance(query, dict) and "method" in query
+
+    
+class JsonrpcRequester:
+  def __init__(self, cli, stat, args):
+    self.check = args.check
+    self.jrp = jsonrpc( cli, stat, args.trace )
+
+  def request(self, query):
+    result = self.jrp.request(query['method'], query['params'])
+    if self.check:
+      return self.check_result( query, result )
+    return 0
+  
+  def check_result(self, query, result):
+    if query["result"]!=result:
+      print("Неверный результат запроса '{0}'".format(query["method"]) )
+      print("params: {0}".format( to_json(query["params"]) ))
+      print("Полученный result: {0}".format( to_json(result)))
+      print("Ожидаемый  result: {0}".format( to_json(query["result"]) ))
+      return 1
+    elif "error" in result:
+      print("Ошибка запроса '{0}'".format(query["method"]) )
+      print("params: {0}".format( to_json(query["params"]) ))
+      print("Полученный error: {0}".format( to_json(result)))
+      return 2
+    return 0
+
+  def is_valid(self, query):
+    return isinstance(query, dict) and "method" in query
+
+
+class Requester:
+  
+  def __init__(self, stat, args):
+    cli = Client( args.addr, args.port, args.pconn , args.udp)
+    self.jrp = JsonrpcRequester( cli, stat, args)
+    self.castom = CusomRequester( cli, stat, args)
+    
+  def request(self, query):
+    if self.jrp.is_valid(query):
+      return self.jrp.request(query)
+    elif self.jrp.is_valid(query):
+      return self.castom.request(query)
+    else:
+      print("Не верный запрос:")
+      return 4
+    
+class SpeedLimiter:
+  def __init__(self, rate):
+    self.rate = rate
+    if rate > 0:
+      self.counter = rate - 1
+    self.start = datetime.datetime.now()
+    if rate!=0:
+      self.ratetime = 1000000.0/rate
+
+  def wait(self):
+    if self.rate == 0:
+      return
+    self.counter += 1
+    if self.counter == self.rate:
+      self.counter=0
+      now = datetime.datetime.now()
+      delta = now - self.start
+      if delta.seconds == 0:
+        microseconds = delta.seconds*1000000 + delta.microseconds
+        time.sleep( (1000000.0 - microseconds)/1000000.0)
+      self.start = datetime.datetime.now()
+
+  def wait_(self):
+    if self.rate == 0:
+      return
+    now = datetime.datetime.now()
+    delta = now - self.start
+    if delta.seconds == 0:
+      microseconds = delta.seconds*1000000 + delta.microseconds
+      if self.ratetime > microseconds:
+        time.sleep( (self.ratetime - microseconds)/1000000.0 )
+    self.start = datetime.datetime.now()
+   
 
 def work_thread(args, stat):
+  global is_working
+  global request_counter
+  
+  is_working+=1
+  if stat and stat.id==0:
+    stat.show_head()
+    stat.show(timeout=1)
+  try:
+    limiter = SpeedLimiter(args.rate)
+    rate_max = args.rate
+    limit = args.limit
+    call_count = rate_max-1
+    args.file.seek(0)
+    v = Evalator( args.file, args.name, args.count)
+    req = Requester( stat, args)
+    start = datetime.datetime.now()
+    while is_working and (request_counter < limit or limit==0):
+      query = v.next()
+      if not query:
+        break
+      status = req.request(query)
+      if status!=0:
+        result_code = status
+        is_working = 0
+        break
+      
+      call_count+=1
+      request_counter+=1
+      
+      # speed limit
+      if stat:
+        stat.show(timeout=args.showtime, minitems=args.minshow)
+    
+      limiter.wait()
+      if False and rate_max != 0 and call_count == rate_max:
+        call_count=0
+        now = datetime.datetime.now()
+        delta = now - start
+        if delta.seconds == 0:
+          microseconds = delta.seconds*1000000 + delta.microseconds
+          time.sleep( (1000000.0 - microseconds)/1000000.0)
+        start = datetime.datetime.now()
+        
+  except IOError as e:
+    print "I/O error({0}): {1}".format(e.errno, e.strerror)
+    raise
+  except:
+    print "Unexpected error:", sys.exc_info()[0]
+    raise
+  if is_working!=0:
+    is_working-=1
+
+
+
+def work_thread1(args, stat):
   global is_working
   global request_counter
   
@@ -75,7 +257,7 @@ def work_thread(args, stat):
       query = v.next()
       if not query:
         break
-      send_request(jrp, query, args.check)
+      send_request(jrp, query, args)
       call_count+=1
       request_counter+=1
       
@@ -140,10 +322,10 @@ def do_test(args):
   
   threads = []
   count = args.threads
-  
+  statsize = args.stat
   for t in xrange(count):
-    if args.stat != 0:
-      stat = PercentileMethods(id=t, limit=args.stat)
+    if statsize != 0:
+      stat = PercentileMethods(id=t, limit=statsize)
     thread = Thread(target = work_thread, args = (args, stat))
     threads.append( thread )
 
@@ -198,6 +380,7 @@ def do_stress(args):
   args.count = 0
   args.limit = 0
   args.stat  = 0
+  args.rate  = 0
   args.trace = False
   args.check = False
   do_test(args)

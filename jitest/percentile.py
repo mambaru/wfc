@@ -5,6 +5,9 @@ import datetime
 import time
 from threading import Lock
 
+import curses
+
+
 class Percentile:
   show_mutex = Lock()
   def __init__(self, id, name, limit=1024):
@@ -65,7 +68,15 @@ class Percentile:
       rate = self.count*1000000/microseconds
     
     Percentile.show_mutex.acquire()
-    print(str(self.id)+": {0}({1},{2})\t{3}({4})\t{5}({6})\t{7}({8})\t{9}({10})\t{11}({12})\t{13}({14})".format(
+    showstr = "{:>2} {:>6} ".format(self.id,self.count)
+    showstr += "{:<14}".format( "{0}:{1}".format(self.name, rate) ) 
+    for i in [0,50,80,90,95,99,100]:
+      cur="{0}:{1}".format(self.time(i), self.rate(i))
+      showstr += "{:>14}".format(cur)
+    print(showstr)
+      
+    '''
+    print(str(self.id)+": {:>2}|{:>7},{:>7}|{:>7}({:>7})|{:>7}({:>7})|{:>7}({:>7})|{:>7}({:>7})|{:>7}({:>7})|{:>7}({:>7})".format(
       self.name, rate, self.count,
       self.time(0), self.rate(0), 
       self.time(50), self.rate(50), 
@@ -74,6 +85,7 @@ class Percentile:
       self.time(99), self.rate(99), 
       self.time(100), self.rate(100))
     )
+    '''
     Percentile.show_mutex.release()
 
     if reset:
@@ -82,7 +94,7 @@ class Percentile:
   @staticmethod
   def show_head(limit):
     print("µ - microsecond. array limit={0}".format(limit) )
-    print("id: method(rate, count)\t0% µs(persec)\t50% µs(persec)\t80% µs(persec)\t95% µs(persec)\t99% µs(persec)\t100% µs(persec)")
+    print("id  count method:rate\t    0% µs:persec\t50% µs:persec\t80% µs:persec\t95% µs:persec\t99% µs:persec\t100% µs:persec")
 
 
 class PercentileMethods:
@@ -92,11 +104,13 @@ class PercentileMethods:
     self.id = id
     self.limit = limit
     self.showtime = None
+    #self.methods["[total]"]=Percentile(self.id, "[total]", self.limit)
     
   def add(self, method, microseconds):  
     if not method in self.methods:
       self.methods[method]=Percentile(self.id, method, self.limit)
     self.methods[method].add(microseconds)
+    #self.methods["[total]"].add(microseconds)
     
   def show(self, timeout=0, minitems=10, reset=True):
     if timeout!=0:
@@ -109,7 +123,6 @@ class PercentileMethods:
         if (delta.seconds + delta.microseconds/1000000.0) < timeout:
           return
         self.showtime = now
-        
     for m in self.methods:
       self.methods[m].show(reset=reset, minitems=minitems)
       
