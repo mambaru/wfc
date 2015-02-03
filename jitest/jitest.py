@@ -109,7 +109,7 @@ def do_list(args):
   for k, v in e.lists.iteritems():
     if k != "import":
       print(u"\t{0} - {1}".format(k, v[-1]))
-  print(u"\tall - объединение всех последовательностей")
+  #print(u"\tall - объединение всех последовательностей")
 
 # ------------------------------------    
 
@@ -120,7 +120,8 @@ def do_probe(args):
       print("\t{0:10}{1}".format(k,v) )
   f = args.file
   f.seek(0)
-  v = Evalator( f, args.name, 1)
+  v = Evalator( f, args.name, args.count)
+  print("Последовательность '{0}':".format(args.name))
   req = v.next()
   while req!=None:
     print( to_json(req) )
@@ -130,31 +131,38 @@ def do_probe(args):
 # ------------------------------------
 
 def do_test(args):
-  global is_working
-  stat = None
-  if args.threads == 0:
-    if args.stat != 0:
-      stat = PercentileMethods(id=0, limit=args.stat)
-    work_thread(args,stat)
+  try:
+    global is_working
+    global result_code
+    stat = None
+    if args.threads == 0:
+      if args.stat != 0:
+        stat = PercentileMethods(id=0, limit=args.stat)
+      work_thread(args,stat)
+      return
+    
+    threads = []
+    count = args.threads
+    
+    for t in xrange(count):
+      if args.stat != 0:
+        stat = PercentileMethods(id=t, limit=args.stat)
+      thread = Thread(target = work_thread, args = (args, stat))
+      threads.append( thread )
+
+    for t in xrange(count):
+      threads[t].start()
+    
+    while is_working:
+      time.sleep(1)
+
+    for t in xrange(count):
+      threads[t].join()
+  except Exception as e:
+    print("Exception: {0}".format(e.message))
+    result_code=3
     return
   
-  threads = []
-  count = args.threads
-  
-  for t in xrange(count):
-    if args.stat != 0:
-      stat = PercentileMethods(id=t, limit=args.stat)
-    thread = Thread(target = work_thread, args = (args, stat))
-    threads.append( thread )
-
-  for t in xrange(count):
-    threads[t].start()
-  
-  while is_working:
-    time.sleep(1)
-
-  for t in xrange(count):
-    threads[t].join()
 
 
 # ------------------------------------    
@@ -172,6 +180,7 @@ def do_ping(args):
     print("Ping OK")
     return
   except Exception as e:
+    result_code = 3
     print("Ping FAIL")
     print(e.message)
   print("Ping FAIL")
@@ -232,6 +241,8 @@ def main(args):
     do_bench(args)
   elif test_type == "stress":
     do_stress(args)
+    
+  
 
 # ------------------------------------
 
@@ -289,4 +300,8 @@ if __name__ == '__main__':
     print("Значение параметра --stat меньше --minshow. Сатистика отображена не будет.")
   
   main(args)
+  if result_code==0:
+    print("Done")
+  else:
+    print("FAIL")
   sys.exit(result_code)

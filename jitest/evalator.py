@@ -26,7 +26,12 @@ class Evalator:
   def __init__(self, fd, name = 'all', max_replay = 0):
     
     # загрузка json файла
-    orig = json.load( fd )
+    try:
+      orig = json.load( fd )
+    except ValueError as e:
+      print("Ошибка декодирования JSON конфигурации: {0}".format(e.message))
+      raise e
+      
     
     # загрузка модyлей 
     self.modules = {}
@@ -62,11 +67,11 @@ class Evalator:
     # счетчик повторений 
     self.count2 = 0
 
-    # номер итерации
+    # глобальный счетчик
     self.flat['N']=0
     # позиция в списке
     self.flat['P']=0
-    # счетчик прохода по списку (сколько раз прошли по списку)
+    # номер итерации
     self.flat['I']=0
     # счетчик списка
     self.flat['C1']=0
@@ -83,21 +88,24 @@ class Evalator:
       # all объединение 
       all=[]
       names=[]
-      for k, v in self.flat.iteritems():
+      for k, v in self.lists.iteritems():
         if isinstance(v, list):
           if len(v) > 2 :
             # TODO: проверка валиидности списка
             names += [k]
             all+=v[:-1]
       all += [ u"union lists of [" + u",".join(names) + u"]" ]
-      self.flat['all']=all
+      if len(all) > 1: 
+        self.lists['all']=all
+#      else:
+#        self.lists['all']=None
       
     if self.name in self.lists:
       self.cur_list = self.lists[self.name]
     elif self.name in self.flat:
       self.cur_list = [ self.flat[self.name], 1, "" ]
     else:
-      raise "sequence '{0}' not found".format(self.name)
+      raise Exception("sequence '{0}' not found".format(self.name))
 
   def next_time_(self):
     now = datetime.datetime.now()
