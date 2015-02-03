@@ -26,12 +26,12 @@ class Evalator:
   def __init__(self, fd, name = 'all', max_replay = 0):
     
     # загрузка json файла
+    fd.seek(0)
     try:
       orig = json.load( fd )
     except ValueError as e:
       print("Ошибка декодирования JSON конфигурации: {0}".format(e.message))
       raise e
-      
     
     # загрузка модyлей 
     self.modules = {}
