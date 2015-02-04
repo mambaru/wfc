@@ -108,24 +108,26 @@ class JsonrpcRequester:
     self.jrp = jsonrpc( cli, stat, args.trace )
 
   def request(self, query):
-    result = self.jrp.request(query['method'], query['params'])
-    if self.check:
-      return self.check_result( query, result )
+    try:
+      result = self.jrp.request(query['method'], query['params'])
+      if self.check:
+        if query["result"]!=result:
+          print("Неверный результат запроса '{0}'".format(query["method"]) )
+          print("params: {0}".format( to_json(query["params"]) ))
+          print("Полученный result: {0}".format( to_json(result)))
+          print("Ожидаемый  result: {0}".format( to_json(query["result"]) ))
+          return 1    
+    except Exception as jerror:
+      if jerror.args[0]=="jsonrpc":
+        if self.check:
+          print("Ошибка запроса '{0}'".format(query["method"]) )
+          print("params: {0}".format( to_json(query["params"]) ))
+          print("Полученный error: {0}".format( to_json(jerror.args[1])))
+          return 2
+      else:
+        raise jerror
     return 0
   
-  def check_result(self, query, result):
-    if query["result"]!=result:
-      print("Неверный результат запроса '{0}'".format(query["method"]) )
-      print("params: {0}".format( to_json(query["params"]) ))
-      print("Полученный result: {0}".format( to_json(result)))
-      print("Ожидаемый  result: {0}".format( to_json(query["result"]) ))
-      return 1
-    elif "error" in result:
-      print("Ошибка запроса '{0}'".format(query["method"]) )
-      print("params: {0}".format( to_json(query["params"]) ))
-      print("Полученный error: {0}".format( to_json(result)))
-      return 2
-    return 0
 
   def is_valid(self, query):
     return isinstance(query, dict) and "method" in query

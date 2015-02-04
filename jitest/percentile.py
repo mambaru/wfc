@@ -69,7 +69,11 @@ class Percentile:
     
     Percentile.show_mutex.acquire()
     showstr = "{:>2} {:>6} ".format(self.id,self.count)
-    showstr += "{:<14}".format( "{0}:{1}".format(self.name, rate) ) 
+    namerate = "{:<24}".format( "{0}:{1}".format(self.name, rate) )
+    if len( namerate ) > 24:
+      namerate=".."+namerate[-22:]
+      
+    showstr +=  namerate
     for i in [0,50,80,90,95,99,100]:
       cur="{0}:{1}".format(self.time(i), self.rate(i))
       showstr += "{:>14}".format(cur)
@@ -94,7 +98,7 @@ class Percentile:
   @staticmethod
   def show_head(limit):
     print("µ - microsecond. array limit={0}".format(limit) )
-    print("id  count method:rate\t    0% µs:persec\t50% µs:persec\t80% µs:persec\t95% µs:persec\t99% µs:persec\t100% µs:persec")
+    print("id  count method:rate                0% µs:rate   50% µs:rate   80% µs:rate   90% µs:rate   95% µs:rate   99% µs:rate  100% µs:rate")
 
 
 class PercentileMethods:

@@ -13,30 +13,8 @@ import datetime
 import time
 import importlib
 import sys
-import re
 
 sys.path.insert(0, '.')
-
-# from http://stackoverflow.com/a/241506
-def comment_remover(text):
-    def replacer(match):
-        s = match.group(0)
-        if s.startswith('/'):
-            return " " # note: a space and not an empty string
-        else:
-            return s
-    pattern = re.compile(
-        r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
-        re.DOTALL | re.MULTILINE
-    )
-    return re.sub(pattern, replacer, text)
-  
-def prepare_load(fd):
-  fd.seek(0)
-  text = fd.read()
-  return comment_remover(text)
-  
-  
 
 class Evalator:
 
@@ -48,11 +26,9 @@ class Evalator:
   def __init__(self, fd, name = 'all', max_replay = 0):
     
     # загрузка json файла
-    #fd.seek(0)
-    txt = prepare_load(fd)
+    fd.seek(0)
     try:
-      orig = json.loads( txt )
-      #orig = json.load( fd )
+      orig = json.load( fd )
     except ValueError as e:
       print("Ошибка декодирования JSON конфигурации: {0}".format(e.message))
       raise e
@@ -143,7 +119,6 @@ class Evalator:
     if self.max_replay!=0 and self.replay_count==self.max_replay:
       return None
     
-    
     # создаем объект и обновляем счетчики 
     obj = self.create_()
     obj = self.prepare_(obj, {})
@@ -154,11 +129,8 @@ class Evalator:
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
-  def is_str(self, obj):
-    return isinstance(obj, str) or isinstance(obj, unicode)
-  
   def prepare_(self, obj, dct ):
-    is_str =  self.is_str(obj)
+    is_str =  isinstance(obj, str) or isinstance(obj, unicode)
     
     if is_str:
       return self.prepare_string_(obj, dct)
@@ -178,94 +150,17 @@ class Evalator:
   def prepare_string_(self, arg, dct ):
     if len(arg) < 3:
       return arg
-    arr0 = [arg]
-    flag=True
-    while flag:
-      flag = self.prepare_sub_(arr0, dct)
-    flag=True
-    while flag:
-      flag = self.prepare_eval_(arr0, dct)
-    return arr0[0]
-  
-  # Поиск ${name} в строке
-  def prepare_sub_(self, arr0, dct, offset=0):
-    arg = arr0[0]
-    if not self.is_str(arg):
-      return False
-    if len(arg) - offset < 3:
-      return False
-    beg = arg.find('$', offset)
-    if beg==-1:
-      return False
-    if arg[beg+1]!='{':
-      # это просто $, продолжаем 
-      return self.prepare_sub_(arr0, dct, beg+1)
-    self.do_sub_(arr0, dct, beg)
-    return True
-      
-  # обработка ${name} в строке
-  def do_sub_(self, arr0, dct, offset=0):
-    arg = arr0[0]
-    beg = offset+2
-    end = arg.find('}', beg)
-    if end==-1:
-      raise Exception("evalator","expected of '}'")
-    name=arg[beg:end]
-    if name in dct:
-      arr0[0]=self.replace_( arr0[0], dct[name], offset, end+1)
-      return
-    elif name in self.flat:
-      obj=self.prepare_(self.flat[name], dct)
-      dct[name]=obj
-      arr0[0]=self.replace_( arr0[0], obj, offset, end+1)
-      return
-    raise Exception("evalator","Object '{0}' not found".format(name))
-    
-  def replace_(self, arg, obj, beg, end):
-    if beg==0 and end==len(arg):
-      return obj
-    if self.is_str(obj):
-      return arg[:beg] + str(obj) + arg[end:]
-    return arg[:beg] + json.dumps(obj)+arg[end:]
-      
-  # Поиск {% code %} в строке
-  # предполагаеться что внутри все ${name} уже обработаны 
-  def prepare_eval_(self, arr0, dct):
-    arg = arr0[0]
-    if not self.is_str(arg):
-      return False
-    if len(arg) < 4:
-      return False
-    beg = arg.find('{%')
-    if beg==-1:
-      return False
-    end = arg.find('%}',beg)
-    if end==-1:
-      raise Exception("evalator","expected of '%}'")
-    self.do_eval_(arr0,  beg, end+2)
-    return True
-    
-  # обработка {% code %} в строке
-  def do_eval_(self, arr0,  beg, end):
-    arg = arr0[0]
-    code = arg[beg+2:end-2]
-    obj = eval(code, self.modules)
-    arr0[0] = self.replace_(arg, obj, beg, end)
-
-  def prepare_string_X(self, arg, dct ):
-    if len(arg) < 3:
-      return arg
     elif arg[0]=='{' and arg[1]=='%':
       return self.eval_(arg[2:-2], dct)
     elif arg[0]=='$' and arg[1]=='{':
       return self.sub_(arg[2:-1], dct)
     return self.replace_(arg, dct)
       
-  def eval_X(self, arg, dct ):
+  def eval_(self, arg, dct ):
     arg = self.replace_(arg, dct)
     return eval(arg, self.modules)
 
-  def replace_X(self, arg, dct ):
+  def replace_(self, arg, dct ):
     while True:
       beg = arg.find('$')
       if beg == -1:
@@ -276,7 +171,7 @@ class Evalator:
       arg = arg[:beg] + str(self.sub_(arg[beg+1:end], dct)) + arg[end:]
     return arg
   
-  def sub_X(self, arg, dct):
+  def sub_(self, arg, dct):
     if arg in dct:
       return dct[arg]
     if arg in self.flat:
@@ -285,14 +180,10 @@ class Evalator:
       dct[arg] = val
       return val
     raise Exception("key '{0}' not found".format(arg))
-
-#-------------------------------------------------------------------------------
-
+  
   def create_(self):
     obj = None
     cur = self.cur_list
-    if not isinstance(cur[ self.flat['P']*2 +1 ], int):
-      raise Exception("evalator", "invalid request sequence")
     if isinstance(cur, list):
       obj = copy.deepcopy( cur[self.flat['P']*2] )
     else:

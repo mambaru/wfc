@@ -1,0 +1,7 @@
+{
+  "import":["random", "string"],
+  "test":{
+    "example":"{% ''.join(random.choice(string.ascii_uppercase) for _ in range(random.randint(1,20))) %}"
+  }
+}
+

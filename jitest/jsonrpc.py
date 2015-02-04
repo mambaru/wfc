@@ -39,7 +39,7 @@ class jsonrpc:
       print(res_str)
     result = json.loads(res_str)
     if 'error' in result:
-      raise Exception('jsonrpc error', result['error'])
+      raise Exception('jsonrpc', result['error'])
     return result['result']
   
   def notify(self, method, params):

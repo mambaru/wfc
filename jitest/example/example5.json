@@ -4,13 +4,13 @@
     "kk":"key"
   },
   "params":{
-    "params-set":{"$kk":"$kk-1", "$vv":"test$vv-1"},
-    "params-get":{"$kk":"$kk-1"}
+    "params-set":{"${kk}":"${kk}1", "${vv}":"${vv}1"},
+    "params-get":{"${kk}":"${kk}1"}
   },
   "results":{
     "status":true,
     "result-set":{"status":"${status}" },
-    "result-get":{"status":"${status}", "$vv":"test$vv-1"}
+    "result-get":{"status":"${status}", "${vv}":"${vv}1"}
   },
   "methods":{
     "method-set":{
