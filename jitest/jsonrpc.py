@@ -16,9 +16,10 @@ class jsonrpc:
   def request(self, method, params):
     self.call_id += 1
     req_str = json.dumps({
+        'jsonrpc':'2.0',
         'method':method,
-        'id': self.call_id,
-        'params':params
+        'params':params,
+        'id': self.call_id
     })
     if self.trace :
       print(req_str)

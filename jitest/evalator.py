@@ -49,7 +49,7 @@ class Evalator:
       if isinstance(v1, dict):
         for k2, v2 in v1.iteritems():
           self.flat[k2]=v2
-      elif isinstance(v1, list):
+      elif isinstance(v1, list) and k1!="import":
         self.lists[k1]=v1
       else:
         self.lists[k1]=[v1,1,""]

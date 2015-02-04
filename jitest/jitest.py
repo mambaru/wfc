@@ -305,9 +305,13 @@ def do_probe(args):
   v = Evalator( f, args.name, args.count)
   print("Последовательность '{0}':".format(args.name))
   req = v.next()
+  i = 0
   while req!=None:
     print( to_json(req) )
     req = v.next()
+    i+=1
+    if args.limit!=0 and args.limit == i:
+      break
 
   
 # ------------------------------------
