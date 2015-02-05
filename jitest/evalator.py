@@ -159,7 +159,6 @@ class Evalator:
   
   def prepare_(self, obj, dct ):
     is_str =  self.is_str(obj)
-    
     if is_str:
       return self.prepare_string_(obj, dct)
     elif isinstance(obj, list):
@@ -175,20 +174,19 @@ class Evalator:
         obj[key] = val
     return obj
 
-  def prepare_string_(self, arg, dct ):
+  def prepare_string_(self, arg, dct, isPy=False ):
     if len(arg) < 3:
       return arg
     arr0 = [arg]
     flag=True
     while flag:
-      flag = self.prepare_sub_(arr0, dct)
-    flag=True
-    while flag:
       flag = self.prepare_eval_(arr0, dct)
+      if not flag:
+        flag = self.prepare_sub_(arr0, dct, offset=0, isPy=isPy)
     return arr0[0]
   
   # Поиск ${name} в строке
-  def prepare_sub_(self, arr0, dct, offset=0):
+  def prepare_sub_(self, arr0, dct, offset=0, isPy=False):
     arg = arr0[0]
     if not self.is_str(arg):
       return False
@@ -199,12 +197,12 @@ class Evalator:
       return False
     if arg[beg+1]!='{':
       # это просто $, продолжаем 
-      return self.prepare_sub_(arr0, dct, beg+1)
-    self.do_sub_(arr0, dct, beg)
+      return self.prepare_sub_(arr0, dct, offset=beg+1, isPy=isPy)
+    self.do_sub_(arr0, dct, beg, isPy=isPy)
     return True
       
   # обработка ${name} в строке
-  def do_sub_(self, arr0, dct, offset=0):
+  def do_sub_(self, arr0, dct, offset=0, isPy=False):
     arg = arr0[0]
     beg = offset+2
     end = arg.find('}', beg)
@@ -215,16 +213,17 @@ class Evalator:
       arr0[0]=self.replace_( arr0[0], dct[name], offset, end+1)
       return
     elif name in self.flat:
-      obj=self.prepare_(self.flat[name], dct)
+      obj=copy.deepcopy(self.flat[name])
+      obj=self.prepare_(obj, dct)
       dct[name]=obj
-      arr0[0]=self.replace_( arr0[0], obj, offset, end+1)
+      arr0[0]=self.replace_( arr0[0], obj, offset, end+1, isPy=isPy)
       return
     raise Exception("evalator","Object '{0}' not found".format(name))
     
-  def replace_(self, arg, obj, beg, end):
+  def replace_(self, arg, obj, beg, end, isPy=False):
     if beg==0 and end==len(arg):
       return obj
-    if self.is_str(obj):
+    if self.is_str(obj) or isPy:
       return arg[:beg] + str(obj) + arg[end:]
     return arg[:beg] + json.dumps(obj)+arg[end:]
       
@@ -242,15 +241,17 @@ class Evalator:
     end = arg.find('%}',beg)
     if end==-1:
       raise Exception("evalator","expected of '%}'")
-    self.do_eval_(arr0,  beg, end+2)
+    self.do_eval_(arr0, dct,  beg, end+2)
     return True
     
   # обработка {% code %} в строке
-  def do_eval_(self, arr0,  beg, end):
+  def do_eval_(self, arr0, dct, beg, end):
     arg = arr0[0]
     code = arg[beg+2:end-2]
+    code =self.prepare_string_(code, dct, isPy=True)
     obj = eval(code, self.modules)
-    arr0[0] = self.replace_(arg, obj, beg, end)
+    obj = self.prepare_(obj, dct)
+    arr0[0] = self.replace_(arg, obj, beg, end, isPy=True)
 
   def prepare_string_X(self, arg, dct ):
     if len(arg) < 3:

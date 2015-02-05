@@ -443,7 +443,8 @@ if __name__ == '__main__':
                       choices=["list", "probe", "ping", "test", "init", "bench", "stress"], 
                       default=options['mode'])
   
-  parser.add_argument('-f', '--file',     help="Файл конфигурации", type=argparse.FileType('r'), default=options['file'])
+  #parser.add_argument('-f', '--file',     help="Файл конфигурации", type=argparse.FileType('r'), default=options['file'])
+  parser.add_argument('-f', '--file',     help="Файл конфигурации", default=options['file'])
   parser.add_argument('-n', '--name',     help="Имя последовательности", default=options['name'])
   parser.add_argument('-a', '--addr',     help="Имя или Интернет адрес сервера", default=options['addr'])
   parser.add_argument('-p', '--port',     help="Номер порта", type=int, default=options['port'])
@@ -464,6 +465,7 @@ if __name__ == '__main__':
   
 
   args = parser.parse_args()
+  args.file = open(args.file, "r")
   
   options['mode']     = args.mode
   options['file']     = args.file.name
