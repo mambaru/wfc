@@ -1,11 +1,13 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2015
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #pragma once
 
-//#include <wfc/callback/callback_status.hpp>
 #include <wfc/logger.hpp>
-//#include <map>
 #include <memory>
-//#include <string>
-//#include <mutex>
 #include <iostream>
 #include <list>
 
@@ -67,18 +69,11 @@ private:
 };
 
 
-
-// TODO: spinlock
-// а лучше callback_owner<mutex_type>
-//template<typename M = std::mutex >
 class callback_owner
 {
   template <typename T>
   struct identity { typedef T type; };
-
 public:
-
-  //typedef M mutex_type;
   
   typedef std::shared_ptr<int> alive_type;
   typedef std::weak_ptr<int>   weak_type;
@@ -93,34 +88,11 @@ public:
 
   alive_type& alive() {return _alive;}
   const alive_type& alive() const {return _alive;}
-
-  //mutex_type& mutex() {return _mutex;}
   
   void reset()
   {
-    //std::lock_guard<mutex_type> lk(_mutex);
     _alive = std::make_shared<int>(1);
   }
-  
-  /*
-  template<typename ... Args>
-  std::function<callback_status(Args&&...)> callback(typename identity<std::function<callback_status(Args&&...)>>::type f)
-  {
-    std::lock_guard<mutex_type> lk(_mutex);
-    std::weak_ptr<int> alive = _alive;
-    _mutex.unlock();
-    
-    return [alive,f](Args&&... args)-> callback_status
-    {
-      if ( auto p = alive.lock() )
-      {
-        return f(std::forward<Args>(args)...);
-      }
-      return callback_status::died;
-    };
-  }
-  */
-
   
   template<typename R, typename ... Args>
   std::function<R(Args&&...)> callback(typename identity<std::function<R(Args&&...)>>::type f)
@@ -151,37 +123,9 @@ public:
     return callback_wrapper2<Handler>( handler, _alive);
   }
 
-  /*
-  template<typename Strand, typename Handler, typename NotAliveHandler = std::function<void()> >
-  callback_wrapper<Handler, NotAliveHandler>
-  wrap(Strand& strand, Handler handler, NotAliveHandler not_alive = nullptr)
-  {
-    Handler wrp = strand.wrap(handler);
-    return this->wrap( wrp, not_alive );
-  }
-  */
-
-  /*
-  template<typename Strand, typename Handler, typename NotAliveHandler>
-  callback_wrapper<Handler, NotAliveHandler>
-  wrap(Strand& strand, Handler handler, NotAliveHandler not_alive)
-  {
-    return callback_wrapper<Handler, NotAliveHandler>( strand, handler, not_alive, _alive);
-  }
-  */
-
 private:
   
   alive_type _alive;
 };
-/*
-  template<typename Handler, typename NotAliveHandler>
-  inline
-  callback_wrapper<Handler, NotAliveHandler>
-  owner_wrap(callback_owner& owner, Handler handler, NotAliveHandler not_alive)
-  {
-    return owner.wrap( handler, not_alive);
-  }
 
-*/
 }

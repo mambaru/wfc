@@ -1,10 +1,14 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2015
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #pragma once
 
 #include <map>
-#include <memory>
 #include <string>
 #include <mutex>
-#include <iostream>
 
 #include <wfc/core/iinterface.hpp>
 #include <wfc/logger.hpp>
@@ -24,13 +28,16 @@ public:
   template<typename I>
   std::shared_ptr<I> get(const std::string& prefix, const std::string& name) const
   {
+    if ( name.empty() )
+      return nullptr;
+      
     std::shared_ptr<I> result = nullptr;
     {
       std::lock_guard<mutex_type> lk(_mutex);
       auto itr = _registry_map.find( key_type(prefix, name) );
       if ( itr == _registry_map.end() )
       {
-        return result; 
+        return nullptr; 
       }
       result = std::dynamic_pointer_cast<I>(itr->second);
     }
@@ -49,7 +56,6 @@ public:
   {
     return this->get<I>("", name);
   }
-
 
   void set(const std::string& prefix, const std::string& name, std::shared_ptr<iinterface> item )
   {
@@ -77,7 +83,6 @@ public:
   {
     this->erase("", name);
   }
-
   
   template<typename I>
   void for_each( std::function< void(std::string, std::string, std::shared_ptr<I> ) > f )
@@ -96,7 +101,6 @@ public:
         f( a.first.first, a.first.second, ptr );
     }
   }
-  
   
   void clear()
   {

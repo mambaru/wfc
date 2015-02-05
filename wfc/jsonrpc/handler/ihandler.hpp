@@ -55,9 +55,7 @@ struct ihandler: ihandler_t<ihandler_base>
   typedef std::function< void(const char* name, notify_serializer_t) > send_notify_t;
   
   send_request_t send_request = nullptr;
-  send_notify_t  send_notify = nullptr;
-  //bool null_result_to_empty_object = false;
-  
+  send_notify_t  send_notify = nullptr;  
 };
 
 }} // wfc

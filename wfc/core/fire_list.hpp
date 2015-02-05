@@ -1,3 +1,9 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2015
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #pragma once
 
 #include <memory>
@@ -40,18 +46,6 @@ public:
     }
     for (const auto& f: lst)
       fire_fun(f);
-    /*
-    auto itr = _fire_list.begin();
-    while ( itr!=_fire_list.end() )
-    {
-      
-      if ( fire_fun(*itr) != callback_status::died )
-        ++itr;
-      else
-        _fire_list.erase(itr++);
-      
-    }
-    */
   }
   
 private:

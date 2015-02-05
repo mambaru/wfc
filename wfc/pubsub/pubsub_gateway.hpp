@@ -11,6 +11,7 @@
 #include <wfc/io/basic_io.hpp>
 #include <wfc/jsonrpc/service.hpp>
 #include <wfc/pubsub/pubsub_gateway_options.hpp>
+#include <wfc/pubsub/ipubsub.hpp>
 #include <wfc/thread/rwlock.hpp>
 
 namespace wfc{ namespace pubsub{
