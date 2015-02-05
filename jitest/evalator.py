@@ -121,15 +121,18 @@ class Evalator:
       all += [ u"union lists of [" + u",".join(names) + u"]" ]
       if len(all) > 1: 
         self.lists['all']=all
-#      else:
-#        self.lists['all']=None
-      
-    if self.name in self.lists:
-      self.cur_list = self.lists[self.name]
-    elif self.name in self.flat:
-      self.cur_list = [ self.flat[self.name], 1, "" ]
+
+    
+    if self.name:
+      if self.name in self.lists:
+        self.cur_list = self.lists[self.name]
+      elif self.name in self.flat:
+        self.cur_list = [ self.flat[self.name], 1, "" ]
+      else:
+        raise Exception("sequence '{0}' not found".format(self.name))
     else:
-      raise Exception("sequence '{0}' not found".format(self.name))
+      self.cur_list = None
+    
 
   def next_time_(self):
     now = datetime.datetime.now()
@@ -142,8 +145,8 @@ class Evalator:
   def next(self):
     if self.max_replay!=0 and self.replay_count==self.max_replay:
       return None
-    
-    
+    if self.cur_list == None:
+      return None
     # создаем объект и обновляем счетчики 
     obj = self.create_()
     obj = self.prepare_(obj, {})

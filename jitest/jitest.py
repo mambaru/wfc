@@ -288,12 +288,14 @@ def work_thread1(args, stat):
 # ------------------------------------
 
 def do_list(args):
-  print("Список доступных последовательностей:")
-  e = Evalator(args.file)
-  for k, v in e.lists.iteritems():
-    if k != "import":
-      print(u"\t{0} - {1}".format(k, v[-1]))
-  #print(u"\tall - объединение всех последовательностей")
+  e = Evalator(args.file, name=None)
+  if len(e.lists):
+    print("Список доступных последовательностей:")
+    for k, v in e.lists.iteritems():
+      if k != "import":
+        print(u"\t{0} - {1}".format(k, v[-1]))
+  else:
+    print("Нет доступных последовательностей")
 
 # ------------------------------------    
 
