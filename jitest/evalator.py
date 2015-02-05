@@ -54,7 +54,7 @@ class Evalator:
       orig = json.loads( txt )
       #orig = json.load( fd )
     except ValueError as e:
-      print("Ошибка декодирования JSON конфигурации: {0}".format(e.message))
+      print("Ошибка декодирования JSON конфигурации: {0}".format(e.args))
       raise e
     
     # загрузка модyлей 

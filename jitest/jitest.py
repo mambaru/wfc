@@ -349,7 +349,7 @@ def do_test(args):
     for t in xrange(count):
       threads[t].join()
   except Exception as e:
-    print("Exception: {0}".format(e.message))
+    print("Exception: {0}".format(e.args))
     result_code=3
     return
   
@@ -372,7 +372,7 @@ def do_ping(args):
   except Exception as e:
     result_code = 3
     print("Ping FAIL")
-    print(e.message)
+    print(e.args)
   print("Ping FAIL")
 
 # ------------------------------------
