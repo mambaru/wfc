@@ -5,7 +5,6 @@ import os
 import argparse
 import socket
 
-
 class Client:
 
   def __init__(self, addr, port, pconn = False, udp=False):
@@ -18,7 +17,6 @@ class Client:
       self.connect()
   
   def connect(self):
-    
     if self.udp:
       self.cli = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     else:
@@ -82,4 +80,3 @@ if __name__ == '__main__':
       cli.send(req)
       result = cli.recv()
       print(result)
-  

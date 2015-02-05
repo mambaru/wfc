@@ -35,24 +35,13 @@ def prepare_load(fd):
   fd.seek(0)
   text = fd.read()
   return comment_remover(text)
-  
-  
 
 class Evalator:
 
-  ## Deserialize fd to a Python object
-  #     @param fd a .read()-supporting file-like object containing a JSON document
-  #     @param name имя последовательности или объекта запроса 
-  #
-  #  Так-же строит all последовательность, которя являеться объединением остальных
   def __init__(self, fd, name = 'all', max_replay = 0):
-    
-    # загрузка json файла
-    #fd.seek(0)
     txt = prepare_load(fd)
     try:
       orig = json.loads( txt )
-      #orig = json.load( fd )
     except ValueError as e:
       print("Ошибка декодирования JSON конфигурации: {0}".format(e.args))
       raise e
@@ -69,7 +58,6 @@ class Evalator:
     # тестовые последовательности в формате [type, int, type, int, ..., "описание"]
     self.lists = {}
     for k1, v1 in orig.iteritems():
-      #if not k1 in ['import'] :
       if isinstance(v1, dict):
         for k2, v2 in v1.iteritems():
           self.flat[k2]=v2
@@ -115,13 +103,11 @@ class Evalator:
       for k, v in self.lists.iteritems():
         if isinstance(v, list):
           if len(v) > 2 :
-            # TODO: проверка валиидности списка
             names += [k]
             all+=v[:-1]
       all += [ u"union lists of [" + u",".join(names) + u"]" ]
       if len(all) > 1: 
         self.lists['all']=all
-
     
     if self.name:
       if self.name in self.lists:
@@ -133,20 +119,19 @@ class Evalator:
     else:
       self.cur_list = None
     
-
   def next_time_(self):
     now = datetime.datetime.now()
     unix_now = time.mktime(now.timetuple())
     unix_start = self.flat['startstamp']
     self.flat['timestamp'] = int(unix_now)
     self.flat['timespan'] = int(unix_now - unix_start)
-
     
   def next(self):
     if self.max_replay!=0 and self.replay_count==self.max_replay:
       return None
     if self.cur_list == None:
       return None
+
     # создаем объект и обновляем счетчики 
     obj = self.create_()
     obj = self.prepare_(obj, {})
@@ -255,40 +240,6 @@ class Evalator:
     obj = eval(code, self.modules)
     obj = self.prepare_(obj, dct)
     arr0[0] = self.replace_(arg, obj, beg, end, isPy=True)
-
-  def prepare_string_X(self, arg, dct ):
-    if len(arg) < 3:
-      return arg
-    elif arg[0]=='{' and arg[1]=='%':
-      return self.eval_(arg[2:-2], dct)
-    elif arg[0]=='$' and arg[1]=='{':
-      return self.sub_(arg[2:-1], dct)
-    return self.replace_(arg, dct)
-      
-  def eval_X(self, arg, dct ):
-    arg = self.replace_(arg, dct)
-    return eval(arg, self.modules)
-
-  def replace_X(self, arg, dct ):
-    while True:
-      beg = arg.find('$')
-      if beg == -1:
-        return arg
-      end = beg+1
-      while end<len(arg) and arg[end].isalnum():
-        end +=1
-      arg = arg[:beg] + str(self.sub_(arg[beg+1:end], dct)) + arg[end:]
-    return arg
-  
-  def sub_X(self, arg, dct):
-    if arg in dct:
-      return dct[arg]
-    if arg in self.flat:
-      val = copy.deepcopy(self.flat[arg])
-      val = self.prepare_(val, dct)
-      dct[arg] = val
-      return val
-    raise Exception("key '{0}' not found".format(arg))
 
 #-------------------------------------------------------------------------------
 

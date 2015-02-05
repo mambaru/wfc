@@ -404,8 +404,6 @@ def do_stress(args):
   
 # ------------------------------------
 
-
-
 def signal_handler(signal, frame):
   global is_working
   print("STOP")
