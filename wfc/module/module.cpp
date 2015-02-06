@@ -1,13 +1,12 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2015
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #include "module.hpp"
 
 namespace wfc{
-
-/*
-module::module()
-  : _impl( nullptr )
-{
-}
-*/
 
 module::module( std::shared_ptr< ::wfc::imodule > impl)
   : _impl(impl)

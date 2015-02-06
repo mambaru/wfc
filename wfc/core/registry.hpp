@@ -7,6 +7,7 @@
 #pragma once
 
 #include <map>
+#include <vector>
 #include <string>
 #include <mutex>
 
@@ -101,6 +102,29 @@ public:
         f( a.first.first, a.first.second, ptr );
     }
   }
+
+  template<typename I>
+  void for_each( std::string prefix, std::function< void( std::string, std::shared_ptr<I> ) > f )
+  {
+    typedef registry_map::value_type value_type;
+    std::vector<value_type> rm;
+    
+    {
+      std::lock_guard<mutex_type> lk(_mutex);
+      rm.reserve(_registry_map.size());
+      auto beg = _registry_map.lower_bound( key_type(prefix, "")  );
+      auto end = _registry_map.lower_bound( key_type(prefix+" ", "")  );
+      std::copy( beg, end, std::back_inserter(rm) );
+    }
+
+    for (const auto& a : rm)
+    {
+      std::shared_ptr<I> ptr = std::dynamic_pointer_cast<I>(a.second);
+      if ( ptr != nullptr )
+        f( a.first.second, ptr );
+    }
+  }
+
   
   void clear()
   {

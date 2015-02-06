@@ -9,11 +9,6 @@ logstream global_log(const std::string& name, const std::string& ident, const st
   if (auto g = global::static_global)
   {
     logger_ptr = g->registry.get<ilogger>(logger);
-    /*if (auto lr = g->loggers)
-    {
-      logger_ptr = lr->get(name);
-    }
-    */
   }
   
   return logstream( 

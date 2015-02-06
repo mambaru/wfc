@@ -1,3 +1,9 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2015
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #pragma once
 
 #include "imodule.hpp"
@@ -8,7 +14,6 @@ class module
   : public ::wfc::imodule
 {
 public:
-  /*module();*/
 
   module( std::shared_ptr< ::wfc::imodule > impl);
 

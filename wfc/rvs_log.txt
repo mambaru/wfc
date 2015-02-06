@@ -1,1 +1,0 @@
-r - /tmp/wfc_build_info.o

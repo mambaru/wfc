@@ -13,8 +13,10 @@ class logstream
 public:
   ~logstream()
   {
-    if (_logger)
+    if ( _logger )
+    {
       _logger->write(_name, _ident, _ss.str());
+    }
     else
     {
 #ifndef WFC_DISABLE_CLOG
@@ -48,7 +50,6 @@ public:
   template<typename V>
   std::stringstream& operator << ( V v)
   {
-    //if ( _logger )
     _ss<<v;
     return _ss;
   }

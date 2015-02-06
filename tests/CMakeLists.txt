@@ -4,8 +4,10 @@ enable_testing()
 include_directories(..)
 include_directories(../faslib/)
 
-add_subdirectory(logger)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${WFC_TEST_DIR})
+
 add_subdirectory(core)
+add_subdirectory(logger)
 add_subdirectory(wfc)
 add_subdirectory(pubsub)
 add_subdirectory(io)

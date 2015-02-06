@@ -51,7 +51,6 @@ private:
 class longspinlock : public spinlock {
 }  __attribute__ ((aligned (32)));
 
-
 template< size_t N >
 class spinlock_n
 {
