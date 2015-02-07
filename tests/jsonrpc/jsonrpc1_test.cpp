@@ -48,7 +48,7 @@ int test_count = 0;
 
 int main()
 {
-  wfc::io_service ios;
+  wfc::asio::io_service ios;
   wfc::jsonrpc::service::options_type opt = wfc::jsonrpc::service::options_type::create();
   
   wfc::jsonrpc::service service(ios, opt, nohandler());

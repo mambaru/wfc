@@ -8,7 +8,7 @@
 
 #include <wfc/logger.hpp>
 #include <wfc/core/except.hpp>
-#include <wfc/module/imodule.hpp>
+#include <wfc/core/imodule.hpp>
 #include <wfc/module/multi_instance_config.hpp>
 #include <wfc/module/multi_instance_config_json.hpp>
 

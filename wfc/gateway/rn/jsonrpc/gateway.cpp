@@ -4,7 +4,7 @@
 #include <wfc/io/ip/tcp/rn/jsonrpc/client.hpp>
 namespace wfc{ namespace gateway{ namespace rn{ namespace jsonrpc{
 
-void gateway::create(wfc::io_service& io, const gateway_config& conf, std::shared_ptr<ifactory> fact)
+void gateway::create(io_service_type& io, const gateway_config& conf, std::shared_ptr<ifactory> fact)
 {
   _conf = conf;
   
@@ -42,7 +42,7 @@ void gateway::create(wfc::io_service& io, const gateway_config& conf, std::share
   }
 }
   
-gateway::gateway(wfc::io_service& io, const gateway_config& conf, std::shared_ptr<ifactory> fact)
+gateway::gateway(io_service_type& io, const gateway_config& conf, std::shared_ptr<ifactory> fact)
   : _io_service(io)
   , _conf( conf )
 {

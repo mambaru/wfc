@@ -10,7 +10,7 @@ server::~server()
 }
 
   
-server::server(wfc::io_service& io, const server::options_type& conf)
+server::server(io_service_type& io, const server::options_type& conf)
   : _impl( std::make_shared<server_impl>(io, conf) )
 {
   

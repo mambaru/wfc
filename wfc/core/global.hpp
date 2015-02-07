@@ -8,8 +8,8 @@
 
 #include <wfc/core/registry.hpp>
 #include <wfc/core/fire_list.hpp>
-#include <wfc/io_service.hpp>
 #include <wfc/core/module_options.hpp>
+#include <wfc/asio.hpp>
 
 namespace wfc{
   
@@ -27,16 +27,15 @@ struct global
   fakir after_start;
   fakir before_stop;
   fakir after_stop;
-  
 
-  typedef interface_registry registry_type;
-  registry_type registry;
+  interface_registry registry;
 
-  ::wfc::io_service& io_service;
+  typedef ::wfc::asio::io_service io_service_type;
+  io_service_type& io_service;
 
   static std::shared_ptr<global>   static_global;
   
-  global(::wfc::io_service& io_service)
+  global( io_service_type& io_service)
     : io_service(io_service)
   {}
   

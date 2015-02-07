@@ -2,7 +2,7 @@
 
 #include <wfc/io/ip/tcp/rn/connection_options.hpp>
 #include <wfc/memory.hpp>
-#include <wfc/io_service.hpp>
+#include <wfc/asio.hpp>
 #include <boost/asio.hpp>
 
 
@@ -22,8 +22,8 @@ public:
   void stop(std::function<void()> finalize);
   void shutdown();
   
-  const ::wfc::io_service::strand& strand() const;
-  ::wfc::io_service::strand& strand();
+  const ::wfc::asio::io_service::strand& strand() const;
+  ::wfc::asio::io_service::strand& strand();
 private:
   std::shared_ptr<connection_impl> _impl;
 };

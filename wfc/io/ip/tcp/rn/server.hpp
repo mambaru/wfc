@@ -2,7 +2,7 @@
 
 #include <wfc/io/ip/tcp/rn/server_options.hpp>
 #include <wfc/memory.hpp>
-#include <wfc/io_service.hpp>
+#include <wfc/asio.hpp>
 #include <boost/asio.hpp>
 
 
@@ -15,8 +15,9 @@ class server
 public:
   typedef server_options options_type;
   typedef boost::asio::ip::tcp::socket descriptor_type;
+  typedef ::wfc::asio::io_service io_service_type;
   ~server();
-  server(io_service& io, const options_type& conf/*, wfc::io::incoming_handler handler = nullptr*/);
+  server(io_service_type& io, const options_type& conf);
   void start();
   void stop();
   void shutdown();

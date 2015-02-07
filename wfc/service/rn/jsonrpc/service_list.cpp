@@ -2,7 +2,7 @@
 #include <wfc/service/rn/jsonrpc/service_list.hpp>
 namespace wfc{ namespace service{ namespace rn{ namespace jsonrpc{
 
-void service_list::create(wfc::io_service& io, const service_list_config& conf, std::shared_ptr<ifactory> fact)
+void service_list::create(io_service_type& io, const service_list_config& conf, std::shared_ptr<ifactory> fact)
 {
   _conf = conf;
   
@@ -10,7 +10,7 @@ void service_list::create(wfc::io_service& io, const service_list_config& conf, 
     _service_list.push_back( std::make_shared<service>( io, c, fact) );
 }
   
-service_list::service_list(wfc::io_service& io, const service_list_config& conf, std::shared_ptr<ifactory> fact)
+service_list::service_list(io_service_type& io, const service_list_config& conf, std::shared_ptr<ifactory> fact)
   : _io_service(io)
   , _conf( conf )
 {

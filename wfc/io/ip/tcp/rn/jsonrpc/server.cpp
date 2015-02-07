@@ -9,7 +9,7 @@ server::~server()
 {
 }
   
-server::server(wfc::io_service& io, const server::options_type& conf, std::shared_ptr<wfc::jsonrpc::service> service)
+server::server(io_service_type& io, const server::options_type& conf, std::shared_ptr<wfc::jsonrpc::service> service)
 {
   using namespace std::placeholders;
 

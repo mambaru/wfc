@@ -5,7 +5,7 @@ namespace wfc{ namespace jsonrpc{
 
 
 
-worker_manager::worker_manager(wfc::io_service& io_service, const options_type& config)
+worker_manager::worker_manager(io_service& io_service, const options_type& config)
   : _io_service(io_service)
   , _config(config)
 {
@@ -22,11 +22,11 @@ void worker_manager::start()
     io_service_ptr io_ptr = nullptr;
     if (w.threads != 0)
     {
-      io_ptr = std::make_shared< ::wfc::io_service>();
+      io_ptr = std::make_shared< io_service>();
       _services.push_back(io_ptr);
     }
     
-    ::wfc::io_service& io_ref = (io_ptr == nullptr ? _io_service : *io_ptr );
+    io_service& io_ref = (io_ptr == nullptr ? _io_service : *io_ptr );
     
     for (auto s: w.strands)
     {
@@ -54,7 +54,7 @@ void worker_manager::start()
     for (int i=0; i < w.threads; ++i)
     {
       _threads.push_back( std::thread([io_ptr]() {
-        ::wfc::io_service::work wrk(*io_ptr);
+        io_service::work wrk(*io_ptr);
         io_ptr->run();
       }));
     }

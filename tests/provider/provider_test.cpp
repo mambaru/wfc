@@ -572,7 +572,7 @@ struct toster_config
 class toster
 {
 public:
-  
+  typedef ::wfc::asio::io_service io_service_type;
   typedef std::shared_ptr<receiver> receiver_ptr;
   typedef std::shared_ptr<source> source_ptr;
   typedef ::wfc::rwlock<std::mutex> barier_type;
@@ -747,7 +747,7 @@ public:
   }
   
   toster_config conf;
-  ::wfc::io_service io_service;
+  io_service_type io_service;
 
   // Для таймаута завершения после отправки всех сообщений
   // Для некоторых тестов не можем сравнивать количетво отправленных и полученных,

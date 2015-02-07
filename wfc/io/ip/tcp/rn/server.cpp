@@ -11,7 +11,7 @@ server::~server()
 }
 
   
-server::server(wfc::io_service& io, const server::options_type& conf/*, wfc::io::incoming_handler handler*/)
+server::server(io_service_type& io, const server::options_type& conf/*, wfc::io::incoming_handler handler*/)
   : _impl( std::make_shared<server_impl>(io, conf/*, handler*/) )
 {
   

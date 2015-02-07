@@ -2,7 +2,7 @@
 #include <wfc/jsonrpc/service.hpp>
 #include <wfc/jsonrpc/handler.hpp>
 #include <wfc/jsonrpc/method.hpp>
-#include <wfc/io_service.hpp>
+#include <wfc/asio.hpp>
 #include <wfc/io/types.hpp>
 #include <boost/asio.hpp>
 #include <thread>
@@ -52,7 +52,7 @@ struct method_list: wfc::jsonrpc::method_list<
 
 
 
-void test_loop(wfc::io_service& io_service)
+void test_loop(wfc::asio::io_service& io_service)
 {
   io_service.run();
 }
@@ -69,14 +69,14 @@ typedef wfc::io::ip::tcp::rn::jsonrpc::server server;
 int main(int argc, char* [])
 {
   using namespace std::placeholders;
-  wfc::io_service io_service;
+  wfc::asio::io_service io_service;
 
   server::options_type conf;
   // conf.acceptors = 10;
   conf.threads = 1;
   conf.host = "0.0.0.0";
   conf.port = "12345";
-  wfc::io_service::work wrk(io_service);
+  wfc::asio::io_service::work wrk(io_service);
   
   auto ptest = std::make_shared<test>();
 

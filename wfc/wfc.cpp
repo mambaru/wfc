@@ -5,7 +5,7 @@
 //
 
 #include <wfc/wfc.hpp>
-#include <wfc/module/imodule.hpp>
+#include <wfc/core/imodule.hpp>
 #include <wfc/core/icore.hpp>
 #include <wfc/core/istartup.hpp>
 #include <wfc/core/global.hpp>

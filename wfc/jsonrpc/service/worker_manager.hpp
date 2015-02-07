@@ -2,6 +2,8 @@
 
 #include <wfc/jsonrpc/service/service_aspect.hpp>
 #include <wfc/jsonrpc/service/io_registry.hpp>
+#include <wfc/jsonrpc/types.hpp>
+
 #include <wfc/io/strand.hpp>
 #include <wfc/thread/spinlock.hpp>
 
@@ -47,14 +49,14 @@ class worker_manager
   typedef std::pair<worker_list, iterator_holder > pair_worker_list;
   typedef std::map< std::string, pair_worker_list> method_map;
   typedef std::list< std::thread > thread_list;
-  typedef std::shared_ptr< ::wfc::io_service> io_service_ptr;
+  typedef std::shared_ptr< io_service> io_service_ptr;
   typedef std::list<io_service_ptr> service_list; 
 
 public:
   
   typedef options options_type;
   
-  worker_manager(wfc::io_service& io_service, const options_type& config);
+  worker_manager(io_service& io_service, const options_type& config);
   
   void start();
   
@@ -63,7 +65,7 @@ public:
   std::shared_ptr< worker_type > get_worker(const char* name) const;
 
 private:
-  wfc::io_service& _io_service;
+  io_service& _io_service;
   options_type _config;
 
   method_map _method_map;

@@ -5,7 +5,7 @@
 #include <wfc/jsonrpc/options_json.hpp>
 #include <wfc/jsonrpc/service.hpp>
 #include <wfc/gateway/rn/jsonrpc/gateway_config.hpp>
-#include <wfc/io_service.hpp>
+#include <wfc/asio.hpp>
 #include <wfc/core/global.hpp>
 #include <wfc/pubsub/pubsub_gateway.hpp>
 #include <vector>
@@ -42,6 +42,7 @@ public:
   typedef std::shared_ptr<client_type> client_ptr;
   typedef typename client_type::rpc_ptr rpc_ptr;
   typedef std::vector< client_ptr > client_list;
+  typedef ::wfc::asio::io_service io_service_type;
   
   multi_client( std::shared_ptr< ::wfc::global > g, const options_type& conf)  
     : _global(g)
@@ -50,7 +51,7 @@ public:
   {
   }
 
-  multi_client( ::wfc::io_service& io, const options_type& conf, rpc_ptr rpc)  
+  multi_client( io_service_type& io, const options_type& conf, rpc_ptr rpc)  
     : _io_service(io)
     , _conf( conf )
     , _rpc(rpc)
@@ -131,7 +132,7 @@ private:
 private:
   std::shared_ptr< ::wfc::global> _global;
 
-  ::wfc::io_service& _io_service;
+  io_service_type& _io_service;
   options_type _conf;
   rpc_ptr _rpc;
   client_list _client_list;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wfc/io_service.hpp>
+#include <wfc/asio.hpp>
 #include <wfc/io/server/tags.hpp>
 #include <wfc/io/basic_io.hpp>
 #include <wfc/io/tags.hpp>
@@ -52,7 +52,7 @@ struct ad_configure
     {
       if ( acceptors.size() < threads )
       {
-        auto io = std::make_shared< ::wfc::io_service>();
+        auto io = std::make_shared< ::wfc::asio::io_service>();
         services.push_back(io);
         acceptors.push_back( acceptor_proto->clone(*io));
       }
@@ -145,7 +145,7 @@ class acceptor_thread
 {
   typedef Acceptor acceptor_type;
   typedef std::shared_ptr<acceptor_type> acceptor_ptr;
-  typedef ::wfc::io_service              io_service_type;
+  typedef ::wfc::asio::io_service              io_service_type;
   typedef std::shared_ptr<std::thread>   thread_ptr;
   
   typedef ServerOptions options_type;
@@ -196,7 +196,7 @@ class acceptor_manager
   
   typedef std::shared_ptr<acceptor_type>       acceptor_ptr;
   //typedef std::shared_ptr<std::thread>         thread_ptr;
-  typedef ::wfc::io_service io_service_type;
+  typedef ::wfc::asio::io_service io_service_type;
   //typedef std::shared_ptr<io_service_type>  io_service_ptr;
   
   //typedef std::list<acceptor_ptr>    acceptor_list;
@@ -422,7 +422,7 @@ struct aspect: fas::aspect
   fas::type< _acceptor_type_, Acceptor>,
   fas::value< _acceptors_, std::list< std::shared_ptr<Acceptor> > >,
   fas::value< _threads_, std::list< std::unique_ptr<std::thread> > >,
-  fas::value< _io_services_, std::list< std::shared_ptr< ::wfc::io_service> > >,
+  fas::value< _io_services_, std::list< std::shared_ptr< ::wfc::asio::io_service> > >,
   fas::advice<_configure_server_, ad_configure>,
   fas::group< _configure_, _configure_server_>,
   fas::advice<_start_server_, ad_start>,
@@ -441,9 +441,9 @@ public:
   typedef typename super::options_type options_type;
   typedef typename super::aspect::template advice_cast< _acceptor_type_ >::type acceptor_type;
   typedef acceptor_manager<acceptor_type, options_type> acceptor_manager_type;
-                        
+  typedef ::wfc::asio::io_service io_service_type;                      
 
-  server( ::wfc::io_service& io, const options_type& conf)
+  server( io_service_type& io, const options_type& conf)
     : super(io, conf)
     , _acceptor_manager( io, conf)
   {

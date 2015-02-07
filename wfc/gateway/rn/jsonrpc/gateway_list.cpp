@@ -11,7 +11,7 @@ void gateway_list::create(wfc::io_service& io, const gateway_list_config& conf, 
 }
 */
   
-gateway_list::gateway_list(wfc::io_service& io, const gateway_list_config& conf, std::shared_ptr<ifactory> fact)
+gateway_list::gateway_list(io_service_type& io, const gateway_list_config& conf, std::shared_ptr<ifactory> fact)
   : _io_service(io)
   , _conf( conf )
 {

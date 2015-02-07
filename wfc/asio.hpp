@@ -8,10 +8,12 @@
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/strand.hpp>
+#include <boost/asio/deadline_timer.hpp>
 
-namespace wfc{
+namespace wfc{ namespace asio{
 
 typedef ::boost::asio::io_service io_service;
 typedef ::boost::asio::strand strand;
+typedef ::boost::asio::strand deadline_timer;
 
-}
+}}

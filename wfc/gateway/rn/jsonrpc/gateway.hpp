@@ -5,7 +5,7 @@
 #include <wfc/jsonrpc/options_json.hpp>
 #include <wfc/jsonrpc/service.hpp>
 #include <wfc/gateway/rn/jsonrpc/gateway_config.hpp>
-#include <wfc/io_service.hpp>
+#include <wfc/asio.hpp>
 #include <wfc/core/global.hpp>
 #include <wfc/pubsub/pubsub_gateway.hpp>
 #include <list>
@@ -34,10 +34,11 @@ struct ifactory
 {
   typedef  ::wfc::jsonrpc::service jsonrpc_type;
   typedef std::shared_ptr<jsonrpc_type> jsonrpc_ptr;
+  typedef ::wfc::asio::io_service io_service_type;
 
   virtual ~ifactory() {}
-  virtual jsonrpc_ptr create_for_tcp( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt) = 0;
-  virtual jsonrpc_ptr create_for_pubsub( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt) = 0;
+  virtual jsonrpc_ptr create_for_tcp( io_service_type& io_service, const  ::wfc::jsonrpc::options& opt) = 0;
+  virtual jsonrpc_ptr create_for_pubsub( io_service_type& io_service, const  ::wfc::jsonrpc::options& opt) = 0;
 };
 
 template<typename MethodList>
@@ -48,18 +49,19 @@ public:
   typedef MethodList methods_type;
   typedef typename methods_type::target_type target_type;
   typedef typename methods_type::provider_type provider_type;
+  typedef ::wfc::asio::io_service io_service_type;
 
   factory(target_type target, provider_type provider)
     : _target(target)
     , _provider(provider)
     {}
     
-  virtual jsonrpc_ptr create_for_tcp( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt)
+  virtual jsonrpc_ptr create_for_tcp( io_service_type& io_service, const  ::wfc::jsonrpc::options& opt)
   {
     return std::make_shared< jsonrpc_type >( io_service, opt,  ::wfc::jsonrpc::handler<methods_type>(_target, _provider) );
   }
 
-  virtual jsonrpc_ptr create_for_pubsub( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt)
+  virtual jsonrpc_ptr create_for_pubsub( io_service_type& io_service, const  ::wfc::jsonrpc::options& opt)
   {
     return std::make_shared< jsonrpc_type >( io_service, opt,  ::wfc::jsonrpc::handler<methods_type>(_target, _provider) );
   }
@@ -85,12 +87,13 @@ class gateway
   typedef std::shared_ptr<pubsub_gateway> pubsub_gateway_ptr;
   typedef std::shared_ptr<client_tcp_type> client_tcp_ptr;
   typedef std::shared_ptr<jsonrpc_type> jsonrpc_ptr;
-  
+  typedef ::wfc::asio::io_service io_service_type;
+
 public:
   
   gateway( std::weak_ptr< ::wfc::global> g, const gateway_config& conf);
   
-  gateway( ::wfc::io_service& io, const gateway_config& conf, std::shared_ptr<ifactory> fact);
+  gateway( io_service_type& io, const gateway_config& conf, std::shared_ptr<ifactory> fact);
   
   void reconfigure(const gateway_config& conf);
   
@@ -104,11 +107,11 @@ public:
   
 private:
   
-  void create( ::wfc::io_service& io, const gateway_config& conf, std::shared_ptr<ifactory> fact);
+  void create( io_service_type& io, const gateway_config& conf, std::shared_ptr<ifactory> fact);
   
 private:
   std::weak_ptr< ::wfc::global> _global;
-  ::wfc::io_service& _io_service;
+  io_service_type& _io_service;
   gateway_config _conf;
   
   jsonrpc_ptr _jsonrpc_for_tcp;

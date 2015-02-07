@@ -9,7 +9,7 @@ client::~client()
 }
 
   
-client::client(wfc::io_service& io, const options_type& conf )
+client::client(io_service_type& io, const options_type& conf )
   : _impl( std::make_shared<client_impl>( io, conf) )
 {
   

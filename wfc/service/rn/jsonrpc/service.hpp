@@ -5,7 +5,7 @@
 #include <wfc/jsonrpc/options_json.hpp>
 #include <wfc/jsonrpc/service.hpp>
 #include <wfc/service/rn/jsonrpc/service_config.hpp>
-#include <wfc/io_service.hpp>
+#include <wfc/asio.hpp>
 #include <wfc/core/global.hpp>
 #include <list>
 
@@ -33,8 +33,8 @@ struct ifactory
   typedef std::shared_ptr<jsonrpc_type> jsonrpc_ptr;
 
   virtual ~ifactory() {}
-  virtual jsonrpc_ptr create_for_tcp( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt) = 0;
-  virtual jsonrpc_ptr create_for_udp( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt) = 0;
+  virtual jsonrpc_ptr create_for_tcp( ::wfc::asio::io_service& io_service, const  ::wfc::jsonrpc::options& opt) = 0;
+  virtual jsonrpc_ptr create_for_udp( ::wfc::asio::io_service& io_service, const  ::wfc::jsonrpc::options& opt) = 0;
 };
 
 template<typename MethodList>
@@ -51,12 +51,12 @@ public:
     , _provider(provider)
     {}
     
-  virtual jsonrpc_ptr create_for_tcp( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt)
+  virtual jsonrpc_ptr create_for_tcp( ::wfc::asio::io_service& io_service, const  ::wfc::jsonrpc::options& opt)
   {
     return std::make_shared< jsonrpc_type >( io_service, opt,  ::wfc::jsonrpc::handler<methods_type>(_target, _provider) );
   }
 
-  virtual jsonrpc_ptr create_for_udp( ::wfc::io_service& io_service, const  ::wfc::jsonrpc::options& opt)
+  virtual jsonrpc_ptr create_for_udp( ::wfc::asio::io_service& io_service, const  ::wfc::jsonrpc::options& opt)
   {
     return std::make_shared< jsonrpc_type >( io_service, opt,  ::wfc::jsonrpc::handler<methods_type>(_target, _provider) );
   }
@@ -79,6 +79,7 @@ class service
   typedef  ::wfc::jsonrpc::service jsonrpc_type;
   typedef  ::wfc::io::ip::tcp::rn::jsonrpc::server server_tcp_type;
   typedef  ::wfc::io::ip::udp::rn::jsonrpc::server server_udp_type;
+  typedef ::wfc::asio::io_service io_service_type;
   typedef std::shared_ptr<server_tcp_type> server_tcp_ptr;
   typedef std::shared_ptr<server_udp_type> server_udp_ptr;
   typedef std::shared_ptr<jsonrpc_type> jsonrpc_ptr;
@@ -87,7 +88,7 @@ public:
   
   service(std::weak_ptr<  ::wfc::global > g, const service_config& conf);
   
-  service( ::wfc::io_service& io, const service_config& conf, std::shared_ptr<ifactory> fact);
+  service( io_service_type& io, const service_config& conf, std::shared_ptr<ifactory> fact);
   
   void reconfigure(const service_config& conf);
   
@@ -102,10 +103,10 @@ public:
 
 private:
   
-  void create( ::wfc::io_service& io, const service_config& conf, std::shared_ptr<ifactory> fact);
+  void create( io_service_type& io, const service_config& conf, std::shared_ptr<ifactory> fact);
   
 private:
-  ::wfc::io_service& _io_service;
+  io_service_type& _io_service;
   service_config _conf;
   
   jsonrpc_ptr _jsonrpc;

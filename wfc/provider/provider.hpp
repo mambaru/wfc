@@ -4,7 +4,7 @@
 #include <wfc/provider/provider_config.hpp>
 #include <wfc/memory.hpp>
 #include <wfc/logger.hpp>
-#include <wfc/io_service.hpp>
+#include <wfc/asio.hpp>
 
 #include <fas/integral/int_.hpp>
 
@@ -209,6 +209,7 @@ class provider
   //const size_t null_id = static_cast<size_t>(-1);
 
 public:
+  typedef ::wfc::asio::io_service io_service_type;
 
   typedef wait_map::info wait_info;
   typedef wait_map::info_ptr info_ptr;
@@ -236,7 +237,7 @@ public:
     }
   }
 
-  provider( ::wfc::io_service& io, const provider_config& conf)
+  provider( io_service_type& io, const provider_config& conf)
     : super(conf)
     , _io_service(io)
     , _io_work(io)
@@ -253,18 +254,18 @@ public:
   {
     if ( conf.threads > 0 )
     {
-      this->_io_service_ptr = std::make_shared< ::wfc::io_service >();
+      this->_io_service_ptr = std::make_shared< io_service_type >();
       for (int i = 0; i < conf.threads; ++i)
       {
         _threads.push_back(std::thread([this](){
-          ::wfc::io_service::work wrk( *this->_io_service_ptr);
+          io_service_type::work wrk( *this->_io_service_ptr);
           this->_io_service_ptr->run();
         }));
       }
     }
   }
   
-  ::wfc::io_service& get_io_service() const
+  io_service_type& get_io_service() const
   {
     if ( _io_service_ptr != nullptr )
       return *_io_service_ptr;
@@ -949,10 +950,10 @@ private:
 
 private:
   
-  ::wfc::io_service& _io_service;
-  std::shared_ptr< ::wfc::io_service > _io_service_ptr;
+  io_service_type& _io_service;
+  std::shared_ptr< io_service_type > _io_service_ptr;
   std::list< std::thread > _threads;
-  ::wfc::io_service::work _io_work;
+  io_service_type::work _io_work;
   size_t _call_id_counter;
   // callclipost_map _callclipost;
   // clicall_set _clicall;

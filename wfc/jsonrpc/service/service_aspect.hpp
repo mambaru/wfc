@@ -4,7 +4,6 @@
 #include <wfc/io/tags.hpp>
 #include <wfc/io/io_base.hpp>
 #include <wfc/io/strand.hpp>
-#include <wfc/io_service.hpp>
 #include <wfc/json/json.hpp>
 #include <string>
 #include <thread>

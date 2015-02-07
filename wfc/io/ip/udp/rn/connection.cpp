@@ -20,7 +20,7 @@ connection::connection(descriptor_type&& desc, const options_type& conf )
 {
 }
 
-std::shared_ptr<connection> connection::clone(::wfc::io_service& io)
+std::shared_ptr<connection> connection::clone(io_service_type& io)
 {
   typedef typename descriptor_type::protocol_type protocol_type;
   auto impl = _impl->clone<connection_impl>( io, protocol_type::v4() );
@@ -58,17 +58,17 @@ void connection::listen()
   _impl->listen();
 }
 
-const wfc::io_service::strand& connection::strand() const
+const connection::strand_type& connection::strand() const
 {
   return _impl->strand();
 }
 
-wfc::io_service::strand& connection::strand()
+connection::strand_type& connection::strand()
 {
   return _impl->strand();
 }
 
-::wfc::io_service& connection::get_io_service()
+connection::io_service_type& connection::get_io_service()
 {
   return _impl->get_io_service();
 }

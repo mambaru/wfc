@@ -7,7 +7,6 @@
 #pragma once
 
 #include <wfc/core/global.hpp>
-#include <wfc/io_service.hpp>
 #include <wfc/io/basic_io.hpp>
 #include <wfc/jsonrpc/service.hpp>
 #include <wfc/pubsub/pubsub_gateway_options.hpp>

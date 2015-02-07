@@ -86,7 +86,7 @@ int test_count = 0;
 int main()
 {
   auto tst = std::make_shared<test>();
-  wfc::io_service ios;
+  wfc::asio::io_service ios;
   wfc::jsonrpc::service::options_type opt = wfc::jsonrpc::service::options_type::create();
   opt.workers[0].threads = 10;
   

@@ -10,10 +10,10 @@ class client_impl
   typedef client_base<> super;
 public:
   typedef typename super::options_type options_type; 
-  //typedef typename super::descriptor_type descriptor_type;
+  typedef ::wfc::asio::io_service io_service_type;
 
-  client_impl(wfc::io_service& io, const options_type& conf/*, wfc::io::handler handler = nullptr*/)
-    : super( io, conf/*, handler*/)
+  client_impl( io_service_type& io, const options_type& conf)
+    : super( io, conf)
   {
   }
 };

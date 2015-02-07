@@ -5,7 +5,7 @@
 #include <wfc/jsonrpc/options_json.hpp>
 #include <wfc/jsonrpc/service.hpp>
 #include <wfc/gateway/rn/jsonrpc/gateway_config.hpp>
-#include <wfc/io_service.hpp>
+#include <wfc/asio.hpp>
 #include <wfc/core/global.hpp>
 #include <wfc/pubsub/pubsub_gateway.hpp>
 #include <list>
@@ -32,9 +32,11 @@ class gateway
   
 public:
   
+  typedef ::wfc::asio::io_service io_service_type;
+  
   gateway( std::weak_ptr< ::wfc::global> g, const gateway_config& conf);
   
-  gateway( ::wfc::io_service& io, const gateway_config& conf, jsonrpc_ptr jsonrpc);
+  gateway( io_service_type& io, const gateway_config& conf, jsonrpc_ptr jsonrpc);
   
   void reconfigure(const gateway_config& conf);
   
@@ -46,13 +48,13 @@ public:
 
 private:
   
-  void create( ::wfc::io_service& io, const gateway_config& conf);
+  void create( io_service_type& io, const gateway_config& conf);
   
 private:
   
   std::weak_ptr< ::wfc::global> _global;
   
-  ::wfc::io_service& _io_service;
+  io_service_type& _io_service;
   
   gateway_config _conf;
   jsonrpc_ptr _jsonrpc;

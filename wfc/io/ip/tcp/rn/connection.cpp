@@ -31,12 +31,12 @@ void connection::stop(std::function<void()> finalize)
   _impl->stop(finalize);
 }
 
-const wfc::io_service::strand& connection::strand() const
+const ::wfc::asio::strand& connection::strand() const
 {
   return _impl->strand();
 }
 
-wfc::io_service::strand& connection::strand()
+::wfc::asio::strand& connection::strand()
 {
   return _impl->strand();
 }

@@ -46,10 +46,12 @@ public:
   typedef boost::asio::ip::tcp::endpoint endpoint_type;
   
   typedef boost::asio::deadline_timer reconnect_timer;
+  
+  typedef ::wfc::asio::io_service io_service_type;
   reconnect_timer _reconnect_timer;
   std::shared_ptr<connection_type> _connection;
   
-  client_base(wfc::io_service& io, const options_type& conf)
+  client_base(io_service_type& io, const options_type& conf)
     : super( io, update_options(this, conf))
     , _reconnect_timer(io)
   {

@@ -71,8 +71,8 @@ int run_client(int , char *argv[])
   typedef wfc::io::ip::tcp::rn::client client_type;
   typedef client_type::options_type options_type;
   
-  wfc::io_service io;
-  wfc::io_service::work wrk(io);
+  wfc::asio::io_service io;
+  wfc::asio::io_service::work wrk(io);
   
   options_type options;
   

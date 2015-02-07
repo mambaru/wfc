@@ -2,7 +2,7 @@
 
 #include <wfc/io/ip/udp/rn/acceptor_options.hpp>
 #include <wfc/memory.hpp>
-#include <wfc/io_service.hpp>
+#include <wfc/asio.hpp>
 #include <boost/asio.hpp>
 
 
@@ -15,6 +15,9 @@ class connection
 public:
   typedef acceptor_options options_type;
   typedef boost::asio::ip::udp::socket descriptor_type;
+  typedef wfc::asio::io_service io_service_type;
+  typedef wfc::asio::strand strand_type;
+
   ~connection();
   connection(descriptor_type&& desc, const options_type& conf);
   void reconfigure( const options_type& conf );
@@ -25,11 +28,11 @@ public:
   void stop(std::function<void()> finalize);
   void shutdown();
   
-  std::shared_ptr<connection> clone( ::wfc::io_service& io );
+  std::shared_ptr<connection> clone( io_service_type& io );
   
-  ::wfc::io_service& get_io_service();
-  const ::wfc::io_service::strand& strand() const;
-  ::wfc::io_service::strand& strand();
+  io_service_type& get_io_service();
+  const strand_type& strand() const;
+  strand_type& strand();
   
   
 private:

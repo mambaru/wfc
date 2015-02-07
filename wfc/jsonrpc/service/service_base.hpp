@@ -44,7 +44,7 @@ public:
   typedef std::pair<worker_list, typename worker_list::iterator > pair_worker_list;
   typedef std::map< std::string, pair_worker_list> method_map;
   typedef std::list< std::thread > thread_list;
-  typedef std::shared_ptr< ::wfc::io_service> io_service_ptr;
+  typedef std::shared_ptr< io_service> io_service_ptr;
   typedef std::list<io_service_ptr> service_list; 
  
   virtual ~service_base()

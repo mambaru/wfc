@@ -5,7 +5,7 @@
 #include <wfc/jsonrpc/options_json.hpp>
 #include <wfc/jsonrpc/service.hpp>
 #include <wfc/gateway/rn/jsonrpc/gateway_config.hpp>
-#include <wfc/io_service.hpp>
+#include <wfc/asio.hpp>
 #include <wfc/core/global.hpp>
 #include <wfc/pubsub/pubsub_gateway.hpp>
 #include <list>
@@ -36,6 +36,7 @@ namespace wfc{ namespace gateway{
 class tcp_client
 {
   typedef ::wfc::io::ip::tcp::rn::jsonrpc::client client_item_type;
+  typedef ::wfc::asio::io_service io_service_type;
   typedef multi_client<client_item_type> client_type;
   typedef std::shared_ptr<client_type>  client_ptr;
   typedef std::list<client_ptr> list_type;
@@ -46,7 +47,7 @@ public:
   
   tcp_client( std::shared_ptr< ::wfc::global> g, const tcp_options& conf);
   
-  tcp_client( ::wfc::io_service& io, const tcp_options& conf, rpc_ptr jsonrpc);
+  tcp_client( io_service_type& io, const tcp_options& conf, rpc_ptr jsonrpc);
   
   void reconfigure(const tcp_options& conf);
   
@@ -58,13 +59,13 @@ public:
 
 private:
   
-  void create( ::wfc::io_service& io, const tcp_options& conf);
+  void create( io_service_type& io, const tcp_options& conf);
   
 private:
   
   std::shared_ptr< ::wfc::global> _global;
   
-  ::wfc::io_service& _io_service;
+  io_service_type& _io_service;
   
   tcp_options _conf;
   

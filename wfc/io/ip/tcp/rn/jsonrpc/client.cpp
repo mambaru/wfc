@@ -11,7 +11,7 @@ client::~client()
 }
 
   
-client::client(wfc::io_service& io, const client::options_type& conf, std::shared_ptr<wfc::jsonrpc::service> service)
+client::client(io_service_type& io, const client::options_type& conf, std::shared_ptr<wfc::jsonrpc::service> service)
 {
   using namespace std::placeholders;
 

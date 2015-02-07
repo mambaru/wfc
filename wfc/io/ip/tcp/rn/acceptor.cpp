@@ -22,7 +22,7 @@ acceptor::acceptor(acceptor::descriptor_type&& desc, const acceptor::options_typ
 {
 }
 
-std::shared_ptr<acceptor> acceptor::clone(::wfc::io_service& io)
+std::shared_ptr<acceptor> acceptor::clone(io_service_type& io)
 {
   typedef typename descriptor_type::protocol_type protocol_type;
   auto impl = _impl->clone<acceptor_impl>( io, protocol_type::v4() );

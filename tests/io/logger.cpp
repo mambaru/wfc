@@ -23,7 +23,7 @@ public:
 
 class test_logger
 {
-  wfc::io_service _io_service;
+  wfc::asio::io_service _io_service;
 public:
   test_logger()
   {

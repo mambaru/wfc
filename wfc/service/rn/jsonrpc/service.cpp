@@ -6,7 +6,7 @@
 
 namespace wfc{ namespace service{ namespace rn{ namespace jsonrpc{
 
-void service::create(wfc::io_service& io, const service_config& conf, std::shared_ptr<ifactory> fact)
+void service::create(io_service_type& io, const service_config& conf, std::shared_ptr<ifactory> fact)
 {
   _conf = conf;
 
@@ -44,7 +44,7 @@ void service::create(wfc::io_service& io, const service_config& conf, std::share
   
 }
   
-service::service(wfc::io_service& io, const service_config& conf, std::shared_ptr<ifactory> fact)
+service::service(io_service_type& io, const service_config& conf, std::shared_ptr<ifactory> fact)
   : _io_service(io)
   , _conf( conf )
 {

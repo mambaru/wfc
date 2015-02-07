@@ -8,7 +8,7 @@
 
 namespace wfc{ namespace gateway{
 
-void gateway::create(wfc::io_service& io, const gateway_config& conf)
+void gateway::create(io_service_type& io, const gateway_config& conf)
 {
   _conf = conf;
   if ( conf.enabled  )
@@ -22,7 +22,7 @@ void gateway::create(wfc::io_service& io, const gateway_config& conf)
   }
 }
   
-gateway::gateway(wfc::io_service& io, const gateway_config& conf, jsonrpc_ptr jsonrpc)
+gateway::gateway(io_service_type& io, const gateway_config& conf, jsonrpc_ptr jsonrpc)
   : _io_service(io)
   , _conf( conf )
   , _jsonrpc(jsonrpc)

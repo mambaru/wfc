@@ -1,11 +1,11 @@
 #include <wfc/io/ip/tcp/rn/server.hpp>
-#include <wfc/io_service.hpp>
+#include <wfc/asio.hpp>
 #include <wfc/io/types.hpp>
 #include <boost/asio.hpp>
 #include <thread>
 #include <algorithm>
 
-void test(wfc::io_service& io_service)
+void test(wfc::asio::io_service& io_service)
 {
   std::cout << "run" << std::endl;
   io_service.run();
@@ -22,7 +22,7 @@ void handler( wfc::io::data_ptr d, wfc::io::outgoing_handler_t callback)
 
 int main(int argc, char* /*argv*/[])
 {
-  wfc::io_service io_service;
+  wfc::asio::io_service io_service;
 
   /*
   boost::asio::ip::udp::resolver resolver( io_service );
@@ -61,7 +61,7 @@ int main(int argc, char* /*argv*/[])
   //conf.acceptors = 1;
   conf.threads = 4;
   //conf.handler = handler;
-  wfc::io_service::work wrk(io_service);
+  wfc::asio::io_service::work wrk(io_service);
   conf.incoming_handler = wfc::io::simple_handler(handler);
   server srv(io_service, conf);
   

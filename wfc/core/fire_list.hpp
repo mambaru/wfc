@@ -22,22 +22,23 @@ class fire_list< std::function<void(Args...)> >
 {
   typedef std::recursive_mutex mutex_type;
 public:
-  typedef std::function<void(Args...)> function_type;
-  typedef std::list< function_type > list_type;
+  typedef std::function<void(Args...)> fire_fun;
+  typedef std::list< fire_fun > list_type;
 
-  void push_back(function_type f)
+  void push_back( fire_fun f)
   {
     std::lock_guard<mutex_type> lk(_mutex);
     _fire_list.push_back(f);
   }
 
-  void push_front(function_type f)
+  void push_front(fire_fun f)
   {
     std::lock_guard<mutex_type> lk(_mutex);
     _fire_list.push_front(f);
   }
 
-  void fire(std::function<void(function_type)> fire_fun)
+  /*
+  void fire(std::function<void(fire_fun)> f)
   {
     list_type lst;
     {
@@ -45,9 +46,26 @@ public:
       lst = _fire_list;
     }
     for (const auto& f: lst)
-      fire_fun(f);
+      f(f);
   }
-  
+  */
+
+  void fire(Args... args)
+  {
+    list_type lst;
+    {
+      std::lock_guard<mutex_type> lk(_mutex);
+      lst = _fire_list;
+    }
+    for (const auto& f: lst)
+      f(args...);
+    /*
+    this->fire([this]() {
+      
+    });
+    */
+  }
+
 private:
   
   list_type _fire_list;

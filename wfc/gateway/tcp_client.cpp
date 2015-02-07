@@ -5,7 +5,7 @@
 
 namespace wfc{ namespace gateway{
 
-void tcp_client::create(wfc::io_service& io, const tcp_options& conf)
+void tcp_client::create(io_service_type& io, const tcp_options& conf)
 {
   _conf = conf;
   if ( conf.enabled && conf.count > 0 )
@@ -19,7 +19,7 @@ void tcp_client::create(wfc::io_service& io, const tcp_options& conf)
   }
 }
   
-tcp_client::tcp_client(wfc::io_service& io, const tcp_options& conf, rpc_ptr jsonrpc)
+tcp_client::tcp_client(io_service_type& io, const tcp_options& conf, rpc_ptr jsonrpc)
   : _io_service(io)
   , _conf( conf )
   , _jsonrpc(jsonrpc)

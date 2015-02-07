@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "imodule.hpp"
+#include <wfc/core/imodule.hpp>
 
 namespace wfc{
   

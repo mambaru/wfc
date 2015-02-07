@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <wfc/io_service.hpp>
+#include <wfc/asio.hpp>
 #include <memory>
 #include <vector>
 
@@ -26,7 +26,7 @@ public:
   int run(int argc, char* argv[]);
 private:
   std::string _program_version;
-  ::wfc::io_service _io_service;
+  ::wfc::asio::io_service _io_service;
   std::shared_ptr<global> _global;
 };
 
