@@ -84,8 +84,6 @@ class jsonrpc:
     obj.start = start
     self.req_by_id[self.call_id]=obj
     
-    
-  
   # seq = True ответы в том же порядке, что и отправленны запросы
   # seq Используеться для проверки запросов 
   def async_result(self, seq=True):
