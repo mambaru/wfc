@@ -8,7 +8,7 @@
 
 #include <fas/integral/int_.hpp>
 
-#include <boost/asio.hpp>
+#include <wfc/asio.hpp>
 #include <memory>
 #include <deque>
 #include <list>
@@ -35,7 +35,7 @@ public:
   typedef size_t call_id_t;
   //typedef std::pair<client_id_t, call_id_t> clicall_pair;
   
-  typedef ::boost::asio::deadline_timer deadline_timer;
+  typedef ::wfc::asio::deadline_timer deadline_timer;
   typedef std::shared_ptr<deadline_timer> timer_ptr;
   struct info;
   typedef std::shared_ptr<info> info_ptr;
@@ -218,7 +218,7 @@ public:
   typedef typename super::mutex_type mutex_type;
   //typedef std::pair<size_t, size_t> clicall_pair;
   typedef std::function<info_ptr()> post_function;
-  typedef ::boost::asio::deadline_timer deadline_timer;
+  typedef ::wfc::asio::deadline_timer deadline_timer;
   typedef std::shared_ptr<deadline_timer> timer_ptr;
   typedef std::tuple<size_t, post_function, timer_ptr> clipost;
   //typedef std::map<size_t, clipost> callclipost_map;
@@ -585,7 +585,7 @@ private:
       
       //std::shared_ptr<deadline_timer> timer;
       //info_ptr inf;
-      std::function<void(const ::boost::system::error_code&)> timer_fun;
+      std::function<void(const ::wfc::system::error_code&)> timer_fun;
       
       if (pthis->_conf.max_waiting != 0 )
       {
@@ -628,9 +628,9 @@ private:
           if (inf->timer)
           {
             //auto client_id = result.first;
-            timer_fun = [pthis, client_id, call_id, callback]( const ::boost::system::error_code& ec)
+            timer_fun = [pthis, client_id, call_id, callback]( const ::wfc::system::error_code& ec)
             {
-              if ( ec == boost::asio::error::operation_aborted )
+              if ( ec == ::wfc::asio::error::operation_aborted )
                 return;
               self::mt_deadline_<Callback>(pthis, client_id, call_id, std::move(callback));
             };
@@ -652,7 +652,7 @@ private:
       
       if ( inf!=nullptr &&  inf->timer!=nullptr )
       {
-        inf->timer->expires_from_now(boost::posix_time::milliseconds(pthis->_conf.wait_timeout_ms));
+        inf->timer->expires_from_now( boost::posix_time::milliseconds(pthis->_conf.wait_timeout_ms));
         inf->timer->async_wait( timer_fun );
       }
     }

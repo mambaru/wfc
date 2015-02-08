@@ -6,14 +6,20 @@
 
 #pragma once
 
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/strand.hpp>
-#include <boost/asio/deadline_timer.hpp>
+#include <boost/asio.hpp>
 
-namespace wfc{ namespace asio{
+namespace wfc{ 
 
-typedef ::boost::asio::io_service io_service;
-typedef ::boost::asio::strand strand;
-typedef ::boost::asio::strand deadline_timer;
+namespace asio{
 
-}}
+using namespace ::boost::asio;
+
+}
+
+namespace system{
+
+using namespace ::boost::system;
+
+}
+
+}
