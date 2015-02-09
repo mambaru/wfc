@@ -38,7 +38,6 @@ struct global
   global( io_service_type& io_service)
     : io_service(io_service)
   {}
-  
 };
 
 }

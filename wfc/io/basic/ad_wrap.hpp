@@ -2,6 +2,7 @@
 
 #include <wfc/io/basic/tags.hpp>
 #include <wfc/io/tags.hpp>
+#include <memory>
 
 namespace wfc{ namespace io{ namespace basic{
   

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wfc/io/reader/aspect/tags.hpp>
+#include <wfc/logger.hpp>
 
 namespace wfc{ namespace io{ namespace reader{ 
   

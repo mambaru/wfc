@@ -105,18 +105,26 @@ class CusomRequester:
 class JsonrpcRequester:
   def __init__(self, cli, stat, args):
     self.check = args.check
-    self.jrp = jsonrpc( cli, stat, args.trace )
-
+    self.pconn = args.pconn
+    self.jrp = jsonrpc( cli, stat=stat, trace=args.trace )
+    self.multi_count = 0
+    self.check_list = []
+    
   def request(self, query):
+    if self.pconn < 2:
+      return self.request_once(query)
+    else:
+      return self.request_multi(query)
+
+  def request_once(self, query, async = False):
     try:
-      result = self.jrp.request(query['method'], query['params'])
-      if self.check:
-        if query["result"]!=result:
-          print("Неверный результат запроса '{0}'".format(query["method"]) )
-          print("params: {0}".format( to_json(query["params"]) ))
-          print("Полученный result: {0}".format( to_json(result)))
-          print("Ожидаемый  result: {0}".format( to_json(query["result"]) ))
-          return 1    
+      if not async:
+        result = self.jrp.request(query['method'], query['params'])
+      else:
+        self.jrp.async_request(query['method'], query['params'])
+        return 0
+      if self.check and not self.check_result(query, result):
+        return 1
     except Exception as jerror:
       if jerror.args[0]=="jsonrpc":
         if self.check:
@@ -128,7 +136,37 @@ class JsonrpcRequester:
         raise jerror
     return 0
   
+  def check_result(self, query, result):
+    if query["result"]!=result:
+      print("Неверный результат запроса '{0}'".format(query["method"]) )
+      print("params: {0}".format( to_json(query["params"]) ))
+      print("Полученный result: {0}".format( to_json(result)))
+      print("Ожидаемый  result: {0}".format( to_json(query["result"]) ))
+      return False
+    return True
+    
+  
+  def request_multi(self, query):
+    self.request_once(query, async=True)
+    if self.check:
+      self.check_list += [query]
+      
+    self.multi_count += 1
+    
+    if self.multi_count == self.pconn:
+      return self.read_all()
+    return 0
 
+  def read_all(self):
+    while self.multi_count!=0:
+      result = self.jrp.async_result()
+      if self.check:
+        if not self.check_result( self.check_list[0], result):
+          return 1
+        del self.check_list[0]
+      self.multi_count -= 1
+    return 0
+      
   def is_valid(self, query):
     return isinstance(query, dict) and "method" in query
 
@@ -138,13 +176,13 @@ class Requester:
   def __init__(self, stat, args):
     cli = Client( args.addr, args.port, args.pconn , args.udp)
     self.jrp = JsonrpcRequester( cli, stat, args)
-    self.castom = CusomRequester( cli, stat, args)
+    self.custom = CusomRequester( cli, stat, args)
     
   def request(self, query):
     if self.jrp.is_valid(query):
       return self.jrp.request(query)
     elif self.jrp.is_valid(query):
-      return self.castom.request(query)
+      return self.custom.request(query)
     else:
       print("Не верный запрос:")
       return 4
@@ -218,6 +256,8 @@ def work_thread(args, stat):
         stat.show(timeout=args.showtime, minitems=args.minshow)
     
       limiter.wait()
+      
+      '''
       if False and rate_max != 0 and call_count == rate_max:
         call_count=0
         now = datetime.datetime.now()
@@ -226,6 +266,7 @@ def work_thread(args, stat):
           microseconds = delta.seconds*1000000 + delta.microseconds
           time.sleep( (1000000.0 - microseconds)/1000000.0)
         start = datetime.datetime.now()
+      '''
         
   except IOError as e:
     print "I/O error({0}): {1}".format(e.errno, e.strerror)
@@ -237,7 +278,7 @@ def work_thread(args, stat):
     is_working-=1
 
 
-
+'''
 def work_thread1(args, stat):
   global is_working
   global request_counter
@@ -284,6 +325,7 @@ def work_thread1(args, stat):
     raise
   if is_working!=0:
     is_working-=1
+'''
 
 # ------------------------------------
 
@@ -387,8 +429,8 @@ def do_init(args):
 def do_bench(args):
   args.count = 0
   args.limit = 0
-  args.trace = False
-  args.check = False
+  #args.trace = False
+  #args.check = False
   do_test(args)
 
 # ------------------------------------
@@ -398,8 +440,8 @@ def do_stress(args):
   args.limit = 0
   args.stat  = 0
   args.rate  = 0
-  args.trace = False
-  args.check = False
+  #args.trace = False
+  #args.check = False
   do_test(args)
   
 # ------------------------------------
@@ -449,7 +491,8 @@ if __name__ == '__main__':
   parser.add_argument('-a', '--addr',     help="Имя или Интернет адрес сервера", default=options['addr'])
   parser.add_argument('-p', '--port',     help="Номер порта", type=int, default=options['port'])
   parser.add_argument('-u', '--udp',      help="Использовать udp-протокол", default=options['udp'], action='store_true') 
-  parser.add_argument('-P', '--pconn',    help="Постоянное подключение", action='store_true')
+  #parser.add_argument('-P', '--pconn',    help="Постоянное подключение", action='store_true')
+  parser.add_argument('-P', '--pconn',    nargs='?', help="Постоянное подключение", type=int, default=options['pconn'])
 
   parser.add_argument('-t', '--threads', help="Число потоков", type=int,  default=options['threads'])
   parser.add_argument('-r', '--rate',    help="Ограничение скорости (запросов в секунду)", type=int, default=options['rate'])

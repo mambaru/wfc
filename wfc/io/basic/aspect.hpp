@@ -24,48 +24,24 @@
 
 namespace wfc{ namespace io{ namespace basic{
 
-  /*
-struct _startup_handler_; 
-struct _shutdown_handler_;
-*/
-
-  
 struct options
 {
   std::function<void()> not_alive = [](){ };
-
-  
   startup_handler_t  startup_handler = nullptr;
-  // shutdown_handler_t shutdown_handler = nullptr;
   incoming_handler_t incoming_handler = nullptr;
   outgoing_handler_t outgoing_handler = nullptr;
-
-  /*
-  transfer_handler_t transfer_handler = nullptr;
-  */
-
 };
-
-//typedef rwlock<std::mutex> mutex_type;
-//typedef spinlock mutex_type;
 
 typedef std::mutex mutex_type;
   
 typedef fas::type_list_n<
-  
   fas::type< ::wfc::io::_io_service_type_, boost::asio::io_service >, 
   fas::type< _strand_type_, boost::asio::strand >,
   fas::type< _owner_type_, ::wfc::callback_owner >,
   fas::type< ::wfc::io::_data_type_, data_type >,
   fas::type< ::wfc::io::_options_type_, options >,
   fas::type< _mutex_type_, mutex_type >,
-  fas::type< _lock_guard_, std::lock_guard< mutex_type > >,/*
-  fas::type< _read_lock_, read_lock< rwlock<spinlock> > >,*/
-  /*
-  fas::type< _mutex_type_, rwlock<spinlock> >,
-  fas::type< _lock_guard_, std::lock_guard< rwlock<spinlock> > >,
-  fas::type< _read_lock_, read_lock< rwlock<spinlock> > >,
-  */
+  fas::type< _lock_guard_, std::lock_guard< mutex_type > >,
 
   fas::advice< _create_, ad_create >,
   fas::advice< ::wfc::io::_post_, ad_post >,
@@ -75,13 +51,7 @@ typedef fas::type_list_n<
   fas::value< _strand_, std::shared_ptr<boost::asio::strand> >, 
   fas::value< _owner_, std::shared_ptr< ::wfc::callback_owner> >, 
   fas::value< _not_alive_, std::function<void()> >, 
-  //fas::value< _startup_handler_, startup_handler_t>,
-  //fas::value< _shutdown_handler_, shutdown_handler_t>,
-  // fas::value< _transfer_handler_, outgoing_handler_t >, // TODO: удалить 
-
-  //fas::stub< ::wfc::io::_start_>, 
   fas::group< ::wfc::io::_on_create_, _create_>
-  
 >::type advice_list;
 
 

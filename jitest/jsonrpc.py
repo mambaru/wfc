@@ -15,7 +15,7 @@ class jsonrpc:
     
     self.id_list = []
     self.req_by_id = {}
-    self.res_by_id = {}
+    #self.res_by_id = {}
   
   def request(self, method, params):
     self.call_id += 1
@@ -25,10 +25,13 @@ class jsonrpc:
         'params':params,
         'id': self.call_id
     })
+    
     if self.trace :
       print(req_str)
+      
     if self.stat:
       start = datetime.datetime.now()
+      
     self.cli.send(req_str)
     res_str = self.cli.recv()
     if res_str == None:
@@ -42,7 +45,9 @@ class jsonrpc:
       
     if self.trace :
       print(res_str)
+      
     result = json.loads(res_str)
+    
     if 'error' in result:
       raise Exception('jsonrpc', result['error'])
     return result['result']
@@ -77,16 +82,91 @@ class jsonrpc:
       start = None
     self.cli.send(req_str)
     self.id_list += [self.call_id]
-    class Obj: 
+    class Info: 
       pass
-    obj = Obj()
-    obj.method = method
-    obj.start = start
-    self.req_by_id[self.call_id]=obj
+    info = Info()
+    info.method = method
+    info.start = start
+    info.result = None
+    self.req_by_id[self.call_id]=info
     
   # seq = True ответы в том же порядке, что и отправленны запросы
   # seq Используеться для проверки запросов 
-  def async_result(self, seq=True):
+  def async_result(self):
+    result = None
+    count_read = 0
+    while result == None:
+      self.async_read()
+      has_result = len(self.id_list)!=0 and self.id_list[0] in self.req_by_id
+      
+        
+      if not has_result:
+        if count_read > 10:
+          time.sleep( count_read/10.0)
+        continue
+      id = self.id_list[0]
+      info = self.req_by_id[id]
+      if info.result == None:
+        continue
+      
+      del self.id_list[0]
+      del self.req_by_id[id]
+      return info.result
+      
+      
+      #has_result = len(self.id_list)!=0 and self.id_list in self.res_by_id
+      #if has_result:
+        #pass
+      
+      # читаем далее
+      #res_str = self.cli.recv()
+      #if res_str == None:
+        #continue
+      
+      
+    
+    return result
+  
+  def async_read(self):
+    try:
+      res_str = self.cli.recv()
+      if res_str == None:
+        return
+      
+      if self.stat != None:
+        finish = datetime.datetime.now()
+        
+      if self.trace :
+        print(res_str)
+
+      result = json.loads(res_str)
+      
+      if 'error' in result:
+        raise Exception('jsonrpc', result['error'])
+      
+      id = result['id']
+      
+      if not id in self.req_by_id:
+        raise Exception('jsonrpc', "Invalid id="+str(id) )
+      info = self.req_by_id[id]
+      
+      if self.stat != None:
+        start = info.start
+        method = info.method
+        delta = finish - start
+        microseconds = delta.seconds*1000000 + delta.microseconds
+        self.stat.add(method, microseconds)
+        
+      info.result = result['result']
+    except Exception as e:
+      print(res_str)
+      raise e
+      
+    
+
+  
+  
+  def async_result2(self, seq=True):
     res_str = self.cli.recv()
     if res_str == None:
       return None
@@ -103,19 +183,33 @@ class jsonrpc:
     id = result['id']
     if not id in self.req_by_id:
       raise Exception('jsonrpc', "Invalid id="+str(id) )
-    start = self.req_by_id[id].start
-    method = self.req_by_id[id].method
+    
+    info = self.req_by_id[id]
+    
+    start = info.start
+    method = info.method
     delta = finish - start
     microseconds = delta.seconds*1000000 + delta.microseconds
+    
     if self.stat != None:
       self.stat.add(method, microseconds)
-      
+    
     result = json.loads(res_str)
+    
     if 'error' in result:
       raise Exception('jsonrpc', result['error'])
+    
+    if result['id'] != self.id_list[0]:
+      self.res_by_id[id] = result
+      return None
+    
+    del self.id_list[0]
+    del self.req_by_id[id]
+    del self.res_by_id[id]
+    
+    
     return result['result']
   
   
-
 if __name__ == '__main__':
   pass  

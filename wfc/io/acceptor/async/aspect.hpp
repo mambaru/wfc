@@ -2,6 +2,7 @@
 
 #include <wfc/io/acceptor/async/ad_async_accept.hpp>
 #include <wfc/io/acceptor/async/tags.hpp>
+#include <fas/aop.hpp>
 
 namespace wfc{ namespace io{ namespace acceptor{ namespace async{ 
 

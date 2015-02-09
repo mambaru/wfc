@@ -3,8 +3,50 @@
 #include <wfc/io/rn/reader/aspect/tags.hpp>
 #include <wfc/memory.hpp>
 #include <vector>
+#include <list>
 
 namespace wfc{ namespace io{ namespace rn{ namespace reader{
+
+#warning оптимизировать разбиение потока
+// Если приходит мусор или очень большой запрос, то пишеться в конец буфера
+// что не эффективно 
+  
+template<typename DataType>
+class buffer
+{
+  typedef DataType data_type;
+  typedef typename data_type::value_type value_type;
+  typedef std::unique_ptr<data_type> data_ptr;
+  typedef std::list<data_ptr> data_list;
+  typedef std::unique_ptr<data_list> list_ptr;
+public:
+  
+  buffer(value_type* sep) // int, чтоб траблов с коструктором копирования небыло
+  {
+  }
+  
+  data_ptr parse(data_ptr d, value_type* sep)
+  {
+    // Не забыть проверку на разрыв sep
+    if ( _list!=nullptr && _list[0]!=nullptr )
+    {
+      data_ptr& last = _list.back();
+      if ( last.capacity() - last.size() > d->size() )
+      {
+        // переносим в последний
+        // или если есть разрыв sep, независимо от размера
+      }
+      else
+      {
+        _list->push_back( std::move(d) );
+      }
+    }
+    return std::move(d);
+  }
+  
+private:  
+  list_ptr _list;
+};
 
 struct ad_splitter
 {

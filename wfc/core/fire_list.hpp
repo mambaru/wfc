@@ -11,7 +11,6 @@
 #include <mutex>
 #include <list>
 
-
 namespace wfc{
 
 template<typename>
@@ -37,19 +36,6 @@ public:
     _fire_list.push_front(f);
   }
 
-  /*
-  void fire(std::function<void(fire_fun)> f)
-  {
-    list_type lst;
-    {
-      std::lock_guard<mutex_type> lk(_mutex);
-      lst = _fire_list;
-    }
-    for (const auto& f: lst)
-      f(f);
-  }
-  */
-
   void fire(Args... args)
   {
     list_type lst;
@@ -59,11 +45,6 @@ public:
     }
     for (const auto& f: lst)
       f(args...);
-    /*
-    this->fire([this]() {
-      
-    });
-    */
   }
 
 private:
