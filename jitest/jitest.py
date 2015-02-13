@@ -175,6 +175,8 @@ class Requester:
   
   def __init__(self, stat, args):
     cli = Client( args.addr, args.port, args.pconn , args.udp)
+    if args.pconn > 1:
+      cli.cli.setblocking(0)
     self.jrp = JsonrpcRequester( cli, stat, args)
     self.custom = CusomRequester( cli, stat, args)
     

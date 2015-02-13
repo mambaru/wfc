@@ -36,7 +36,15 @@ class Client:
   def send(self, req):
     if not self.pconn:
       self.connect()
-    self.cli.send(req+"\r\n")
+    while True:
+      try:
+        self.cli.send(req+"\r\n")
+        break
+      except Exception as e:
+        if e.errno==11:
+          continue
+        raise e
+      
 
   def parse(self):
     pos = self.buff.find("\r\n")

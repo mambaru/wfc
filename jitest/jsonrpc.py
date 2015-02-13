@@ -112,33 +112,24 @@ class jsonrpc:
       del self.id_list[0]
       del self.req_by_id[id]
       return info.result
-      
-      
-      #has_result = len(self.id_list)!=0 and self.id_list in self.res_by_id
-      #if has_result:
-        #pass
-      
-      # читаем далее
-      #res_str = self.cli.recv()
-      #if res_str == None:
-        #continue
-      
-      
-    
     return result
   
   def async_read(self):
+    
     try:
+      res_str=None
+      
       res_str = self.cli.recv()
+      
       if res_str == None:
         return
       
       if self.stat != None:
         finish = datetime.datetime.now()
-        
+      
       if self.trace :
         print(res_str)
-
+      
       result = json.loads(res_str)
       
       if 'error' in result:
@@ -159,7 +150,11 @@ class jsonrpc:
         
       info.result = result['result']
     except Exception as e:
-      print(res_str)
+      if e.errno == 11:
+        return
+      print("Exception {0}, {1}".format(e, e.errno) )
+      if res_str:
+        print(res_str)
       raise e
       
     
