@@ -125,7 +125,6 @@ public:
     }
   }
 
-  
   void clear()
   {
     std::lock_guard<mutex_type> lk(_mutex);

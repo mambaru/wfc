@@ -10,7 +10,7 @@ add_subdirectory(config)
 add_subdirectory(wfc)
 
 if ( WFC_BUILD_ALL )
-  add_subdirectory(tests)
-  add_subdirectory(tutorial)
+  #add_subdirectory(tests)
+  #add_subdirectory(tutorial)
 endif()
 
