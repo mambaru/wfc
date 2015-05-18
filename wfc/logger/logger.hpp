@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iow/logger/global_log.hpp>
+#include <iow/logger/logger.hpp>
 
 #define CONFIG_LOG_ERROR(X)    IOW_LOG_ERROR( "config", X )
 #define CONFIG_LOG_WARNING(X)  IOW_LOG_WARNING( "config", X )

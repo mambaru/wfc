@@ -1,4 +1,6 @@
-#define WFC_DISABLE_ALL_LOG
+
+#define IOW_DISABLE_ALL_LOG
+
 #include <wfc/core/registry.hpp>
 #include <vector>
 #include <algorithm>
@@ -18,6 +20,8 @@ struct number_greater
     return left.count > right.count;
   }
 };
+
+
 
 int main()
 {

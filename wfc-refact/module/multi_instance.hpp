@@ -90,10 +90,10 @@ public:
       catch(const json::json_error& e)
       {
         std::stringstream ss;
-        ss << "Invalid json configuration module '"<< _name << "' for instance '" << s.first << "':" << std::endl;
+        ss << "Invalid json configuration module '"<< this->name() << "' for instance '" << s.first << "':" << std::endl;
         ss << e.message( jsonbeg, jsonend );
         
-        throw config_error(ss.str());
+        throw std::domain_error(ss.str());
       }
     }
     return true;

@@ -39,5 +39,5 @@ ENDMACRO(build_info)
 #
 # Boost filesystem
 #
-CONFIGURE_LIBRARY(boost/system/error_code.hpp  "/usr/include /usr/local/include"
-                  boost_system-mt   "/lib /usr/lib /usr/local/lib /usr/lib64")
+#CONFIGURE_LIBRARY(boost/system/error_code.hpp  "/usr/include /usr/local/include"
+#                  boost_system-mt   "/lib /usr/lib /usr/local/lib /usr/lib64")
