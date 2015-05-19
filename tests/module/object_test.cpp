@@ -1,6 +1,6 @@
 #define IOW_DISABLE_ALL_LOG
 
-#include <wfc/module/domain.hpp>
+#include <wfc/module/domain_object.hpp>
 #include <wfc/module/instance.hpp>
 #include <wfc/module/singleton.hpp>
 
@@ -25,11 +25,12 @@ struct options_json
     >::type
   > type;
 
-  typedef typename type::member_list member_list;  
+  typedef typename type::member_list member_list;
+  typedef typename type::target target;
 };
 
 class test:
-  public ::wfc::domain<itest, options>
+  public ::wfc::domain_object<itest, options>
 {
   
 };
@@ -49,6 +50,7 @@ template<typename T>
 void test_gen()
 {
   T t;
+  std::cout << "[" << t.interface_name() << "]" << std::endl;
   std::string genstr = t.generate("");
   std::cout << genstr << std::endl;
   t.configure(genstr, "");

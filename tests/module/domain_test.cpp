@@ -1,6 +1,6 @@
 #define IOW_DISABLE_ALL_LOG
 
-#include <wfc/module/domain.hpp>
+#include <wfc/module/domain_object.hpp>
 
 struct options
 {
@@ -14,7 +14,7 @@ struct itest
 };
 
 class test
-  : public ::wfc::domain<itest, options>
+  : public ::wfc::domain_object<itest, options>
 {
 public:
  

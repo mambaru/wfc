@@ -7,7 +7,7 @@
 #pragma once
 
 #include <wfc/core/iinterface.hpp>
-#include <wfc/core/iobject.hpp>
+#include <wfc/module/iobject.hpp>
 #include <memory>
 #include <string>
 
@@ -22,7 +22,10 @@ struct imodule: iinterface
   virtual std::string description() const = 0;
   virtual std::vector< std::shared_ptr<iobject> > objects() const = 0;
   virtual void create( std::shared_ptr<wfcglobal>) = 0;
-  
+
+  // only for external control
+  virtual void start(const std::string& arg) = 0;
+  virtual void stop(const std::string& arg) = 0;
 };
 
 }

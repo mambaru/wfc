@@ -1,6 +1,6 @@
 #define IOW_DISABLE_ALL_LOG
 
-#include <wfc/module/domain.hpp>
+#include <wfc/module/domain_object.hpp>
 #include <wfc/module/instance.hpp>
 #include <wfc/module/singleton.hpp>
 #include <wfc/module/module.hpp>
@@ -39,11 +39,13 @@ struct helper
       >::type
     > type;
 
-    typedef typename type::member_list member_list;  
+    typedef typename type::member_list member_list;
+    typedef typename type::target target;
+
   };
 
   class test:
-    public ::wfc::domain<itest, options>
+    public ::wfc::domain_object<itest, options>
   {
   public:
     int doit_count = 0;

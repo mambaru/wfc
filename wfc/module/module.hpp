@@ -1,7 +1,12 @@
 #pragma once
 
-#include <wfc/core/imodule.hpp>
-#include <wfc/core/iobject.hpp>
+#include <wfc/module/imodule.hpp>
+#include <wfc/module/iobject.hpp>
+
+#include <fas/type_list.hpp>
+#include <memory>
+#include <string>
+#include <map>
 
 namespace wfc{
 
@@ -38,12 +43,25 @@ public:
       result.push_back(p.second);
     }
     return result;
-    /*
-    std::vector<std::string> result;
-    this->objects_(result, object_list() );
-    return std::move(result);
-    */
   }
+
+  // only for external control
+  virtual void start(const std::string& arg) 
+  {
+    for (auto& p : _objects)
+    {
+      p.second->start(arg);
+    }
+  }
+
+  virtual void stop(const std::string& arg)
+  {
+    for (auto& p : _objects)
+    {
+      p.second->stop(arg);
+    }
+  }
+
 
 private:
   

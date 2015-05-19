@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wfc/module/instance_options.hpp>
-#include <wfc/core/iinstance.hpp>
+#include <wfc/module/iinstance.hpp>
 #include <wfc/core/global.hpp>
 
 
@@ -26,6 +26,8 @@ public:
   typedef std::shared_ptr<object_type> object_ptr;
   typedef std::shared_ptr<wfcglobal> global_ptr;
 
+  virtual ~instance() {}
+  
   instance()
     : _startup(false)
   {}
@@ -85,16 +87,6 @@ public:
   void configure(const options_type& opt)  
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    /*if ( opt.name.empty() )
-      return;
-      */
-    
-    /*if ( !_options.name.empty() && _options.name != opt.name && _global!=nullptr)
-    {
-      _global->registry.erase("instance", _options.name);
-      _global->registry.set("instance", opt.name);
-    }
-    */
     _options = opt;
     // Reset ready flag for enable startup 
     _startup = !( _object==nullptr && _options.enabled );
@@ -109,19 +101,21 @@ public:
 
 // -------------------------------------------------
 
-  
-  object_ptr object() const 
+  object_ptr object() const
   {
+    std::lock_guard<mutex_type> lk(_mutex);
     return _object;
   }
 
   global_ptr global() const 
   {
+    std::lock_guard<mutex_type> lk(_mutex);
     return _global;
   }
-  
-  const options_type& options() const 
+
+  options_type options() const 
   {
+    std::lock_guard<mutex_type> lk(_mutex);
     return _options;
   }
   
@@ -138,14 +132,20 @@ private:
         _object = std::make_shared<object_type>();
       }
       //std::shared_ptr<iinstance> tmp = _object;
-      _global->registry.set(_options.name, _object);
+      if (_global)
+      {
+        _global->registry.set(_options.name, _object);
+      }
     }
     else
     {
       if ( _object != nullptr )
       {
         _object->stop("");
-        _global->registry.erase(_options.name);
+        if ( _global )
+        {
+          _global->registry.erase(_options.name);
+        }
         _object = nullptr;
       }
     }

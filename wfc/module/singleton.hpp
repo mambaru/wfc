@@ -2,7 +2,7 @@
 
 #include <wfc/module/instance_options_json.hpp>
 
-#include <wfc/core/iobject.hpp>
+#include <wfc/module/iobject.hpp>
 #include <wfc/core/global.hpp>
 
 #include <fas/typemanip.hpp>
@@ -10,95 +10,21 @@
 #include <string>
 #include <stdexcept>
 
-
 namespace wfc{
-  
 
-template<typename Name, typename Instance, typename DomainJson, bool Singleton >
-struct object_helper;
-
-template<typename Name, typename Instance, typename DomainJson>
-struct object_helper<Name, Instance, DomainJson, true>
-  
-{
-  typedef Instance    instance_type;
-  typedef DomainJson  domain_json;
-  typedef typename instance_type::options_type item_options_type;
-  typedef typename instance_type::object_type::options_type domain_options_type;
-  
-  typedef basic_instance_options_json< 
-            domain_options_type, 
-            domain_json
-          > item_options_json;
-          
-  typedef item_options_json options_json;
-  typedef item_options_type options_type;
-  
-  
-  static options_type instance2object(options_type opt)
-  {
-    opt.name = Name()();
-    return opt;
-  }
-
-  static std::vector<options_type> object2list(options_type opt)
-  {
-    opt.name = Name()();
-    return std::vector<options_type>({opt});
-  }
-};
-
-
-template<typename Name, typename Instance, typename DomainJson>
-struct object_helper<Name, Instance, DomainJson, false>
-{
-  typedef Instance    instance_type;
-  typedef DomainJson  domain_json;
-  typedef typename instance_type::options_type item_options_type;
-  typedef typename instance_type::object_type::options_type domain_options_type;
-  typedef instance_options_json< 
-            domain_options_type, 
-            domain_json
-          > item_options_json;
-
-
-  typedef std::vector<item_options_type> options_type;
-  typedef ::iow::json::array< std::vector< item_options_json > > options_json;
-  
-  static options_type instance2object(const item_options_type& opt)
-  {
-    auto res = opt;
-    if ( res.name.empty() )
-    {
-      res.name = std::string(Name()())+"1";
-    }
-    return options_type({res});
-  }
-
-  static options_type object2list(const options_type& opt)
-  {
-    return opt;
-  }
-};
-
-
-  // base for singletion or multiton
-// для sington массив из одного объекта
-// multiton частый случай singletion
-  
 template< 
-  typename Name, 
-  typename Instance, 
+  typename Name,
+  typename Instance,
   typename DomainJson,
   bool Singleton = true
 >
 class basic_object
   : public iobject
-  , public std::enable_shared_from_this<iobject>
+  //, public std::enable_shared_from_this<iobject>
 {
-  // Автоопределялка для Obj: object_base или object_impl
 public:
   enum { is_singleton = Singleton};
+  /*
   typedef object_helper<Name, Instance, DomainJson, Singleton> helper;
   friend struct object_helper<Name, Instance, DomainJson, Singleton>;
   
@@ -107,12 +33,15 @@ public:
 
   typedef typename helper::item_options_type instance_options_type;
   typedef typename helper::item_options_json instance_options_json;
+  */
 
   typedef std::shared_ptr<wfcglobal> global_ptr;
   
   typedef Instance    instance_type;
+  typedef typename instance_type::options_type options_type;
+  typedef typename instance_type::interface_type interface_type;
+  typedef instance_options_json<DomainJson, Singleton> instance_json;
   typedef std::shared_ptr<instance_type> instance_ptr;
-  // typedef std::pair<instance_ptr, std::string> instance_pair;
   typedef std::map< std::string, instance_ptr> instance_map;
   
   virtual ~basic_object()
@@ -143,15 +72,23 @@ public:
     return "no description";
   }
 
+  virtual std::string interface_name() const 
+  {
+    return typeid( interface_type ).name();
+  }
+
   virtual std::string generate(const std::string& type) const 
   {
-    instance_options_type inst_opt;
+    options_type inst_opt;
     this->generate_options(inst_opt, type);
+    return this->serialize_(inst_opt, fas::bool_<Singleton>() );
+    /*
     auto opt = helper::instance2object(inst_opt);
     typename options_json::serializer serializer;
     std::string result;
     serializer( opt, std::back_inserter(result) );
     return result;
+    */
   }
 
   virtual void parse(const std::string& stropt)
@@ -168,7 +105,7 @@ public:
     try
     {
       beg = ::iow::json::parser::parse_space(beg, end);
-      typename options_json::serializer serializer;
+      typename instance_json::serializer serializer;
       serializer(opt, beg, end);
     }
     catch(const ::iow::json::json_error& e)
@@ -183,11 +120,11 @@ public:
   virtual void create( std::shared_ptr<wfcglobal> g) 
   {
     _global = g;
-    if ( _global )
+    /*if ( _global )
     {
       // TODO: module
       _global->registry.set( "object", this->name(), this->shared_from_this() );
-    }
+    }*/
   }
   
   std::string parse_(const std::string& stropt)
@@ -208,47 +145,29 @@ public:
     }
     return std::string(beg, end);
   }
-  
-  /*
-  std::vector<std::string> raw_unserialize_(const std::string& stropt, fas::true_ )
+
+  template<typename JSON>
+  std::string serialize_( const typename JSON::target& value ) const
   {
-    std::string stropt1 = this->parse_(stropt);
-    return std::vector<std::string>(stropt1);
+    std::string result;
+    typename JSON::serializer serializer;
+    serializer( value, std::back_inserter(result) );
+    return result;
   }
 
-  std::vector<std::string> raw_unserialize_(const std::string& stropt, fas::false_ )
+  std::string  serialize_( const options_type& opt, fas::true_ ) const
   {
-    //std::string stropt = this->parse_(stropt);
-    typedef ::iow::json::array< std::vector< ::iow::json::raw_value<std::string> > > raw_array;
-    std::vector<std::string> result;
-    raw_array::serializer()( result, stropt.begin(),  stropt.end() );
-    return std::vector<std::string>(stropt);
+    return serialize_<instance_json>(opt);
   }
-  
-  instance_options_type unserialize_instance_( const std::string& stropt, fas::false_ )
+
+  std::string  serialize_( const options_type& opt, fas::false_ ) const
   {
-    instance_options_type opt;
-    try
-    {
-      instance_options_json::serializer( opt, stropt.begin(), stropt.end() );
-    }
-    catch(const ::iow::json::json_error& e)
-    {
-      std::stringstream ss;
-      ss << "Instance unserialize json error for object '"<< this->name() << "':" << std::endl;
-      ss << e.message( stropt.begin(), stropt.end() );
-      throw std::domain_error(ss.str());
-    }
+    typedef std::vector<options_type> vect_opt;
+    typedef ::iow::json::array< std::vector< instance_json > > list_json;
+    vect_opt vopt = {opt};
+    return this->serialize_<list_json>(vopt);
   }
-  
-  instance_options_type unserialize_instance_( const std::string& stropt, fas::true_ )
-  {
-    instance_options_type opt = unserialize_instance_( stropt, fas::false_);
-    opt.name = Name()();
-    return opt;
-  }
-  */
-  
+
   template<typename JSON>
   void unserialize_( typename JSON::target& value, const std::string&  str )
   {
@@ -268,18 +187,20 @@ public:
   
   
   
-  std::vector< instance_options_type > unserialize_( const std::string& stropt, fas::true_ )
+  std::vector< options_type > 
+  unserialize_( const std::string& stropt, fas::true_ )
   {
-    instance_options_type opt;
-    this->unserialize_<instance_options_json>(opt, stropt);
+    options_type opt;
+    this->unserialize_<instance_json>(opt, stropt);
     opt.name = Name()();
-    return std::vector< instance_options_type >( {opt} );
+    return std::vector< options_type >( {opt} );
   }
   
-  std::vector< instance_options_type > unserialize_( const std::string& stropt, fas::false_ )
+  std::vector< options_type > 
+  unserialize_( const std::string& stropt, fas::false_ )
   {
-    typedef std::vector< instance_options_type > options_list;
-    typedef ::iow::json::array< std::vector< instance_options_json > > list_json;
+    typedef std::vector< options_type > options_list;
+    typedef ::iow::json::array< std::vector< instance_json > > list_json;
     options_list opt;
     this->unserialize_<list_json>(opt, stropt);
     return opt;
@@ -375,7 +296,7 @@ public:
     
   }
 
-  virtual void generate_options(instance_options_type& opt, const std::string& type) const 
+  virtual void generate_options(options_type& opt, const std::string& type) const 
   {
     /*auto tmp = std::make_shared<instance_type>();
     tmp->generate( opt, type);

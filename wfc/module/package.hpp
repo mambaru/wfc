@@ -1,7 +1,12 @@
 #pragma once
 
-#include <wfc/core/imodule.hpp>
-#include <wfc/core/ipackage.hpp>
+#include <wfc/module/imodule.hpp>
+#include <wfc/module/ipackage.hpp>
+
+#include <fas/type_list.hpp>
+#include <memory>
+#include <string>
+#include <map>
 
 namespace wfc{
 
@@ -13,7 +18,7 @@ class package
   typedef std::shared_ptr<imodule> module_ptr;
   typedef std::map<std::string, module_ptr > module_map;
 public:
-  virtual std::string version() const 
+  virtual std::string build_info() const 
   {
     return BuildInfo()();
   }
@@ -38,6 +43,23 @@ public:
       result.push_back(p.second);
     }
     return result;
+  }
+
+  // only for external control
+  virtual void start(const std::string& arg) 
+  {
+    for (auto& p : _modules)
+    {
+      p.second->start(arg);
+    }
+  }
+
+  virtual void stop(const std::string& arg)
+  {
+    for (auto& p : _modules)
+    {
+      p.second->stop(arg);
+    }
   }
 
 private:

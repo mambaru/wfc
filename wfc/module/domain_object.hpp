@@ -14,20 +14,21 @@ template<
   typename Itf,
   typename Opt
 >
-class domain
+class domain_object
   : public Itf
 {
-  
 public:
   typedef Opt options_type;
   typedef Itf interface_type;
   typedef std::shared_ptr<wfcglobal> global_ptr;
 
+  virtual ~domain_object(){}
+  
   const std::string& name() const
   {
     return _name;
   }
-  
+
   global_ptr global() const 
   {
     return _global;
@@ -37,8 +38,7 @@ public:
   {
     return _options;
   }
-  
-  
+
   static void generate(options_type& opt, const std::string& /*type*/)
   {
     opt = options_type();
