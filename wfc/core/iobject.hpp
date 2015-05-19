@@ -14,17 +14,22 @@ namespace wfc{
 
 struct global;
 
+// Multiton and singleton
+// 
 struct iobject: iinterface
 {
   virtual ~iobject(){}
-  
-  virtual std::string name() const = 0;
-  virtual int startup_priority() const = 0;
-  virtual int shutdown_priority() const = 0;
 
+  virtual std::string name() const = 0;
+  virtual std::string description() const = 0;
+  virtual std::string generate(const std::string& type) const = 0;
+  virtual bool parse(const std::string& conf) = 0;
+  virtual void create( std::shared_ptr<global>) = 0;
+  virtual void configure(const std::string& conf, const std::string& arg)  = 0;
+
+// only for external control
   virtual void start(const std::string& arg) = 0;
   virtual void stop(const std::string& arg) = 0;
-  virtual void perform(const std::string& arg) = 0;
 };
 
 }

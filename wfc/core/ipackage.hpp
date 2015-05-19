@@ -15,6 +15,7 @@ namespace wfc{
 struct imodule;
 struct global;
 
+// Убрать нафиг - это модуль
 struct ipackage: iinterface
 {
   virtual ~ipackage() {}

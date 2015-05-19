@@ -23,12 +23,13 @@ struct global
 
   typedef std::function<void()> fire_handler;
   typedef fire_list< fire_handler > fakir;
+  typedef interface_registry registry_type;
   fakir idle;
   fakir after_start;
   fakir before_stop;
   fakir after_stop;
 
-  interface_registry registry;
+  registry_type registry;
 
   typedef ::wfc::asio::io_service io_service_type;
   io_service_type& io_service;

@@ -1,7 +1,6 @@
 #pragma once
 
-#include <wfc/core/imodule.hpp>
-#include <../../../../cdaemon/geoip_converter/types.h>
+#include <wfc/core/iobject.hpp>
 #include <wfc/core/global.hpp>
 
 #include <memory>
@@ -11,49 +10,33 @@
 
 namespace wfc{
   
-template< typename Name, typename Obj, typename OptJson>
-class module_base
+// base for singletion or multiton
+// для sington массив из одного объекта
+// multiton частый случай singletion
+template< typename Name, typename Instance, typename OptJson>
+class multiton
+  : public iobject
 {
   // Автоопределялка для Obj: object_base или object_impl
-};
-  
-template<
-  typename Name,
-  typename Obj,
-  typename OptJson
->
-class singletion
-  : public imodule
-{
 public:
-  typedef object_impl<Obj> object_type;
-  typedef Itf inteface_type;
-  typedef OptJson options_json;
-  typedef typename options_json::target options_type;
-  
-  typedef std::shared_ptr<object_type> object_ptr;
-  typedef std::shared_ptr<global> global_ptr;
-  
-  virtual int startup_priority() const
-  {
-    return _options.startup_priority;
-  }
-  
-  virtual int shutdown_priority() const
-  {
-    return _options.shutdown_priority;
-  }
-  
+  typedef Instance instance_type;
+  typedef OptJson  instance_json;
+  typedef typename instance_type::options_type options_type;
+  typedef std::shared_ptr<wfcglobal> global_ptr;
+  typedef std::shared_ptr<instance_type> instance_ptr;
+  typedef std::map< std::string, instance_ptr> instance_map;
+
+
   virtual std::string name() const 
   {
     return Name()();
   }
-  
+
   virtual std::string description() const
   {
-    return "";
+    return "no description";
   }
-  
+
   virtual std::string generate(const std::string& type) const 
   {
     options_type opt;
@@ -63,7 +46,7 @@ public:
     serializer( opt, std::back_inserter(result) );
     return result;
   }
-  
+
   virtual bool parse(const std::string& stropt)
   {
     try
@@ -84,15 +67,55 @@ public:
       throw std::domain_error(ss.str());
     }
   }
-  
+
   virtual void create( std::shared_ptr<global> g) 
   {
-    _options.name = this->name();
     _global = g;
   }
+
+  virtual void configure(const std::string& conf, const std::string& arg)
+  {
+ 
+  }
+
+// only for external control
+  virtual void start(const std::string& arg) 
+  {
+
+  }
+
+  virtual void stop(const std::string& arg) 
+  {
+    
+  }
+
+private:
+  global_ptr   _global;
+  instance_map _instances;
+
+};
+
+template<
+  typename Name,
+  typename Obj,
+  typename OptJson
+>
+class singletion:
+  public iobject
+  //: public instance_holder<Name, Obj, OptJson>
+{
+public:
+  typedef object_impl<Obj> object_type;
+  typedef Itf inteface_type;
+  typedef OptJson options_json;
+  typedef typename options_json::target options_type;
+  
+  typedef std::shared_ptr<object_type> object_ptr;
+
   
   virtual void configure(const std::string& conf, const std::string& arg)  
   {
+    _options.name = this->name();
     
   }
   
@@ -137,7 +160,6 @@ public:
 private:
   
   options_type _options;
-  global_ptr   _global;
   object_ptr   _object;
   
 };

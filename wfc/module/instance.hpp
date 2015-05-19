@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wfc/module/object_options.hpp>
-#include <wfc/core/iobject.hpp>
+#include <wfc/core/iinstance.hpp>
 #include <wfc/core/global.hpp>
 
 
@@ -11,21 +11,21 @@
 
 namespace wfc{
 
-template<typename Obj>
-class object_impl
-  : public iobject
+template<typename DomainObject>
+class instance
+  : public iinstance
 {
 public:
   typedef std::recursive_mutex mutex_type;
-  typedef Obj object_type;
+  typedef DomainObject object_type;
   typedef typename object_type::interface_type interface_type;
   typedef typename object_type::options_type basic_options_type;
   typedef object_options<basic_options_type> options_type;
-    
+
   typedef std::shared_ptr<object_type> object_ptr;
   typedef std::shared_ptr<wfcglobal> global_ptr;
-  
-  object_impl()
+
+  instance()
     : _startup(false)
   {}
 
@@ -74,13 +74,13 @@ public:
   {
     object_type::generate( opt, type );
   }
-  
+
   void create( std::shared_ptr<wfcglobal> g) 
   {
     std::lock_guard<mutex_type> lk(_mutex);
     _global = g;
   }
-  
+
   void configure(const options_type& opt)  
   {
     std::lock_guard<mutex_type> lk(_mutex);

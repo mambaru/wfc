@@ -1,6 +1,5 @@
 #pragma once
 
-#include <wfc/core/iobject.hpp>
 #include <wfc/core/global.hpp>
 
 #include <memory>
@@ -15,7 +14,7 @@ template<
   typename Opt,
   typename Itf
 >
-class object_base
+class domain
   : public Itf
 {
   
