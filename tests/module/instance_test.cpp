@@ -16,7 +16,7 @@ struct itest
 };
 
 class test
-  : public ::wfc::domain<options1, itest>
+  : public ::wfc::domain<itest, options1>
 {
 public:
  

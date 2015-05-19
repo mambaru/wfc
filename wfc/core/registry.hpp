@@ -131,6 +131,12 @@ public:
     _registry_map.clear();
   }
   
+  size_t size() const
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    return _registry_map.size();
+  }
+  
 private:
   registry_map _registry_map;
   mutable mutex_type _mutex;

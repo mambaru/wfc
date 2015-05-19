@@ -11,8 +11,8 @@
 namespace wfc{
 
 template<
-  typename Opt,
-  typename Itf
+  typename Itf,
+  typename Opt
 >
 class domain
   : public Itf
@@ -62,16 +62,17 @@ public:
     // TODO: LOG default (empty) stop
   }
   
-  virtual void reconfigure()
-  {
-    // TODO: LOG default (empty) initialize
-  }
-  
   virtual void perform(const std::string&) 
   {
     
   }
-  
+
+  virtual void reconfigure()
+  {
+    // Переконфигурация запущенного объекта!!
+    // TODO: LOG default (empty) initialize
+  }
+
 private:  
   
   std::string _name;

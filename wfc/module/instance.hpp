@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wfc/module/object_options.hpp>
+#include <wfc/module/instance_options.hpp>
 #include <wfc/core/iinstance.hpp>
 #include <wfc/core/global.hpp>
 
@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <stdexcept>
+
 
 namespace wfc{
 
@@ -19,9 +20,9 @@ public:
   typedef std::recursive_mutex mutex_type;
   typedef DomainObject object_type;
   typedef typename object_type::interface_type interface_type;
-  typedef typename object_type::options_type basic_options_type;
-  typedef object_options<basic_options_type> options_type;
-
+  typedef typename object_type::options_type domain_options_type;
+  typedef instance_options<domain_options_type> options_type;
+  
   typedef std::shared_ptr<object_type> object_ptr;
   typedef std::shared_ptr<wfcglobal> global_ptr;
 
@@ -84,6 +85,16 @@ public:
   void configure(const options_type& opt)  
   {
     std::lock_guard<mutex_type> lk(_mutex);
+    /*if ( opt.name.empty() )
+      return;
+      */
+    
+    /*if ( !_options.name.empty() && _options.name != opt.name && _global!=nullptr)
+    {
+      _global->registry.erase("instance", _options.name);
+      _global->registry.set("instance", opt.name);
+    }
+    */
     _options = opt;
     // Reset ready flag for enable startup 
     _startup = !( _object==nullptr && _options.enabled );
@@ -126,6 +137,7 @@ private:
       {
         _object = std::make_shared<object_type>();
       }
+      //std::shared_ptr<iinstance> tmp = _object;
       _global->registry.set(_options.name, _object);
     }
     else
@@ -143,7 +155,7 @@ private:
   {
     if ( _object != nullptr )
     {
-      _object->initialize(_options.name, _global, static_cast<const basic_options_type&>(_options) );
+      _object->initialize(_options.name, _global, static_cast<const domain_options_type&>(_options) );
     }
   }
   

@@ -12,7 +12,7 @@
 
 namespace wfc{
 
-struct global;
+struct wfcglobal;
 
 // Multiton and singleton
 // 
@@ -23,8 +23,8 @@ struct iobject: iinterface
   virtual std::string name() const = 0;
   virtual std::string description() const = 0;
   virtual std::string generate(const std::string& type) const = 0;
-  virtual bool parse(const std::string& conf) = 0;
-  virtual void create( std::shared_ptr<global>) = 0;
+  virtual void parse(const std::string& conf) = 0;
+  virtual void create( std::shared_ptr<wfcglobal>) = 0;
   virtual void configure(const std::string& conf, const std::string& arg)  = 0;
 
 // only for external control

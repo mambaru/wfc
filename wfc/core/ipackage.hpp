@@ -13,16 +13,16 @@
 namespace wfc{
 
 struct imodule;
-struct global;
+struct wfcglobal;
 
 // Убрать нафиг - это модуль
 struct ipackage: iinterface
 {
   virtual ~ipackage() {}
-  virtual std::string version() = 0;
-  virtual std::string description() = 0;
-  virtual std::vector<std::string> modules() = 0;
-  virtual void create( std::shared_ptr<global> ) = 0;
+  virtual std::string version() const= 0;
+  virtual std::string description() const = 0;
+  virtual std::vector< std::shared_ptr<imodule> > modules() const = 0;
+  virtual void create( std::shared_ptr<wfcglobal> ) = 0;
 };
 
 }

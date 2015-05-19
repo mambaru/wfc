@@ -14,7 +14,7 @@ struct itest
 };
 
 class test
-  : public ::wfc::domain<options, itest>
+  : public ::wfc::domain<itest, options>
 {
 public:
  
