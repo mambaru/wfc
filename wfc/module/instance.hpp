@@ -70,6 +70,12 @@ public:
       _object->perform(arg);
   }
 
+  virtual void initialize() 
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    this->initialize_();
+  }
+
   
 // 
 
@@ -93,11 +99,6 @@ public:
     this->configure_(_options.enabled);
   }
   
-  void initialize(const std::string& /*arg*/) 
-  {
-    std::lock_guard<mutex_type> lk(_mutex);
-    this->initialize_();
-  }
 
 // -------------------------------------------------
 

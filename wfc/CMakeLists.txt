@@ -11,8 +11,12 @@ include_directories(../../iow/)
 
 SET(
   wfc_source_list
+  wfc.cpp
   core/global.cpp
- # ../../iow/iow/logger/global_log.cpp
+  module/object.cpp
+  module/module.cpp
+  module/package.cpp
+  ../../iow/iow/logger/global_log.cpp
 )
 
 add_library(

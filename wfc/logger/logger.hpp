@@ -32,3 +32,13 @@
 #define COMMON_LOG_DEBUG(X)    IOW_LOG_DEBUG( "common", X )
 #define COMMON_LOG_TRACE(X)    IOW_LOG_TRACE( "common", X )
 #define COMMON_LOG_PROGRESS(X) IOW_LOG_PROGRESS( "common", X )
+
+#define DEBUG_LOG_ERROR(X)    IOW_LOG_ERROR( "debug", X )
+#define DEBUG_LOG_WARNING(X)  IOW_LOG_WARNING( "debug", X )
+#define DEBUG_LOG_MESSAGE(X)  IOW_LOG_MESSAGE( "debug", X )
+#define DEBUG_LOG_FATAL(X)    IOW_LOG_FATAL( "debug", X )
+#define DEBUG_LOG_BEGIN(X)    IOW_LOG_BEGIN( "debug", X )
+#define DEBUG_LOG_END(X)      IOW_LOG_END( "debug", X )
+#define DEBUG_LOG_DEBUG(X)    IOW_LOG_DEBUG( "debug", X )
+#define DEBUG_LOG_TRACE(X)    IOW_LOG_TRACE( "debug", X )
+#define DEBUG_LOG_PROGRESS(X) IOW_LOG_PROGRESS( "debug", X )

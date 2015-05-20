@@ -9,6 +9,7 @@
 #include <wfc/core/iinterface.hpp>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace wfc{
 

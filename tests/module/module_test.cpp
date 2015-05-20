@@ -3,8 +3,8 @@
 #include <wfc/module/domain_object.hpp>
 #include <wfc/module/instance.hpp>
 #include <wfc/module/singleton.hpp>
-#include <wfc/module/module.hpp>
-#include <wfc/module/package.hpp>
+#include <wfc/module/object_list.hpp>
+#include <wfc/module/module_list.hpp>
 
 template<typename Name, bool Singleton>
 struct helper
@@ -66,7 +66,7 @@ JSON_NAME(object2)
 JSON_NAME(object3)
 JSON_NAME(object4)
 
-class test_module: public ::wfc::module<
+class test_module: public ::wfc::object_list<
     n_module1,
     helper<n_object1, true>::object,
     helper<n_object2, true>::object,
@@ -76,7 +76,7 @@ class test_module: public ::wfc::module<
 {
 };
 
-class test_package: public ::wfc::package< n_package1, test_module> {};
+class test_package: public ::wfc::module_list< n_package1, test_module> {};
 
 int main()
 {

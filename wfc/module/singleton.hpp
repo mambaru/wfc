@@ -91,13 +91,13 @@ public:
     */
   }
 
-  virtual void parse(const std::string& stropt)
+  virtual bool parse(const std::string& stropt)
   {
     options_type opt;
-    this->parse1_(opt, stropt);
+    return this->parse1_(opt, stropt);
   }
 
-  void parse1_(options_type& opt, const std::string& stropt)
+  bool parse1_(options_type& opt, const std::string& stropt)
   {
     auto beg = stropt.begin();
     auto end = stropt.end();
@@ -115,18 +115,31 @@ public:
       ss << e.message( beg, end );
       throw std::domain_error(ss.str());
     }
+    return true;
   }
   
   virtual void create( std::shared_ptr<wfcglobal> g) 
   {
     _global = g;
-    /*if ( _global )
-    {
-      // TODO: module
-      _global->registry.set( "object", this->name(), this->shared_from_this() );
-    }*/
+    this->create_(fas::bool_<Singleton>());
   }
   
+  void create_(fas::true_)
+  {
+    std::cout << "DEBUG: SINGLETON OBJECT " << std::endl;
+    auto inst = std::make_shared<instance_type>();
+    _instances[ this->name() ] = inst;
+    options_type opt;
+    opt.name = this->name();
+    opt.enabled = true;
+    _global->registry.set("instance", this->name(), inst);
+    inst->create(_global);
+    inst->configure(opt);
+    inst->initialize();
+  }
+
+  void create_(fas::false_) { }
+
   std::string parse_(const std::string& stropt)
   {
     auto beg = stropt.begin();

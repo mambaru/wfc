@@ -10,6 +10,7 @@
 #include <wfc/module/iobject.hpp>
 #include <memory>
 #include <string>
+#include <vector>
 
 struct wfcglobal;
 
