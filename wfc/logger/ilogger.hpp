@@ -1,8 +1,7 @@
 #pragma once
 
-#include <wfc/core/iinterface.hpp>
+#include <wfc/iinterface.hpp>
 
-#include <sstream>
 #include <string>
 
 namespace wfc{

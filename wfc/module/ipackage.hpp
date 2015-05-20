@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <wfc/core/iinterface.hpp>
+#include <wfc/iinterface.hpp>
 #include <memory>
 #include <string>
 #include <vector>

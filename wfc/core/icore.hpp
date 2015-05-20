@@ -8,7 +8,7 @@
 
 #include <memory>
 
-#include <wfc/core/iinterface.hpp>
+#include <wfc/iinterface.hpp>
 
 namespace wfc{
 

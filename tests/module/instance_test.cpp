@@ -1,6 +1,6 @@
 #define IOW_DISABLE_ALL_LOG
 
-#include <wfc/module/domain_object.hpp>
+#include <wfc/domain_object.hpp>
 #include <wfc/module/instance.hpp>
 
 struct options1
@@ -61,12 +61,12 @@ int main()
     return -1;
   if ( tmp1->testtest() != false )
     return -2;
-  t.initialize("");
+  t.initialize();
   if ( tmp1->testtest() != true )
     return -3;
   t.start("");
   t.configure(opt);
-  t.initialize("");
+  t.initialize();
   t.stop("");
   /*
   if ( t.options().test != false )

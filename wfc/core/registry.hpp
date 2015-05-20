@@ -11,7 +11,7 @@
 #include <string>
 #include <mutex>
 
-#include <wfc/core/iinterface.hpp>
+#include <wfc/iinterface.hpp>
 #include <wfc/logger.hpp>
 
 namespace wfc{

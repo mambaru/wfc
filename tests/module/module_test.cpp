@@ -1,6 +1,6 @@
 #define IOW_DISABLE_ALL_LOG
 
-#include <wfc/module/domain_object.hpp>
+#include <wfc/domain_object.hpp>
 #include <wfc/module/instance.hpp>
 #include <wfc/module/singleton.hpp>
 #include <wfc/module/object_list.hpp>

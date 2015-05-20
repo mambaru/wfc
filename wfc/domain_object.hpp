@@ -54,6 +54,7 @@ public:
 
   virtual void start(const std::string&)
   {
+    CONFIG_LOG_MESSAGE("instance " << _name << " default START!!!")
     // TODO: LOG default (empty) start
   }
 

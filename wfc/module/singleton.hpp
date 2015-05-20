@@ -20,23 +20,11 @@ template<
 >
 class basic_object
   : public iobject
-  //, public std::enable_shared_from_this<iobject>
 {
 public:
   enum { is_singleton = Singleton};
-  /*
-  typedef object_helper<Name, Instance, DomainJson, Singleton> helper;
-  friend struct object_helper<Name, Instance, DomainJson, Singleton>;
-  
-  typedef typename helper::options_type options_type;
-  typedef typename helper::options_json options_json;
-
-  typedef typename helper::item_options_type instance_options_type;
-  typedef typename helper::item_options_json instance_options_json;
-  */
 
   typedef std::shared_ptr<wfcglobal> global_ptr;
-  
   typedef Instance    instance_type;
   typedef typename instance_type::options_type options_type;
   typedef typename instance_type::interface_type interface_type;
@@ -51,20 +39,11 @@ public:
       _global->registry.erase( "object", this->name() );
     }
   }
-  
   typedef Name object_name;
-  /*
-  typedef Instance    instance_type;
-  typedef DomainJson  domain_json;
-  typedef typename instance_type::options_type options_type;
-  typedef std::shared_ptr<wfcglobal> global_ptr;
-  typedef std::shared_ptr<instance_type> instance_ptr;
-  typedef instance_options_json< options_type, domain_json> instance_json;
-  */
 
   virtual std::string name() const 
   {
-    return Name()();
+    return object_name()();
   }
 
   virtual std::string description() const
@@ -80,23 +59,20 @@ public:
   virtual std::string generate(const std::string& type) const 
   {
     options_type inst_opt;
+    inst_opt.name = this->name() + "1";
     this->generate_options(inst_opt, type);
     return this->serialize_(inst_opt, fas::bool_<Singleton>() );
-    /*
-    auto opt = helper::instance2object(inst_opt);
-    typename options_json::serializer serializer;
-    std::string result;
-    serializer( opt, std::back_inserter(result) );
-    return result;
-    */
   }
 
   virtual bool parse(const std::string& stropt)
   {
-    options_type opt;
-    return this->parse1_(opt, stropt);
+    //options_type opt;
+    this->unserialize_( stropt, fas::bool_<Singleton>());
+    return true;
+    //return this->parse1_(opt, stropt);
   }
 
+  /*
   bool parse1_(options_type& opt, const std::string& stropt)
   {
     auto beg = stropt.begin();
@@ -117,6 +93,7 @@ public:
     }
     return true;
   }
+  */
   
   virtual void create( std::shared_ptr<wfcglobal> g) 
   {
