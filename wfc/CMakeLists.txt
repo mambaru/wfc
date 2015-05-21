@@ -20,7 +20,7 @@ SET(
 )
 
 add_library(
-  wfc SHARED
+  wfc
   ${wfc_source_list}
 )
 

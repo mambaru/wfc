@@ -42,3 +42,13 @@
 #define DEBUG_LOG_DEBUG(X)    IOW_LOG_DEBUG( "debug", X )
 #define DEBUG_LOG_TRACE(X)    IOW_LOG_TRACE( "debug", X )
 #define DEBUG_LOG_PROGRESS(X) IOW_LOG_PROGRESS( "debug", X )
+
+#define SYSLOG_LOG_ERROR(X)    IOW_LOG_ERROR( "syslog", X )
+#define SYSLOG_LOG_WARNING(X)  IOW_LOG_WARNING( "syslog", X )
+#define SYSLOG_LOG_MESSAGE(X)  IOW_LOG_MESSAGE( "syslog", X )
+#define SYSLOG_LOG_FATAL(X)    IOW_LOG_FATAL( "syslog", X )
+#define SYSLOG_LOG_BEGIN(X)    IOW_LOG_BEGIN( "syslog", X )
+#define SYSLOG_LOG_END(X)      IOW_LOG_END( "syslog", X )
+#define SYSLOG_LOG_DEBUG(X)    IOW_LOG_DEBUG( "syslog", X )
+#define SYSLOG_LOG_TRACE(X)    IOW_LOG_TRACE( "syslog", X )
+#define SYSLOG_LOG_PROGRESS(X) IOW_LOG_PROGRESS( "syslog", X )

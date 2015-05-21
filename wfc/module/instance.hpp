@@ -94,7 +94,7 @@ public:
   {
     std::lock_guard<mutex_type> lk(_mutex);
     _options = opt;
-    // Reset ready flag for enable startup 
+    // Reset ready flag for enable startup
     _startup = _startup && !( _object==nullptr && _options.enabled );
     this->configure_(_options.enabled);
   }
@@ -159,7 +159,6 @@ private:
       _object->initialize(_options.name, _global, static_cast<const domain_options_type&>(_options) );
     }
   }
-  
 
   void startup_(const std::string& arg) 
   {
@@ -179,15 +178,12 @@ private:
 
   void start_(const std::string& arg) 
   {
-    std::cout << "DEBUG instance start " << std::endl;
     if ( !_startup )
     {
-      std::cout << "DEBUG instance start startup" << std::endl;
       this->startup_(arg);
     }
     else if ( _object == nullptr )
     {
-      std::cout << "DEBUG instance start start forced_start_" << std::endl;
       this->forced_start_(arg);
     }
   }

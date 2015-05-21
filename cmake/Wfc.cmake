@@ -6,7 +6,7 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-#message(STATUS "---!---> ${CMAKE_CXX_COMPILER_VERSION}")
+SET(WFC_READY ON)
 
 IF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
     exec_program(
@@ -41,15 +41,14 @@ SET(IOWLIB_DIR "${CMAKE_SOURCE_DIR}/iow")
 SET(FAS_TESTING_CPP "${FASLIB_DIR}/fas/testing/testing.cpp")
 set(WFC_TEST_DIR "${CMAKE_BINARY_DIR}/bin-test")
 
+SET(BUILD_SHARED_LIBS ON)
+
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-message(STATUS "-->Wfc.cmake")
+
 set(Boost_USE_STATIC_LIBS OFF) 
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
-#find_package(Boost COMPONENTS system asio program_options) 
 find_package(Boost COMPONENTS system program_options REQUIRED)
-#find_package(Boost COMPONENTS asio REQUIRED)
-#find_package(Boost 1.53 COMPONENTS system asio program_options) 

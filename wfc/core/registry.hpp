@@ -33,22 +33,25 @@ public:
       return nullptr;
       
     std::shared_ptr<I> result = nullptr;
+    registry_map::const_iterator itr;
     {
       std::lock_guard<mutex_type> lk(_mutex);
-      auto itr = _registry_map.find( key_type(prefix, name) );
+      itr = _registry_map.find( key_type(prefix, name) );
       if ( itr == _registry_map.end() )
       {
         return nullptr; 
       }
+ 
       result = std::dynamic_pointer_cast<I>(itr->second);
     }
-    
+
     if (result == nullptr)
     {
-      DOMAIN_LOG_FATAL("wfc::registry::get: invalid interface for " << name )
+      DOMAIN_LOG_FATAL("wfc::registry::get: invalid interface for " << name <<
+                       "(" << typeid(itr->second.get()).name() << " x-> " << typeid(result.get()).name() << ")" )
       abort();
     }
-    
+
     return result;
   }
   

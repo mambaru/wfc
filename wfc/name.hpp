@@ -8,4 +8,5 @@
 
 #include <iow/json/name.hpp>
 
-#define WFC_NAME(X,Y) JSON_NAME2(X,Y)
+#define WFC_NAME(X) JSON_NAME(X)
+#define WFC_NAME2(X,Y) JSON_NAME2(X,Y)
