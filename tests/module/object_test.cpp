@@ -3,6 +3,7 @@
 #include <wfc/domain_object.hpp>
 #include <wfc/module/instance.hpp>
 #include <wfc/module/singleton.hpp>
+#include <wfc/module/multiton.hpp>
 
 struct itest: 
   public ::wfc::iinterface

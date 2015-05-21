@@ -16,6 +16,42 @@ author=`git log -1 --pretty=format:"Author: %cn <%ce>" .`
 date=`git log -1 --pretty=format:"Date: %cd" .`
 message=`git log -1 --pretty=format:"%s" .`
 
+#################################################
+toplevel2=`git rev-parse --show-toplevel  2>/dev/null`
+basename2=`basename $toplevel2`
+tag2=`git describe --abbrev=0 --tags 2>/dev/null`
+branch2=`git rev-parse --abbrev-ref HEAD`
+commit2=`git log -1 --pretty=format:"%H"`
+author2=`git log -1 --pretty=format:"%cn <%ce>" .`
+date2=`git log -1 --pretty=format:"%cd" .`
+head_commit_count2=`git rev-list HEAD --count`
+last_tag_commit_count2=`git rev-list $tag2 --count`
+untaged_commits2=`expr $head_commit_count2 - $last_tag_commit_count2`
+
+# Get number of total uncommited files
+uncommited2=`expr $(git status --porcelain 2>/dev/null| egrep "^(M| M)" | wc -l)`
+if [[ ! -z $tag2 ]]; then
+  revlist2=`git rev-list $tag2 | wc -l`
+fi
+
+if [[ -z "$version2" ]]; then
+  version2="Use git --tag as version"
+fi
+echo "BuildInfo"
+echo -e "\tbasename2: $basename2"
+echo -e "\ttag2: $tag2"
+echo -e "\tbranch2: $branch2"
+echo -e "\tcommit2: $commit2"
+echo -e "\tauthor2: $author2"
+echo -e "\tdate2: $date2"
+echo -e "\tuncommited2: $uncommited2"
+echo -e "\trevlist2: $revlist2"
+echo -e "\tuntaged_commits2: $untaged_commits2"
+echo -e "\thead_commit_count2: $head_commit_count2"
+
+#echo "DEBUG build_info.sh $version"
+#echo "DEBUG build_info.sh $branch"
+
 h_file="$1_build_info.h"
 c_file="$path/$1_build_info.c"
 o_file="$path/$1_build_info.o"

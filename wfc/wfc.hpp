@@ -14,14 +14,13 @@ namespace wfc{
 
 struct ipackage;
 struct wfcglobal;
-  
+
 class wfc
 {
 public:
   typedef std::shared_ptr<ipackage> package_ptr;
-  //typedef std::initializer_list< package_ptr > packages_initializer;
   typedef std::list<package_ptr> package_list;
-  
+
   wfc(std::string program_version, package_list packages);
   int run(int argc, char* argv[]);
 private:

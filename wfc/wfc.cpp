@@ -19,12 +19,12 @@ wfc::wfc(std::string program_version, package_list packages )
   , _packages(packages)
 {
   _global = std::make_shared<wfcglobal>(_io_service);
-  
+
   for (const auto& p: packages)
   {
-    _global->registry.set("packages", p);
+    _global->registry.set("package", p);
   }
-  
+
   for (const auto& p: packages)
   {
     p->create(_global);
@@ -32,24 +32,12 @@ wfc::wfc(std::string program_version, package_list packages )
 
   _global->program_version = _program_version;
   _global->wfc_version = wfc_build_info_string;
-
 }
 
 int wfc::run(int argc, char* argv[])
 {
-  /*
-  global::static_global = _global;
-  _global->program_version = _program_version;
-  _global->wfc_version = wfc_build_info_string;
-
-  _global->registry.for_each<imodule>("module", [this](const std::string& name, std::shared_ptr<imodule> module)
-  {
-    module->create(name,  this->_global);
-  });
-  */
-
   wfcglobal::static_global = _global;
-  
+
   if ( auto startup = _global->registry.get<istartup>("startup") )
   {
     if ( !startup->startup(argc, argv) )
@@ -59,25 +47,22 @@ int wfc::run(int argc, char* argv[])
   {
     std::cerr << "no startup module" << std::endl;
   }
-  
+
   int status = 0;
 
   if ( auto core = _global->registry.get<icore>("core") )
   {
-    status = core->run(/*_global*/);
+    status = core->run();
   }
-  
+
   std::clog << "wfc::run finalize ... " << std::endl;
-  
+
   _global->registry.clear();
-  
+
   wfcglobal::static_global.reset();
   _global.reset();
   std::clog << "...finalize done!" << std::endl;
   return status;
-  
-
-  return 0;
 }
 
 }
