@@ -22,14 +22,36 @@ basename2=`basename $toplevel2`
 tag2=`git describe --abbrev=0 --tags 2>/dev/null`
 branch2=`git rev-parse --abbrev-ref HEAD`
 commit2=`git log -1 --pretty=format:"%H"`
+# commit author
 author2=`git log -1 --pretty=format:"%cn <%ce>" .`
 date2=`git log -1 --pretty=format:"%cd" .`
+# всего коммитов
 head_commit_count2=`git rev-list HEAD --count`
+# всего коммитов до последнего тега
 last_tag_commit_count2=`git rev-list $tag2 --count`
+#коммтов от последнего тега
 untaged_commits2=`expr $head_commit_count2 - $last_tag_commit_count2`
-
+# количество назапушеных коммитов
+unpushed_commits2=`git log --branches --not --remotes --simplify-by-decoration --decorate --oneline | wc -l`
 # Get number of total uncommited files
 uncommited2=`expr $(git status --porcelain 2>/dev/null| egrep "^(M| M)" | wc -l)`
+#TODO: inital author
+#TODO: real author, default as initial author
+#TODO: author list почислу коммитов (count)
+#allauthors2=`git shortlog -e -s -n | awk '{printf "%s %s %s %s(%s), ",$2,$3,$4,$5,$1}'`
+#allauthors2="expr $(git shortlog -e -s -n)"
+echo -1-
+#echo `git shortlog -e -s -n` >> /tmp/aaa1
+#aaa=`git --status`
+#allauthors2=`expr $(git --no-pager shortlog -e -s -n | awk '{printf "%s %s %s %s(%s), ",$2,$3,$4,$5,$1}')`
+#allauthors2=zzz`git --no-pager shortlog -e -s -n 2>/dev/null`
+allauthors2=$(git log --format="%aN <%aE>" | sort | uniq -c | sort -nr | awk '{for(i=2;i<=NF;i++) printf "%s ",$i; printf "(%s), ",$1;}')
+#echo "aaa: $allauthors2" >> /tmp/aaa
+#git shortlog -e -s -n | awk '{printf "%s %s %s %s(%s), ",$2,$3,$4,$5,$1}' >> /tmp/aaa
+#git shortlog -e -s -n | cat
+#git status
+echo -2-
+
 if [[ ! -z $tag2 ]]; then
   revlist2=`git rev-list $tag2 | wc -l`
 fi
@@ -48,6 +70,9 @@ echo -e "\tuncommited2: $uncommited2"
 echo -e "\trevlist2: $revlist2"
 echo -e "\tuntaged_commits2: $untaged_commits2"
 echo -e "\thead_commit_count2: $head_commit_count2"
+echo -e "\tunpushed_commits2: $unpushed_commits2"
+echo -e "\tallauthors2: ${allauthors2::-2}"
+
 
 #echo "DEBUG build_info.sh $version"
 #echo "DEBUG build_info.sh $branch"
