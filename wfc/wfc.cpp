@@ -14,9 +14,8 @@
 
 namespace wfc{
 
-wfc::wfc(std::string program_version, package_list packages )
-  : _program_version(program_version)
-  , _packages(packages)
+wfc::wfc(std::shared_ptr<ibuild_info> bi, package_list packages )
+  : _packages(packages)
 {
   _global = std::make_shared<wfcglobal>(_io_service);
 
@@ -30,8 +29,9 @@ wfc::wfc(std::string program_version, package_list packages )
     p->create(_global);
   }
 
-  _global->program_version = _program_version;
-  _global->wfc_version = wfc_build_info_string;
+  _global->program_build_info = bi;
+  _global->wfc_build_info = make_build_info<wfc_build_info>();
+  //_global->wfc_version = wfc_build_info().version();
 }
 
 int wfc::run(int argc, char* argv[])

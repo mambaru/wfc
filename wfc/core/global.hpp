@@ -9,16 +9,24 @@
 #include <wfc/core/registry.hpp>
 #include <wfc/core/fire_list.hpp>
 #include <wfc/core/module_options.hpp>
+#include <wfc/core/ibuild_info.hpp>
 #include <iow/asio.hpp>
 
 namespace wfc{
   
 struct wfcglobal
 { 
+  /*
   std::string program_name;
   std::string program_version;
   std::string wfc_version;
   std::string instance_name;
+  */
+  std::string program_name;
+  std::string instance_name;
+  std::shared_ptr<ibuild_info> program_build_info;
+  std::shared_ptr<ibuild_info> wfc_build_info;
+  
   module_options options;
 
   typedef std::function<void()> fire_handler;
@@ -34,7 +42,7 @@ struct wfcglobal
   io_service_type& io_service;
 
   static std::shared_ptr<wfcglobal>   static_global;
-  
+
   wfcglobal( io_service_type& io_service)
     : io_service(io_service)
   {}

@@ -33,7 +33,7 @@ MACRO(build_info target_name prefix)
   )
   add_dependencies(${target_name} ${prefix}_build_info)
   target_link_libraries(${target_name} ${CMAKE_BINARY_DIR}/${prefix}_build_info.a)
-  SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_CURRENT_SOURCE_DIR}/build_info.h")
+  SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_CURRENT_SOURCE_DIR}/${prefix}_build_info.h")
 ENDMACRO(build_info)
 
 #

@@ -9,6 +9,118 @@ else
    path=$2
 fi
 
+tag=$(git describe --abbrev=0 --tags 2>/dev/null)
+commits_head=$(git rev-list HEAD --count 2>/dev/null)
+if [[ ! -z "$tag" ]]; then
+  commits_tag=$(git rev-list $tag --count)
+else
+  commits_tag="0"
+fi
+
+version=$tag
+branch=`git rev-parse --abbrev-ref HEAD`
+if [[ -z $version ]]; then
+  version="($branch)"
+fi
+
+untaged_commits=`expr $commits_head - $commits_tag`
+uncommited=`expr $(git status --porcelain 2>/dev/null | egrep "^(M| M)" | wc -l)`
+unpushed=$(git log --branches --not --remotes --simplify-by-decoration --decorate --oneline | wc -l)
+
+if [[ $(expr $untaged_commits + $uncommited) -ne "0"  ]]; then
+  version="$version-$untaged_commits.$uncommited"
+fi
+
+if [[ "$unpushed" -ne "0"  ]]; then
+  version="$version[$unpushed]"
+fi
+
+toplevel=`git rev-parse --show-toplevel  2>/dev/null`
+basename=`basename $toplevel`
+
+commit=`git log -1 --pretty=format:"%H"`
+author=`git log -1 --pretty=format:"%cn <%ce>"`
+message=$(git log -1 --pretty=format:"%s")
+commitdate=$(date "+%F %T %:z" -d @`git log -1 --pretty=format:"%ct"`)
+builddate=$(date "+%F %T %:z")
+date="$builddate (commit: $commitdate)"
+authors=$(git log --format="%aN <%aE>" | sort | uniq -c | sort -nr | awk '{for(i=2;i<=NF;i++) printf "%s ",$i; printf "(%s), ",$1;}')
+
+h_file="$1_build_info.h"
+c_file="$path/$1_build_info.c"
+o_file="$path/$1_build_info.o"
+a_file="$path/$1_build_info.a"
+
+if [[ ! -f "$h_file" ]]; then
+  echo "struct $1_build_info{" > $h_file
+  echo "  const char* name() const;" >> $h_file
+  echo "  const char* version() const;" >> $h_file
+  echo "  const char* branch() const;" >> $h_file
+  echo "  const char* commit() const;" >> $h_file
+  echo "  const char* date() const;" >> $h_file
+  echo "  const char* author() const;" >> $h_file
+  echo "  const char* message() const;" >> $h_file
+  echo "  const char* authors() const;" >> $h_file
+  echo "};" >> $h_file
+fi
+
+echo "#include \"`pwd`/$h_file\"" > $c_file
+echo "const char* $1_build_info::name() const { return \"$basename\";}" >> $c_file
+echo "const char* $1_build_info::version() const { return \"$version\"; }" >> $c_file
+echo "const char* $1_build_info::branch() const { return \"$branch\"; }" >> $c_file
+echo "const char* $1_build_info::commit() const { return \"$commit\"; }" >> $c_file
+echo "const char* $1_build_info::author() const { return \"$author\"; }" >> $c_file
+echo "const char* $1_build_info::message() const { return \"$message\"; }" >> $c_file
+echo "const char* $1_build_info::authors() const { return \"$authors\"; }" >> $c_file
+
+if [[ -f "$c_file~1" ]]; then
+  if diff $c_file "$c_file~1" >/dev/null ; then
+    exit 0
+  fi
+fi
+cp $c_file "$c_file~1"
+echo "const char* $1_build_info::date() const { return \"$date\"; }" >> $c_file
+
+echo "BuildInfo"
+echo -e "\tname:    $basename"
+echo -e "\tversion: $version"
+echo -e "\tbranch:  $branch"
+echo -e "\tcommit:  $commit"
+echo -e "\tdate:    $date"
+echo -e "\tauthor:  $author"
+echo -e "\tmessage: $message"
+echo -e "\tauthors: $authors"
+
+g++ -c $c_file -fPIC -o $o_file >/dev/null 2>&1
+ar rvs $a_file $o_file >/dev/null 2>&1
+
+exit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+if [[ ! -n "$1" ]]; then
+   exit -1
+fi
+
+if [[ ! -n "$2" ]]; then
+   path="/tmp"
+else
+   path=$2
+fi
+
 version=`git describe --long 2>/dev/null`
 branch="Branch: `git branch | grep '\*' | grep -o '[^ *].\+$' `"
 commit=`git log -1 --pretty=format:"commit %H" . `
@@ -49,7 +161,11 @@ basename2=`basename $toplevel2`
 branch2=`git rev-parse --abbrev-ref HEAD`
 commit2=`git log -1 --pretty=format:"%H"`
 author2=`git log -1 --pretty=format:"%cn <%ce>"`
-date2=`git log -1 --pretty=format:"%cd"`
+message2=$(git log -1 --pretty=format:"%s")
+
+commitdate2=$(date "+%F %T %:z" -d @`git log -1 --pretty=format:"%ct"`)
+builddate2=$(date "+%F %T %:z")
+date2="$builddate2 (commit: $commitdate2)"
 allauthors2=$(git log --format="%aN <%aE>" | sort | uniq -c | sort -nr | awk '{for(i=2;i<=NF;i++) printf "%s ",$i; printf "(%s), ",$1;}')
 
 version2=$tag2
@@ -97,6 +213,39 @@ fi
 #if [[ ! -z $tag2 ]]; then
 #  revlist2=`git rev-list $tag2 | wc -l`
 #fi
+
+h_file2="$1_2build_info.h"
+c_file2="$path/$1_2build_info.c"
+o_file2="$path/$1_2build_info.o"
+a_file2="$path/$1_2build_info.a"
+
+if [[ ! -f "$h_file2" ]]; then
+  echo "struct $1_build_info{" > $h_file2
+  echo "  const char* name() const;" >> $h_file2
+  echo "  const char* version() const;" >> $h_file2
+  echo "  const char* branch() const;" >> $h_file2
+  echo "  const char* commit() const;" >> $h_file2
+  echo "  const char* date() const;" >> $h_file2
+  echo "  const char* author() const;" >> $h_file2
+  echo "  const char* message() const;" >> $h_file2
+  echo "  const char* authors() const;" >> $h_file2
+  echo "  const char* build() const;" >> $h_file2
+  echo "};" >> $h_file2
+fi
+
+echo "#include \"`pwd`/$h_file2\"" > $c_file2
+echo "const char* $1_build_info::name() const { return \"$basename2\";}" >> $c_file2
+echo "const char* $1_build_info::version() const { return \"$version2\"; }" >> $c_file2
+echo "const char* $1_build_info::branch() const { return \"$branch2\"; }" >> $c_file2
+echo "const char* $1_build_info::commit() const { return \"$commit2\"; }" >> $c_file2
+echo "const char* $1_build_info::date() const { return \"$date2\"; }" >> $c_file2
+echo "const char* $1_build_info::author() const { return \"$author2\"; }" >> $c_file2
+echo "const char* $1_build_info::message() const { return \"$message2\"; }" >> $c_file2
+echo "const char* $1_build_info::authors() const { return \"$authors2\"; }" >> $c_file2
+echo "const char* $1_build_info::build() const {}" >> $c_file2
+
+
+
 
 if [[ -z "$version2" ]]; then
   version2="Use git --tag as version"
@@ -148,7 +297,19 @@ if [[ -f "$c_file~1" ]]; then
   fi
 fi
 
+if [[ -f "$c_file2~1" ]]; then
+  if diff $c_file2 "$c_file2~1" >/dev/null ; then
+    exit 0
+  fi
+fi
+
 g++ -c $c_file -o $o_file >/dev/null 2>&1
 ar rvs $a_file $o_file >/dev/null 2>&1
+
+echo "---------------------------"
+echo 'g++ -c $c_file2 -o $o_file2'
+echo "+++++++++++++++++++++++++++"
+g++ -c $c_file2 -o $o_file2 
+ar rvs $a_file2 $o_file2 >/dev/null 2>&1
 
 exit
