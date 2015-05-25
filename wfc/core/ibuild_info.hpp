@@ -13,12 +13,14 @@ namespace wfc{
 struct ibuild_info
 {
   virtual ~ibuild_info(){}
+  virtual bool enabled() = 0;
   virtual std::string name() = 0;
   virtual std::string version() = 0;
   virtual std::string branch() = 0;
   virtual std::string commit() = 0;
   virtual std::string date() = 0;
   virtual std::string author() = 0;
+  virtual std::string project() = 0;
   virtual std::string message() = 0;
   virtual std::string authors() = 0;
 };
@@ -31,7 +33,12 @@ class build_info
 public:
   
   virtual ~build_info(){}
-  
+
+  virtual bool enabled()
+  {
+    return BuildInfo().enabled();
+  }
+
   virtual std::string name()
   {
     return BuildInfo().name();
@@ -60,6 +67,11 @@ public:
   virtual std::string author()
   {
     return BuildInfo().author();
+  }
+
+  virtual std::string project()
+  {
+    return BuildInfo().project();
   }
   
   virtual std::string message()

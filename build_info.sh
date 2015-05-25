@@ -39,7 +39,8 @@ toplevel=`git rev-parse --show-toplevel  2>/dev/null`
 basename=`basename $toplevel`
 
 commit=`git log -1 --pretty=format:"%H"`
-author=`git log -1 --pretty=format:"%cn <%ce>"`
+commit_author=`git log -1 --pretty=format:"%cn <%ce>"`
+project_author=$commit_author
 message=$(git log -1 --pretty=format:"%s")
 commitdate=$(date "+%F %T %:z" -d @`git log -1 --pretty=format:"%ct"`)
 builddate=$(date "+%F %T %:z")
@@ -53,23 +54,27 @@ a_file="$path/$1_build_info.a"
 
 if [[ ! -f "$h_file" ]]; then
   echo "struct $1_build_info{" > $h_file
+  echo "  bool enabled() const;" >> $h_file
   echo "  const char* name() const;" >> $h_file
   echo "  const char* version() const;" >> $h_file
   echo "  const char* branch() const;" >> $h_file
   echo "  const char* commit() const;" >> $h_file
   echo "  const char* date() const;" >> $h_file
   echo "  const char* author() const;" >> $h_file
+  echo "  const char* project() const;" >> $h_file
   echo "  const char* message() const;" >> $h_file
   echo "  const char* authors() const;" >> $h_file
   echo "};" >> $h_file
 fi
 
 echo "#include \"`pwd`/$h_file\"" > $c_file
+echo "bool $1_build_info::enabled() const { return true;}" >> $c_file
 echo "const char* $1_build_info::name() const { return \"$basename\";}" >> $c_file
 echo "const char* $1_build_info::version() const { return \"$version\"; }" >> $c_file
 echo "const char* $1_build_info::branch() const { return \"$branch\"; }" >> $c_file
 echo "const char* $1_build_info::commit() const { return \"$commit\"; }" >> $c_file
-echo "const char* $1_build_info::author() const { return \"$author\"; }" >> $c_file
+echo "const char* $1_build_info::author() const { return \"$commit_author\"; }" >> $c_file
+echo "const char* $1_build_info::project() const { return \"$project_author\"; }" >> $c_file
 echo "const char* $1_build_info::message() const { return \"$message\"; }" >> $c_file
 echo "const char* $1_build_info::authors() const { return \"$authors\"; }" >> $c_file
 

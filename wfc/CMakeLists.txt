@@ -12,6 +12,7 @@ include_directories(../../iow/)
 SET(
   wfc_source_list
   wfc.cpp
+  system/system.cpp
   core/global.cpp
   module/object.cpp
   module/module.cpp
