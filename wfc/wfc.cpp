@@ -21,7 +21,7 @@ wfc::wfc(std::shared_ptr<ibuild_info> bi, package_list packages )
 
   for (const auto& p: packages)
   {
-    _global->registry.set("package", p);
+    _global->registry.set("package", p->build_info()->name(), p);
   }
 
   for (const auto& p: packages)

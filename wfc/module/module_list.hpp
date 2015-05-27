@@ -1,5 +1,6 @@
 #pragma once
 
+#include <wfc/core/ibuild_info.hpp>
 #include <wfc/module/imodule.hpp>
 #include <wfc/module/ipackage.hpp>
 #include <wfc/core/global.hpp>
@@ -19,9 +20,9 @@ class module_list
   typedef std::shared_ptr<imodule> module_ptr;
   typedef std::map<std::string, module_ptr > module_map;
 public:
-  virtual std::string build_info() const 
+  virtual std::shared_ptr<ibuild_info> build_info() const 
   {
-    return BuildInfo()();
+    return make_build_info<BuildInfo>();
   }
   
   virtual std::string description() const 

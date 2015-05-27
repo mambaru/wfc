@@ -35,7 +35,6 @@ public:
   io_info( std::shared_ptr<handler_interface> jsonrpc_handler, outgoing_handler_t outgoing_handler)
     : jsonrpc_handler(jsonrpc_handler)
     , outgoing_handler(outgoing_handler)
-    
   {}
 };
 

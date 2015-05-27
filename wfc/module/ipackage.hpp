@@ -14,12 +14,13 @@
 namespace wfc{
 
 struct imodule;
+struct ibuild_info;
 struct wfcglobal;
 
 struct ipackage: iinterface
 {
   virtual ~ipackage() {}
-  virtual std::string build_info() const= 0;
+  virtual std::shared_ptr<ibuild_info> build_info() const= 0;
   virtual std::string description() const = 0;
   virtual std::vector< std::shared_ptr<imodule> > modules() const = 0;
   virtual void create( std::shared_ptr<wfcglobal> ) = 0;

@@ -21,7 +21,7 @@ struct iconfig: iinterface
   virtual std::string get_config(std::string name) = 0;
   //virtual std::string generate_and_write(std::string type, std::string path) = 0;
   typedef std::map<std::string, std::string> generate_options;
-  virtual bool generate_config( const generate_options& go, std::string& result) = 0;
+  virtual bool generate_config( const generate_options& go, const std::string& path, std::string& result) = 0;
 };
 
 }

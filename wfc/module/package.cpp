@@ -14,7 +14,7 @@ package::package(std::shared_ptr<ipackage> p)
   
 }
 
-std::string package::build_info() const
+std::shared_ptr<ibuild_info> package::build_info() const
 {
   return _impl->build_info();
 }

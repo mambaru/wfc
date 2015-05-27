@@ -12,7 +12,7 @@ class package
 public:
   virtual ~package();
   package(std::shared_ptr<ipackage>);
-  virtual std::string build_info() const;
+  virtual std::shared_ptr<ibuild_info> build_info() const;
   virtual std::string description() const;
   virtual std::vector< std::shared_ptr<imodule> > modules() const ;
   virtual void create( std::shared_ptr<wfcglobal> );
