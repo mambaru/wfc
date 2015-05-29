@@ -78,7 +78,6 @@ struct method_list: wfc::jsonrpc::method_list
 >
 {};
 
-
 typedef wfc::jsonrpc::handler<method_list> handler;
 
 int test_count = 0;
