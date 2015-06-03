@@ -15,7 +15,6 @@ struct ad_method_handler
     auto handler = t.registry().get_jsonrpc_handler(io_id);
     if ( handler == nullptr)
     {
-      
       // Если обработчик не был создан create_handler
       // который вызываеться при новом коннекте 
       // то при каждом запросе создаем временный 
@@ -23,7 +22,6 @@ struct ad_method_handler
       // !!! handler = t.clone_prototype();
       handler = t.get_prototype();
     }
-    
     
     if ( auto wrk = t.get_worker( holder.method() ) )
     {
@@ -52,7 +50,6 @@ struct ad_method_handler
       COMMON_LOG_WARNING("jsonrpc worker unavailable for method: " << holder.method() )
       t.get_aspect().template get<_callback_error_>()(t, service_unavailable(), std::move(holder), outgoing_handler );
     }
-    
   }
 };
 

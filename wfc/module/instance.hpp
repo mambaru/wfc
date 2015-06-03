@@ -63,18 +63,37 @@ public:
     this->stop_(arg);
   }
   
+  /*
   virtual void perform(const std::string& arg) 
   {
     std::lock_guard<mutex_type> lk(_mutex);
     if ( _object != nullptr )
       _object->perform(arg);
-  }
+  }*/
 
   virtual void initialize() 
   {
     std::lock_guard<mutex_type> lk(_mutex);
     this->initialize_();
   }
+  
+// iinterface
+  virtual void startup_io(io_id_t, outgoing_handler_t)
+  {
+    
+  }
+
+  virtual void perform_io(data_ptr, io_id_t, outgoing_handler_t handler)
+  {
+    if ( handler!=nullptr )
+      handler(nullptr);
+  }
+  
+  virtual void shutdown_io(io_id_t)
+  {
+    
+  }
+
 
   
 // 

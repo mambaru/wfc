@@ -60,4 +60,19 @@ void object::stop(const std::string& arg)
   return _impl->stop(arg);
 }
 
+void object::startup_io(io_id_t io_id, outgoing_handler_t handler)
+{
+  return _impl->startup_io( std::move(io_id), std::move(handler) );
+}
+
+void object::perform_io(data_ptr d, io_id_t io_id, outgoing_handler_t handler)
+{
+  return _impl->perform_io(std::move(d), std::move(io_id),  std::move(handler) );
+}
+
+void object::shutdown_io(io_id_t io_id)
+{
+  return _impl->shutdown_io(std::move(io_id));
+}
+
 }

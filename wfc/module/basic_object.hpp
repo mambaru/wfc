@@ -122,6 +122,23 @@ public:
     this->stop_(arg, fas::bool_<is_singleton>() );
   }
 
+  // iinterface
+  virtual void startup_io(io_id_t, outgoing_handler_t)
+  {
+    
+  }
+
+  virtual void perform_io(data_ptr, io_id_t, outgoing_handler_t handler)
+  {
+    if ( handler!=nullptr )
+      handler(nullptr);
+  }
+  
+  virtual void shutdown_io(io_id_t)
+  {
+    
+  }
+
 
 private:
   

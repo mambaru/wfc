@@ -44,4 +44,20 @@ void module::stop(const std::string& arg)
   return _impl->stop(arg);
 }
 
+void module::startup_io(io_id_t io_id, outgoing_handler_t handler)
+{
+  return _impl->startup_io( std::move(io_id), std::move(handler) );
+}
+
+void module::perform_io(data_ptr d, io_id_t io_id, outgoing_handler_t handler)
+{
+  return _impl->perform_io(std::move(d), std::move(io_id),  std::move(handler) );
+}
+
+void module::shutdown_io(io_id_t io_id)
+{
+  return _impl->shutdown_io(std::move(io_id));
+}
+
+
 }

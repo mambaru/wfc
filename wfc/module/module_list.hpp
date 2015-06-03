@@ -64,6 +64,22 @@ public:
     }
   }
 
+  
+  virtual void startup_io(io_id_t , outgoing_handler_t ) override
+  {
+  }
+
+  virtual void perform_io(data_ptr , io_id_t, outgoing_handler_t handler) override
+  {
+    if ( handler!=nullptr )
+      handler(nullptr);
+  }
+  
+  virtual void shutdown_io(io_id_t ) override
+  {
+    
+  }
+
 private:
   
   void create_(fas::empty_list) {}

@@ -19,24 +19,24 @@ class object_list
   typedef std::shared_ptr<iobject> object_ptr;
   typedef std::map<std::string, object_ptr > object_map;
 public:
-  virtual std::string name() const 
+  virtual std::string name() const override
   {
     return Name()();
   }
   
-  virtual std::string description() const 
+  virtual std::string description() const override
   {
     return "no description";
   }
   
-  virtual void create( std::shared_ptr<wfcglobal> g)
+  virtual void create( std::shared_ptr<wfcglobal> g) override
   {
     _global = g;
     this->create_( object_types() );
   }
   
   // virtual std::vector<std::string> objects() 
-  virtual std::vector< std::shared_ptr<iobject> > objects() const
+  virtual std::vector< std::shared_ptr<iobject> > objects() const override
   {
     std::vector< std::shared_ptr<iobject> > result;
     for (auto& p : _objects)
@@ -47,7 +47,7 @@ public:
   }
 
   // only for external control
-  virtual void start(const std::string& arg) 
+  virtual void start(const std::string& arg) override
   {
     for (auto& p : _objects)
     {
@@ -55,7 +55,7 @@ public:
     }
   }
 
-  virtual void stop(const std::string& arg)
+  virtual void stop(const std::string& arg) override
   {
     for (auto& p : _objects)
     {
@@ -63,6 +63,21 @@ public:
     }
   }
 
+
+  virtual void startup_io(io_id_t , outgoing_handler_t ) override
+  {
+  }
+
+  virtual void perform_io(data_ptr , io_id_t, outgoing_handler_t handler) override
+  {
+    if ( handler!=nullptr )
+      handler(nullptr);
+  }
+  
+  virtual void shutdown_io(io_id_t ) override
+  {
+    
+  }
 
 private:
   

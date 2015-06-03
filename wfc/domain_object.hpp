@@ -21,6 +21,17 @@ public:
   typedef Opt options_type;
   typedef Itf interface_type;
   typedef std::shared_ptr<wfcglobal> global_ptr;
+  
+  
+  typedef typename interface_type::data_type data_type;
+  typedef typename interface_type::data_ptr  data_ptr;
+  typedef typename interface_type::io_id_t   io_id_t;
+
+  typedef typename interface_type::outgoing_handler_t outgoing_handler_t;
+  typedef typename interface_type::incoming_handler_t incoming_handler_t;
+  typedef typename interface_type::startup_handler_t  startup_handler_t;
+  typedef typename interface_type::shutdown_handler_t shutdown_handler_t;
+
 
   virtual ~domain_object(){}
   
@@ -62,17 +73,36 @@ public:
   {
     // TODO: LOG default (empty) stop
   }
-  
-  virtual void perform(const std::string&) 
-  {
-    
-  }
 
   virtual void reconfigure()
   {
     // Переконфигурация запущенного объекта!!
     // TODO: LOG default (empty) initialize
   }
+
+  /*
+  virtual void perform(const std::string&) 
+  {
+    
+  }
+  */
+  
+  virtual void startup_io(io_id_t , outgoing_handler_t )
+  {
+  }
+
+  virtual void perform_io(data_ptr , io_id_t, outgoing_handler_t handler)
+  {
+    if ( handler!=nullptr )
+      handler(nullptr);
+  }
+  
+  virtual void shutdown_io(io_id_t )
+  {
+    
+  }
+
+
 
 private:  
   
