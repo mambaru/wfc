@@ -5,6 +5,7 @@
 #include <mutex>
 #include <cstdlib>
 #include <condition_variable>
+#include <iostream>
 
 namespace wfc{
   
@@ -50,12 +51,13 @@ public:
 
   bool try_lock()
   {
-    if(_mutex.try_lock() && (_writer == 0 && _readers == 0))
+    lock_guard lk(_mutex);
+    if(_writer == 0 && _readers == 0)
     {
       ++_writer;
-      if (_writer != 1)
+      if (_writer!=1)
         abort();
-      if (_readers != 0)
+      if ( this->_readers!=0 )
         abort();
       return true;
     }
