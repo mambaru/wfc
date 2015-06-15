@@ -47,6 +47,20 @@ public:
     if ( this->_readers!=0 )
       abort();
   }
+
+  bool try_lock()
+  {
+    if(_mutex.try_lock() && (_writer == 0 && _readers == 0))
+    {
+      ++_writer;
+      if (_writer != 1)
+        abort();
+      if (_readers != 0)
+        abort();
+      return true;
+    }
+    return false;
+  }
     
   void unlock()
   {
