@@ -340,8 +340,6 @@ public:
     {
       _engine->invoke( std::move(d), io_id, std::move(handler) );
     }
-    
-    
 
     /*
     incoming_holder holder( std::move(d) );
