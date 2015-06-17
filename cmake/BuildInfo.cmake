@@ -26,7 +26,7 @@ MACRO(build_info target_name prefix)
   add_custom_target(
     ${prefix}_build_info
     COMMAND
-      /bin/bash ${CURRENT_SCRIPT_DIRECTORY}/../build_info.sh ${prefix} ${CMAKE_BINARY_DIR}
+      /bin/bash ${CURRENT_SCRIPT_DIRECTORY}/../build_info.sh ${prefix} ${CMAKE_BINARY_DIR} ${CMAKE_BUILD_TYPE}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Create build info files"
     VERBATIM

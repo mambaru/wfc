@@ -26,7 +26,7 @@ add_library(
 )
 
 message(STATUS "WFC CMAKELIST ${Boost_LIBRARIES}")
-target_link_libraries(wfc ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
+target_link_libraries(wfc iow ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
 #target_link_libraries(wfc ${HAVE_boost_system-mt} ${CMAKE_THREAD_LIBS_INIT} )
 
 build_info(wfc wfc)

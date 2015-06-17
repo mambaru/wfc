@@ -50,7 +50,9 @@ class jsonrpc:
     
     if 'error' in result:
       raise Exception('jsonrpc', result['error'])
-    return result['result']
+    if 'result' in result:
+      return result['result']
+    return {}
   
   def notify(self, method, params):
     req_str = json.dumps({

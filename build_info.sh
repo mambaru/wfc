@@ -9,6 +9,14 @@ else
    path=$2
 fi
 
+if [[ ! -n "$2" ]]; then
+   build_type=""
+else
+   build_type=$3
+fi
+
+
+
 tag=$(git describe --abbrev=0 --tags 2>/dev/null)
 commits_head=$(git rev-list HEAD --count 2>/dev/null)
 if [[ ! -z "$tag" ]]; then
@@ -34,6 +42,8 @@ fi
 if [[ "$unpushed" -ne "0"  ]]; then
   version="$version[$unpushed]"
 fi
+
+version="$version($build_type)"
 
 toplevel=`git rev-parse --show-toplevel  2>/dev/null`
 basename=`basename $toplevel`
