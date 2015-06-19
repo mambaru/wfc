@@ -7,6 +7,7 @@
 #include <wfc/jsonrpc/ijsonrpc.hpp>
 #include <wfc/domain_object.hpp>
 #include <wfc/memory.hpp>
+#include <wfc/json.hpp>
 
 namespace wfc{ namespace jsonrpc{
 
@@ -324,7 +325,7 @@ public:
     
   }
 
-  virtual void startup_io(io_id_t io_id, outgoing_handler_t handler) override
+  virtual void startup_io(io_id_t /*io_id*/, outgoing_handler_t /*handler*/) override
   {
     /*
     if ( _engine != nullptr )
@@ -353,7 +354,7 @@ public:
     */
   }
 
-  virtual void shutdown_io(io_id_t io_id) override
+  virtual void shutdown_io(io_id_t /*io_id*/) override
   {
     /*
     if ( _engine != nullptr )
