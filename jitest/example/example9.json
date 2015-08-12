@@ -1,0 +1,7 @@
+{
+  "import":["genstr"],
+  "test":{
+    "example":"{% genstr.genstr() %}"
+  }
+}
+
