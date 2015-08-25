@@ -80,7 +80,7 @@ public:
     }
     else
     {
-      _engine->initialize(engine_opt);
+      _engine->reconfigure(engine_opt);
     }
   }
 
