@@ -60,9 +60,9 @@ void object::stop(const std::string& arg)
   return _impl->stop(arg);
 }
 
-void object::startup_io(io_id_t io_id, outgoing_handler_t handler)
+void object::reg_io(io_id_t io_id, std::weak_ptr<iinterface> itf)
 {
-  return _impl->startup_io( std::move(io_id), std::move(handler) );
+  return _impl->reg_io( std::move(io_id), itf );
 }
 
 void object::perform_io(data_ptr d, io_id_t io_id, outgoing_handler_t handler)
@@ -70,9 +70,9 @@ void object::perform_io(data_ptr d, io_id_t io_id, outgoing_handler_t handler)
   return _impl->perform_io(std::move(d), std::move(io_id),  std::move(handler) );
 }
 
-void object::shutdown_io(io_id_t io_id)
+void object::unreg_io(io_id_t io_id)
 {
-  return _impl->shutdown_io(std::move(io_id));
+  return _impl->unreg_io(std::move(io_id));
 }
 
 }

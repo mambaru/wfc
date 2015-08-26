@@ -44,9 +44,9 @@ void package::stop(const std::string& arg)
   return _impl->stop(arg);
 }
 
-void package::startup_io(io_id_t io_id, outgoing_handler_t handler)
+void package::reg_io(io_id_t io_id, std::weak_ptr<iinterface> itf)
 {
-  return _impl->startup_io( std::move(io_id), std::move(handler) );
+  return _impl->reg_io( std::move(io_id), itf );
 }
 
 void package::perform_io(data_ptr d, io_id_t io_id, outgoing_handler_t handler)
@@ -54,9 +54,9 @@ void package::perform_io(data_ptr d, io_id_t io_id, outgoing_handler_t handler)
   return _impl->perform_io(std::move(d), std::move(io_id),  std::move(handler) );
 }
 
-void package::shutdown_io(io_id_t io_id)
+void package::unreg_io(io_id_t io_id)
 {
-  return _impl->shutdown_io(std::move(io_id));
+  return _impl->unreg_io(std::move(io_id));
 }
 
 

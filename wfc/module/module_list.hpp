@@ -65,7 +65,7 @@ public:
   }
 
   
-  virtual void startup_io(io_id_t , outgoing_handler_t ) override
+  virtual void reg_io(io_id_t , std::weak_ptr<iinterface> ) override
   {
   }
 
@@ -75,7 +75,7 @@ public:
       handler(nullptr);
   }
   
-  virtual void shutdown_io(io_id_t ) override
+  virtual void unreg_io(io_id_t ) override
   {
     
   }

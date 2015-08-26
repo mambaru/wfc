@@ -23,7 +23,24 @@ struct iinterface
   
   virtual ~iinterface() {}
   
-  virtual void startup_io(io_id_t /*io_id*/, outgoing_handler_t /*handler*/)
+  /*
+  virtual void startup_io(io_id_t io_id, outgoing_handler_t handler)
+  {
+    
+  }
+
+  virtual void shutdown_io(io_id_t io_id)
+  {
+    
+  }
+  */
+
+  virtual void reg_io(io_id_t /*io_id*/, std::weak_ptr<iinterface> /*itf*/)
+  {
+    
+  }
+
+  virtual void unreg_io(io_id_t /*io_id*/)
   {
     
   }
@@ -34,10 +51,6 @@ struct iinterface
       return handler(nullptr);
   }
   
-  virtual void shutdown_io(io_id_t /*io_id*/)
-  {
-    
-  }
 
 };
 
