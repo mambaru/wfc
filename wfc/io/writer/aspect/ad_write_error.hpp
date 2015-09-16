@@ -10,7 +10,7 @@ struct ad_write_error
   template<typename T>
   void operator()(T& t, typename T::data_ptr, boost::system::error_code ec, std::size_t /*bytes_transferred*/)
   {
-    t.get_aspect().template get<_status_ >() = false;
+    //t.get_aspect().template get<_status_ >() = false;
     
     if ( ec == boost::asio::error::operation_aborted)
     {
