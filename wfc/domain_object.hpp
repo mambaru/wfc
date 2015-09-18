@@ -17,20 +17,22 @@ template<
 class domain_object
   : public Itf
 {
+  // compile debug - убрать
+  typedef void interface_type;
 public:
   typedef Opt options_type;
-  typedef Itf interface_type;
+  typedef Itf domain_interface;
   typedef std::shared_ptr<wfcglobal> global_ptr;
   
   
-  typedef typename interface_type::data_type data_type;
-  typedef typename interface_type::data_ptr  data_ptr;
-  typedef typename interface_type::io_id_t   io_id_t;
+  typedef typename domain_interface::data_type data_type;
+  typedef typename domain_interface::data_ptr  data_ptr;
+  typedef typename domain_interface::io_id_t   io_id_t;
 
-  typedef typename interface_type::outgoing_handler_t outgoing_handler_t;
-  typedef typename interface_type::incoming_handler_t incoming_handler_t;
-  typedef typename interface_type::startup_handler_t  startup_handler_t;
-  typedef typename interface_type::shutdown_handler_t shutdown_handler_t;
+  typedef typename domain_interface::outgoing_handler_t outgoing_handler_t;
+  typedef typename domain_interface::incoming_handler_t incoming_handler_t;
+  typedef typename domain_interface::startup_handler_t  startup_handler_t;
+  typedef typename domain_interface::shutdown_handler_t shutdown_handler_t;
 
 
   virtual ~domain_object(){}
@@ -87,17 +89,17 @@ public:
   }
   */
   
-  virtual void startup_io(io_id_t , outgoing_handler_t )
+  virtual void reg_io(io_id_t , std::weak_ptr<iinterface> ) override
   {
   }
 
-  virtual void perform_io(data_ptr , io_id_t, outgoing_handler_t handler)
+  virtual void perform_io(data_ptr , io_id_t, outgoing_handler_t handler) override
   {
     if ( handler!=nullptr )
       handler(nullptr);
   }
   
-  virtual void shutdown_io(io_id_t )
+  virtual void unreg_io(io_id_t ) override
   {
     
   }

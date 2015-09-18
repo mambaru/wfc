@@ -42,8 +42,20 @@ struct jsonrpc_options_json
   typedef typename type::serializer  serializer;
 };
 
+template<typename ...Args >
+class method_list: 
+  public ::iow::jsonrpc::method_list<
+    Args...,
+    target<iinterface>,
+    peeper<iinterface>,
+    startup_method<iinterface, iinterface, &iinterface::reg_io >,
+    shutdown_method<iinterface, &iinterface::unreg_io>
+  >
+{
+};
+
 template<typename JsonrpcHandler>
-class jsonrpc
+class service
   : public domain_object<
               ijsonrpc, 
               jsonrpc_options< 
@@ -60,7 +72,7 @@ public:
 
 public:
 
-  jsonrpc()
+  service()
   {
   }
 
@@ -72,6 +84,7 @@ public:
     target_type target = this->global()->registry.template get< interface_type >(domain_opt.target);
     engine_options engine_opt = static_cast<engine_options>(domain_opt);
     engine_opt.target = target;
+    engine_opt.peeper = target;
 
     if ( _engine == nullptr ) 
     {
@@ -84,14 +97,15 @@ public:
     }
   }
 
-  virtual void startup_io(io_id_t /*io_id*/, outgoing_handler_t /*handler*/) override
+  virtual void reg_io(io_id_t /*io_id*/, std::weak_ptr<iinterface> /*handler*/) override
   {
+    DEBUG_LOG_MESSAGE("wfc::jsonrpc::startup_io")
     if ( _engine != nullptr )
     {
     }
   }
 
-  virtual void shutdown_io(io_id_t /*io_id*/) override
+  virtual void unreg_io(io_id_t /*io_id*/) override
   {
     if ( _engine != nullptr )
     {
@@ -105,7 +119,6 @@ public:
       _engine->invoke( std::move(d), io_id, std::move(handler) );
     }
   }
-
 
   virtual void perform_incoming(incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) override
   {
@@ -121,7 +134,104 @@ public:
   }
 
 private:
+  
   engine_ptr _engine;
+  
+};
+
+#warning copy-past from service
+template<typename JsonrpcHandler>
+class gateway
+  : public domain_object<
+              typename JsonrpcHandler::interface_type, 
+              jsonrpc_options< 
+                typename ::iow::jsonrpc::engine<JsonrpcHandler>::options_type
+              > 
+           >
+  //, public JsonrpcHandler
+{
+public:
+  
+  typedef domain_object<
+              typename JsonrpcHandler::interface_type, 
+              jsonrpc_options< 
+                typename ::iow::jsonrpc::engine<JsonrpcHandler>::options_type
+              > 
+           > super_domain;
+  
+  
+  typedef ::iow::jsonrpc::engine<JsonrpcHandler> engine_type;
+  typedef typename engine_type::options_type engine_options;
+  typedef jsonrpc_options<engine_options> options_type;
+
+public:
+
+  gateway()
+  {
+  }
+
+  virtual void reconfigure() override
+  {
+    const auto& domain_opt = this->options();
+    typedef typename engine_type::target_type target_type;
+    typedef typename target_type::element_type interface_type;
+    target_type target = this->global()->registry.template get< interface_type >(domain_opt.target);
+    engine_options engine_opt = static_cast<engine_options>(domain_opt);
+    engine_opt.target = target;
+    engine_opt.peeper = target;
+    engine_type::start(engine_opt);
+  }
+  
+  using super_domain::stop;
+  using super_domain::start;
+  
+  
+  /*
+#warning убрать!!!!
+  using JsonrpcHandler::set;
+  using JsonrpcHandler::get;
+  */
+
+  
+  /*
+  virtual void reg_io(io_id_t, std::weak_ptr<iinterface> ) override
+  {
+    DEBUG_LOG_MESSAGE("wfc::jsonrpc::startup_io")
+    if ( _engine != nullptr )
+    {
+    }
+  }
+
+  virtual void unreg_io(io_id_t) override
+  {
+    if ( _engine != nullptr )
+    {
+    }
+  }
+
+  virtual void perform_io(data_ptr d, io_id_t io_id, outgoing_handler_t handler) override
+  {
+    if ( _engine != nullptr )
+    {
+      _engine->invoke( std::move(d), io_id, std::move(handler) );
+    }
+  }
+
+  virtual void perform_incoming(incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) override
+  {
+    if ( _engine != nullptr )
+    {
+      _engine->invoke( std::move(holder), io_id, handler );
+    }
+  }
+
+  virtual void perform_outgoing(outgoing_holder , io_id_t ) override
+  {
+    abort();
+  }
+  */
+
+  
 };
 
 }}

@@ -19,7 +19,7 @@ class instance
 public:
   typedef std::recursive_mutex mutex_type;
   typedef DomainObject object_type;
-  typedef typename object_type::interface_type interface_type;
+  typedef typename object_type::domain_interface domain_interface;
   typedef typename object_type::options_type domain_options_type;
   typedef instance_options<domain_options_type> options_type;
   
@@ -78,7 +78,7 @@ public:
   }
   
 // iinterface
-  virtual void startup_io(io_id_t, outgoing_handler_t)
+  virtual void reg_io(io_id_t, std::weak_ptr<iinterface>) override
   {
     
   }
@@ -89,7 +89,7 @@ public:
       handler(nullptr);
   }
   
-  virtual void shutdown_io(io_id_t)
+  virtual void unreg_io(io_id_t)
   {
     
   }

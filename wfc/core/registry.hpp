@@ -48,7 +48,7 @@ public:
     if (result == nullptr)
     {
       DOMAIN_LOG_FATAL("wfc::registry::get: invalid interface for " << name <<
-                       "(" << typeid(itr->second.get()).name() << " x-> " << typeid(result.get()).name() << ")" )
+                       " (cannot convert from " << typeid(itr->second.get()).name() << " to " << typeid(result.get()).name() << ")" )
       abort();
     }
 

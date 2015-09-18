@@ -32,7 +32,7 @@ public:
   
   typedef std::shared_ptr<wfcglobal> global_ptr;
   typedef typename instance_type::options_type instance_options;
-  typedef typename instance_type::interface_type interface_type;
+  typedef typename instance_type::domain_interface domain_interface;
   
   typedef typename std::conditional<
     Singleton,
@@ -74,7 +74,7 @@ public:
 
   virtual std::string interface_name() const 
   {
-    return typeid( interface_type ).name();
+    return typeid( domain_interface ).name();
   }
 
   // TODO: generate json
