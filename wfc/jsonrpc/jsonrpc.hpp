@@ -178,16 +178,26 @@ public:
     typedef typename engine_type::target_type target_type;
     typedef typename target_type::element_type interface_type;
     target_type target = this->global()->registry.template get< interface_type >(domain_opt.target);
-    engine_options engine_opt = static_cast<engine_options>(domain_opt);
-    engine_opt.target = target;
-    engine_opt.peeper = target;
-    _handler->start(engine_opt);
+    if ( target != nullptr )
+    {
+      DOMAIN_LOG_DEBUG("JSONRPC Gateway: Target '" << domain_opt.target << "' founded!")
+      engine_options engine_opt = static_cast<engine_options>(domain_opt);
+      engine_opt.target = target;
+      engine_opt.peeper = target;
+      _handler->start(engine_opt);
+    }
+    else
+    {
+      DOMAIN_LOG_ERROR("JSONRPC Gateway: Target '" << domain_opt.target << "' not found")
+    }
   }
   
   template<typename Tg, typename ...Args>
   void call(Args... args)
   {
+    DEBUG_LOG_TRACE("-1- wfc::jsonrpc::gateway::call<>")
     _handler->template call<Tg>( std::forward<Args>(args)... );
+    DEBUG_LOG_TRACE("-2- wfc::jsonrpc::gateway::call<>")
   }
   
   using super_domain::stop;
