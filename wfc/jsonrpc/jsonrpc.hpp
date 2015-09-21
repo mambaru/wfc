@@ -158,15 +158,17 @@ public:
                 typename ::iow::jsonrpc::engine<JsonrpcHandler>::options_type
               > 
            > super_domain;
-  
-  
-  typedef ::iow::jsonrpc::engine<JsonrpcHandler> engine_type;
+
+  typedef JsonrpcHandler handler_type;
+  typedef std::shared_ptr<handler_type> handler_ptr;
+  typedef ::iow::jsonrpc::engine<handler_type> engine_type;
   typedef typename engine_type::options_type engine_options;
   typedef jsonrpc_options<engine_options> options_type;
 
 public:
 
   gateway()
+    : _handler(std::make_shared<handler_type>())
   {
   }
 
@@ -179,12 +181,21 @@ public:
     engine_options engine_opt = static_cast<engine_options>(domain_opt);
     engine_opt.target = target;
     engine_opt.peeper = target;
-    engine_type::start(engine_opt);
+    _handler->start(engine_opt);
+  }
+  
+  template<typename Tg, typename ...Args>
+  void call(Args... args)
+  {
+    _handler->template call<Tg>( std::forward<Args>(args)... );
   }
   
   using super_domain::stop;
   using super_domain::start;
   
+private:
+  
+  handler_ptr _handler;
   
   /*
 #warning убрать!!!!
