@@ -116,7 +116,7 @@ public:
   {
     if ( _engine != nullptr )
     {
-      _engine->invoke( std::move(d), io_id, std::move(handler) );
+      _engine->perform( std::move(d), io_id, std::move(handler) );
     }
   }
 
@@ -179,12 +179,25 @@ public:
     typedef typename engine_type::target_type target_type;
     typedef typename target_type::element_type interface_type;
     
-    auto target = this->global()->registry.template get< ijsonrpc >(domain_opt.target);
+    auto target = this->global()->registry.template get< iinterface >(domain_opt.target);
     
     if ( target != nullptr )
     {
       DOMAIN_LOG_DEBUG("JSONRPC Gateway: Target '" << domain_opt.target << "' founded!")
       engine_options engine_opt = static_cast<engine_options>(domain_opt);
+      
+      engine_opt.outgoing_handler1=[target](::iow::io::data_ptr d)
+      {
+        DOMAIN_LOG_DEBUG("JSONRPC Gateway outgoing_handler do -1-")
+#warning Ахтунг 222222
+        target->perform_io(std::move(d), 222222, [](data_ptr d)
+        {
+          DOMAIN_LOG_FATAL("jsonrpc::gateway:: notimpl (todo reg io)" << d)
+          abort();
+        }
+        );
+        DOMAIN_LOG_DEBUG("JSONRPC Gateway outgoing_handler do -2-")
+      };
       /*
       
       engine_opt.target = target;
@@ -227,6 +240,8 @@ public:
   virtual void reg_io(io_id_t id, std::weak_ptr<iinterface> wsrc) override
   {
     DEBUG_LOG_MESSAGE("wfc::jsonrpc::gateway::reg_io")
+    // Не нужно, работаем с одним клиентом
+    /*
     if ( _handler != nullptr )
     {
       _handler->reg_io(id, [id, wsrc](data_ptr d)
@@ -236,18 +251,22 @@ public:
           psrc->perform_io( std::move(d), id, nullptr );
         }
       });
-      
     }
+    */
     
   }
 
-  virtual void unreg_io(io_id_t id) override
+  virtual void unreg_io(io_id_t /*id*/) override
   {
     DEBUG_LOG_MESSAGE("wfc::jsonrpc::gateway::reg_io")
+    // Не нужно, работаем с одним клиентом
+    
+    /*
     if ( _handler != nullptr )
     {
       _handler->unreg_io(id);
     }
+    */
   }
 
 private:

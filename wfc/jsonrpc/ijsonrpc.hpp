@@ -14,7 +14,7 @@ struct ijsonrpc
 
   virtual ~ijsonrpc(){}
   virtual void perform_incoming(incoming_holder, io_id_t, outgoing_handler_t handler) = 0;
-  virtual void perform_outgoing(outgoing_holder, io_id_t) = 0;
+  virtual void perform_outgoing(outgoing_holder, io_id_t /*id*/) = 0;
 };
 
 }
