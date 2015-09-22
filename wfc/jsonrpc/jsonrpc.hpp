@@ -140,6 +140,7 @@ private:
 };
 
 #warning copy-past from service
+
 template<typename JsonrpcHandler>
 class gateway
   : public domain_object<
@@ -148,7 +149,6 @@ class gateway
                 typename ::iow::jsonrpc::engine<JsonrpcHandler>::options_type
               > 
            >
-  //, public JsonrpcHandler
 {
 public:
   
@@ -160,15 +160,16 @@ public:
            > super_domain;
 
   typedef JsonrpcHandler handler_type;
-  typedef std::shared_ptr<handler_type> handler_ptr;
+  //typedef std::shared_ptr<handler_type> handler_ptr;
   typedef ::iow::jsonrpc::engine<handler_type> engine_type;
+  typedef std::shared_ptr<engine_type> engine_ptr;
   typedef typename engine_type::options_type engine_options;
   typedef jsonrpc_options<engine_options> options_type;
 
 public:
 
   gateway()
-    : _handler(std::make_shared<handler_type>())
+    : _handler(std::make_shared<engine_type>())
   {
   }
 
@@ -177,13 +178,32 @@ public:
     const auto& domain_opt = this->options();
     typedef typename engine_type::target_type target_type;
     typedef typename target_type::element_type interface_type;
-    target_type target = this->global()->registry.template get< interface_type >(domain_opt.target);
+    
+    auto target = this->global()->registry.template get< ijsonrpc >(domain_opt.target);
+    
     if ( target != nullptr )
     {
       DOMAIN_LOG_DEBUG("JSONRPC Gateway: Target '" << domain_opt.target << "' founded!")
       engine_options engine_opt = static_cast<engine_options>(domain_opt);
+      /*
+      
       engine_opt.target = target;
       engine_opt.peeper = target;
+      */
+      
+      // ПЕРЕНЕСТИ в iow
+      /*
+      engine_opt.send_request = this->wrap([]( const char* name, result_handler_t, request_serializer_t )
+      {
+        DOMAIN_LOG_FATAL("engine_opt.send_request!=nullptr notimpl")
+        abort();
+      });
+      engine_opt.send_notify = this->wrap([]( const char* name, result_handler_t, request_serializer_t )
+      {
+        DOMAIN_LOG_FATAL("engine_opt.send_request!=nullptr notimpl")
+        abort();
+      }); 
+      */
       _handler->start(engine_opt);
     }
     else
@@ -203,9 +223,36 @@ public:
   using super_domain::stop;
   using super_domain::start;
   
+  
+  virtual void reg_io(io_id_t id, std::weak_ptr<iinterface> wsrc) override
+  {
+    DEBUG_LOG_MESSAGE("wfc::jsonrpc::gateway::reg_io")
+    if ( _handler != nullptr )
+    {
+      _handler->reg_io(id, [id, wsrc](data_ptr d)
+      {
+        if ( auto psrc = wsrc.lock() )
+        {
+          psrc->perform_io( std::move(d), id, nullptr );
+        }
+      });
+      
+    }
+    
+  }
+
+  virtual void unreg_io(io_id_t id) override
+  {
+    DEBUG_LOG_MESSAGE("wfc::jsonrpc::gateway::reg_io")
+    if ( _handler != nullptr )
+    {
+      _handler->unreg_io(id);
+    }
+  }
+
 private:
   
-  handler_ptr _handler;
+  engine_ptr _handler;
   
   /*
 #warning убрать!!!!

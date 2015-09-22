@@ -4,7 +4,7 @@
 #include <iow/jsonrpc/outgoing/outgoing_holder.hpp>
 #include <wfc/iinterface.hpp>
 
-namespace wfc{ namespace jsonrpc{
+namespace wfc{
 
 struct ijsonrpc
   : iinterface
@@ -17,4 +17,4 @@ struct ijsonrpc
   virtual void perform_outgoing(outgoing_holder, io_id_t) = 0;
 };
 
-}}
+}
