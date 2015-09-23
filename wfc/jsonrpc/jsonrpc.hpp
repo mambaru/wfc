@@ -186,14 +186,17 @@ public:
       DOMAIN_LOG_DEBUG("JSONRPC Gateway: Target '" << domain_opt.target << "' founded!")
       engine_options engine_opt = static_cast<engine_options>(domain_opt);
       
-      engine_opt.outgoing_handler1=[target](::iow::io::data_ptr d)
+      engine_opt.outgoing_handler1=[target, this](::iow::io::data_ptr d)
       {
         DOMAIN_LOG_DEBUG("JSONRPC Gateway outgoing_handler do -1-")
 #warning Ахтунг 222222
-        target->perform_io(std::move(d), 222222, [](data_ptr d)
+        target->perform_io(std::move(d), 222222, [this](data_ptr d)
         {
+          this->_handler->perform( std::move(d), 0, nullptr );
+          /*
           DOMAIN_LOG_FATAL("jsonrpc::gateway:: notimpl (todo reg io)" << d)
           abort();
+          */
         }
         );
         DOMAIN_LOG_DEBUG("JSONRPC Gateway outgoing_handler do -2-")

@@ -82,13 +82,6 @@ public:
     // TODO: LOG default (empty) initialize
   }
 
-  /*
-  virtual void perform(const std::string&) 
-  {
-    
-  }
-  */
-  
   virtual void reg_io(io_id_t , std::weak_ptr<iinterface> ) override
   {
   }
@@ -103,8 +96,6 @@ public:
   {
     
   }
-
-
 
 private:  
   

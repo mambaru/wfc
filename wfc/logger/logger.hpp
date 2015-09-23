@@ -33,6 +33,18 @@
 #define COMMON_LOG_TRACE(X)    IOW_WRITE_LOG_TRACE( "common", X )
 #define COMMON_LOG_PROGRESS(X) IOW_WRITE_LOG_PROGRESS( "common", X )
 
+#define SYSLOG_LOG_ERROR(X)    IOW_WRITE_LOG_ERROR( "syslog", X )
+#define SYSLOG_LOG_WARNING(X)  IOW_WRITE_LOG_WARNING( "syslog", X )
+#define SYSLOG_LOG_MESSAGE(X)  IOW_WRITE_LOG_MESSAGE( "syslog", X )
+#define SYSLOG_LOG_FATAL(X)    IOW_WRITE_LOG_FATAL( "syslog", X )
+#define SYSLOG_LOG_BEGIN(X)    IOW_WRITE_LOG_BEGIN( "syslog", X )
+#define SYSLOG_LOG_END(X)      IOW_WRITE_LOG_END( "syslog", X )
+#define SYSLOG_LOG_DEBUG(X)    IOW_WRITE_LOG_DEBUG( "syslog", X )
+#define SYSLOG_LOG_TRACE(X)    IOW_WRITE_LOG_TRACE( "syslog", X )
+#define SYSLOG_LOG_PROGRESS(X) IOW_WRITE_LOG_PROGRESS( "syslog", X )
+
+#ifndef NDEBUG
+
 #define DEBUG_LOG_ERROR(X)    IOW_WRITE_LOG_ERROR( "debug", X )
 #define DEBUG_LOG_WARNING(X)  IOW_WRITE_LOG_WARNING( "debug", X )
 #define DEBUG_LOG_MESSAGE(X)  IOW_WRITE_LOG_MESSAGE( "debug", X )
@@ -43,12 +55,16 @@
 #define DEBUG_LOG_TRACE(X)    IOW_WRITE_LOG_TRACE( "debug", X )
 #define DEBUG_LOG_PROGRESS(X) IOW_WRITE_LOG_PROGRESS( "debug", X )
 
-#define SYSLOG_LOG_ERROR(X)    IOW_WRITE_LOG_ERROR( "syslog", X )
-#define SYSLOG_LOG_WARNING(X)  IOW_WRITE_LOG_WARNING( "syslog", X )
-#define SYSLOG_LOG_MESSAGE(X)  IOW_WRITE_LOG_MESSAGE( "syslog", X )
-#define SYSLOG_LOG_FATAL(X)    IOW_WRITE_LOG_FATAL( "syslog", X )
-#define SYSLOG_LOG_BEGIN(X)    IOW_WRITE_LOG_BEGIN( "syslog", X )
-#define SYSLOG_LOG_END(X)      IOW_WRITE_LOG_END( "syslog", X )
-#define SYSLOG_LOG_DEBUG(X)    IOW_WRITE_LOG_DEBUG( "syslog", X )
-#define SYSLOG_LOG_TRACE(X)    IOW_WRITE_LOG_TRACE( "syslog", X )
-#define SYSLOG_LOG_PROGRESS(X) IOW_WRITE_LOG_PROGRESS( "syslog", X )
+#else
+
+#define DEBUG_LOG_ERROR(X)    
+#define DEBUG_LOG_WARNING(X)  
+#define DEBUG_LOG_MESSAGE(X)  
+#define DEBUG_LOG_FATAL(X)    
+#define DEBUG_LOG_BEGIN(X)    
+#define DEBUG_LOG_END(X)      
+#define DEBUG_LOG_DEBUG(X)    
+#define DEBUG_LOG_TRACE(X)    
+#define DEBUG_LOG_PROGRESS(X) 
+
+#endif
