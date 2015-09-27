@@ -13,15 +13,10 @@
 #include <iow/asio.hpp>
 
 namespace wfc{
-  
+
 struct wfcglobal
-{ 
-  /*
-  std::string program_name;
-  std::string program_version;
-  std::string wfc_version;
-  std::string instance_name;
-  */
+{
+
   std::string program_name;
   std::string instance_name;
   std::shared_ptr<ibuild_info> program_build_info;
@@ -35,6 +30,7 @@ struct wfcglobal
   fakir after_start;
   fakir before_stop;
   fakir after_stop;
+  bool enable_callback_check  = false;
 
   interface_registry registry;
 
