@@ -72,31 +72,7 @@ public:
   {
     return _owner.wrap( std::forward<H>(h), std::forward<H2>(h2));
   }
-  /*
-  template<typename H, typename H2>
-  auto wrap(H&& h, H&& h2) 
-    -> typename std::result_of<decltype(&owner_type::wrap< H, H2 >)(H&&, H2&&)>::type
-  {
-    return _owner.wrap( std::forward<H>(h), std::forward<H2>(h2));
-  }
-  */
-  /*
-  template<typename... Args>
-  auto wrap2(Args&&... args) 
-    -> typename std::result_of<decltype(&owner_type::wrap2< Args... >)(Args&&...)>::type
-  {
-    return _owner.wrap2( std::forward<Args>(args)...);
-  }
-  */
-
-  /*
-  template<typename... Args>
-  auto wrap2(Args&&... args) 
-    -> typename std::result_of<decltype(&owner_type::wrap2)(Args&&...)>::type
-  {
-    return _owner->wrap2( std::forward<Args>(args)...);
-  }
-  */
+  
   static void generate(options_type& opt, const std::string& /*type*/)
   {
     opt = options_type();

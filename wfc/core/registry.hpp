@@ -16,7 +16,7 @@
 
 namespace wfc{
 
-class interface_registry
+class object_registry
 {
   typedef std::mutex mutex_type;
   

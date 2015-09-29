@@ -32,7 +32,7 @@ struct wfcglobal
   fakir after_stop;
   bool enable_callback_check  = false;
 
-  interface_registry registry;
+  object_registry registry;
 
   typedef ::iow::asio::io_service io_service_type;
   io_service_type& io_service;

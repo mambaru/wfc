@@ -31,7 +31,6 @@ wfc::wfc(std::shared_ptr<ibuild_info> bi, package_list packages )
 
   _global->program_build_info = bi;
   _global->wfc_build_info = make_build_info<wfc_build_info>();
-  //_global->wfc_version = wfc_build_info().version();
 }
 
 int wfc::run(int argc, char* argv[])
