@@ -63,14 +63,6 @@ public:
     this->stop_(arg);
   }
   
-  /*
-  virtual void perform(const std::string& arg) 
-  {
-    std::lock_guard<mutex_type> lk(_mutex);
-    if ( _object != nullptr )
-      _object->perform(arg);
-  }*/
-
   virtual void initialize() 
   {
     std::lock_guard<mutex_type> lk(_mutex);
@@ -91,11 +83,8 @@ public:
   
   virtual void unreg_io(io_id_t)
   {
-    
   }
 
-
-  
 // 
 
   void generate(options_type& opt, const std::string& type) const 
@@ -151,7 +140,7 @@ private:
       {
         _object = std::make_shared<object_type>();
       }
-      //std::shared_ptr<iinstance> tmp = _object;
+
       if (_global)
       {
         _global->registry.set(_options.name, _object);
