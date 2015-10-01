@@ -42,16 +42,32 @@ struct jsonrpc_options_json
   typedef typename type::serializer  serializer;
 };
 
+
 template<typename ...Args >
-class method_list: 
-  public ::iow::jsonrpc::method_list<
+struct method_list_builder
+{
+  typedef ::iow::jsonrpc::method_list<
     Args...,
     target<iinterface>,
     peeper<iinterface>,
     startup_method<iinterface, iinterface, &iinterface::reg_io >,
     shutdown_method<iinterface, &iinterface::unreg_io>
-  >
+  > base;
+  
+  typedef typename base::interface_type interface_type;
+};
+
+template<typename ...Args >
+class method_list
+  : public method_list_builder<Args...>::base
+  , public method_list_builder<Args...>::interface_type
 {
+public:
+  typedef typename method_list_builder<Args...>::base super;
+  typedef typename super::io_id_t   io_id_t;
+  typedef typename super::data_type data_type;
+  typedef typename super::data_ptr  data_ptr;
+  typedef typename super::outgoing_handler_t outgoing_handler_t;
 };
 
 template<typename JsonrpcHandler>
@@ -149,8 +165,11 @@ class gateway
                 typename ::iow::jsonrpc::engine<JsonrpcHandler>::options_type
               > 
            >
+  , public std::enable_shared_from_this< gateway<JsonrpcHandler> >
 {
 public:
+  
+  typedef gateway<JsonrpcHandler> self;
   
   typedef domain_object<
               typename JsonrpcHandler::interface_type, 
@@ -186,27 +205,26 @@ public:
       DOMAIN_LOG_DEBUG("JSONRPC Gateway: Target '" << domain_opt.target << "' founded!")
       engine_options engine_opt = static_cast<engine_options>(domain_opt);
       
-      engine_opt.outgoing_handler1=[target, this](::iow::io::data_ptr d)
+      std::weak_ptr<self> wthis = this->shared_from_this();
+      engine_opt.outgoing_handler1=this->wrap([target, wthis](::iow::io::data_ptr d)
       {
-        DOMAIN_LOG_DEBUG("JSONRPC Gateway outgoing_handler do -1-")
-#warning Ахтунг 222222
-        target->perform_io(std::move(d), 222222, [this](data_ptr d)
+        if ( auto pthis = wthis.lock() )
         {
-          this->_handler->perform( std::move(d), 0, nullptr );
-          /*
-          DOMAIN_LOG_FATAL("jsonrpc::gateway:: notimpl (todo reg io)" << d)
-          abort();
-          */
+          auto outgoing_handler = pthis->wrap([wthis](data_ptr d)
+          {
+            if ( auto pthis = wthis.lock() )
+            {
+              pthis->_handler->perform( std::move(d), 0, nullptr );
+            }
+          });
+          target->perform_io(std::move(d), 222222, std::move(outgoing_handler) );
         }
-        );
-        DOMAIN_LOG_DEBUG("JSONRPC Gateway outgoing_handler do -2-")
-      };
-      /*
+      });
+      
       
       engine_opt.target = target;
       engine_opt.peeper = target;
-      */
-      
+            
       // ПЕРЕНЕСТИ в iow
       /*
       engine_opt.send_request = this->wrap([]( const char* name, result_handler_t, request_serializer_t )
