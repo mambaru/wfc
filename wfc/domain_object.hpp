@@ -2,6 +2,7 @@
 
 #include <wfc/core/global.hpp>
 #include <iow/owner/owner.hpp>
+#include <iow/io/io_id.hpp>
 
 #include <memory>
 #include <string>
@@ -36,7 +37,12 @@ public:
   typedef typename domain_interface::shutdown_handler_t shutdown_handler_t;
 
 
+  
   virtual ~domain_object(){}
+  
+  domain_object()
+    : _io_id( ::iow::io::create_id<io_id_t>() )
+  {}
   
   const std::string& name() const
   {
@@ -119,8 +125,10 @@ public:
 
   }
 
+  constexpr io_id_t get_id() const { return _io_id;}
+  
 private:
-
+  const io_id_t _io_id;
   std::string _name;
   global_ptr _global;
   options_type _options;

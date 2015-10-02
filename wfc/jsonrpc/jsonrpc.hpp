@@ -26,15 +26,15 @@ struct jsonrpc_options_json
   typedef T options_type;
   typedef typename options_type::handler_options handler_options;
   JSON_NAME(target)
-  JSON_NAME(allow_callback)
+  JSON_NAME(direct_mode)
   
-  typedef wfc::json::member< n_allow_callback, handler_options, bool, &handler_options::allow_callback> member_type;
+  //typedef wfc::json::member< n_allow_callback, handler_options, bool, &handler_options::allow_callback> member_type;
   
   typedef wfc::json::object<
     options_type,
     wfc::json::member_list<
       wfc::json::member< n_target, options_type, std::string, &options_type::target>,
-      wfc::json::member< n_allow_callback, handler_options, bool, &handler_options::allow_callback>
+      wfc::json::member< n_direct_mode, handler_options, bool, &handler_options::direct_mode>
     >
   > type;
   typedef typename type::target      target;
@@ -48,6 +48,7 @@ struct method_list_builder
 {
   typedef ::iow::jsonrpc::method_list<
     Args...,
+    interface_<iinterface>,
     target<iinterface>,
     peeper<iinterface>,
     startup_method<iinterface, iinterface, &iinterface::reg_io >,
@@ -68,6 +69,8 @@ public:
   typedef typename super::data_type data_type;
   typedef typename super::data_ptr  data_ptr;
   typedef typename super::outgoing_handler_t outgoing_handler_t;
+  
+  
 };
 
 template<typename JsonrpcHandler>
@@ -113,18 +116,26 @@ public:
     }
   }
 
-  virtual void reg_io(io_id_t /*io_id*/, std::weak_ptr<iinterface> /*handler*/) override
+  virtual void reg_io(io_id_t io_id, std::weak_ptr<iinterface> witf) override
   {
     DEBUG_LOG_MESSAGE("wfc::jsonrpc::startup_io")
     if ( _engine != nullptr )
     {
+      _engine->reg_io( io_id, this->wrap([witf](data_ptr d)
+      {
+        if (auto pitf = witf.lock() )
+        {
+          pitf->perform_io( std::move(d), 0, nullptr);
+        }
+      }));
     }
   }
 
-  virtual void unreg_io(io_id_t /*io_id*/) override
+  virtual void unreg_io(io_id_t io_id) override
   {
     if ( _engine != nullptr )
     {
+      _engine->unreg_io(io_id);
     }
   }
 
@@ -132,7 +143,7 @@ public:
   {
     if ( _engine != nullptr )
     {
-      _engine->perform( std::move(d), io_id, std::move(handler) );
+      _engine->perform_io( std::move(d), io_id, std::move(handler) );
     }
   }
 
@@ -140,7 +151,7 @@ public:
   {
     if ( _engine != nullptr )
     {
-      _engine->invoke( std::move(holder), io_id, handler );
+      _engine->perform_incoming( std::move(holder), io_id, handler );
     }
   }
 
@@ -206,7 +217,7 @@ public:
       engine_options engine_opt = static_cast<engine_options>(domain_opt);
       
       std::weak_ptr<self> wthis = this->shared_from_this();
-      engine_opt.outgoing_handler1=this->wrap([target, wthis](::iow::io::data_ptr d)
+      engine_opt.outgoing_handler=this->wrap([target, wthis](::iow::io::data_ptr d)
       {
         if ( auto pthis = wthis.lock() )
         {
@@ -214,7 +225,7 @@ public:
           {
             if ( auto pthis = wthis.lock() )
             {
-              pthis->_handler->perform( std::move(d), 0, nullptr );
+              pthis->_handler->perform_io( std::move(d), 0, nullptr );
             }
           });
           target->perform_io(std::move(d), 222222, std::move(outgoing_handler) );
@@ -249,16 +260,14 @@ public:
   template<typename Tg, typename ...Args>
   void call(Args... args)
   {
-    DEBUG_LOG_TRACE("-1- wfc::jsonrpc::gateway::call<>")
     _handler->template call<Tg>( std::forward<Args>(args)... );
-    DEBUG_LOG_TRACE("-2- wfc::jsonrpc::gateway::call<>")
   }
   
   using super_domain::stop;
   using super_domain::start;
   
   
-  virtual void reg_io(io_id_t id, std::weak_ptr<iinterface> wsrc) override
+  virtual void reg_io(io_id_t /*id*/, std::weak_ptr<iinterface> /*wsrc*/) override
   {
     DEBUG_LOG_MESSAGE("wfc::jsonrpc::gateway::reg_io")
     // Не нужно, работаем с одним клиентом
