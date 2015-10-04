@@ -1,20 +1,12 @@
 include(BuildInfo)
 include(Wfc)
 
-#find_package(Boost COMPONENTS system REQUIRED)
-# CONFIGURE_LIBRARY(boost/system/error_code.hpp  "/usr/include /usr/local/include"
-#                  boost_system-mt   "/lib /usr/lib /usr/local/lib /usr/lib64")
-
-#include_directories(..)
-#include_directories(../../faslib/)
-#include_directories(../../iow/)
-
 SET(
   wfc_source_list
   wfc.cpp
   system/system.cpp
   core/global.cpp
-  module/object.cpp
+  module/component.cpp
   module/module.cpp
   module/package.cpp
   ../../iow/iow/logger/global_log.cpp

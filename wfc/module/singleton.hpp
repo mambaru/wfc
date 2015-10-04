@@ -1,11 +1,11 @@
 #pragma once
 
-#include <wfc/module/basic_object.hpp>
+#include <wfc/module/basic_component.hpp>
 
 namespace wfc{
 
 template< typename Name, typename Instance, typename DomainJson>
-class singleton: public basic_object<Name, Instance, DomainJson, true> {};
+class singleton: public basic_component<Name, Instance, DomainJson, true> {};
 
 }
 

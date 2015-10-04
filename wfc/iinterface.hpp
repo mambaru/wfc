@@ -20,20 +20,8 @@ struct iinterface
   typedef ::iow::io::incoming_handler_t incoming_handler_t;
   typedef ::iow::io::startup_handler_t  startup_handler_t;
   typedef ::iow::io::shutdown_handler_t shutdown_handler_t;
-  
-  virtual ~iinterface() {}
-  
-  /*
-  virtual void startup_io(io_id_t io_id, outgoing_handler_t handler)
-  {
-    
-  }
 
-  virtual void shutdown_io(io_id_t io_id)
-  {
-    
-  }
-  */
+  virtual ~iinterface() {}
 
   virtual void reg_io(io_id_t /*io_id*/, std::weak_ptr<iinterface> /*itf*/)
   {

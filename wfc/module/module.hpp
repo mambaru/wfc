@@ -1,6 +1,8 @@
 #pragma once
 
 #include <wfc/module/imodule.hpp>
+#include <wfc/module/icomponent.hpp>
+#include <wfc/core/global.hpp>
 #include <memory>
 #include <string>
 
@@ -14,7 +16,7 @@ public:
   virtual ~module();
   virtual std::string name() const override;
   virtual std::string description() const override;
-  virtual std::vector< std::shared_ptr<iobject> > objects() const override;
+  virtual std::vector< std::shared_ptr<icomponent> > components() const override;
   virtual void create( std::shared_ptr<wfcglobal>) override;
   // only for external control
   virtual void start(const std::string& arg) override;

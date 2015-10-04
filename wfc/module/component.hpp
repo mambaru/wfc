@@ -1,17 +1,17 @@
 #pragma once
 
-#include <wfc/module/iobject.hpp>
+#include <wfc/module/icomponent.hpp>
 #include <memory>
 #include <string>
 
 namespace wfc{
 
-class object
-  : public iobject
+class component
+  : public icomponent
 {
 public:
-  object(std::shared_ptr<iobject>);
-  virtual ~object();
+  component(std::shared_ptr<icomponent>);
+  virtual ~component();
   virtual std::string name() const;
   virtual std::string description() const;
   virtual std::string interface_name() const;
@@ -32,7 +32,7 @@ public:
 
 
 private:
-  std::shared_ptr<iobject> _impl;
+  std::shared_ptr<icomponent> _impl;
 };
 
 }

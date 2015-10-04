@@ -24,9 +24,9 @@ std::string module::description() const
   return _impl->description();
 }
 
-std::vector< std::shared_ptr<iobject> > module::objects() const
+std::vector< std::shared_ptr<icomponent> > module::components() const
 {
-  return _impl->objects();
+  return _impl->components();
 }
 
 void module::create( std::shared_ptr<wfcglobal> g)

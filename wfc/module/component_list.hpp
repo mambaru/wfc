@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wfc/module/imodule.hpp>
-#include <wfc/module/iobject.hpp>
+#include <wfc/module/icomponent.hpp>
 #include <wfc/core/global.hpp>
 
 #include <fas/type_list.hpp>
@@ -12,12 +12,12 @@
 namespace wfc{
 
 template<typename Name, typename... Args>  
-class object_list
+class component_list
   : public imodule
 {
-  typedef typename fas::type_list_n< Args... >::type object_types;
-  typedef std::shared_ptr<iobject> object_ptr;
-  typedef std::map<std::string, object_ptr > object_map;
+  typedef typename fas::type_list_n< Args... >::type component_types;
+  typedef std::shared_ptr<icomponent> component_ptr;
+  typedef std::map<std::string, component_ptr > component_map;
 public:
   virtual std::string name() const override
   {
@@ -32,14 +32,13 @@ public:
   virtual void create( std::shared_ptr<wfcglobal> g) override
   {
     _global = g;
-    this->create_( object_types() );
+    this->create_( component_types() );
   }
   
-  // virtual std::vector<std::string> objects() 
-  virtual std::vector< std::shared_ptr<iobject> > objects() const override
+  virtual std::vector< std::shared_ptr<icomponent> > components() const override
   {
-    std::vector< std::shared_ptr<iobject> > result;
-    for (auto& p : _objects)
+    std::vector< std::shared_ptr<icomponent> > result;
+    for (auto& p : _components)
     {
       result.push_back(p.second);
     }
@@ -49,7 +48,7 @@ public:
   // only for external control
   virtual void start(const std::string& arg) override
   {
-    for (auto& p : _objects)
+    for (auto& p : _components)
     {
       p.second->start(arg);
     }
@@ -57,7 +56,7 @@ public:
 
   virtual void stop(const std::string& arg) override
   {
-    for (auto& p : _objects)
+    for (auto& p : _components)
     {
       p.second->stop(arg);
     }
@@ -80,28 +79,17 @@ public:
   }
 
 private:
-  
-  /*
-  void objects_( std::vector<std::string>& , fas::empty_list) {}
-  
-  template<typename H, typename L>
-  void objects_( std::vector<std::string>& obj, fas::type_list< H, L > ) 
-  {
-    typename H::object_name name;
-    obj.push_back( name() );
-  }*/
 
   void create_(fas::empty_list) {}
   
   template<typename H, typename L>
   void create_( fas::type_list< H, L > ) 
   {
-    //typename H::object_name name;
     auto obj = std::make_shared<H>();
-    _objects[ obj->name() ] = obj;
+    _components[ obj->name() ] = obj;
     if ( _global )
     {
-      _global->registry.set("object", obj->name(), obj);
+      _global->registry.set("component", obj->name(), obj);
     }
     obj->create(_global);
     create_( L() );
@@ -109,7 +97,7 @@ private:
 
 private:
   std::shared_ptr<wfcglobal> _global;
-  object_map _objects;
+  component_map _components;
   
 };
 

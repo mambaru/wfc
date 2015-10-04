@@ -139,7 +139,7 @@ public:
     }
   }
 
-  virtual void perform_io(data_ptr d, io_id_t io_id, outgoing_handler_t handler) override
+  virtual void perform_io(data_ptr d, io_id_t io_id, ::iow::io::outgoing_handler_t handler) override
   {
     if ( _engine != nullptr )
     {
@@ -147,7 +147,7 @@ public:
     }
   }
 
-  virtual void perform_incoming(incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) override
+  virtual void perform_incoming(incoming_holder holder, io_id_t io_id, ::iow::jsonrpc::outgoing_handler_t handler) override
   {
     if ( _engine != nullptr )
     {

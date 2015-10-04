@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wfc/module/instance_options_json.hpp>
-#include <wfc/module/iobject.hpp>
+#include <wfc/module/icomponent.hpp>
 #include <wfc/core/global.hpp>
 
 #include <wfc/json.hpp>
@@ -19,13 +19,13 @@ template<
   typename DomainJson,
   bool Singleton = true
 >
-class basic_object
-  : public iobject
+class basic_component
+  : public icomponent
 {
 public:
   enum { is_singleton = Singleton};
 
-  typedef Name        object_name;
+  typedef Name        component_name;
   typedef Instance    instance_type;
   typedef DomainJson  domain_json;
   typedef instance_options_json<domain_json, Singleton> instance_json;
@@ -38,13 +38,13 @@ public:
     Singleton,
     instance_options,
     std::vector<instance_options>
-  >::type object_options;
+  >::type component_options;
 
   typedef typename std::conditional<
     Singleton,
     instance_json,
     ::wfc::json::array< std::vector<instance_json> >
-  >::type object_json;
+  >::type component_json;
   
   typedef std::shared_ptr<instance_type> instance_ptr;
 
@@ -54,17 +54,17 @@ public:
     std::map< std::string, instance_ptr>
   >::type instance_map;
   
-  virtual ~basic_object()
+  virtual ~basic_component()
   {
     if ( _global )
     {
-      _global->registry.erase( "object", this->name() );
+      _global->registry.erase( "component", this->name() );
     }
   }
 
   virtual std::string name() const 
   {
-    return object_name()();
+    return component_name()();
   }
 
   virtual std::string description() const
@@ -80,9 +80,9 @@ public:
   // TODO: generate json
   virtual std::string generate(const std::string& type) const 
   {
-    object_options opt;
+    component_options opt;
     this->generate_options(opt, type);
-    typename object_json::serializer serializer;
+    typename component_json::serializer serializer;
     std::string result;
     serializer( opt, std::back_inserter( result ) );
     return std::move(result);
@@ -90,7 +90,7 @@ public:
 
   virtual bool parse(const std::string& stropt)
   {
-    object_options opt;
+    component_options opt;
     this->unserialize_(opt, stropt );
     return true;
   }
@@ -106,7 +106,7 @@ public:
     this->configure_(stropt, fas::bool_<is_singleton>() );
   }
 
-  virtual void generate_options(object_options& opt, const std::string& type) const 
+  virtual void generate_options(component_options& opt, const std::string& type) const 
   {
     this->generate_options_(opt, type, fas::bool_<is_singleton>() );
   }
@@ -142,17 +142,17 @@ public:
 
 private:
   
-  void unserialize_( object_options& opt,  const std::string& str )
+  void unserialize_( component_options& opt,  const std::string& str )
   {
     try
     {
-      typename object_json::serializer serializer;
+      typename component_json::serializer serializer;
       serializer( opt, str.begin(), str.end() );
     }
     catch(const ::iow::json::json_error& e)
     {
       std::stringstream ss;
-      ss << "Json unserialize error for object '"<< this->name() << "':" << std::endl;
+      ss << "Json unserialize error for component '"<< this->name() << "':" << std::endl;
       ss << e.message( str.begin(), str.end() );
       throw std::domain_error(ss.str());
     }
@@ -175,7 +175,7 @@ private:
 
   void configure_(const std::string& stropt, fas::true_)
   {
-    object_options opt;
+    component_options opt;
     unserialize_(opt, stropt );
     opt.name = this->name();
     _instances->configure(opt/*, ""*/);
@@ -187,7 +187,7 @@ private:
     for (const auto& item : _instances )
       stop_list.insert(item.first);
     
-    object_options optlist;
+    component_options optlist;
     unserialize_( optlist, stropt );
     
     for (const auto& opt : optlist )
@@ -248,13 +248,13 @@ private:
     }
   }
   
-  void generate_options_(object_options& opt, const std::string& type, fas::true_) const 
+  void generate_options_(component_options& opt, const std::string& type, fas::true_) const 
   {
     opt.name = std::string(this->name()) + "1";
     instance_type().generate( opt, type);
   }
 
-  void generate_options_(object_options& opt, const std::string& type, fas::false_) const 
+  void generate_options_(component_options& opt, const std::string& type, fas::false_) const 
   {
     instance_options inst;
     inst.name = std::string(this->name()) + "1";

@@ -1,0 +1,78 @@
+
+#include <wfc/module/component.hpp>
+
+namespace wfc{
+
+component::~component()
+{
+  
+}
+  
+component::component(std::shared_ptr<icomponent> p)
+  : _impl(p)
+{
+  
+}
+
+std::string component::name() const
+{
+  return _impl->name();
+}
+
+std::string component::description() const
+{
+  return _impl->description();
+}
+
+std::string component::interface_name() const
+{
+  return _impl->interface_name();
+}
+
+std::string component::generate(const std::string& type) const
+{
+  return _impl->generate(type);
+}
+
+bool component::parse(const std::string& strjson)
+{
+  return _impl->parse(strjson);
+}
+
+void component::configure(const std::string& strjson, const std::string& arg)
+{
+  return _impl->configure(strjson, arg);
+}
+
+
+void component::create( std::shared_ptr<wfcglobal> g)
+{
+  return _impl->create(g);
+}
+
+void component::start(const std::string& arg)
+{
+  return _impl->start(arg);
+}
+
+void component::stop(const std::string& arg)
+{
+  return _impl->stop(arg);
+}
+
+void component::reg_io(io_id_t io_id, std::weak_ptr<iinterface> itf)
+{
+  return _impl->reg_io( std::move(io_id), itf );
+}
+
+void component::perform_io(data_ptr d, io_id_t io_id, outgoing_handler_t handler)
+{
+  return _impl->perform_io(std::move(d), std::move(io_id),  std::move(handler) );
+}
+
+void component::unreg_io(io_id_t io_id)
+{
+  return _impl->unreg_io(std::move(io_id));
+}
+
+}
