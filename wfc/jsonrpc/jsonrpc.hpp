@@ -206,8 +206,8 @@ public:
   virtual void reconfigure() override
   {
     const auto& domain_opt = this->options();
-    typedef typename engine_type::target_type target_type;
-    typedef typename target_type::element_type interface_type;
+    // typedef typename engine_type::target_type target_type;
+    //typedef typename target_type::element_type interface_type;
     
     auto target = this->global()->registry.template get< iinterface >(domain_opt.target);
     
@@ -228,7 +228,7 @@ public:
               pthis->_handler->perform_io( std::move(d), 0, nullptr );
             }
           });
-          target->perform_io(std::move(d), 222222, std::move(outgoing_handler) );
+          target->perform_io(std::move(d), pthis->get_id(), std::move(outgoing_handler) );
         }
       });
       
