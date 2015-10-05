@@ -4,11 +4,9 @@
 #include <wfc/module/iinstance.hpp>
 #include <wfc/core/global.hpp>
 
-
 #include <memory>
 #include <string>
 #include <stdexcept>
-
 
 namespace wfc{
 
@@ -22,12 +20,12 @@ public:
   typedef typename object_type::domain_interface domain_interface;
   typedef typename object_type::options_type domain_options_type;
   typedef instance_options<domain_options_type> options_type;
-  
+
   typedef std::shared_ptr<object_type> object_ptr;
   typedef std::shared_ptr<wfcglobal> global_ptr;
 
   virtual ~instance() {}
-  
+
   instance()
     : _startup(false)
   {}
@@ -44,7 +42,7 @@ public:
     std::lock_guard<mutex_type> lk(_mutex);
     return _options.startup_priority;
   }
-  
+
   virtual int shutdown_priority() const
   {
     std::lock_guard<mutex_type> lk(_mutex);
@@ -56,23 +54,22 @@ public:
     std::lock_guard<mutex_type> lk(_mutex);
     this->start_(arg);
   }
-  
+
   virtual void stop(const std::string& arg)
   {
     std::lock_guard<mutex_type> lk(_mutex);
     this->stop_(arg);
   }
-  
+
   virtual void initialize() 
   {
     std::lock_guard<mutex_type> lk(_mutex);
     this->initialize_();
   }
-  
+
 // iinterface
   virtual void reg_io(io_id_t, std::weak_ptr<iinterface>) override
   {
-    
   }
 
   virtual void perform_io(data_ptr, io_id_t, outgoing_handler_t handler)
@@ -80,12 +77,12 @@ public:
     if ( handler!=nullptr )
       handler(nullptr);
   }
-  
+
   virtual void unreg_io(io_id_t)
   {
   }
 
-// 
+//
 
   void generate(options_type& opt, const std::string& type) const 
   {
@@ -106,7 +103,6 @@ public:
     _startup = _startup && !( _object==nullptr && _options.enabled );
     this->configure_(_options.enabled);
   }
-  
 
 // -------------------------------------------------
 
@@ -195,7 +191,7 @@ private:
       this->forced_start_(arg);
     }
   }
-  
+
   void stop_(const std::string& arg)
   {
     if ( _object != nullptr )
@@ -211,8 +207,8 @@ private:
   global_ptr   _global;
   options_type _options;
   object_ptr   _object;
-  
+
   mutable mutex_type _mutex;
 };
-  
+
 }

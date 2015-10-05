@@ -7,7 +7,7 @@
 
 namespace wfc{
 
-template</*typename DomainOptions,*/ typename DomainJson>
+template<typename DomainJson>
 struct singleton_instance_options_json
 {
   JSON_NAME(enabled)
@@ -33,7 +33,7 @@ struct singleton_instance_options_json
   typedef typename type::serializer  serializer;
 };
 
-template</*typename DomainOptions,*/ typename DomainJson>
+template<typename DomainJson>
 struct multiton_instance_options_json
 {
   JSON_NAME(name)
@@ -46,7 +46,7 @@ struct multiton_instance_options_json
     options_type,
     typename fas::type_list_n<
       ::iow::json::member<n_name, options_type, std::string, &options_type::name>,
-      typename singleton_instance_options_json</*DomainOptions,*/ DomainJson>::member_list
+      typename singleton_instance_options_json<DomainJson>::member_list
     >::type
   > type;
 
@@ -55,19 +55,18 @@ struct multiton_instance_options_json
   typedef typename type::serializer  serializer;
 };
 
-template</*typename DomainOptions,*/ typename DomainJson, bool Singleton>
+template<typename DomainJson, bool Singleton>
 struct instance_options_json;
 
-template</*typename DomainOptions,*/ typename DomainJson>
-struct instance_options_json</*DomainOptions,*/ DomainJson, true>
-  : singleton_instance_options_json</*DomainOptions,*/ DomainJson>
+template<typename DomainJson>
+struct instance_options_json<DomainJson, true>
+  : singleton_instance_options_json<DomainJson>
 {};
 
 
-template</*typename DomainOptions,*/ typename DomainJson>
-struct instance_options_json</*DomainOptions,*/ DomainJson, false>
-  : multiton_instance_options_json</*DomainOptions,*/ DomainJson>
+template<typename DomainJson>
+struct instance_options_json<DomainJson, false>
+  : multiton_instance_options_json<DomainJson>
 {};
-
 
 }

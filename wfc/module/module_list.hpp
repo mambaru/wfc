@@ -19,23 +19,25 @@ class module_list
   typedef typename fas::type_list_n< Args... >::type module_types;
   typedef std::shared_ptr<imodule> module_ptr;
   typedef std::map<std::string, module_ptr > module_map;
+
 public:
+
   virtual std::shared_ptr<ibuild_info> build_info() const 
   {
     return make_build_info<BuildInfo>();
   }
-  
+
   virtual std::string description() const 
   {
     return "no description";
   }
-  
+
   virtual void create( std::shared_ptr<wfcglobal> g)
   {
     _global = g;
     this->create_( module_types() );
   }
-  
+
   // virtual std::vector<std::string> objects() 
   virtual std::vector< std::shared_ptr<imodule> > modules() const
   {
@@ -64,7 +66,6 @@ public:
     }
   }
 
-  
   virtual void reg_io(io_id_t , std::weak_ptr<iinterface> ) override
   {
   }
@@ -74,16 +75,15 @@ public:
     if ( handler!=nullptr )
       handler(nullptr);
   }
-  
+
   virtual void unreg_io(io_id_t ) override
   {
-    
   }
 
 private:
-  
+
   void create_(fas::empty_list) {}
-  
+
   template<typename H, typename L>
   void create_( fas::type_list< H, L > ) 
   {
@@ -101,7 +101,6 @@ private:
 private:
   std::shared_ptr<wfcglobal> _global;
   module_map _modules;
-  
 };
 
 }

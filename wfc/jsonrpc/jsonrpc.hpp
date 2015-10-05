@@ -70,6 +70,14 @@ public:
   typedef typename super::outgoing_handler_t outgoing_handler_t;
 };
 
+template<typename Base >
+class interface_implementation: Base
+{
+public:
+  typedef Base super; // JsonrpcHandler
+  typedef typename super::interface_type interface_type;
+};
+
 template<typename Interface, typename JsonrpcHandler>
 class basic_engine
   : public domain_object<
@@ -147,7 +155,7 @@ private:
   engine_ptr _engine;
 };
 
-template<typename JsonrpcHandler>
+template<typename JsonrpcHandler, template<typename> class Impl = interface_implementation >
 class service
   : public basic_engine< ijsonrpc, JsonrpcHandler > 
 {
