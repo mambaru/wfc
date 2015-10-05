@@ -20,7 +20,7 @@ class domain_object
   : public Itf
 {
   // compile debug - убрать
-  typedef void interface_type;
+  //typedef void interface_type;
 public:
   typedef Opt options_type;
   typedef Itf domain_interface;
