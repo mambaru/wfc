@@ -29,7 +29,7 @@ public:
   typedef Instance    instance_type;
   typedef DomainJson  domain_json;
   typedef instance_options_json<domain_json, Singleton> instance_json;
-  
+
   typedef std::shared_ptr<wfcglobal> global_ptr;
   typedef typename instance_type::options_type instance_options;
   typedef typename instance_type::domain_interface domain_interface;

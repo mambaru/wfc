@@ -15,6 +15,11 @@ class service_multiton: public ::wfc::multiton<
   wfc::jsonrpc::options_json< typename service< MethodList, Impl >::options_type >
 >
 {
+public:
+  virtual std::string interface_name() const override
+  {
+    return "ijsonrpc";
+  }
 };
 
 }}
