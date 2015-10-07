@@ -37,7 +37,7 @@ MACRO(build_info target_name prefix)
   add_dependencies(${target_name} ${prefix}_build_info)
   target_link_libraries(${target_name} ${build_prefix}.a)
   
-  set(clean_list "${build_prefix}.h;${build_prefix}.c;${build_prefix}.c~1;${build_prefix}.a;${build_prefix}.o;")
+  set(clean_list "${CMAKE_CURRENT_SOURCE_DIR}/${prefix}_build_info.h;${build_prefix}.h;${build_prefix}.c;${build_prefix}.c~1;${build_prefix}.a;${build_prefix}.o;")
   SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${clean_list}" )
 ENDMACRO(build_info)
 

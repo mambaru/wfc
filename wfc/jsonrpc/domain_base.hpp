@@ -72,7 +72,9 @@ public:
     if ( target!=nullptr )
     {
       using namespace std::placeholders;
-      engine_opt.io_outgoing_handler = std::bind(&self::io_outgoing_handler_<decltype(target)>, this, target, _1);
+      //engine_opt.io_outgoing_handler = std::bind(&self::io_outgoing_handler_<decltype(target)>, this, target, _1);
+      
+      engine_opt.io_send_handler = std::bind(&iinterface::perform_io, target, _1, _2, _3);
       /*
       engine_opt.io_outgoing_handler = [target, this](data_ptr d)
       {
@@ -83,8 +85,8 @@ public:
           this->perform_io(std::move(), this->get_id() )
         });
         std::cout << "} <---- engine_opt.io_outgoing_handler" << std::endl;
-      };
-      */
+      };*/
+      
     }
 
     if ( _engine == nullptr ) 
