@@ -23,6 +23,9 @@
 GET_FILENAME_COMPONENT(CURRENT_SCRIPT_DIRECTORY ${CMAKE_CURRENT_LIST_FILE} PATH)
 
 MACRO(build_info target_name prefix)
+  set(build_dir ${CMAKE_BINARY_DIR}/build_info)
+  set(build_prefix ${build_dir}/${prefix}_build_info)
+
   add_custom_target(
     ${prefix}_build_info
     COMMAND
@@ -32,8 +35,10 @@ MACRO(build_info target_name prefix)
     VERBATIM
   )
   add_dependencies(${target_name} ${prefix}_build_info)
-  target_link_libraries(${target_name} ${CMAKE_BINARY_DIR}/build_info/${prefix}_build_info.a)
-  SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_CURRENT_SOURCE_DIR}/${prefix}_build_info.h")
+  target_link_libraries(${target_name} ${build_prefix}.a)
+  
+  set(clean_list "${build_prefix}.h;${build_prefix}.c;${build_prefix}.c~1;${build_prefix}.a;${build_prefix}.o;")
+  SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${clean_list}" )
 ENDMACRO(build_info)
 
 #

@@ -15,8 +15,6 @@ else
    build_type=$3
 fi
 
-
-
 tag=$(git describe --abbrev=0 --tags 2>/dev/null)
 commits_head=$(git rev-list HEAD --count 2>/dev/null)
 if [[ ! -z "$tag" ]]; then
@@ -43,7 +41,7 @@ if [[ "$unpushed" -ne "0"  ]]; then
   version="$version[$unpushed]"
 fi
 
-version="$version($build_type)"
+version="$version"
 
 toplevel=`git rev-parse --show-toplevel  2>/dev/null`
 basename=`basename $toplevel`
@@ -68,6 +66,7 @@ if [[ ! -f "$h_file" ]]; then
   echo "  bool enabled() const;" >> $h_file
   echo "  const char* name() const;" >> $h_file
   echo "  const char* version() const;" >> $h_file
+  echo "  const char* build() const;" >> $h_file
   echo "  const char* branch() const;" >> $h_file
   echo "  const char* commit() const;" >> $h_file
   echo "  const char* date() const;" >> $h_file
@@ -82,6 +81,7 @@ echo "#include \"`pwd`/$h_file\"" > $c_file
 echo "bool $1_build_info::enabled() const { return true;}" >> $c_file
 echo "const char* $1_build_info::name() const { return \"$basename\";}" >> $c_file
 echo "const char* $1_build_info::version() const { return \"$version\"; }" >> $c_file
+echo "const char* $1_build_info::build() const { return \"$build_type\"; }" >> $c_file
 echo "const char* $1_build_info::branch() const { return \"$branch\"; }" >> $c_file
 echo "const char* $1_build_info::commit() const { return \"$commit\"; }" >> $c_file
 echo "const char* $1_build_info::author() const { return \"$commit_author\"; }" >> $c_file
@@ -100,6 +100,7 @@ echo "const char* $1_build_info::date() const { return \"$date\"; }" >> $c_file
 echo "BuildInfo"
 echo -e "\tname:    $basename"
 echo -e "\tversion: $version"
+echo -e "\tbuild:   $build_type"
 echo -e "\tbranch:  $branch"
 echo -e "\tcommit:  $commit"
 echo -e "\tdate:    $date"

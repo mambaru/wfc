@@ -16,6 +16,7 @@ struct ibuild_info
   virtual bool enabled() = 0;
   virtual std::string name() = 0;
   virtual std::string version() = 0;
+  virtual std::string build() = 0;
   virtual std::string branch() = 0;
   virtual std::string commit() = 0;
   virtual std::string date() = 0;
@@ -48,7 +49,12 @@ public:
   {
     return BuildInfo().version();
   }
-  
+
+  virtual std::string build()
+  {
+    return BuildInfo().build();
+  }
+
   virtual std::string branch()
   {
     return BuildInfo().branch();
