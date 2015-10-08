@@ -11,6 +11,11 @@ class gateway
   : public Impl< basic_domain< typename MethodList::interface_type, ::iow::jsonrpc::handler< Impl<MethodList> > > >
 {
 public:
+  virtual ~gateway()
+  {
+    std::cout << "~gateway() " << std::endl;
+  }
+
 };
 
 }}
