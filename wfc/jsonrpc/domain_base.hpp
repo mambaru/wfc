@@ -68,7 +68,20 @@ public:
     
   }
   */
-  
+
+  void reconfigure_(const engine_options& opt)
+  {
+    if ( _engine == nullptr ) 
+    {
+      _engine = std::make_shared<engine_type>();
+      _engine->start(opt);
+    }
+    else
+    {
+      _engine->reconfigure(opt);
+    }
+  }
+
   virtual void reconfigure() override
   {
     std::cout << "--- engine reconfigure --- -0-" << std::endl;
@@ -151,7 +164,15 @@ public:
   template<typename Tg, typename ...Args>
   void call(Args... args)
   {
-    this->_engine->template call<Tg>( std::forward<Args>(args)... );
+    if ( _engine != nullptr )
+    {
+      this->_engine->template call<Tg>( std::forward<Args>(args)... );
+    }
+    else
+    {
+      // TODO: 
+      abort();
+    }
   }
 
 protected:

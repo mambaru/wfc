@@ -186,10 +186,10 @@ private:
     std::set<std::string> stop_list;
     for (const auto& item : _instances )
       stop_list.insert(item.first);
-    
+
     component_options optlist;
     unserialize_( optlist, stropt );
-    
+
     for (const auto& opt : optlist )
     {
       auto itr = _instances.find(opt.name);
@@ -250,7 +250,7 @@ private:
   
   void generate_options_(component_options& opt, const std::string& type, fas::true_) const 
   {
-    opt.name = std::string(this->name()) + "1";
+    // opt.name = std::string(this->name()) + "1";
     instance_type().generate( opt, type);
   }
 
