@@ -10,27 +10,52 @@
 
 namespace wfc{ namespace jsonrpc{
 
+template<typename Interface, typename JsonrpcHandler>
+class service_impl
+  : public basic_domain<Interface, JsonrpcHandler>
+{
+  typedef basic_domain<Interface, JsonrpcHandler> super;
+  typedef typename super::engine_type engine_type;
+  typedef typename engine_type::options_type engine_options;
+public:
+  
+  virtual void reconfigure() override
+  {
+    auto dopt = this->options();
+    engine_options eopt = static_cast<engine_options>(dopt);
+    typedef typename engine_type::target_type target_type;
+    typedef typename target_type::element_type interface_type;
+    target_type target = this->global()->registry.template get< interface_type >(dopt.target);
+    eopt.target = target;
+    eopt.peeper = target;
+
+    super::reconfigure_(eopt);
+  }
+};
+
 template<typename MethodList, template<typename> class Impl = interface_implementation >
 class service
-  : public basic_domain< ijsonrpc, ::iow::jsonrpc::handler< Impl<MethodList> > >
+  : public service_impl< ijsonrpc, ::iow::jsonrpc::handler< Impl<MethodList> > >
 {
 public:
   virtual ~service()
   {
-    std::cout << "~service() " << std::endl;
   }
 
   virtual void perform_incoming( ijsonrpc::incoming_holder holder, ijsonrpc::io_id_t io_id, ijsonrpc::rpc_outgoing_handler_t handler) override
   {
-    this->engine()->perform_incoming( std::move(holder), io_id, handler );
+    this->engine()->perform_jsonrpc( std::move(holder), io_id, handler );
   }
 
   virtual void perform_outgoing( ijsonrpc::outgoing_holder /*holder*/, ijsonrpc::io_id_t /*io_id*/) override
   {
     // TODO :  Преобразование outgoing_holder в incoming_holder и в engine + плюс захват response handler
     // Плюс нужен call_id реестр
+    // TODO: сделать в endine 
     abort();
   }
+private:
+  
 };
 
 }}

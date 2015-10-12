@@ -82,54 +82,6 @@ public:
     }
   }
 
-  virtual void reconfigure() override
-  {
-    std::cout << "--- engine reconfigure --- -0-" << std::endl;
-    const auto& domain_opt = this->options();
-    typedef typename engine_type::target_type target_type;
-    typedef typename target_type::element_type interface_type;
-    target_type target = this->global()->registry.template get< interface_type >(domain_opt.target);
-    engine_options engine_opt = static_cast<engine_options>(domain_opt);
-    engine_opt.target = target;
-    engine_opt.peeper = target;
-    
-    // TODO: wthis
-    if ( target!=nullptr )
-    {
-      using namespace std::placeholders;
-      //engine_opt.io_outgoing_handler = std::bind(&self::io_outgoing_handler_<decltype(target)>, this, target, _1);
-      
-      // TODO: engine::reg_io и reg_jsonrpc в зависимости от цели 
-      //engine_opt.io_send_handler = std::bind(&iinterface::perform_io, target, _1, _2, _3);
-      /*
-      engine_opt.io_outgoing_handler = [target, this](data_ptr d)
-      {
-        std::cout << "----> engine_opt.io_outgoing_handler { "<< std::endl;
-        // здесь предпологается tcp-client 
-        target->perform_io( std::move(d), this->get_id(), [this](data_ptr d)
-        {
-          this->perform_io(std::move(), this->get_id() )
-        });
-        std::cout << "} <---- engine_opt.io_outgoing_handler" << std::endl;
-      };*/
-      
-    }
-
-    std::cout << "--- engine reconfigure --- -1-" << std::endl;
-    if ( _engine == nullptr ) 
-    {
-      std::cout << "--- engine reconfigure --- -2-" << std::endl;
-      _engine = std::make_shared<engine_type>();
-      _engine->start(engine_opt);
-      std::cout << "--- engine reconfigure --- -2.1-" << std::endl;
-    }
-    else
-    {
-      std::cout << "--- engine reconfigure --- -3-" << std::endl;
-      _engine->reconfigure(engine_opt);
-    }
-    std::cout << "--- engine reconfigure --- -4-" << std::endl;
-  }
 
   virtual void reg_io(io_id_t io_id, std::weak_ptr<iinterface> witf) override
   {
