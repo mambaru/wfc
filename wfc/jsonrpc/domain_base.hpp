@@ -175,7 +175,8 @@ public:
     }
   }
 
-protected:
+  engine_ptr engine() const { return _engine; };
+private:
 
   engine_ptr _engine;
   

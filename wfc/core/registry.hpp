@@ -27,7 +27,7 @@ public:
   typedef std::map< key_type, interface_ptr > registry_map;
 
   template<typename I>
-  std::shared_ptr<I> get(const std::string& prefix, const std::string& name) const
+  std::shared_ptr<I> get(const std::string& prefix, const std::string& name, bool disabort = false) const
   {
     if ( name.empty() )
       return nullptr;
@@ -45,7 +45,7 @@ public:
       result = std::dynamic_pointer_cast<I>(itr->second);
     }
 
-    if (result == nullptr)
+    if ( !disabort && result == nullptr)
     {
       DOMAIN_LOG_FATAL("wfc::registry::get: invalid interface for " << name <<
                        " (cannot convert from " << typeid(itr->second.get()).name() << " to " << typeid(result.get()).name() << ")" )
@@ -56,9 +56,9 @@ public:
   }
   
   template<typename I>
-  std::shared_ptr<I> get(const std::string& name) const
+  std::shared_ptr<I> get(const std::string& name, bool disabort = false) const
   {
-    return this->get<I>("", name);
+    return this->get<I>("", name, disabort);
   }
 
   void set(const std::string& prefix, const std::string& name, std::shared_ptr<iinterface> item )

@@ -22,11 +22,13 @@ public:
 
   virtual void perform_incoming( ijsonrpc::incoming_holder holder, ijsonrpc::io_id_t io_id, ijsonrpc::rpc_outgoing_handler_t handler) override
   {
-    this->_engine->perform_incoming( std::move(holder), io_id, handler );
+    this->engine()->perform_incoming( std::move(holder), io_id, handler );
   }
 
   virtual void perform_outgoing( ijsonrpc::outgoing_holder /*holder*/, ijsonrpc::io_id_t /*io_id*/) override
   {
+    // TODO :  Преобразование outgoing_holder в incoming_holder и в engine + плюс захват response handler
+    // Плюс нужен call_id реестр
     abort();
   }
 };
