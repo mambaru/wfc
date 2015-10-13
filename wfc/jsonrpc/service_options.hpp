@@ -5,7 +5,7 @@
 namespace wfc{ namespace jsonrpc{
 
 template<typename EngineOptions>
-struct options: EngineOptions
+struct service_options: EngineOptions
 {
   typedef EngineOptions engine_options;
   std::string target;

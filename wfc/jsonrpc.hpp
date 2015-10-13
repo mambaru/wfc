@@ -14,7 +14,6 @@
 #include <wfc/jsonrpc/method_list.hpp>
 #include <wfc/jsonrpc/interface_implementation.hpp>
 
-#include <wfc/jsonrpc/options_json.hpp>
 #include <wfc/jsonrpc/gateway_multiton.hpp>
 #include <wfc/jsonrpc/service_multiton.hpp>
 

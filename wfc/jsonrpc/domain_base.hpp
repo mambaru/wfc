@@ -32,23 +32,19 @@ public:
 
   virtual ~domain_base()
   {
-    std::cout << "-1- ~domain_base() " << (_engine!=nullptr) << std::endl;
     _engine=nullptr;
-    std::cout << "-2- ~domain_base()" << std::endl;
   }
 
   /*
   template<typename Target>
   void io_outgoing_result_(Target target, data_ptr d)
   {
-    std::cout << "----> io_outgoing_result_ { "<< std::endl;
     using namespace std::placeholders;
     this->perform_io(
       std::move(d), 
       this->get_id(),
       std::bind(&self::io_outgoing_handler_<Target>, this, target, _1)
     );
-    std::cout << "} <---- io_outgoing_result_" << std::endl;
   }
 
   */
@@ -58,13 +54,11 @@ public:
   void io_outgoing_handler_(Target target, data_ptr d)
   {
     using namespace std::placeholders;
-    std::cout << "----> io_outgoing_handler_ { "<< std::endl;
     target->perform_io( 
       std::move(d),
       this->get_id(), 
       std::bind(&self::io_outgoing_result_<Target>, this, target, _1) 
     );
-    std::cout << "} <---- io_outgoing_handler_" << std::endl;
     
   }
   */

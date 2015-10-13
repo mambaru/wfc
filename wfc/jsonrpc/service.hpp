@@ -7,14 +7,15 @@
 #include <wfc/jsonrpc/basic_domain.hpp>
 #include <wfc/jsonrpc/ijsonrpc.hpp>
 #include <iow/jsonrpc/handler.hpp>
+#include <wfc/jsonrpc/service_options.hpp>
 
 namespace wfc{ namespace jsonrpc{
 
 template<typename Interface, typename JsonrpcHandler>
 class service_impl
-  : public basic_domain<Interface, JsonrpcHandler>
+  : public basic_domain<Interface, JsonrpcHandler, service_options>
 {
-  typedef basic_domain<Interface, JsonrpcHandler> super;
+  typedef basic_domain<Interface, JsonrpcHandler, service_options> super;
   typedef typename super::engine_type engine_type;
   typedef typename engine_type::options_type engine_options;
 public:
