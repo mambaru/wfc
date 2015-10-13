@@ -113,8 +113,8 @@ public:
     }
   }
   
-  template<typename Tg, typename ...Args>
-  void call(Args... args)
+  /*template<typename Tg, typename Req, typename ...Args>
+  void call(Req req, Args... args)
   {
     if ( _engine != nullptr )
     {
@@ -126,6 +126,7 @@ public:
       abort();
     }
   }
+  */
 
   engine_ptr engine() const { return _engine; };
 private:
