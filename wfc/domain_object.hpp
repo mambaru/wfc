@@ -36,8 +36,6 @@ public:
   typedef typename domain_interface::startup_handler_t  startup_handler_t;
   typedef typename domain_interface::shutdown_handler_t shutdown_handler_t;
 
-
-  
   virtual ~domain_object(){}
   
   domain_object()
