@@ -66,14 +66,15 @@ if [[ ! -f "$h_file" ]]; then
   echo "  bool enabled() const;" >> $h_file
   echo "  const char* name() const;" >> $h_file
   echo "  const char* version() const;" >> $h_file
-  echo "  const char* build() const;" >> $h_file
+  echo "  const char* build_type() const;" >> $h_file
+  echo "  const char* build_date() const;" >> $h_file
   echo "  const char* branch() const;" >> $h_file
   echo "  const char* commit() const;" >> $h_file
-  echo "  const char* date() const;" >> $h_file
-  echo "  const char* author() const;" >> $h_file
-  echo "  const char* project() const;" >> $h_file
-  echo "  const char* message() const;" >> $h_file
-  echo "  const char* authors() const;" >> $h_file
+  echo "  const char* commit_message() const;" >> $h_file
+  echo "  const char* commit_author() const;" >> $h_file
+  echo "  const char* commit_date() const;" >> $h_file
+  echo "  const char* project_author() const;" >> $h_file
+  echo "  const char* all_authors() const;" >> $h_file
   echo "};" >> $h_file
 fi
 
@@ -81,34 +82,40 @@ echo "#include \"`pwd`/$h_file\"" > $c_file
 echo "bool $1_build_info::enabled() const { return true;}" >> $c_file
 echo "const char* $1_build_info::name() const { return \"$basename\";}" >> $c_file
 echo "const char* $1_build_info::version() const { return \"$version\"; }" >> $c_file
-echo "const char* $1_build_info::build() const { return \"$build_type\"; }" >> $c_file
+echo "const char* $1_build_info::build_type() const { return \"$build_type\"; }" >> $c_file
+echo "const char* $1_build_info::build_date() const { return \"$builddate\"; }" >> $c_file
 echo "const char* $1_build_info::branch() const { return \"$branch\"; }" >> $c_file
 echo "const char* $1_build_info::commit() const { return \"$commit\"; }" >> $c_file
-echo "const char* $1_build_info::author() const { return \"$commit_author\"; }" >> $c_file
-echo "const char* $1_build_info::project() const { return \"$project_author\"; }" >> $c_file
-echo "const char* $1_build_info::message() const { return \"$message\"; }" >> $c_file
-echo "const char* $1_build_info::authors() const { return \"$authors\"; }" >> $c_file
+echo "const char* $1_build_info::commit_message() const { return \"$message\"; }" >> $c_file
+echo "const char* $1_build_info::commit_author() const { return \"$commit_author\"; }" >> $c_file
+echo "const char* $1_build_info::commit_date() const { return \"$commitdate\"; }" >> $c_file
+echo "const char* $1_build_info::project_author() const { return \"$project_author\"; }" >> $c_file
+echo "const char* $1_build_info::all_authors() const { return \"$authors\"; }" >> $c_file
 
 if [[ -f "$c_file~1" ]]; then
+  echo "--1--"
+  diff $c_file "$c_file~1"
   if diff $c_file "$c_file~1" >/dev/null ; then
+    echo "--2--"
     exit 0
   fi
 fi
 cp $c_file "$c_file~1"
-echo "const char* $1_build_info::date() const { return \"$date\"; }" >> $c_file
+
 
 echo "BuildInfo"
 echo -e "\tname:    $basename"
 echo -e "\tversion: $version"
-echo -e "\tbuild:   $build_type"
+echo -e "\tbuild type:   $build_type"
 echo -e "\tbranch:  $branch"
 echo -e "\tcommit:  $commit"
-echo -e "\tdate:    $date"
-echo -e "\tauthor:  $author"
-echo -e "\tmessage: $message"
-echo -e "\tauthors: $authors"
+echo -e "\tcommit date:    $date"
+echo -e "\tcommit author:  $author"
+echo -e "\tcommit message: $message"
+echo -e "\tall authors: $authors"
 
 g++ -c $c_file -fPIC -o $o_file >/dev/null 2>&1
 ar rvs $a_file $o_file >/dev/null 2>&1
 
+#echo "Build Info Done"
 exit
