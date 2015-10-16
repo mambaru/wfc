@@ -57,7 +57,8 @@ authors=$(git log --format="%aN <%aE>" | sort | uniq -c | sort -nr | awk '{for(i
 
 h_file="$1_build_info.h"
 mkdir -p $path/build_info
-c_file="$path/build_info/$1_build_info.c"
+c1_file="$path/build_info/$1_build_info1.c"
+c2_file="$path/build_info/$1_build_info2.c"
 o_file="$path/build_info/$1_build_info.o"
 a_file="$path/build_info/$1_build_info.a"
 
@@ -78,31 +79,30 @@ if [[ ! -f "$h_file" ]]; then
   echo "};" >> $h_file
 fi
 
-echo "#include \"`pwd`/$h_file\"" > $c_file
-echo "bool $1_build_info::enabled() const { return true;}" >> $c_file
-echo "const char* $1_build_info::name() const { return \"$basename\";}" >> $c_file
-echo "const char* $1_build_info::version() const { return \"$version\"; }" >> $c_file
-echo "const char* $1_build_info::build_type() const { return \"$build_type\"; }" >> $c_file
-echo "const char* $1_build_info::build_date() const { return \"$builddate\"; }" >> $c_file
-echo "const char* $1_build_info::branch() const { return \"$branch\"; }" >> $c_file
-echo "const char* $1_build_info::commit() const { return \"$commit\"; }" >> $c_file
-echo "const char* $1_build_info::commit_message() const { return \"$message\"; }" >> $c_file
-echo "const char* $1_build_info::commit_author() const { return \"$commit_author\"; }" >> $c_file
-echo "const char* $1_build_info::commit_date() const { return \"$commitdate\"; }" >> $c_file
-echo "const char* $1_build_info::project_author() const { return \"$project_author\"; }" >> $c_file
-echo "const char* $1_build_info::all_authors() const { return \"$authors\"; }" >> $c_file
+echo "#include \"`pwd`/$h_file\"" > $c1_file
+echo "#include \"`pwd`/$h_file\"" > $c2_file
+echo "bool $1_build_info::enabled() const { return true;}" >> $c1_file
+echo "const char* $1_build_info::name() const { return \"$basename\";}" >> $c1_file
+echo "const char* $1_build_info::version() const { return \"$version\"; }" >> $c1_file
+echo "const char* $1_build_info::build_type() const { return \"$build_type\"; }" >> $c1_file
+echo "const char* $1_build_info::build_date() const { return \"$builddate\"; }" >> $c2_file
+echo "const char* $1_build_info::branch() const { return \"$branch\"; }" >> $c1_file
+echo "const char* $1_build_info::commit() const { return \"$commit\"; }" >> $c1_file
+echo "const char* $1_build_info::commit_message() const { return \"$message\"; }" >> $c1_file
+echo "const char* $1_build_info::commit_author() const { return \"$commit_author\"; }" >> $c1_file
+echo "const char* $1_build_info::commit_date() const { return \"$commitdate\"; }" >> $c1_file
+echo "const char* $1_build_info::project_author() const { return \"$project_author\"; }" >> $c1_file
+echo "const char* $1_build_info::all_authors() const { return \"$authors\"; }" >> $c1_file
 
-if [[ -f "$c_file~1" ]]; then
-  echo "--1--"
-  diff $c_file "$c_file~1"
-  if diff $c_file "$c_file~1" >/dev/null ; then
-    echo "--2--"
+if [[ -f "$c1_file~1" ]]; then
+  #echo "--1--"
+  #diff $c_file "$c_file~1"
+  if diff $c1_file "$c1_file~1" >/dev/null ; then
+    #echo "--2--"
     exit 0
   fi
 fi
-cp $c_file "$c_file~1"
-
-
+cp $c1_file "$c1_file~1"
 echo "BuildInfo"
 echo -e "\tname:    $basename"
 echo -e "\tversion: $version"
@@ -114,7 +114,7 @@ echo -e "\tcommit author:  $author"
 echo -e "\tcommit message: $message"
 echo -e "\tall authors: $authors"
 
-g++ -c $c_file -fPIC -o $o_file >/dev/null 2>&1
+g++ -c $c1_file $c2_file -fPIC -o $o_file >/dev/null 2>&1
 ar rvs $a_file $o_file >/dev/null 2>&1
 
 #echo "Build Info Done"

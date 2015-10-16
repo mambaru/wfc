@@ -31,14 +31,12 @@ MACRO(build_info target_name prefix)
     COMMAND
       /bin/bash ${CURRENT_SCRIPT_DIRECTORY}/../build_info.sh ${prefix} ${CMAKE_BINARY_DIR} ${CMAKE_BUILD_TYPE}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${prefix}_build_info.h" "${build_prefix}.c"
     COMMENT "Create build info files"
     VERBATIM
   )
   add_dependencies(${target_name} ${prefix}_build_info)
   target_link_libraries(${target_name} ${build_prefix}.a)
-  
-  set(clean_list "${CMAKE_CURRENT_SOURCE_DIR}/${prefix}_build_info.h;${build_prefix}.c;${build_prefix}.c~1;${build_prefix}.a;${build_prefix}.o;")
+  set(clean_list "${CMAKE_CURRENT_SOURCE_DIR}/${prefix}_build_info.h;${build_prefix}1.c;${build_prefix}2.c;${build_prefix}1.c~1;${build_prefix}.a;${build_prefix}.o;")
   SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${clean_list}" )
 ENDMACRO(build_info)
 
