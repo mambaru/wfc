@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wfc/core/ibuild_info.hpp>
+#include <wfc/core/build_info.hpp>
 #include <wfc/module/imodule.hpp>
 #include <wfc/module/ipackage.hpp>
 #include <wfc/core/global.hpp>

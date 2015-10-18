@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <wfc/core/ibuild_info.hpp>
+#include <wfc/core/build_info.hpp>
 #include <wfc/asio.hpp>
 #include <memory>
 #include <list>

@@ -8,3 +8,7 @@
 
 #include <wfc/logger/logger.hpp>
 
+namespace wfc
+{
+  using ::iow::only_for_log;
+}

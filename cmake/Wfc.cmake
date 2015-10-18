@@ -1,18 +1,10 @@
-message(STATUS " tmp -------------> ${CMAKE_CURRENT_SOURCE_DIR} ready=${WFC_READY} ")
-
-if ( WFC_READY )
-  message(STATUS "WFC_READY ON ${CMAKE_CURRENT_SOURCE_DIR}")
-  return()
+if ( CMAKE_BINARY_DIR STREQUAL CMAKE_SOURCE_DIR )
+  message(FATAL_ERROR "Source and build directories cannot be the same.")
 endif()
 
-INCLUDE(ConfigureLibrary)
 INCLUDE(FindThreads)
-
 set(WFC_READY ON)
-
-message(STATUS " NEW -------------> ${CMAKE_CURRENT_SOURCE_DIR}")
-
-set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_MULTITHREADED ON)
 
 if (NOT CMAKE_BUILD_TYPE)
   message(STATUS "No build type selected, default to Release")
@@ -28,37 +20,15 @@ elseif( WFC_BUILD_STATIC_BOOST)
   set(Boost_USE_STATIC_LIBS ON)
   set(Boost_USE_STATIC_RUNTIME ON)
 endif()
-#if ( NOT WFC_BULD_STATIC )
-#  message(STATUS "Default build shared libs. Use -DWFC_BULD_STATIC for static build")
-#  SET(BUILD_SHARED_LIBS ON)
-#  set(Boost_USE_STATIC_LIBS OFF) 
-#  set(Boost_USE_STATIC_RUNTIME OFF) 
-#else()
-#  message(STATUS "Build static libs.")
-#  SET(BUILD_SHARED_LIBS OFF)
-#  set(Boost_USE_STATIC_LIBS ON) 
-#  set(Boost_USE_STATIC_RUNTIME ON) 
-#endif()
 
 find_package(Boost COMPONENTS system program_options filesystem REQUIRED)
-
-#if (BUILD_SHARED_LIBS:BOOL!=OFF )
-  # -DBUILD_SHARED_LIBS:BOOL=OFF
-#  message(STATUS "Default build shared libs ${BUILD_SHARED_LIBS}")
-#  SET(BUILD_SHARED_LIBS ON)
-#endif()
-
-# -DBUILD_SHARED_LIBS:BOOL=OFF
-# SET(BUILD_SHARED_LIBS ON)
-
-
 
 IF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
     exec_program(
       ${CMAKE_CXX_COMPILER}
       ARGS -dumpversion
       OUTPUT_VARIABLE gcc_compiler_version
-    )        
+    )
 
     STRING(REGEX REPLACE "^([0-9]+)\\..*" "\\1" gcc_major_version "${gcc_compiler_version}")
     STRING(REGEX REPLACE "^[0-9]+\\.([0-9]+).*" "\\1" gcc_minor_version "${gcc_compiler_version}")
@@ -81,16 +51,15 @@ IF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
     SET(CMAKE_C_FLAGS_RELEASE "-O2 -ggdb -march=core2 -DNDEBUG")
 ENDIF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
 
-SET(FASLIB_DIR "${CMAKE_SOURCE_DIR}/faslib")
-SET(IOWLIB_DIR "${CMAKE_SOURCE_DIR}/iow")
-SET(FAS_TESTING_CPP "${FASLIB_DIR}/fas/testing/testing.cpp")
-##set(CMAKE_BINARY_DIR "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
+set(FASLIB_DIR "${CMAKE_SOURCE_DIR}/faslib")
+set(IOWLIB_DIR "${CMAKE_SOURCE_DIR}/iow")
+set(FAS_TESTING_CPP "${FASLIB_DIR}/fas/testing/testing.cpp")
 set(WFC_TEST_DIR "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}-tests")
-
-#
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
 
-
+include_directories(wfcroot/wfc)
+include_directories(wfcroot/faslib)
+include_directories(wfcroot/iow)
