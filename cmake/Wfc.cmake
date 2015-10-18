@@ -1,5 +1,5 @@
 if ( CMAKE_BINARY_DIR STREQUAL CMAKE_SOURCE_DIR )
-  message(FATAL_ERROR "Source and build directories cannot be the same.")
+  message(FATAL_ERROR "*** FATAL: Source and build directories cannot be the same. ***")
 endif()
 
 INCLUDE(FindThreads)
