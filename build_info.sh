@@ -58,7 +58,7 @@ fi
 untaged_commits=`expr $commits_head - $commits_tag`
 uncommited=`expr $(git status --porcelain 2>/dev/null | egrep "^(M| M)" | wc -l)`
 unpushed=$(git log --branches --not --remotes --simplify-by-decoration --decorate --oneline | wc -l)
-lastmodifytime=$(git status -s | grep -v -w D | grep -v $1_build_counter | while read mode file; do echo $(stat -c %y $file); done | sort -r | head -n 1)
+lastmodifytime=$(stat -c %z `pwd`)
 
 verex=""
 if [[ $(expr $untaged_commits + $uncommited + $unpushed) -ne "0"  ]]; then
@@ -76,6 +76,7 @@ commitdate=$(date "+%F %T %:z" -d @`git log -1 --pretty=format:"%ct"`)
 builddate=$(date "+%F %T %:z")
 #date="$builddate (commit: $commitdate)"
 authors=$(git log --format="%aN <%aE>" | sort | uniq -c | sort -nr | awk '{for(i=2;i<=NF;i++) printf "%s ",$i; printf "(%s), ",$1;}')
+
 
 #
 # create file names
