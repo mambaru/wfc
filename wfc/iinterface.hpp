@@ -38,8 +38,6 @@ struct iinterface
     if (handler!=nullptr)
       return handler(nullptr);
   }
-  
-
 };
 
 }

@@ -9,7 +9,7 @@ fi
 if [[ ! -n "$2" ]]; then
    path="/tmp"
 else
-   path="$2/$3"
+   path="$2"
 fi
 
 if [[ ! -n "$2" ]]; then
@@ -84,12 +84,18 @@ authors=$(git log --format="%aN <%aE>" | sort | uniq -c | sort -nr | awk '{for(i
 
 h_file="$1_build_info.h"
 count_file=".$1_build.counter"
-mkdir -p $path/build_info
-c1_file="$path/build_info/$1_build_info1.c"
-c2_file="$path/build_info/$1_build_info2.c"
-o1_file="$path/build_info/$1_build_info1.o"
-o2_file="$path/build_info/$1_build_info2.o"
-a_file="$path/build_info/$1_build_info.a"
+c1_file="$path/$1_build_info1.c"
+c2_file="$path/$1_build_info2.c"
+o1_file="$path/$1_build_info1.o"
+o2_file="$path/$1_build_info2.o"
+a_file="$path/$1_build_info.a"
+
+mkdir -p $path
+#c1_file="$path/build_info/$1_build_info1.c"
+#c2_file="$path/build_info/$1_build_info2.c"
+#o1_file="$path/build_info/$1_build_info1.o"
+#o2_file="$path/build_info/$1_build_info2.o"
+#a_file="$path/build_info/$1_build_info.a"
 
 #
 # create basic cpp

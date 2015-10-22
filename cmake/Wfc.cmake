@@ -19,6 +19,8 @@ elseif( WFC_BUILD_STATIC_BOOST)
   set(BUILD_SHARED_LIBS OFF)
   set(Boost_USE_STATIC_LIBS ON)
   set(Boost_USE_STATIC_RUNTIME ON)
+else()
+  set(BUILD_SHARED_LIBS ON)
 endif()
 
 find_package(Boost COMPONENTS system program_options filesystem REQUIRED)

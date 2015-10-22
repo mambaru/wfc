@@ -16,7 +16,6 @@ namespace wfc{
 
 struct wfcglobal
 {
-
   std::string program_name;
   std::string instance_name;
   std::shared_ptr<ibuild_info> program_build_info;
