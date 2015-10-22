@@ -16,11 +16,13 @@ namespace wfc{
 
 struct wfcglobal
 {
+  typedef std::shared_ptr<wfcglobal> ptr;
+
   std::string program_name;
   std::string instance_name;
   std::shared_ptr<ibuild_info> program_build_info;
   std::shared_ptr<ibuild_info> wfc_build_info;
-  
+
   module_options options;
 
   typedef std::function<void()> fire_handler;
@@ -36,7 +38,7 @@ struct wfcglobal
   typedef ::iow::asio::io_service io_service_type;
   io_service_type& io_service;
 
-  static std::shared_ptr<wfcglobal>   static_global;
+  static ptr static_global;
 
   wfcglobal( io_service_type& io_service)
     : io_service(io_service)

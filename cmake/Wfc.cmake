@@ -1,5 +1,5 @@
 if ( CMAKE_BINARY_DIR STREQUAL CMAKE_SOURCE_DIR )
-  message(FATAL_ERROR "*** FATAL: Source and build directories cannot be the same. ***")
+  message(FATAL_ERROR "********* FATAL: Source and build directories cannot be the same. ********* Remove CMakeCache.txt from ${CMAKE_SOURCE_DIR}")
 endif()
 
 INCLUDE(FindThreads)
