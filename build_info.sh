@@ -42,9 +42,9 @@ buildflags="$compiler $flags"
 #
 
 tag=$(git describe --abbrev=0 --tags 2>/dev/null)
-commits_head=$(git rev-list HEAD --count 2>/dev/null)
+commits_head=$(git rev-list HEAD 2>/dev/null | wc -l 2>/dev/null)
 if [[ ! -z "$tag" ]]; then
-  commits_tag=$(git rev-list $tag --count)
+  commits_tag=$(git rev-list $tag 2>/dev/null | wc -l 2>/dev/null)
 else
   commits_tag="0"
 fi
@@ -70,7 +70,7 @@ basename=`basename $toplevel`
 
 commit=`git log -1 --pretty=format:"%H"`
 commit_author=`git log -1 --pretty=format:"%cn <%ce>"`
-project_author=$commit_author
+initial_author=`git log --reverse --pretty=format:"%cn <%ce>" | head -1`
 message=$(git log -1 --pretty=format:"%s")
 commitdate=$(date "+%F %T %:z" -d @`git log -1 --pretty=format:"%ct"`)
 builddate=$(date "+%F %T %:z")
@@ -108,7 +108,7 @@ echo "const char* $1_build_info::commit() const { return \"$commit\"; }" >> $c1_
 echo "const char* $1_build_info::commit_date() const { return \"$commitdate\"; }" >> $c1_file
 echo "const char* $1_build_info::commit_message() const { return \"$message\"; }" >> $c1_file
 echo "const char* $1_build_info::commit_author() const { return \"$commit_author\"; }" >> $c1_file
-echo "const char* $1_build_info::project_author() const { return \"$project_author\"; }" >> $c1_file
+echo "const char* $1_build_info::initial_author() const { return \"$initial_author\"; }" >> $c1_file
 echo "const char* $1_build_info::all_authors() const { return \"$authors\"; }" >> $c1_file
 
 # check rebuild needs
@@ -157,7 +157,7 @@ if [[ ! -f "$h_file" ]]; then
   echo "  const char* commit_date() const;" >> $h_file
   echo "  const char* commit_author() const;" >> $h_file
   echo "  const char* commit_message() const;" >> $h_file
-  echo "  const char* project_author() const;" >> $h_file
+  echo "  const char* initial_author() const;" >> $h_file
   echo "  const char* all_authors() const;" >> $h_file
   echo "};" >> $h_file
 fi
@@ -180,6 +180,6 @@ echo -e "\tBranch:          $branch"
 echo -e "\tCommit:          $commit"
 echo -e "\tCommit Date:     $commitdate"
 echo -e "\tCommit Message:  $message"
-echo -e "\tCommit Author:   $commit_author"
-echo -e "\tProject Authors: $project_author"
+echo -e "\tCommit  Author:  $commit_author"
+echo -e "\tInitial Author:  $initial_author"
 echo -e "\tAll Authors:     $authors"

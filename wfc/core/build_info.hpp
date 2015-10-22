@@ -79,9 +79,9 @@ public:
     return BuildInfo().commit_author();
   }
 
-  virtual std::string project_author() override
+  virtual std::string initial_author() override
   {
-    return BuildInfo().project_author();
+    return BuildInfo().initial_author();
   }
 
   virtual std::string commit_message() override

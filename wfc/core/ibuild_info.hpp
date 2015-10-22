@@ -25,7 +25,7 @@ struct ibuild_info
   virtual std::string commit_message() = 0;
   virtual std::string commit_date() = 0;
   virtual std::string commit_author() = 0;
-  virtual std::string project_author() = 0;
+  virtual std::string initial_author() = 0;
   virtual std::string all_authors() = 0;
 };
 
