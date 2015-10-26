@@ -14,6 +14,7 @@ public:
   virtual ~package();
   package(std::shared_ptr<ipackage>);
   virtual std::shared_ptr<ibuild_info> build_info() const override;
+  virtual std::string name() const override;
   virtual std::string description() const override;
   virtual std::vector< std::shared_ptr<imodule> > modules() const override;
   virtual void create( std::shared_ptr<wfcglobal> ) override;

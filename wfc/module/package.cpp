@@ -1,5 +1,6 @@
 
 #include <wfc/module/package.hpp>
+#include <wfc/core/ibuild_info.hpp>
 
 namespace wfc{
 
@@ -17,6 +18,11 @@ package::package(std::shared_ptr<ipackage> p)
 std::shared_ptr<ibuild_info> package::build_info() const
 {
   return _impl->build_info();
+}
+
+std::string package::name() const
+{
+  return _impl->build_info()->name();
 }
 
 std::string package::description() const

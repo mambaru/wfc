@@ -43,6 +43,7 @@ MACRO(build_info target_name display_name)
 
   add_dependencies(${target_name} ${display_name}_build_info)
 
+  # message(FATAL_ERROR ${build_prefix}.a)
   target_link_libraries(${target_name} ${build_prefix}.a)
   set(clean_list "${CMAKE_CURRENT_SOURCE_DIR}/${display_name}_build_info.h;${build_prefix}1.c;${build_prefix}2.c;${build_prefix}1.c~1;${build_prefix}.a;${build_prefix}1.o;${build_prefix}2.o;")
   SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${clean_list}" )

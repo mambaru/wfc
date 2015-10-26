@@ -27,6 +27,11 @@ public:
     return make_build_info<BuildInfo>();
   }
 
+  virtual std::string name() const 
+  {
+    return BuildInfo().name();
+  }
+
   virtual std::string description() const 
   {
     return "no description";
