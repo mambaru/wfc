@@ -508,7 +508,6 @@ struct array: array_r<C, fas::int_<R> > {};
 template<typename C>
 struct array<C, -1>: array_r<C, fas::empty_type> {};
 
-
 /// //////////////////////////////////////////////////////////////////////////////
 
 }}
@@ -522,5 +521,6 @@ struct array<C, -1>: array_r<C, fas::empty_type> {};
 #include "specialization/json_enum.hpp"
 #include "specialization/json_set_enum.hpp"
 #include "specialization/json_quoted.hpp"
+#include "specialization/json_float.hpp"
 
 
