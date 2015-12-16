@@ -40,7 +40,6 @@ MACRO(build_info target_name display_name)
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     VERBATIM
   )
-
   add_dependencies(${target_name} ${display_name}_build_info)
 
   # message(FATAL_ERROR ${build_prefix}.a)
