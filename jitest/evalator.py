@@ -65,7 +65,14 @@ class Evalator:
         self.lists[k1]=v1
       else:
         self.lists[k1]=[v1,1,""]
+    
     self.reset(name, max_replay)
+    
+    #self.next()
+    #tmp = self.lists;
+    #self.lists = self.prepare_(tmp, {})
+    
+    
 
   def reset(self, name = 'all', max_replay = 0):
     # Имя объекта или последовательности

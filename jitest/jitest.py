@@ -332,7 +332,10 @@ def work_thread1(args, stat):
 # ------------------------------------
 
 def do_list(args):
-  e = Evalator(args.file, name=None)
+  e = Evalator(args.file, None, 1)
+  #e = Evalator(args.file, args.name, args.count)
+  #e.next()
+  #e.next()
   if len(e.lists):
     print("Список доступных последовательностей:")
     for k, v in e.lists.iteritems():
