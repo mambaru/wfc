@@ -12,6 +12,8 @@
 #include <wfc/core/ibuild_info.hpp>
 #include <iow/asio.hpp>
 
+void wfc_abort(std::string message);
+
 namespace wfc{
 
 struct wfcglobal
