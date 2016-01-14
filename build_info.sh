@@ -69,8 +69,8 @@ toplevel=`git rev-parse --show-toplevel  2>/dev/null`
 basename=`basename $toplevel`
 
 commit=`git log -1 --pretty=format:"%H"`
-commit_author=`git log -1 --pretty=format:"%cn <%ce>"`
-initial_author=`git log --reverse --pretty=format:"%cn <%ce>" | head -1`
+commit_author=`git log -1 --pretty=format:"%aN <%aE>"`
+initial_author=`git log --reverse --pretty=format:"%aN <%aE>" | head -1`
 message=$(git log -1 --pretty=format:"%s")
 commitdate=$(date "+%F %T %:z" -d @`git log -1 --pretty=format:"%ct"`)
 builddate=$(date "+%F %T %:z")
