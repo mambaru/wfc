@@ -24,7 +24,7 @@ public:
   typedef std::list<package_ptr> package_list;
 
   basic_wfc(std::shared_ptr<ibuild_info> bi, package_list packages);
-  int run(int argc, char* argv[]);
+  int run(int argc, char* argv[], std::string helpstring = std::string() );
 private:
   ::wfc::asio::io_service _io_service;
   std::shared_ptr<wfcglobal> _global;

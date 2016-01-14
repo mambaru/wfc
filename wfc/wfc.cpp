@@ -34,13 +34,13 @@ basic_wfc::basic_wfc(std::shared_ptr<ibuild_info> bi, package_list packages )
   _global->wfc_build_info = make_build_info<wfc_build_info>();
 }
 
-int basic_wfc::run(int argc, char* argv[])
+int basic_wfc::run(int argc, char* argv[], std::string helpstring)
 {
   wfcglobal::static_global = _global;
 
   if ( auto startup = _global->registry.get<istartup>("startup") )
   {
-    if ( !startup->startup(argc, argv) )
+    if ( !startup->startup(argc, argv, helpstring) )
       return 0;
   }
   else
