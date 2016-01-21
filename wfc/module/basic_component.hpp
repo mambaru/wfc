@@ -53,7 +53,20 @@ public:
     instance_ptr,
     std::map< std::string, instance_ptr>
   >::type instance_map;
+
+  typedef typename std::conditional<
+    Singleton,
+    std::string,
+    std::map< std::string, std::string>
+  >::type options_map;
+
+  typedef typename std::conditional<
+    Singleton,
+    std::string,
+    std::list< std::string>
+  >::type start_list;
   
+    
   virtual ~basic_component()
   {
     if ( _global )
@@ -141,6 +154,13 @@ public:
 
 
 private:
+
+  void serialize_( const instance_options& opt,  std::string& str )
+  {
+    typename domain_json::serializer serializer;
+    str.clear();
+    serializer( opt, std::back_inserter(str) );
+  }
   
   void unserialize_( component_options& opt,  const std::string& str )
   {
@@ -176,9 +196,16 @@ private:
   void configure_(const std::string& stropt, fas::true_)
   {
     component_options opt;
-    unserialize_(opt, stropt );
+    this->unserialize_(opt, stropt );
     opt.name = this->name();
-    _instances->configure(opt/*, ""*/);
+    
+    std::string strins;
+    this->serialize_(opt, strins );
+    if ( _options == strins )
+      return;
+    _options = strins;
+    _start_list = opt.name;
+    _instances->configure(opt);
   }
 
   void configure_(const std::string& stropt, fas::false_)
@@ -188,10 +215,29 @@ private:
       stop_list.insert(item.first);
 
     component_options optlist;
-    unserialize_( optlist, stropt );
+    this->unserialize_( optlist, stropt );
 
     for (const auto& opt : optlist )
     {
+      { // проверям на фактическое изменения опций объекта
+        // для этого сериализуем его и сравнимваем строки
+        // после сериализации пробелов и коментариев в строке не будет
+        
+        std::string strins;
+        this->serialize_(opt, strins );
+        
+        auto itr = _options.find(opt.name);
+        if ( itr!=_options.end() )
+        {
+          if ( strins == itr->second )
+            continue;
+          itr->second = strins;
+        }
+        else
+        {
+          _options.insert(itr, std::make_pair(opt.name, strins) );
+        }
+      }
       auto itr = _instances.find(opt.name);
       if ( itr == _instances.end() )
       {
@@ -205,6 +251,7 @@ private:
       }
       itr->second->configure(opt);
       stop_list.erase(opt.name);
+      _start_list.push_back(opt.name);
     }
     
     for ( const auto& name: stop_list )
@@ -224,28 +271,51 @@ private:
   
   void start_(const std::string& arg, fas::true_)
   {
-    _instances->start(arg);
+    if ( !_start_list.empty() ) 
+      _instances->start(arg);
+    _start_list.clear();
   }
 
   void start_(const std::string& arg, fas::false_)
   {
-    for ( auto& p : _instances )
+    for (const auto& name :  _start_list )
     {
-      p.second->start(arg);
+      auto itr = _instances.find(name);
+      if ( itr != _instances.end() )
+      {
+        itr->second->start(arg);
+      }
     }
+    _start_list.clear();
   }
 
   void stop_(const std::string& arg, fas::true_)
   {
-    _instances->stop(arg);
+    if ( !_start_list.empty() )
+    {
+      _instances->stop(arg);
+    }
   }
 
   void stop_(const std::string& arg, fas::false_)
   {
-    for ( auto& p : _instances )
+    if ( !_start_list.empty() )
+    {
+      for (const auto& name :  _start_list )
+      {
+        auto itr = _instances.find(name);
+        if ( itr != _instances.end() )
+        {
+          itr->second->start(arg);
+        }
+      }
+    }
+    /*for ( auto& p : _instances )
     {
       p.second->stop(arg);
     }
+    */
+    
   }
   
   void generate_options_(component_options& opt, const std::string& type, fas::true_) const 
@@ -266,6 +336,8 @@ private:
   
   global_ptr   _global;
   instance_map _instances;
+  options_map  _options;
+  start_list   _start_list;
 };
 
 }
