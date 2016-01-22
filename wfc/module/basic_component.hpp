@@ -204,7 +204,6 @@ private:
     if ( _options == strins )
       return;
     _options = strins;
-    _start_list = opt.name;
     _instances->configure(opt);
   }
 
@@ -238,6 +237,7 @@ private:
           _options.insert(itr, std::make_pair(opt.name, strins) );
         }
       }
+      
       auto itr = _instances.find(opt.name);
       if ( itr == _instances.end() )
       {
@@ -251,7 +251,6 @@ private:
       }
       itr->second->configure(opt);
       stop_list.erase(opt.name);
-      _start_list.push_back(opt.name);
     }
     
     for ( const auto& name: stop_list )
@@ -271,51 +270,28 @@ private:
   
   void start_(const std::string& arg, fas::true_)
   {
-    if ( !_start_list.empty() ) 
-      _instances->start(arg);
-    _start_list.clear();
+    _instances->start(arg);
   }
 
   void start_(const std::string& arg, fas::false_)
   {
-    for (const auto& name :  _start_list )
+    for ( auto& p : _instances )
     {
-      auto itr = _instances.find(name);
-      if ( itr != _instances.end() )
-      {
-        itr->second->start(arg);
-      }
+      p.second->start(arg);
     }
-    _start_list.clear();
   }
 
   void stop_(const std::string& arg, fas::true_)
   {
-    if ( !_start_list.empty() )
-    {
-      _instances->stop(arg);
-    }
+    _instances->stop(arg);
   }
 
   void stop_(const std::string& arg, fas::false_)
   {
-    if ( !_start_list.empty() )
-    {
-      for (const auto& name :  _start_list )
-      {
-        auto itr = _instances.find(name);
-        if ( itr != _instances.end() )
-        {
-          itr->second->start(arg);
-        }
-      }
-    }
-    /*for ( auto& p : _instances )
+    for ( auto& p : _instances )
     {
       p.second->stop(arg);
     }
-    */
-    
   }
   
   void generate_options_(component_options& opt, const std::string& type, fas::true_) const 
@@ -337,7 +313,6 @@ private:
   global_ptr   _global;
   instance_map _instances;
   options_map  _options;
-  start_list   _start_list;
 };
 
 }

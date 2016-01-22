@@ -26,10 +26,6 @@ public:
 
   virtual ~instance() {}
 
-  instance()
-    : _startup(false)
-  {}
-
 // iobject interface
   virtual std::string name() const 
   {
@@ -52,7 +48,9 @@ public:
   virtual void start(const std::string& arg) 
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    this->start_(arg);
+    if ( _ready_for_start )
+      this->start_(arg);
+    _ready_for_start = false;
   }
 
   virtual void stop(const std::string& arg)
@@ -64,7 +62,8 @@ public:
   virtual void initialize() 
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    this->initialize_();
+    if ( _ready_for_start )
+      this->initialize_();
   }
 
 // iinterface
@@ -98,6 +97,7 @@ public:
   void configure(const options_type& opt)  
   {
     std::lock_guard<mutex_type> lk(_mutex);
+    _ready_for_start = true;
     _options = opt;
     // Reset ready flag for enable startup
     _startup = _startup && !( _object==nullptr && _options.enabled );
@@ -203,7 +203,8 @@ private:
 
 private:
 
-  bool         _startup;
+  bool         _ready_for_start = true;
+  bool         _startup = false;
   global_ptr   _global;
   options_type _options;
   object_ptr   _object;
