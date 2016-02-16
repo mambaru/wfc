@@ -229,7 +229,10 @@ private:
         if ( itr!=_options.end() )
         {
           if ( strins == itr->second )
+          {
+            DEBUG_LOG_MESSAGE("component: ignore instance " << opt.name)
             continue;
+          }
           itr->second = strins;
         }
         else
@@ -249,7 +252,9 @@ private:
         }
         inst->create( _global );
       }
+      
       itr->second->configure(opt);
+      DEBUG_LOG_MESSAGE("component: configured instance " << opt.name)
       stop_list.erase(opt.name);
     }
     
@@ -262,6 +267,7 @@ private:
         {
           _global->registry.erase("instance", name);
         }
+        DEBUG_LOG_MESSAGE("component: stop instance " << itr->first)
         itr->second->stop("");
         _instances.erase(itr);
       }
@@ -296,14 +302,13 @@ private:
   
   void generate_options_(component_options& opt, const std::string& type, fas::true_) const 
   {
-    // opt.name = std::string(this->name()) + "1";
     instance_type().generate( opt, type);
   }
 
   void generate_options_(component_options& opt, const std::string& type, fas::false_) const 
   {
     instance_options inst;
-    inst.name = std::string(this->name()) + "1";
+    inst.name = this->name() + "1";
     instance_type().generate( inst, type);
     opt.push_back(inst);
   }

@@ -48,6 +48,7 @@ public:
   virtual void start(const std::string& arg) 
   {
     std::lock_guard<mutex_type> lk(_mutex);
+    
     if ( _ready_for_start )
       this->start_(arg);
     _ready_for_start = false;
