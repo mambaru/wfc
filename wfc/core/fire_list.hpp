@@ -16,12 +16,13 @@ namespace wfc{
 template<typename>
 class fire_list;
 
+
 template<typename ...Args>
-class fire_list< std::function<void(Args...)> >
+class fire_list< std::function<bool(Args...)> >
 {
   typedef std::recursive_mutex mutex_type;
 public:
-  typedef std::function<void(Args...)> fire_fun;
+  typedef std::function<bool(Args...)> fire_fun;
   typedef std::list< fire_fun > list_type;
 
   void push_back( fire_fun f)
@@ -36,6 +37,12 @@ public:
     _fire_list.push_front(f);
   }
 
+  void size() const
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    return _fire_list.size();
+  }
+  
   void fire(Args... args)
   {
     list_type lst;
@@ -43,8 +50,20 @@ public:
       std::lock_guard<mutex_type> lk(_mutex);
       lst = _fire_list;
     }
-    for (const auto& f: lst)
-      f(args...);
+    
+    auto beg = lst.begin();
+    auto end = lst.end();
+    for (;beg!=end;)
+    {
+      if ( (*beg)(args...) )
+      {
+        ++beg;
+      }
+      else
+      {
+        lst.erase(beg++);
+      }
+    }
   }
 
 private:

@@ -27,7 +27,7 @@ struct wfcglobal
 
   module_options options;
 
-  typedef std::function<void()> fire_handler;
+  typedef std::function<bool()> fire_handler;
   typedef fire_list< fire_handler > fakir;
   fakir idle;
   fakir after_start;
