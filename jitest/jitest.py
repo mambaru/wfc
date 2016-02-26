@@ -27,7 +27,7 @@ def to_json(obj):
 def check_result(query, result):
   global result_code
   global is_working
-  if query["result"]!=result:
+  if query["result"]!="null" and query["result"]!=result:
     print(u"Неверный результат запроса '{0}'".format(query["method"]) )
     print(u"params: {0}".format( to_json(query["params"]) ))
     print(u"Полученный result: {0}".format( to_json(result)))
@@ -137,7 +137,7 @@ class JsonrpcRequester:
     return 0
   
   def check_result(self, query, result):
-    if query["result"]!=result:
+    if query["result"]!=None and query["result"]!=result:
       print("Неверный результат запроса '{0}'".format(query["method"]) )
       print("params: {0}".format( to_json(query["params"]) ))
       print("Полученный result: {0}".format( to_json(result)))
