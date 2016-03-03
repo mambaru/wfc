@@ -23,7 +23,7 @@ else()
   set(BUILD_SHARED_LIBS ON)
 endif()
 
-find_package(Boost COMPONENTS system program_options filesystem REQUIRED)
+find_package(Boost COMPONENTS system program_options filesystem date_time REQUIRED)
 
 IF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
     exec_program(
