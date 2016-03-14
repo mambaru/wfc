@@ -4,12 +4,12 @@
 #include <wfc/asio.hpp>
 #include <chrono>
 
-namespace iow{ class dataflow;}
+namespace iow{ class workflow;}
 namespace wfc{
 
 class workflow
 {
-  typedef ::iow::dataflow impl;
+  typedef ::iow::workflow impl;
 public:
   typedef ::wfc::asio::io_service io_service;
   typedef std::function< void () > post_handler;

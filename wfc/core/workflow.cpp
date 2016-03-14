@@ -1,5 +1,5 @@
 #include <wfc/core/workflow.hpp>
-#include <iow/thread/dataflow.hpp>
+#include <iow/workflow/workflow.hpp>
 
 namespace wfc{
   
@@ -12,8 +12,8 @@ workflow::~workflow()
 
 workflow::workflow(io_service& io)
 {
-  ::iow::dataflow_options opt;
-  _impl = std::make_shared<impl>(io, opt);
+  ::iow::queue_options opt;
+  _impl = std::make_shared<impl>(io, opt, 0);
 }
 
 void workflow::start()
@@ -28,11 +28,10 @@ void workflow::configure(workflow_options opt)
 
 void workflow::reconfigure(workflow_options conf)
 {
-  ::iow::dataflow_options opt;
-  opt.threads = conf.threads;
+  ::iow::queue_options opt;
   opt.wrnsize = conf.wrnsize;
   opt.maxsize = conf.maxsize;
-  _impl->reconfigure(opt);
+  _impl->reconfigure(opt, conf.threads);
   
 }
 
