@@ -6,6 +6,7 @@ SET(
   wfc.cpp
   system/system.cpp
   core/global.cpp
+  core/workflow.cpp
   module/component.cpp
   module/module.cpp
   module/package.cpp
