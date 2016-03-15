@@ -8,7 +8,7 @@
 
 #include <wfc/core/registry.hpp>
 #include <wfc/core/fire_list.hpp>
-#include <wfc/core/module_options.hpp>
+#include <wfc/core/extended_args.hpp>
 #include <wfc/core/ibuild_info.hpp>
 #include <wfc/core/workflow.hpp>
 #include <iow/asio.hpp>
@@ -26,7 +26,7 @@ struct wfcglobal
   std::shared_ptr<ibuild_info> program_build_info;
   std::shared_ptr<ibuild_info> wfc_build_info;
 
-  module_options options;
+  extended_args args;
 
   typedef std::function<bool()> fire_handler;
   typedef fire_list< fire_handler > fakir;
