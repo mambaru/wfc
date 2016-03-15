@@ -33,14 +33,14 @@ public:
   bool post(duration,   post_handler handler);
   
 
-  timer_id create_timer(duration, timer_handler, bool);
-  timer_id create_timer(duration, async_timer_handler, bool);
+  timer_id create_timer(duration, timer_handler, bool = true);
+  timer_id create_timer(duration, async_timer_handler, bool = true);
 
-  timer_id create_timer(time_point, duration, timer_handler, bool);
-  timer_id create_timer(time_point, duration, async_timer_handler, bool);
+  timer_id create_timer(time_point, duration, timer_handler, bool = true);
+  timer_id create_timer(time_point, duration, async_timer_handler, bool = true);
 
-  timer_id create_timer(std::string, duration, timer_handler, bool);
-  timer_id create_timer(std::string, duration, async_timer_handler, bool);
+  timer_id create_timer(std::string, duration, timer_handler, bool = true);
+  timer_id create_timer(std::string, duration, async_timer_handler, bool = true);
 
   std::shared_ptr<bool> detach_timer(timer_id);
   bool release_timer( timer_id id );

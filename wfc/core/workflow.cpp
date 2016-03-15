@@ -26,13 +26,9 @@ void workflow::configure(workflow_options opt)
   this->reconfigure(opt);
 }
 
-void workflow::reconfigure(workflow_options conf)
+void workflow::reconfigure(workflow_options opt)
 {
-  ::iow::queue_options opt;
-  opt.wrnsize = conf.wrnsize;
-  opt.maxsize = conf.maxsize;
-  _impl->reconfigure(opt, conf.threads);
-  
+  _impl->reconfigure(opt, opt.threads);
 }
 
 void workflow::stop()
@@ -54,7 +50,6 @@ bool workflow::post(duration d,   post_handler handler)
 {
   return _impl->delayed_post(d, std::move(handler) );
 }
-  
 
 workflow::timer_id workflow::create_timer(duration d, timer_handler handler, bool expires_after)
 {

@@ -26,26 +26,50 @@ public:
 
   virtual ~instance() {}
 
-// iobject interface
-  virtual std::string name() const 
+// iinstance interface
+  virtual std::string name() const override
   {
     std::lock_guard<mutex_type> lk(_mutex);
     return _options.name;
   }
 
-  virtual int startup_priority() const
+  virtual int startup_priority() const override
   {
     std::lock_guard<mutex_type> lk(_mutex);
     return _options.startup_priority;
   }
 
-  virtual int shutdown_priority() const
+  virtual int shutdown_priority() const override
   {
     std::lock_guard<mutex_type> lk(_mutex);
     return _options.shutdown_priority;
   }
+  
+  void create( std::shared_ptr<wfcglobal> g) 
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    _global = g;
+  }
 
-  virtual void start(const std::string& arg) 
+  void configure(const options_type& opt)  
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    _ready_for_start = true;
+    _options = opt;
+    // Reset ready flag for enable startup
+    _startup = _startup && !( _object==nullptr && _options.enabled );
+    this->configure_(_options.enabled);
+  }
+
+  virtual void initialize() 
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    if ( _ready_for_start )
+      this->initialize_();
+  }
+
+
+  virtual void start(const std::string& arg) override
   {
     std::lock_guard<mutex_type> lk(_mutex);
     
@@ -54,17 +78,10 @@ public:
     _ready_for_start = false;
   }
 
-  virtual void stop(const std::string& arg)
+  virtual void stop(const std::string& arg) override
   {
     std::lock_guard<mutex_type> lk(_mutex);
     this->stop_(arg);
-  }
-
-  virtual void initialize() 
-  {
-    std::lock_guard<mutex_type> lk(_mutex);
-    if ( _ready_for_start )
-      this->initialize_();
   }
 
 // iinterface
@@ -89,21 +106,7 @@ public:
     object_type::generate( opt, type );
   }
 
-  void create( std::shared_ptr<wfcglobal> g) 
-  {
-    std::lock_guard<mutex_type> lk(_mutex);
-    _global = g;
-  }
 
-  void configure(const options_type& opt)  
-  {
-    std::lock_guard<mutex_type> lk(_mutex);
-    _ready_for_start = true;
-    _options = opt;
-    // Reset ready flag for enable startup
-    _startup = _startup && !( _object==nullptr && _options.enabled );
-    this->configure_(_options.enabled);
-  }
 
 // -------------------------------------------------
 

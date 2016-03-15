@@ -10,6 +10,7 @@
 #include <wfc/core/fire_list.hpp>
 #include <wfc/core/module_options.hpp>
 #include <wfc/core/ibuild_info.hpp>
+#include <wfc/core/workflow.hpp>
 #include <iow/asio.hpp>
 
 void wfc_abort(std::string message);
@@ -39,11 +40,13 @@ struct wfcglobal
 
   typedef ::iow::asio::io_service io_service_type;
   io_service_type& io_service;
-
+  ::wfc::workflow workflow;
+  
   static ptr static_global;
 
   wfcglobal( io_service_type& io_service)
     : io_service(io_service)
+    , workflow(io_service)
   {}
 };
 

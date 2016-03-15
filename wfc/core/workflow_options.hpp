@@ -1,12 +1,11 @@
 #pragma once
-#include <cstddef>
+#include <iow/workflow/queue_options.hpp>
 
 namespace wfc{
 
-struct workflow_options
+struct workflow_options: 
+  ::iow::queue_options
 {
-  size_t maxsize = 0;
-  size_t wrnsize = 0;
   int threads = 0;
 };
 
