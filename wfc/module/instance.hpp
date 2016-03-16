@@ -56,6 +56,7 @@ public:
     std::lock_guard<mutex_type> lk(_mutex);
     _ready_for_start = true;
     _options = opt;
+    
     // Reset ready flag for enable startup
     _startup = _startup && !( _object==nullptr && _options.enabled );
     this->configure_(_options.enabled);

@@ -39,7 +39,8 @@ public:
   virtual ~domain_object(){}
   
   domain_object()
-    : _io_id( ::iow::io::create_id<io_id_t>() )
+    : _started(false)
+    , _io_id( ::iow::io::create_id<io_id_t>() )
   {}
   
   const std::string& name() const
@@ -96,13 +97,21 @@ public:
     opt = options_type();
   }
 
-  virtual void initialize(const std::string& name, global_ptr g, const options_type& opt)
+  virtual void initialize(const std::string& name, global_ptr g, const options_type& opt) final
   {
     _name = name;
     _global = g;
     _options = opt;
     _owner.enable_callback_check(g->enable_callback_check);
-    this->reconfigure();
+    if ( !_started )
+    {
+      this->configure();
+      _started = true;
+    }
+    else
+    {
+      this->reconfigure();
+    }
   }
 
   virtual void start(const std::string&)
@@ -116,6 +125,11 @@ public:
     // TODO: LOG default (empty) stop
   }
 
+  virtual void configure()
+  {
+    this->reconfigure();
+  }
+  
   virtual void reconfigure()
   {
     // Переконфигурация запущенного объекта!!
@@ -139,7 +153,43 @@ public:
 
   constexpr io_id_t get_id() const { return _io_id;}
   
+  std::string get_arg(const std::string& arg) const
+  {
+    if ( !_global->args.has(_name) )
+      return std::string();
+    
+    auto args = _global->args.get(_name);
+    if ( !args.has(arg) )
+      return std::string();
+    
+    return args.get(arg);
+  }
+
+  int get_arg_int(const std::string& arg) const
+  {
+    if ( !_global->args.has(_name) )
+      return 0;
+    
+    auto args = _global->args.get(_name);
+    if ( !args.has(arg) )
+      return 0;
+    
+    std::string sval = args.get(arg);
+    if ( sval.empty() ) return 0;
+    return atoi( sval.c_str() );
+  }
+
+  bool has_arg(const std::string& arg) const
+  {
+    if ( !_global->args.has(_name) )
+      return false;
+    
+    auto args = _global->args.get(_name);
+    return args.has(arg);
+  }
+
 private:
+  bool _started;
   const io_id_t _io_id;
   std::string _name;
   global_ptr _global;

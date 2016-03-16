@@ -15,6 +15,14 @@ extended_args::extended_args(){}
 extended_args::extended_args(const extended_args_map& po)
   : _extended_args(po)
 {}
+
+void extended_args::insert( std::map<std::string, std::map<std::string, std::string> > args)
+{
+  for (auto& ins : args)
+  {
+    this->insert(ins.first, instance_args(ins.first, std::move(ins.second)) );
+  }
+}
   
 void extended_args::insert(const std::string& name, instance_args args)
 {
