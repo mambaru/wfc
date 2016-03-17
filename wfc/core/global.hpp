@@ -14,6 +14,7 @@
 #include <iow/asio.hpp>
 
 void wfc_abort(std::string message);
+void wfc_exit();
 
 namespace wfc{
 
