@@ -41,13 +41,13 @@ struct wfcglobal
 
   typedef ::iow::asio::io_service io_service_type;
   io_service_type& io_service;
-  ::wfc::workflow workflow;
+  std::shared_ptr< ::wfc::workflow > workflow;
   
   static ptr static_global;
 
   wfcglobal( io_service_type& io_service)
     : io_service(io_service)
-    , workflow(io_service)
+    , workflow( std::make_shared< ::wfc::workflow >(io_service) )
   {}
 };
 
