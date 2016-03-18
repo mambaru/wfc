@@ -6,6 +6,7 @@ namespace wfc{
 struct workflow_options: 
   ::iow::queue_options
 {
+  bool enabled = true;
   int threads = 0;
 };
 

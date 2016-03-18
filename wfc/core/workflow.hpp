@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wfc/core/workflow_options.hpp>
+#include <iow/workflow/workflow.hpp>
 #include <wfc/asio.hpp>
 #include <chrono>
 
@@ -12,38 +13,65 @@ class workflow
   typedef ::iow::workflow impl;
 public:
   typedef ::wfc::asio::io_service io_service;
-  typedef std::function< void () > post_handler;
+  typedef std::function< void() > post_handler;
   
-  typedef std::chrono::time_point<std::chrono::system_clock>  time_point;
-  typedef time_point::duration                                  duration;
-  typedef std::function< bool() >  timer_handler;
-  typedef std::function< void(bool) >  callback_timer_handler;
-  typedef std::function< void(callback_timer_handler) >  async_timer_handler;
-  typedef int timer_id;
+  typedef iow::workflow::timer_type::timer_id_t timer_id_t;
+  typedef iow::workflow::timer_type::time_point_t  time_point_t;
+  typedef iow::workflow::timer_type::duration_t    duration_t;
+
+  typedef iow::workflow::timer_type::handler1 timer_handler;
+  typedef iow::workflow::timer_type::handler_callback  callback_timer_handler;
+  typedef iow::workflow::timer_type::handler2 async_timer_handler;
   
   virtual ~workflow();
-  workflow(io_service& io);
+
+  friend struct wfcglobal;
+private:
+  explicit workflow(workflow_options opt = workflow_options() );
+  workflow(io_service& io, workflow_options opt = workflow_options() );
+
+public:
+  static std::shared_ptr<workflow> create(workflow_options opt);
+  
   void start();
-  void configure(workflow_options opt);
   void reconfigure(workflow_options opt);
   void stop();
 
   bool post(post_handler handler);
-  bool post(time_point, post_handler handler);
-  bool post(duration,   post_handler handler);
+  bool post(time_point_t, post_handler handler);
+  bool post(duration_t,   post_handler handler);
   
 
-  timer_id create_timer(duration, timer_handler, bool = true);
-  timer_id create_timer(duration, async_timer_handler, bool = true);
+  timer_id_t create_timer(duration_t, timer_handler, bool = true);
+  timer_id_t create_timer(duration_t, async_timer_handler, bool = true);
 
-  timer_id create_timer(time_point, duration, timer_handler, bool = true);
-  timer_id create_timer(time_point, duration, async_timer_handler, bool = true);
+  timer_id_t create_timer(time_point_t, duration_t, timer_handler, bool = true);
+  timer_id_t create_timer(time_point_t, duration_t, async_timer_handler, bool = true);
 
-  timer_id create_timer(std::string, duration, timer_handler, bool = true);
-  timer_id create_timer(std::string, duration, async_timer_handler, bool = true);
+  timer_id_t create_timer(std::string, duration_t, timer_handler, bool = true);
+  timer_id_t create_timer(std::string, duration_t, async_timer_handler, bool = true);
+  
+  template< typename Req, typename Res, typename I, typename MemFun, typename Handler >
+  timer_id_t create_requester( duration_t d, std::shared_ptr<I> i, MemFun mem_fun, Handler handler )
+  {
+    return _impl->timer()->create<Req, Res>( d, i, mem_fun, std::move(handler) );
+  }
 
-  std::shared_ptr<bool> detach_timer(timer_id);
-  bool release_timer( timer_id id );
+  template< typename Req, typename Res, typename I, typename MemFun, typename Handler >
+  timer_id_t create_requester( std::string st, duration_t d, std::shared_ptr<I> i, MemFun mem_fun, Handler handler )
+  {
+    return _impl->timer()->create<Req, Res>(st, d, i, mem_fun, std::move(handler) );
+  }
+
+  template< typename Req, typename Res, typename I, typename MemFun, typename Handler >
+  timer_id_t create_requester( time_point_t tp, duration_t d, std::shared_ptr<I> i, MemFun mem_fun, Handler handler )
+  {
+    return _impl->timer()->create<Req, Res>( tp, d, i, mem_fun, std::move(handler) );
+  }
+
+  std::shared_ptr<bool> detach_timer(timer_id_t );
+  
+  bool release_timer( timer_id_t id );
   
   size_t timer_size() const;
   size_t queue_size() const;

@@ -47,7 +47,7 @@ struct wfcglobal
 
   wfcglobal( io_service_type& io_service)
     : io_service(io_service)
-    , workflow( std::make_shared< ::wfc::workflow >(io_service) )
+    , workflow( /*std::make_shared< ::wfc::workflow >(io_service)*/ new ::wfc::workflow(io_service) )
   {}
 };
 
