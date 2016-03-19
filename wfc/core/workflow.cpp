@@ -4,8 +4,6 @@
 
 namespace wfc{
   
-
-  
 std::shared_ptr<workflow> workflow::create(workflow_options opt)
 {
   if ( auto g = ::wfc::wfcglobal::static_global )
@@ -20,7 +18,15 @@ std::shared_ptr<workflow> workflow::create(workflow_options opt)
     return std::shared_ptr<workflow>( new workflow( opt ) );
   }
 }
-  
+
+std::shared_ptr<workflow> workflow::create(::wfc::asio::io_service& io, iow::queue_options opt)
+{
+  workflow_options wopt;
+  static_cast<iow::queue_options&>(wopt) = opt;
+  wopt.threads = 0;
+  return std::shared_ptr<workflow>( new workflow( io, wopt ) );
+}
+
 workflow::~workflow()
 {
   

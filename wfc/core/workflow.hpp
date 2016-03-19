@@ -32,6 +32,8 @@ private:
 
 public:
   static std::shared_ptr<workflow> create(workflow_options opt);
+  // простая очередь без потоков
+  static std::shared_ptr<workflow> create(::wfc::asio::io_service& io, iow::queue_options opt);
   
   void start();
   void reconfigure(workflow_options opt);
