@@ -3,6 +3,8 @@
 #include <iow/logger/global_log.hpp>
 #include <iow/logger/logger.hpp>
 
+#define WFC_WRITE_LOG(NAME, TYPE, X) IOW_WRITE_LOG(NAME, TYPE,   X )
+
 #define WFC_LOG_ERROR(NAME, X)    IOW_WRITE_LOG_ERROR( NAME, X )
 #define WFC_LOG_WARNING(NAME,X)   IOW_WRITE_LOG_WARNING( NAME, X )
 #define WFC_LOG_MESSAGE(NAME, X)  IOW_WRITE_LOG_MESSAGE( NAME, X )
