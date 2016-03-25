@@ -4,7 +4,7 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 
-#include <wfc/core/abort.hpp>
+#include <wfc/wfc_exit.hpp>
 #include <wfc/core/extended_args.hpp>
 #include <sstream>
 
@@ -52,7 +52,7 @@ instance_args extended_args::get(const std::string& name, bool required ) const
   {
     std::stringstream ss;
     ss << "instance '" << name << "' required args ";
-    ::wfc_abort( ss.str() );
+    ::wfc_exit_with_error( ss.str() );
   }
   return instance_args(name);
 }

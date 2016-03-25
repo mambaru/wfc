@@ -4,6 +4,7 @@ include(Wfc)
 SET(
   wfc_source_list
   wfc.cpp
+  wfc_exit.cpp
   system/system.cpp
   core/global.cpp
   core/workflow.cpp

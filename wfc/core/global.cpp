@@ -15,19 +15,3 @@ std::shared_ptr<wfcglobal> wfcglobal::static_global;
 
 }
 
-void wfc_abort(std::string message)
-{
-  if ( auto g = ::wfc::wfcglobal::static_global )
-  {
-    g->registry.get< ::wfc::icore >("core")->core_abort(message);
-  }
-}
-
-void wfc_exit()
-{
-  if ( auto g = ::wfc::wfcglobal::static_global )
-  {
-    g->registry.get< ::wfc::icore >("core")->core_stop();
-  }
-}
-

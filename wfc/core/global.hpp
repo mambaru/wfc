@@ -13,8 +13,6 @@
 #include <wfc/core/workflow.hpp>
 #include <iow/asio.hpp>
 
-void wfc_abort(std::string message);
-void wfc_exit();
 
 namespace wfc{
 
@@ -47,7 +45,7 @@ struct wfcglobal
 
   wfcglobal( io_service_type& io_service)
     : io_service(io_service)
-    , workflow( /*std::make_shared< ::wfc::workflow >(io_service)*/ new ::wfc::workflow(io_service) )
+    , workflow( new ::wfc::workflow(io_service) )
   {}
 };
 
