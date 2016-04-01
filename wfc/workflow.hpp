@@ -8,4 +8,13 @@
 
 #include <wfc/core/workflow.hpp>
 #include <wfc/core/workflow_options_json.hpp>
+//#include <iow/workflow/rrqueue.hpp>
 
+namespace wfc{ 
+
+  /*
+template<class T, class Allocator = std::allocator<T> >
+using ::iow::rrqueue<T, Allocator>;
+  */
+
+}
