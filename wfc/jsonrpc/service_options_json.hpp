@@ -12,13 +12,13 @@ struct service_options_json
   typedef typename options_type::engine_options engine_options;
   
   JSON_NAME(target)
-  JSON_NAME(direct_mode)
+  JSON_NAME(allow_non_jsonrpc)
   
   typedef wfc::json::object<
     options_type,
     wfc::json::member_list<
       wfc::json::member< n_target, options_type, std::string, &options_type::target>,
-      wfc::json::member< n_direct_mode, engine_options, bool, &engine_options::direct_mode>
+      wfc::json::member< n_allow_non_jsonrpc, engine_options, bool, &engine_options::allow_non_jsonrpc>
     >
   > type;
   typedef typename type::target      target;

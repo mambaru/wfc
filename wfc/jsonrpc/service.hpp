@@ -38,11 +38,12 @@ template<typename MethodList, template<typename> class Impl = interface_implemen
 class service
   : public service_impl< ijsonrpc, ::iow::jsonrpc::handler< Impl<MethodList> > >
 {
+  typedef service_impl< ijsonrpc, ::iow::jsonrpc::handler< Impl<MethodList> > > super;
 public:
   virtual ~service()
   {
   }
-
+  
   virtual void perform_incoming( ijsonrpc::incoming_holder holder, ijsonrpc::io_id_t io_id, ijsonrpc::rpc_outgoing_handler_t handler) override
   {
     this->engine()->perform_jsonrpc( std::move(holder), io_id, handler );

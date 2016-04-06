@@ -35,34 +35,6 @@ public:
     _engine=nullptr;
   }
 
-  /*
-  template<typename Target>
-  void io_outgoing_result_(Target target, data_ptr d)
-  {
-    using namespace std::placeholders;
-    this->perform_io(
-      std::move(d), 
-      this->get_id(),
-      std::bind(&self::io_outgoing_handler_<Target>, this, target, _1)
-    );
-  }
-
-  */
-  
-  /*
-  template<typename Target>
-  void io_outgoing_handler_(Target target, data_ptr d)
-  {
-    using namespace std::placeholders;
-    target->perform_io( 
-      std::move(d),
-      this->get_id(), 
-      std::bind(&self::io_outgoing_result_<Target>, this, target, _1) 
-    );
-    
-  }
-  */
-
   void reconfigure_(const engine_options& opt)
   {
     if ( _engine == nullptr ) 
@@ -107,21 +79,6 @@ public:
     }
   }
   
-  /*template<typename Tg, typename Req, typename ...Args>
-  void call(Req req, Args... args)
-  {
-    if ( _engine != nullptr )
-    {
-      this->_engine->template call<Tg>( std::forward<Args>(args)... );
-    }
-    else
-    {
-      // TODO: 
-      abort();
-    }
-  }
-  */
-
   engine_ptr engine() const { return _engine; };
 private:
 
