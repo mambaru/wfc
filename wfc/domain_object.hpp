@@ -3,6 +3,7 @@
 #include <wfc/core/global.hpp>
 #include <iow/owner/owner.hpp>
 #include <iow/io/io_id.hpp>
+#include <wfc/json.hpp>
 
 #include <memory>
 #include <string>
@@ -165,18 +166,19 @@ public:
     return args.get(arg);
   }
 
-  int get_arg_int(const std::string& arg) const
+  template<typename T>
+  int get_arg_t(const std::string& arg) const
   {
-    if ( !_global->args.has(_name) )
-      return 0;
+    T val = T();
+    auto str = this->get_arg(arg);
+    if ( str.empty() )
+      return val;
     
-    auto args = _global->args.get(_name);
-    if ( !args.has(arg) )
-      return 0;
+    try {
+      typename ::wfc::json::value<T>::serializer()(val, str.begin(), str.end() );
+    }catch(...){}
     
-    std::string sval = args.get(arg);
-    if ( sval.empty() ) return 0;
-    return atoi( sval.c_str() );
+    return val;
   }
 
   bool has_arg(const std::string& arg) const
