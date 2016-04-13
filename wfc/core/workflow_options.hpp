@@ -8,6 +8,7 @@ struct workflow_options:
 {
   bool enabled = true;
   int threads = 0;
+  bool use_io_service = false;
 };
 
 }

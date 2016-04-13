@@ -42,10 +42,13 @@ public:
   bool post(post_handler handler);
   bool post(time_point_t, post_handler handler);
   bool post(duration_t,   post_handler handler);
-  
+
 
   timer_id_t create_timer(duration_t, timer_handler, bool = true);
   timer_id_t create_timer(duration_t, async_timer_handler, bool = true);
+
+  timer_id_t create_timer(duration_t, duration_t, timer_handler, bool = true);
+  timer_id_t create_timer(duration_t, duration_t, async_timer_handler, bool = true);
 
   timer_id_t create_timer(time_point_t, duration_t, timer_handler, bool = true);
   timer_id_t create_timer(time_point_t, duration_t, async_timer_handler, bool = true);
@@ -57,6 +60,12 @@ public:
   timer_id_t create_requester( duration_t d, std::shared_ptr<I> i, MemFun mem_fun, Handler handler )
   {
     return _impl->timer()->create<Req, Res>( d, i, mem_fun, std::move(handler) );
+  }
+
+  template< typename Req, typename Res, typename I, typename MemFun, typename Handler >
+  timer_id_t create_requester( duration_t sd, duration_t d, std::shared_ptr<I> i, MemFun mem_fun, Handler handler )
+  {
+    return _impl->timer()->create<Req, Res>( sd, d, i, mem_fun, std::move(handler) );
   }
 
   template< typename Req, typename Res, typename I, typename MemFun, typename Handler >

@@ -39,7 +39,7 @@ workflow::workflow(workflow_options opt )
 
 workflow::workflow(io_service& io, workflow_options opt)
 {
-  _impl = std::make_shared<impl>(io, opt, opt.threads);
+  _impl = std::make_shared<impl>(io, opt, opt.threads, opt.use_io_service);
 }
 
 void workflow::start()
@@ -49,7 +49,7 @@ void workflow::start()
 
 void workflow::reconfigure(workflow_options opt)
 {
-  _impl->reconfigure(opt, opt.threads);
+  _impl->reconfigure(opt, opt.threads, opt.use_io_service);
 }
 
 void workflow::stop()
@@ -80,6 +80,16 @@ workflow::timer_id_t workflow::create_timer(duration_t d, timer_handler handler,
 workflow::timer_id_t workflow::create_timer(duration_t d, async_timer_handler handler, bool expires_after)
 {
   return _impl->timer()->create(d, std::move(handler), expires_after );
+}
+
+workflow::timer_id_t workflow::create_timer(duration_t sd, duration_t d, timer_handler handler, bool expires_after)
+{
+  return _impl->timer()->create( sd, d, std::move(handler), expires_after );
+}
+
+workflow::timer_id_t workflow::create_timer(duration_t sd, duration_t d, async_timer_handler handler, bool expires_after)
+{
+  return _impl->timer()->create( sd, d, std::move(handler), expires_after );
 }
 
 workflow::timer_id_t workflow::create_timer(time_point_t tp, duration_t d, timer_handler handler, bool expires_after)
