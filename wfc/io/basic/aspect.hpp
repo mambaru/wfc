@@ -49,7 +49,7 @@ struct options
 //typedef rwlock<std::mutex> mutex_type;
 //typedef spinlock mutex_type;
 
-typedef std::mutex mutex_type;
+typedef std::recursive_mutex mutex_type;
   
 typedef fas::type_list_n<
   
@@ -59,7 +59,8 @@ typedef fas::type_list_n<
   fas::type< ::wfc::io::_data_type_, data_type >,
   fas::type< ::wfc::io::_options_type_, options >,
   fas::type< _mutex_type_, mutex_type >,
-  fas::type< _lock_guard_, std::lock_guard< mutex_type > >,/*
+  fas::type< _lock_guard_, std::unique_lock< mutex_type > >,
+  /*
   fas::type< _read_lock_, read_lock< rwlock<spinlock> > >,*/
   /*
   fas::type< _mutex_type_, rwlock<spinlock> >,
