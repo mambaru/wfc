@@ -27,9 +27,9 @@ struct ad_async_write_some
       //std::cout << "write some ready: " << std::string((*dd)->begin(), (*dd)->end()) << ". Error code: " << ec.message() << std::endl;
       pthis->get_aspect().template get<_write_handler_>()(*pthis, std::move(*dd), std::move(ec), bytes_transferred);
     };
-    t.mutex().unlock();
+    // t.mutex().unlock();
     t.descriptor().async_write_some( ::boost::asio::buffer( **dd, transfer_size ), callback);
-    t.mutex().lock();
+    // t.mutex().lock();
   }
 };
 
