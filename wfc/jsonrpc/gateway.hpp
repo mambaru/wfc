@@ -33,6 +33,8 @@ public:
     target_type target = this->global()->registry.template get< interface_type >(dopt.incoming_target);
     eopt.target = target;
     eopt.peeper = target;
+    if ( target!=nullptr && dopt.incoming_reg)
+      target->reg_io( this->engine()->get_id(),this->shared_from_this()  );
 
     super::reconfigure_(eopt);
 
@@ -40,6 +42,9 @@ public:
 
     if ( auto pitf = registry.template get<ijsonrpc>(dopt.outgoing_target, true) )
     {
+      if ( dopt.outgoing_reg )
+        pitf->reg_io( this->engine()->get_id(), this->shared_from_this() );
+      
       std::weak_ptr<ijsonrpc> witf = pitf;
       io_id_t io_id = _target_id;
       this->engine()->reg_jsonrpc( _target_id, [witf, io_id]( ::iow::jsonrpc::outgoing_holder holder)
@@ -52,6 +57,9 @@ public:
     }
     else if ( auto pitf = registry.template get<iinterface>(dopt.outgoing_target, false) )
     {
+      if ( dopt.outgoing_reg )
+        pitf->reg_io( this->engine()->get_id(), this->shared_from_this() );
+      
       std::weak_ptr<iinterface> witf = pitf;
       this->engine()->reg_io( _target_id, [witf]( data_ptr d, io_id_t io_id, ::iow::io::outgoing_handler_t handler )
       {
@@ -78,6 +86,7 @@ public:
    * Используеться только шлюзом, в основном для предварительного коннекта
    * если первый запрос должен идти от сервера 
    */
+  /*
   void connect(io_id_t io_id)
   {
     const auto& dopt = this->options();
@@ -95,6 +104,7 @@ public:
       pitf->unreg_io(io_id);
     }
   }
+  */
 
 private:
   std::atomic<io_id_t> _target_id;

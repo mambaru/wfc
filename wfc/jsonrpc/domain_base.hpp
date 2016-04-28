@@ -51,6 +51,7 @@ public:
 
   virtual void reg_io(io_id_t io_id, std::weak_ptr<iinterface> witf) override
   {
+    DEBUG_LOG_DEBUG( "domain_base::reg_io " << io_id )
     if ( _engine != nullptr )
     {
       _engine->reg_io( io_id, this->wrap([witf]( data_ptr d, io_id_t io_id, ::iow::io::outgoing_handler_t handler)
@@ -65,6 +66,7 @@ public:
 
   virtual void unreg_io(io_id_t io_id) override
   {
+    DEBUG_LOG_DEBUG( "domain_base::unreg_io " << io_id )
     if ( _engine != nullptr )
     {
       _engine->unreg_io(io_id);
