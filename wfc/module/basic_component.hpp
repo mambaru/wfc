@@ -1,7 +1,9 @@
 #pragma once
 
+
 #include <wfc/module/instance_options_json.hpp>
 #include <wfc/module/icomponent.hpp>
+#include <wfc/module/component_features.hpp>
 #include <wfc/core/global.hpp>
 
 #include <wfc/json.hpp>
@@ -12,36 +14,36 @@
 #include <stdexcept>
 
 namespace wfc{
-
+  
 template< 
   typename Name,
   typename Instance,
   typename DomainJson,
-  bool Singleton = true
+  int Features = component_features::Multiton
 >
 class basic_component
   : public icomponent
 {
 public:
-  enum { is_singleton = Singleton};
+  enum { is_singleton = ( Features & int(component_features::Singleton) )!=0 };
 
   typedef Name        component_name;
   typedef Instance    instance_type;
   typedef DomainJson  domain_json;
-  typedef instance_options_json<domain_json, Singleton> instance_json;
+  typedef instance_options_json<domain_json, Features> instance_json;
 
   typedef std::shared_ptr<wfcglobal> global_ptr;
   typedef typename instance_type::options_type instance_options;
   typedef typename instance_type::domain_interface domain_interface;
   
   typedef typename std::conditional<
-    Singleton,
+    is_singleton,
     instance_options,
     std::vector<instance_options>
   >::type component_options;
 
   typedef typename std::conditional<
-    Singleton,
+    is_singleton,
     instance_json,
     ::wfc::json::array< std::vector<instance_json> >
   >::type component_json;
@@ -49,19 +51,19 @@ public:
   typedef std::shared_ptr<instance_type> instance_ptr;
 
   typedef typename std::conditional<
-    Singleton,
+    is_singleton,
     instance_ptr,
     std::map< std::string, instance_ptr>
   >::type instance_map;
 
   typedef typename std::conditional<
-    Singleton,
+    is_singleton,
     std::string,
     std::map< std::string, std::string>
   >::type options_map;
 
   typedef typename std::conditional<
-    Singleton,
+    is_singleton,
     std::string,
     std::list< std::string>
   >::type start_list;
@@ -111,7 +113,7 @@ public:
   virtual void create( std::shared_ptr<wfcglobal> g) 
   {
     _global = g;
-    this->create_(fas::bool_<Singleton>());
+    this->create_(fas::bool_<is_singleton>());
   }
   
   virtual void configure(const std::string& stropt, const std::string& /*arg*/)
