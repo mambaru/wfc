@@ -84,23 +84,15 @@ public:
     std::lock_guard<mutex_type> lk(_mutex);
     this->stop_(arg);
   }
+  
+  virtual void suspend(bool val)  override
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    if ( _object != nullptr )
+      _object->suspend(val);
+  }
 
 // iinterface
-  virtual void reg_io(io_id_t, std::weak_ptr<iinterface>) override
-  {
-  }
-
-  virtual void perform_io(data_ptr, io_id_t, outgoing_handler_t handler)
-  {
-    if ( handler!=nullptr )
-      handler(nullptr);
-  }
-
-  virtual void unreg_io(io_id_t)
-  {
-  }
-
-//
 
   void generate(options_type& opt, const std::string& type) const 
   {

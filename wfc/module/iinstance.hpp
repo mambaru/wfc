@@ -25,7 +25,7 @@ struct iinstance: iinterface
   virtual void initialize(/*const std::string& arg*/) = 0;
   virtual void start(const std::string& arg) = 0;
   virtual void stop(const std::string& arg) = 0;
-  //virtual void perform(const std::string& arg) = 0;
+  virtual void suspend(bool val) = 0;
 };
 
 }

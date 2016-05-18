@@ -159,11 +159,21 @@ private:
 
   void serialize_( const instance_options& opt,  std::string& str )
   {
-    typename domain_json::serializer serializer;
+    typename instance_json::serializer serializer;
+    //typename domain_json::serializer serializer;
     str.clear();
     serializer( opt, std::back_inserter(str) );
   }
-  
+
+  /*
+  void test_serialize_( const instance_options& opt,  std::string& str )
+  {
+    typename instance_json::serializer serializer;
+    str.clear();
+    serializer( opt, std::back_inserter(str) );
+  }
+  */
+
   void unserialize_( component_options& opt,  const std::string& str )
   {
     try
@@ -218,8 +228,10 @@ private:
     component_options optlist;
     this->unserialize_( optlist, stropt );
 
+    
     for (const auto& opt : optlist )
     {
+      bool suspend_only = false;
       { // проверям на фактическое изменения опций объекта
         // для этого сериализуем его и сравнимваем строки
         // после сериализации пробелов и коментариев в строке не будет
@@ -232,9 +244,17 @@ private:
         {
           if ( strins == itr->second )
           {
-            DEBUG_LOG_MESSAGE("component: ignore instance " << opt.name)
             continue;
           }
+          
+          {
+            auto test_opt = opt;
+            test_opt.suspend = !opt.suspend;
+            std::string test_strins;
+            this->serialize_(test_opt, test_strins );
+            suspend_only = ( test_strins == itr->second );
+          }
+          
           itr->second = strins;
         }
         else
@@ -255,8 +275,17 @@ private:
         inst->create( _global );
       }
       
-      itr->second->configure(opt);
-      DEBUG_LOG_MESSAGE("component: configured instance " << opt.name)
+      if ( suspend_only )
+      {
+        DEBUG_LOG_MESSAGE("component: change only suspend " << opt.name)
+        itr->second->suspend(opt.suspend);
+      }
+      else
+      {
+        itr->second->configure(opt);
+        itr->second->suspend(opt.suspend);
+        DEBUG_LOG_MESSAGE("component: configured instance " << opt.name)
+      }
       stop_list.erase(opt.name);
     }
     

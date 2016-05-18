@@ -41,6 +41,7 @@ public:
   
   domain_object()
     : _started(false)
+    , _suspend(false)
     , _io_id( ::iow::io::create_id<io_id_t>() )
   {}
   
@@ -114,6 +115,15 @@ public:
       this->reconfigure();
     }
   }
+  
+  virtual void suspend( bool suspend ) 
+  {
+    if ( _suspend != suspend )
+    {
+      CONFIG_LOG_MESSAGE("instance " << _name << " suspend mode " << (suspend ? "ON" : "OFF") )
+    }
+    _suspend = suspend;
+  }
 
   virtual void start(const std::string&)
   {
@@ -154,6 +164,11 @@ public:
 
   constexpr io_id_t get_id() const { return _io_id;}
   
+  bool suspended() const 
+  {
+    return _suspend;
+  }
+  
   std::string get_arg(const std::string& arg) const
   {
     if ( !_global->args.has(_name) )
@@ -192,6 +207,7 @@ public:
 
 private:
   bool _started;
+  bool _suspend;
   const io_id_t _io_id;
   std::string _name;
   global_ptr _global;
