@@ -164,11 +164,6 @@ public:
 
   constexpr io_id_t get_id() const { return _io_id;}
   
-  bool suspended() const 
-  {
-    return _suspend;
-  }
-  
   std::string get_arg(const std::string& arg) const
   {
     if ( !_global->args.has(_name) )
@@ -190,7 +185,8 @@ public:
       return val;
     
     try {
-      typename ::wfc::json::value<T>::serializer()(val, str.begin(), str.end() );
+      typedef typename ::wfc::json::value<T>::serializer serializer;
+      serializer()(val, str.begin(), str.end() );
     }catch(...){}
     
     return val;
@@ -205,6 +201,65 @@ public:
     return args.has(arg);
   }
 
+  bool suspended() const 
+  {
+    return _suspend;
+  }
+
+  template<typename Res, typename Callback>
+  bool suspended(const Callback& cb) const
+  {
+    if ( !this->_suspend ) 
+      return false;
+
+    if ( cb != nullptr )
+      cb( std::make_unique<Res>() );
+
+    return true;
+  }
+
+  template<typename Res, typename Req, typename Callback>
+  bool bad_params(const Req& req, const Callback& cb) const
+  {
+    if ( this->suspended<Res>(req, cb) ) 
+      return true;
+    
+    if ( req!=nullptr )
+      return false;
+    
+    if ( cb!=nullptr )
+      cb(nullptr);
+    
+    return true;
+  }
+  
+  template<typename Res, typename Req, typename Callback>
+  bool notify_ban(const Req& req, const Callback& cb) const
+  {
+    return cb==nullptr || this->bad_params<Res>(req, cb);
+  }
+  
+  template<typename Res, typename Req, typename Callback>
+  bool request_ban(const Req& req, const Callback& cb) const
+  {
+    if ( this->bad_params<Res>(req, cb) )
+      return true;
+    
+    if ( cb==nullptr )
+      return false;
+    
+    cb(nullptr);
+    
+    return true;
+  }
+  
+  template<typename Res, typename Callback>
+  void default_response(const Callback& cb) const
+  {
+    if ( cb != nullptr )
+      cb( std::make_unique<Res>() );
+  }
+  
 private:
   bool _started;
   bool _suspend;
