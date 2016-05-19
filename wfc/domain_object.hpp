@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wfc/core/global.hpp>
+#include <wfc/core/workflow.hpp>
 #include <iow/owner/owner.hpp>
 #include <iow/io/io_id.hpp>
 #include <wfc/json.hpp>
@@ -54,7 +55,7 @@ public:
   {
     return _global;
   }
-
+  
   const options_type& options() const 
   {
     return _options;
@@ -205,21 +206,27 @@ public:
   {
     return _suspend;
   }
-
+  
   template<typename Res, typename Callback>
-  bool suspended(const Callback& cb) const
+  void default_response(const Callback& cb) const
+  {
+    if ( cb != nullptr )
+      cb( std::make_unique<Res>() );
+  }
+
+
+  template<typename Res, typename Req, typename Callback>
+  bool suspended(const Req& /*req*/, const Callback& cb) const
   {
     if ( !this->_suspend ) 
       return false;
 
-    if ( cb != nullptr )
-      cb( std::make_unique<Res>() );
-
+    this->default_response<Res>(cb);
     return true;
   }
 
   template<typename Res, typename Req, typename Callback>
-  bool bad_params(const Req& req, const Callback& cb) const
+  bool bad_request(const Req& req, const Callback& cb) const
   {
     if ( this->suspended<Res>(req, cb) ) 
       return true;
@@ -236,13 +243,13 @@ public:
   template<typename Res, typename Req, typename Callback>
   bool notify_ban(const Req& req, const Callback& cb) const
   {
-    return cb==nullptr || this->bad_params<Res>(req, cb);
+    return cb==nullptr || this->bad_request<Res>(req, cb);
   }
   
   template<typename Res, typename Req, typename Callback>
   bool request_ban(const Req& req, const Callback& cb) const
   {
-    if ( this->bad_params<Res>(req, cb) )
+    if ( this->bad_request<Res>(req, cb) )
       return true;
     
     if ( cb==nullptr )
@@ -253,12 +260,6 @@ public:
     return true;
   }
   
-  template<typename Res, typename Callback>
-  void default_response(const Callback& cb) const
-  {
-    if ( cb != nullptr )
-      cb( std::make_unique<Res>() );
-  }
   
 private:
   bool _started;

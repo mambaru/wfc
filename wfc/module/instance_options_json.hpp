@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include <wfc/module/instance_options.hpp>
 #include <wfc/module/component_features.hpp>
 
@@ -34,10 +35,10 @@ struct instance_options_json
   
   enum 
   {
-    has_name =     ( Features & int(component_features::Singleton)      ) == 0 ,
-    has_enabled =  ( Features & int(component_features::Fixed)          ) == 0,
-    has_priority = ( Features & int(component_features::Extraordinary)  ) == 0 ,
-    has_suspend =  ( Features & int(component_features::SuspendSupport) ) != 0 
+    has_name =     ( Features & int(component_features::Singleton)       )   == 0 ,
+    has_enabled =  ( Features & int(component_features::Fixed)           )   == 0 ,
+    has_priority = ( Features & int(component_features::Extraordinary)   )   == 0 ,
+    has_suspend =  ( Features & int(component_features::DisableSuspend)  )   == 0
   };
   
   typedef DomainJson domain_json;

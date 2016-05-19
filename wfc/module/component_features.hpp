@@ -8,7 +8,8 @@ enum class component_features
   Singleton = 1,        // нет имени в json-конфиге (enabled)
   Fixed = 2,            // нет флага включения/отключение (enabled)
   Extraordinary = 4,    // нет полей приоритета
-  SuspendSupport = 8
+  DisableSuspend  = 8,
+  CommonWorkflow  = 16
 };
 
 

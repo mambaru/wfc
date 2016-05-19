@@ -4,19 +4,44 @@
 
 namespace wfc{
   
-std::shared_ptr<workflow> workflow::create(workflow_options opt)
+std::shared_ptr<workflow> workflow::create_and_start(workflow_options opt)
 {
+  std::shared_ptr<workflow> wrk;
   if ( auto g = ::wfc::wfcglobal::static_global )
   {
     if ( opt.enabled )
-      return std::shared_ptr<workflow>( new workflow( g->io_service, opt ) );
+      wrk = std::shared_ptr<workflow>( new workflow( g->io_service, opt ) );
     else
       return g->workflow;
   }
   else
   {
-    return std::shared_ptr<workflow>( new workflow( opt ) );
+    wrk = std::shared_ptr<workflow>( new workflow( opt ) );
   }
+  wrk->start();
+  return wrk;
+}
+
+std::shared_ptr<workflow> workflow::recreate_and_start( std::shared_ptr<workflow> wrk,  workflow_options opt )
+{
+  if ( wrk == nullptr )
+    return workflow::create_and_start(opt);
+  
+  if ( auto g = ::wfc::wfcglobal::static_global )
+  {
+    if ( opt.enabled )
+    {
+      if ( wrk == g->workflow ) wrk = workflow::create_and_start(opt);
+      else wrk->reconfigure(opt);
+    }
+    else
+      return g->workflow;
+  }
+  else
+  {
+    wrk->reconfigure(opt);
+  }
+  return wrk;
 }
 
 std::shared_ptr<workflow> workflow::create(::wfc::asio::io_service& io, iow::queue_options opt)
@@ -55,6 +80,11 @@ void workflow::reconfigure(workflow_options opt)
 void workflow::stop()
 {
   _impl->stop();
+}
+
+std::shared_ptr< workflow::impl > workflow::get() const
+{
+  return _impl;
 }
 
 bool workflow::post(post_handler handler)
