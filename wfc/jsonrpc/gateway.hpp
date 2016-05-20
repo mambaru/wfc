@@ -1,3 +1,4 @@
+
 #pragma once 
 
 #include <wfc/jsonrpc/interface_implementation.hpp>
@@ -22,6 +23,13 @@ public:
   typedef typename super::data_ptr data_ptr;
 
   virtual ~gateway_impl() {}
+  
+  virtual void configure() override{}
+  
+  virtual void start(const std::string&) override
+  {
+    this->reconfigure();
+  }
 
   virtual void reconfigure() override
   {
@@ -29,8 +37,8 @@ public:
     auto dopt = this->options();
     engine_options eopt = static_cast<engine_options>(dopt);
     typedef typename engine_type::target_type target_type;
-    typedef typename target_type::element_type interface_type;
-    target_type target = this->global()->registry.template get< interface_type >(dopt.incoming_target);
+    typedef typename target_type::element_type target_interface;
+    target_type target = this->global()->registry.template get< target_interface >(dopt.incoming_target);
     eopt.target = target;
     eopt.peeper = target;
     if ( target!=nullptr && dopt.incoming_reg)
@@ -81,30 +89,6 @@ public:
   {
     this->engine()->template call<Tg>( std::move(req), _target_id, std::forward<Args>(args)... );
   }
-
-  /**
-   * Используеться только шлюзом, в основном для предварительного коннекта
-   * если первый запрос должен идти от сервера 
-   */
-  /*
-  void connect(io_id_t io_id)
-  {
-    const auto& dopt = this->options();
-    if ( auto pitf = this->global()->registry.template get<iinterface>(dopt.target) )
-    {
-      pitf->reg_io(io_id, this->shared_from_this());
-    }
-  }
-
-  void disconnect(io_id_t io_id)
-  {
-    const auto& dopt = this->options();
-    if ( auto pitf = this->global()->registry.template get<iinterface>(dopt.target) )
-    {
-      pitf->unreg_io(io_id);
-    }
-  }
-  */
 
 private:
   std::atomic<io_id_t> _target_id;
