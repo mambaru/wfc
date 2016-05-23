@@ -73,10 +73,10 @@ public:
       {
         if ( auto pitf = witf.lock() )
         {
-          auto tmp = [handler](data_ptr d) 
+          /*auto tmp = [handler](data_ptr d) 
           { 
             handler( std::move(d) );
-          };
+          };*/
           pitf->perform_io( std::move(d), io_id, std::move(handler) );
         }
 

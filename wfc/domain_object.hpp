@@ -260,6 +260,19 @@ public:
     return true;
   }
   
+  template<typename I>
+  std::shared_ptr<I> get_target(const std::string& prefix, const std::string& name, bool disabort = false) const
+  {
+    return this->global()->registry.template get<I>(prefix, name, disabort);
+  }
+  
+  template<typename I>
+  std::shared_ptr<I> get_target(const std::string& name, bool disabort = false) const
+  {
+    return this->global()->registry.template get<I>(name, disabort);
+  }
+
+
   
 private:
   bool _started;
