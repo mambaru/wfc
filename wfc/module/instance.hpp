@@ -19,7 +19,7 @@ public:
   typedef DomainObject object_type;
   typedef typename object_type::domain_interface domain_interface;
   typedef typename object_type::options_type domain_options_type;
-  typedef instance_options<domain_options_type> options_type;
+  typedef domain_instance_options<domain_options_type> options_type;
 
   typedef std::shared_ptr<object_type> object_ptr;
   typedef std::shared_ptr<wfcglobal> global_ptr;
@@ -51,7 +51,24 @@ public:
     _global = g;
   }
 
-  void configure(const options_type& opt)  
+  void reconfigure_instance_(  )
+  {
+    this->configure_(_options.enabled);
+    if ( _object != nullptr )
+    {
+      _object->suspend( _options.suspend );
+      _object->reconfigure_workflow( _options.workflow );
+    }
+  }
+
+  void reconfigure_instance( const base_instance_options& opt )
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    static_cast<base_instance_options&>( _options ) = opt;
+    this->reconfigure_instance_();
+  }
+
+  void reconfigure(const options_type& opt)  
   {
     std::lock_guard<mutex_type> lk(_mutex);
     _ready_for_start = true;
@@ -59,14 +76,21 @@ public:
     
     // Reset ready flag for enable startup
     _startup = _startup && !( _object==nullptr && _options.enabled );
-    this->configure_(_options.enabled);
+    this->reconfigure_instance_();
   }
 
   virtual void initialize() 
   {
     std::lock_guard<mutex_type> lk(_mutex);
     if ( _ready_for_start )
+    {
       this->initialize_();
+      // CONFIG_LOG_MESSAGE("Instance '" << _options.name << "' is initialized")
+    }
+    else
+    {
+      CONFIG_LOG_MESSAGE("Instance '" << _options.name << "' without initialization")
+    }
   }
 
 
@@ -75,7 +99,14 @@ public:
     std::lock_guard<mutex_type> lk(_mutex);
     
     if ( _ready_for_start )
+    {
       this->start_(arg);
+      // CONFIG_LOG_MESSAGE("Instance '" << _options.name << "' is started")
+    }
+    else
+    {
+      CONFIG_LOG_MESSAGE("Instance '" << _options.name << "' without restart")
+    }
     _ready_for_start = false;
   }
 
@@ -84,13 +115,6 @@ public:
     std::lock_guard<mutex_type> lk(_mutex);
     this->stop_(arg);
   }
-  
-  virtual void suspend(bool val)  override
-  {
-    std::lock_guard<mutex_type> lk(_mutex);
-    if ( _object != nullptr )
-      _object->suspend(val);
-  }
 
 // iinterface
 
@@ -98,8 +122,6 @@ public:
   {
     object_type::generate( opt, type );
   }
-
-
 
 // -------------------------------------------------
 

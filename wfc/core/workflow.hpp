@@ -91,7 +91,7 @@ public:
   size_t queue_size() const;
   
 private:
-  
+  std::atomic<time_t> _delay_ms;
   std::shared_ptr<impl> _impl;
 };
 

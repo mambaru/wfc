@@ -60,11 +60,15 @@ workflow::~workflow()
 workflow::workflow(workflow_options opt )
 {
   _impl = std::make_shared<impl>(opt, opt.threads);
+  _impl->rate_limit( opt.rate_limit );
+  _delay_ms = opt.post_delay_ms;
 }
 
 workflow::workflow(io_service& io, workflow_options opt)
 {
   _impl = std::make_shared<impl>(io, opt, opt.threads, opt.use_io_service);
+  _impl->rate_limit( opt.rate_limit );
+  _delay_ms = opt.post_delay_ms;
 }
 
 void workflow::start()
@@ -74,7 +78,9 @@ void workflow::start()
 
 void workflow::reconfigure(workflow_options opt)
 {
+  _impl->rate_limit( opt.rate_limit );
   _impl->reconfigure(opt, opt.threads, opt.use_io_service);
+  
 }
 
 void workflow::stop()
@@ -89,7 +95,10 @@ std::shared_ptr< workflow::impl > workflow::get() const
 
 bool workflow::post(post_handler handler)
 {
-  return _impl->post( std::move(handler) );
+  if ( _delay_ms == 0)
+    return _impl->post( std::move(handler) );
+  else
+    return this->post( std::chrono::milliseconds(_delay_ms), std::move(handler) );
 }
 
 bool workflow::post(time_point_t tp, post_handler handler)

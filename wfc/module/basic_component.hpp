@@ -29,8 +29,10 @@ public:
 
   typedef Name        component_name;
   typedef Instance    instance_type;
+  
   typedef DomainJson  domain_json;
-  typedef instance_options_json<domain_json, Features> instance_json;
+  typedef base_instance_options_json<Features> base_instance_json;
+  typedef domain_instance_options_json<domain_json, Features> instance_json;
 
   typedef std::shared_ptr<wfcglobal> global_ptr;
   typedef typename instance_type::options_type instance_options;
@@ -45,7 +47,7 @@ public:
   typedef typename std::conditional<
     is_singleton,
     instance_json,
-    ::wfc::json::array< std::vector<instance_json> >
+    ::wfc::json::array< std::vector< instance_json> >
   >::type component_json;
   
   typedef std::shared_ptr<instance_type> instance_ptr;
@@ -56,10 +58,11 @@ public:
     std::map< std::string, instance_ptr>
   >::type instance_map;
 
+  struct options_pair { std::string instance, domain;};
   typedef typename std::conditional<
     is_singleton,
-    std::string,
-    std::map< std::string, std::string>
+    options_pair,
+    std::map< std::string, options_pair>
   >::type options_map;
 
   typedef typename std::conditional<
@@ -67,7 +70,6 @@ public:
     std::string,
     std::list< std::string>
   >::type start_list;
-  
     
   virtual ~basic_component()
   {
@@ -137,42 +139,21 @@ public:
     this->stop_(arg, fas::bool_<is_singleton>() );
   }
 
-  // iinterface
-  virtual void startup_io(io_id_t, outgoing_handler_t)
-  {
-    
-  }
-
-  virtual void perform_io(data_ptr, io_id_t, outgoing_handler_t handler)
-  {
-    if ( handler!=nullptr )
-      handler(nullptr);
-  }
-  
-  virtual void shutdown_io(io_id_t)
-  {
-    
-  }
-
-
 private:
 
-  void serialize_( const instance_options& opt,  std::string& str )
+  void serialize_base_instance_( const instance_options& opt,  std::string& str )
   {
-    typename instance_json::serializer serializer;
-    //typename domain_json::serializer serializer;
+    typename base_instance_json::serializer serializer;
     str.clear();
     serializer( opt, std::back_inserter(str) );
   }
 
-  /*
-  void test_serialize_( const instance_options& opt,  std::string& str )
+  void serialize_domain_( const instance_options& opt,  std::string& str )
   {
-    typename instance_json::serializer serializer;
+    typename domain_json::serializer serializer;
     str.clear();
     serializer( opt, std::back_inserter(str) );
   }
-  */
 
   void unserialize_( component_options& opt,  const std::string& str )
   {
@@ -198,9 +179,9 @@ private:
     opt.enabled = true;
     _global->registry.set("instance", this->name(), _instances);
     _instances->create(_global);
-    // TODO: Убрать как допилим domain_object, чтобы logger работал
-    _instances->configure(opt);
+    _instances->reconfigure(opt);
     _instances->initialize();
+    // CONFIG_LOG_MESSAGE("Singleton '" << opt.name << "' configured with defaults params")
   }
 
   void create_(fas::false_) { }
@@ -211,14 +192,93 @@ private:
     this->unserialize_(opt, stropt );
     opt.name = this->name();
     
-    std::string strins;
-    this->serialize_(opt, strins );
-    if ( _options == strins )
-      return;
-    _options = strins;
-    _instances->configure(opt);
+    options_pair op;
+    this->serialize_base_instance_(opt, op.instance );
+    this->serialize_domain_(opt, op.domain );
+    
+    if ( _options.domain != op.domain )        
+    {
+      _instances->reconfigure(opt);
+      CONFIG_LOG_MESSAGE("Singleton '" << opt.name << "' is reconfigured (fully)")
+    }
+    else if ( _options.instance != op.instance ) 
+    {
+      _instances->reconfigure_instance(opt);
+      CONFIG_LOG_MESSAGE("Singleton '" << opt.name << "' is reconfigured (basic)")
+    }
+    else
+    {
+      CONFIG_LOG_MESSAGE("Singleton '" << opt.name << "' without reconfiguration")
+    }
+    
+    _options = op;
   }
 
+
+  void configure_(const std::string& stropt, fas::false_)
+  {
+    std::set<std::string> stop_list;
+    for (const auto& item : _instances )
+      stop_list.insert(item.first);
+    
+    component_options optlist;
+    this->unserialize_( optlist, stropt );
+
+    for (const auto& opt : optlist )
+    {
+      stop_list.erase(opt.name);
+      options_pair op;
+      this->serialize_domain_(opt, op.domain );
+      this->serialize_base_instance_(opt, op.instance );
+      
+      auto itr = _instances.find(opt.name);
+      if ( itr == _instances.end() )
+      {
+        auto inst =  std::make_shared<instance_type>();
+        itr = _instances.insert( std::make_pair( opt.name, inst) ).first;
+        if ( _global ) _global->registry.set("instance", opt.name, inst);
+        inst->create( _global );
+        itr->second->reconfigure(opt);
+        CONFIG_LOG_MESSAGE("Instance '" << opt.name << "' is configured")
+        _options.insert(std::make_pair(opt.name, op) );
+      }
+      else
+      {
+        auto oitr = _options.find(opt.name);
+        if ( oitr == _options.end() ) abort();
+      
+        if ( oitr->second.domain != op.domain )
+        {
+          itr->second->reconfigure(opt);
+          CONFIG_LOG_MESSAGE("Instance '" << opt.name << "' is reconfigured (fully)")
+        }
+        else if ( oitr->second.instance != op.instance )
+        {
+          itr->second->reconfigure_instance(opt);
+          CONFIG_LOG_MESSAGE("Instance '" << opt.name << "' is reconfigured (basic)")
+        }
+        else
+        {
+          CONFIG_LOG_MESSAGE("Instance '" << opt.name << "' without reconfiguration")
+        }
+        oitr->second = op;
+      }
+    } // for optlist
+
+    for ( const auto& name: stop_list )
+    {
+      auto itr = _instances.find(name);
+      if ( itr == _instances.end() )
+      {
+        if ( _global ) _global->registry.erase("instance", name);
+        itr->second->stop("");
+        _instances.erase(itr);
+        CONFIG_LOG_MESSAGE("Instance '" << name << "' is deleted")
+      }
+    }
+  }
+
+  /*
   void configure_(const std::string& stropt, fas::false_)
   {
     std::set<std::string> stop_list;
@@ -236,12 +296,16 @@ private:
         // для этого сериализуем его и сравнимваем строки
         // после сериализации пробелов и коментариев в строке не будет
         
-        std::string strins;
-        this->serialize_(opt, strins );
+        std::string dom_json;
+        std::string ins_json;
+        
+        this->serialize_domain_(opt, dom_json );
+        this->serialize_base_instance_(opt, ins_json );
         
         auto itr = _options.find(opt.name);
         if ( itr!=_options.end() )
         {
+          
           if ( strins == itr->second )
           {
             continue;
@@ -256,6 +320,7 @@ private:
           }
           
           itr->second = strins;
+          
         }
         else
         {
@@ -287,7 +352,7 @@ private:
         DEBUG_LOG_MESSAGE("component: configured instance " << opt.name)
       }
       stop_list.erase(opt.name);
-    }
+    } // for optlist
     
     for ( const auto& name: stop_list )
     {
@@ -304,6 +369,8 @@ private:
       }
     }
   }
+  
+  */
   
   void start_(const std::string& arg, fas::true_)
   {

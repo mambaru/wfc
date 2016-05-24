@@ -1,10 +1,10 @@
 #pragma once
 
 #include <wfc/core/global.hpp>
-#include <wfc/core/workflow.hpp>
 #include <iow/owner/owner.hpp>
 #include <iow/io/io_id.hpp>
 #include <wfc/json.hpp>
+#include <wfc/workflow.hpp>
 
 #include <memory>
 #include <string>
@@ -124,6 +124,11 @@ public:
       CONFIG_LOG_MESSAGE("instance " << _name << " suspend mode " << (suspend ? "ON" : "OFF") )
     }
     _suspend = suspend;
+  }
+  
+  virtual void reconfigure_workflow( workflow_options opt ) 
+  {
+    _workflow = workflow::recreate_and_start(_workflow, opt);
   }
 
   virtual void start(const std::string&)
@@ -272,6 +277,10 @@ public:
     return this->global()->registry.template get<I>(name, disabort);
   }
 
+  std::shared_ptr<workflow> get_workflow() const 
+  {
+    return _workflow;
+  }
 
   
 private:
@@ -282,6 +291,7 @@ private:
   global_ptr _global;
   options_type _options;
   owner_type _owner;
+  std::shared_ptr<workflow > _workflow;
 };
   
 }

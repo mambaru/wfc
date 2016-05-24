@@ -62,22 +62,6 @@ public:
     }
   }
 
-
-  virtual void reg_io(io_id_t , std::weak_ptr<iinterface> ) override
-  {
-  }
-
-  virtual void perform_io(data_ptr , io_id_t, outgoing_handler_t handler) override
-  {
-    if ( handler!=nullptr )
-      handler(nullptr);
-  }
-  
-  virtual void unreg_io(io_id_t ) override
-  {
-    
-  }
-
 private:
 
   void create_(fas::empty_list) {}
