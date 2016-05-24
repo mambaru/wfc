@@ -48,16 +48,16 @@ public:
 
 
   timer_id_t create_timer(duration_t, timer_handler, bool = true);
-  timer_id_t create_timer(duration_t, async_timer_handler, bool = true);
+  timer_id_t create_async_timer(duration_t, async_timer_handler, bool = true);
 
   timer_id_t create_timer(duration_t, duration_t, timer_handler, bool = true);
-  timer_id_t create_timer(duration_t, duration_t, async_timer_handler, bool = true);
+  timer_id_t create_async_timer(duration_t, duration_t, async_timer_handler, bool = true);
 
   timer_id_t create_timer(time_point_t, duration_t, timer_handler, bool = true);
-  timer_id_t create_timer(time_point_t, duration_t, async_timer_handler, bool = true);
+  timer_id_t create_async_timer(time_point_t, duration_t, async_timer_handler, bool = true);
 
   timer_id_t create_timer(std::string, duration_t, timer_handler, bool = true);
-  timer_id_t create_timer(std::string, duration_t, async_timer_handler, bool = true);
+  timer_id_t create_async_timer(std::string, duration_t, async_timer_handler, bool = true);
   
   template< typename Req, typename Res, typename I, typename MemFun, typename Handler >
   timer_id_t create_requester( duration_t d, std::shared_ptr<I> i, MemFun mem_fun, Handler handler )
