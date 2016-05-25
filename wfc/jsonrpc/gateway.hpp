@@ -35,7 +35,7 @@ public:
   {
     _target_id = ::iow::io::create_id<size_t>();
     auto dopt = this->options();
-    engine_options eopt = static_cast<engine_options>(dopt);
+    engine_options& eopt = static_cast<engine_options&>(dopt);
     typedef typename engine_type::target_type target_type;
     typedef typename target_type::element_type target_interface;
     target_type target = this->global()->registry.template get< target_interface >(dopt.incoming_target);
@@ -44,7 +44,7 @@ public:
     if ( target!=nullptr && dopt.incoming_reg)
       target->reg_io( this->engine()->get_id(),this->shared_from_this()  );
 
-    super::reconfigure_(eopt);
+    super::reconfigure_(dopt);
 
     const auto& registry = this->global()->registry;
 
@@ -73,10 +73,6 @@ public:
       {
         if ( auto pitf = witf.lock() )
         {
-          /*auto tmp = [handler](data_ptr d) 
-          { 
-            handler( std::move(d) );
-          };*/
           pitf->perform_io( std::move(d), io_id, std::move(handler) );
         }
 

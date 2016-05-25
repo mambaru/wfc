@@ -37,6 +37,9 @@ public:
   typedef typename domain_interface::incoming_handler_t incoming_handler_t;
   typedef typename domain_interface::startup_handler_t  startup_handler_t;
   typedef typename domain_interface::shutdown_handler_t shutdown_handler_t;
+  
+  typedef ::wfc::workflow workflow_type;
+  typedef workflow_type::timer_id_t timer_id_t;
 
   virtual ~domain_object(){}
   
@@ -277,7 +280,7 @@ public:
     return this->global()->registry.template get<I>(name, disabort);
   }
 
-  std::shared_ptr<workflow> get_workflow() const 
+  std::shared_ptr<workflow_type> get_workflow() const 
   {
     return _workflow;
   }
@@ -291,7 +294,7 @@ private:
   global_ptr _global;
   options_type _options;
   owner_type _owner;
-  std::shared_ptr<workflow > _workflow;
+  std::shared_ptr<workflow_type > _workflow;
 };
   
 }

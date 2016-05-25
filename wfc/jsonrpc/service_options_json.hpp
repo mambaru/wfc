@@ -13,12 +13,16 @@ struct service_options_json
   
   JSON_NAME(target)
   JSON_NAME(allow_non_jsonrpc)
+  JSON_NAME(call_lifetime_ms)
+  JSON_NAME(remove_outdated_ms)
   
   typedef wfc::json::object<
     options_type,
     wfc::json::member_list<
-      wfc::json::member< n_target, options_type, std::string, &options_type::target>,
-      wfc::json::member< n_allow_non_jsonrpc, engine_options, bool, &engine_options::allow_non_jsonrpc>
+      ::wfc::json::member< n_target, options_type, std::string, &options_type::target>,
+      ::wfc::json::member< n_allow_non_jsonrpc, engine_options, bool, &engine_options::allow_non_jsonrpc>,
+      ::wfc::json::member< n_call_lifetime_ms, engine_options, time_t, &engine_options::call_lifetime_ms>,
+      ::wfc::json::member< n_remove_outdated_ms, options_type, time_t, &options_type::remove_outdated_ms>
     >
   > type;
   typedef typename type::target      target;

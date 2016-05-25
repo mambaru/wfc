@@ -27,6 +27,7 @@ public:
   typedef typename super::data_ptr data_ptr;
   typedef typename super::data_type data_type;
   typedef typename super::outgoing_handler_t outgoing_handler_t;
+  typedef typename super::timer_id_t timer_id_t;
 
 public:
 
@@ -34,20 +35,10 @@ public:
   {
     _engine=nullptr;
   }
-
-  void reconfigure_(const engine_options& opt)
-  {
-    if ( _engine == nullptr ) 
-    {
-      _engine = std::make_shared<engine_type>();
-      _engine->start(opt);
-    }
-    else
-    {
-      _engine->reconfigure(opt);
-    }
-  }
-
+  
+  domain_base()
+    : _timer_id(0) 
+  {}
 
   virtual void reg_io(io_id_t io_id, std::weak_ptr<iinterface> witf) override
   {
@@ -82,8 +73,42 @@ public:
   }
   
   engine_ptr engine() const { return _engine; };
+  
+  void reconfigure_(const options_type& opt)
+  {
+    const engine_options& eopt = static_cast<const engine_options&>(opt);
+    if ( _engine == nullptr ) 
+    {
+      _engine = std::make_shared<engine_type>();
+      _engine->start(eopt);
+    }
+    else
+    {
+      _engine->reconfigure( eopt );
+    }
+    this->get_workflow()->release_timer(_timer_id);
+    if ( opt.remove_outdated_ms != 0 )
+    {
+      _timer_id = this->get_workflow()->create_timer(
+        std::chrono::milliseconds(opt.remove_outdated_ms),
+        [this]() -> bool 
+        {
+          if ( size_t count = this->_engine->remove_outdated() )
+          {
+            COMMON_LOG_WARNING( count << " calls is outdated.")
+          }
+          return true;
+        }
+      );
+    }
+  }
+  
+  virtual void stop(const std::string& ) final override
+  {
+    this->get_workflow()->release_timer(_timer_id);
+  }
 private:
-
+  timer_id_t _timer_id;
   engine_ptr _engine;
   
 };
