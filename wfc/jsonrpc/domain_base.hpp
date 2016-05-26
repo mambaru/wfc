@@ -76,7 +76,8 @@ public:
   
   void reconfigure_(const options_type& opt)
   {
-    const engine_options& eopt = static_cast<const engine_options&>(opt);
+    engine_options eopt = static_cast<const engine_options&>(opt);
+    eopt.engine_args.workflow = this->get_workflow();
     if ( _engine == nullptr ) 
     {
       _engine = std::make_shared<engine_type>();
@@ -86,6 +87,7 @@ public:
     {
       _engine->reconfigure( eopt );
     }
+    /*
     this->get_workflow()->release_timer(_timer_id);
     if ( opt.remove_outdated_ms != 0 )
     {
@@ -101,11 +103,17 @@ public:
         }
       );
     }
+    */
   }
   
   virtual void stop(const std::string& ) final override
   {
-    this->get_workflow()->release_timer(_timer_id);
+    if ( _engine != nullptr ) 
+    {
+      _engine->stop();
+    }
+    _engine = nullptr;
+    //this->get_workflow()->release_timer(_timer_id);
   }
 private:
   timer_id_t _timer_id;

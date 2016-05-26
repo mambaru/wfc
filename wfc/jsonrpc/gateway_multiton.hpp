@@ -12,7 +12,8 @@ template< typename Name, typename MethodList, template<typename> class Impl = in
 class gateway_multiton: public ::wfc::multiton<
   Name,
   ::wfc::instance< gateway< MethodList, Impl > >,
-  ::wfc::jsonrpc::gateway_options_json< typename gateway< MethodList, Impl >::options_type >
+  ::wfc::jsonrpc::gateway_options_json< typename gateway< MethodList, Impl >::options_type >,
+  component_features::CommonWorkflow
 >
 {
 };

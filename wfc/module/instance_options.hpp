@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <wfc/core/workflow_options.hpp>
+#include <wfc/workflow.hpp>
 
 namespace wfc{
 

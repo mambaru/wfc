@@ -90,6 +90,7 @@ private:
   std::atomic<io_id_t> _target_id;
 };
 
+
 template<typename MethodList, template<typename> class ItfT = interface_implementation>
 class gateway
   : public ItfT< gateway_impl< typename MethodList::interface_type, ::iow::jsonrpc::handler< ItfT<MethodList> > > >
