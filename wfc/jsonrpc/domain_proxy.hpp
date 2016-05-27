@@ -57,7 +57,7 @@ public:
       return;
     }
     
-    // проверить исключения jsonrpc
+    //TODO: проверить исключения jsonrpc
     while ( d != nullptr )
     {
       incoming_holder holder( std::move(d), false);
@@ -77,7 +77,6 @@ public:
   
   virtual void perform_outgoing(outgoing_holder holder, io_id_t io_id) override
   {
-    
     _adapter.perform_outgoing( std::move(holder), io_id);
   }
   
