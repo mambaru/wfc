@@ -1,8 +1,8 @@
 #pragma once 
 
 #include <wfc/jsonrpc/interface_implementation.hpp>
-#include <wfc/jsonrpc/gateway.hpp>
-#include <wfc/jsonrpc/gateway_options_json.hpp>
+#include <wfc/jsonrpc/gateway/gateway.hpp>
+#include <wfc/jsonrpc/gateway/gateway_options_json.hpp>
 #include <wfc/module/multiton.hpp>
 #include <wfc/module/instance.hpp>
 

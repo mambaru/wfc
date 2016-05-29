@@ -2,18 +2,18 @@
 #pragma once 
 
 #include <wfc/jsonrpc/interface_implementation.hpp>
-#include <wfc/jsonrpc/basic_domain.hpp>
-#include <wfc/jsonrpc/gateway_options.hpp>
+#include <wfc/jsonrpc/basic_engine.hpp>
+#include <wfc/jsonrpc/gateway/gateway_options.hpp>
 #include <iow/jsonrpc/handler.hpp>
 
 namespace wfc{ namespace jsonrpc{
 
 template<typename Interface, typename JsonrpcHandler>
 class gateway_impl
-  : public basic_domain<Interface, JsonrpcHandler, gateway_options>
+  : public basic_engine<Interface, JsonrpcHandler, gateway_options>
   , public std::enable_shared_from_this< gateway_impl<Interface, JsonrpcHandler> >
 {
-  typedef basic_domain<Interface, JsonrpcHandler, gateway_options> super;
+  typedef basic_engine<Interface, JsonrpcHandler, gateway_options> super;
   typedef typename super::engine_options engine_options;
   typedef typename super::interface_type interface_type;
   typedef typename super::engine_type    engine_type;

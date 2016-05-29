@@ -8,11 +8,11 @@
 namespace wfc{ namespace jsonrpc{
 
 template<typename Interface, typename EngineType, typename OptionsType >
-class domain_base
+class engine_base
   : public domain_object< Interface, OptionsType>
 {
 public:
-  typedef domain_base<Interface, EngineType, OptionsType> self;
+  typedef engine_base<Interface, EngineType, OptionsType> self;
   typedef domain_object< Interface, OptionsType> super;
   
   typedef Interface interface_type;
@@ -31,18 +31,18 @@ public:
 
 public:
 
-  virtual ~domain_base()
+  virtual ~engine_base()
   {
     _engine=nullptr;
   }
   
-  domain_base()
+  engine_base()
     : _timer_id(0) 
   {}
 
   virtual void reg_io(io_id_t io_id, std::weak_ptr<iinterface> witf) override
   {
-    DEBUG_LOG_DEBUG( "domain_base::reg_io " << io_id )
+    DEBUG_LOG_DEBUG( "engine_base::reg_io " << io_id )
     if ( _engine != nullptr )
     {
       _engine->reg_io( io_id, this->wrap([witf]( data_ptr d, io_id_t io_id, ::iow::io::outgoing_handler_t handler)
@@ -57,7 +57,7 @@ public:
 
   virtual void unreg_io(io_id_t io_id) override
   {
-    DEBUG_LOG_DEBUG( "domain_base::unreg_io " << io_id )
+    DEBUG_LOG_DEBUG( "engine_base::unreg_io " << io_id )
     if ( _engine != nullptr )
     {
       _engine->unreg_io(io_id);
