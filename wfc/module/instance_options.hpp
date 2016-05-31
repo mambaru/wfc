@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <wfc/workflow.hpp>
+//#include <wfc/workflow.hpp>
 
 namespace wfc{
 
@@ -12,7 +12,8 @@ struct base_instance_options
   int  startup_priority = 0;
   int  shutdown_priority = 0;
   std::string name;
-  workflow_options workflow;
+  std::string workflow;
+  //workflow_options workflow;
 };
 
 template<typename DomainOptions>

@@ -129,9 +129,24 @@ public:
     _suspend = suspend;
   }
   
-  virtual void reconfigure_workflow( workflow_options opt ) 
+  virtual void reconfigure_workflow( std::string name ) 
   {
-    _workflow = workflow::recreate_and_start(_workflow, opt);
+    if ( auto g =  this->global() )
+    {
+      if ( auto w =  g->registry.template get< ::wfc::workflow >("workflow", name, true) )
+      {
+        _workflow = w;
+      }
+      else
+      {
+        _workflow = g->workflow;
+      }
+    }
+    else
+    {
+      _workflow = std::make_shared<workflow_type>( workflow_options() );
+      _workflow->start();
+    }
   }
 
   virtual void start(const std::string&)

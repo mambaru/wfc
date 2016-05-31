@@ -2,7 +2,9 @@
 #include "workflow.hpp"
 
 namespace wfc{
-  
+
+
+/*
 std::shared_ptr<workflow> workflow::create_and_start(workflow_options opt)
 {
   std::shared_ptr<workflow> wrk;
@@ -58,6 +60,6 @@ workflow::workflow(workflow_options opt )
 workflow::workflow(io_service_type& io, workflow_options opt)
   : super(io, opt)
 {}
-
+*/
   
 }

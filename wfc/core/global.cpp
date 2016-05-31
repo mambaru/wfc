@@ -13,5 +13,12 @@ namespace wfc{
 
 std::shared_ptr<wfcglobal> wfcglobal::static_global;
 
+wfcglobal::wfcglobal( io_service_type& io_service)
+  : io_service(io_service)
+  , workflow( new ::wfc::workflow(io_service) )
+{
+  
+}
+
 }
 
