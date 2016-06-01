@@ -80,7 +80,8 @@ public:
     _adapter.perform_outgoing( std::move(holder), io_id);
   }
   
-  target_adapter target() const { return _adapter;}
+  using super::get_target;
+  target_adapter get_target() const { return _adapter;}
   
 public:
   target_adapter _adapter;

@@ -5,6 +5,8 @@
 #include <iow/io/io_id.hpp>
 #include <wfc/json.hpp>
 #include <wfc/workflow.hpp>
+#include <wfc/module/instance_options.hpp>
+#include <wfc/wfc_exit.hpp>
 
 #include <memory>
 #include <string>
@@ -25,6 +27,7 @@ class domain_object
   //typedef void interface_type;
 public:
   typedef Opt options_type;
+  typedef base_instance_options instance_options_type;
   typedef Itf domain_interface;
   typedef std::shared_ptr<wfcglobal> global_ptr;
   typedef ::iow::owner owner_type;
@@ -45,7 +48,6 @@ public:
   
   domain_object()
     : _started(false)
-    , _suspend(false)
     , _io_id( ::iow::io::create_id<io_id_t>() )
   {}
   
@@ -102,13 +104,35 @@ public:
   {
     opt = options_type();
   }
-
-  virtual void initialize(const std::string& name, global_ptr g, const options_type& opt) final
+  
+  virtual void create() {}
+  virtual void create_object(const std::string& name, global_ptr g, const instance_options_type& opt1, const options_type& opt2 ) final
   {
     _name = name;
     _global = g;
+    _instance_options = opt1;
+    _options = opt2;
+    this->create();
+  }
+
+  // Если вызван, то перед этим гарантированно вызван reconfigure_instance
+  virtual void initialize(/*const std::string& name, global_ptr g,*/ const options_type& opt) final
+  {
+    /*
+    _name = name;
+    _global = g;
+    */
     _options = opt;
-    _owner.enable_callback_check(g->enable_callback_check);
+    _owner.enable_callback_check(_global->enable_callback_check);
+    _workflow = _instance_options.workflow.empty()
+                ? this->global()->workflow
+                : this->global()->registry.template get<workflow >("workflow", _instance_options.workflow);
+    if ( _workflow == nullptr )
+    {
+      CONFIG_LOG_FATAL("workflow '" << _instance_options.workflow << "' for instance '" << _name << "' not found")
+      return;
+    }
+
     if ( !_started )
     {
       this->configure();
@@ -120,6 +144,11 @@ public:
     }
   }
   
+  virtual void reconfigure_instance(instance_options_type instance_options)
+  {
+    _instance_options = instance_options;
+  }
+  /*
   virtual void suspend( bool suspend ) 
   {
     if ( _suspend != suspend )
@@ -131,8 +160,17 @@ public:
   
   virtual void reconfigure_workflow( std::string name ) 
   {
-    if ( auto g =  this->global() )
+    if (false) {if ( auto g =  this->global() )
     {
+      if ( name.empty() )
+      {
+        _workflow = g->workflow;
+      }
+      else
+      {
+        _workflow = g->registry.template get<workflow >("workflow", name);
+      }
+      
       if ( auto w =  g->registry.template get< ::wfc::workflow >("workflow", name, true) )
       {
         _workflow = w;
@@ -141,13 +179,15 @@ public:
       {
         _workflow = g->workflow;
       }
-    }
+      
+    }}
     else
     {
-      _workflow = std::make_shared<workflow_type>( workflow_options() );
+      _workflow = std::make_shared<workflow_type>( this->global()->io_service, workflow_options() );
       _workflow->start();
     }
   }
+  */
 
   virtual void start(const std::string&)
   {
@@ -227,7 +267,7 @@ public:
 
   bool suspended() const 
   {
-    return _suspend;
+    return _instance_options.suspend;
   }
   
   template<typename Res, typename Callback>
@@ -241,7 +281,7 @@ public:
   template<typename Res, typename Req, typename Callback>
   bool suspended(const Req& /*req*/, const Callback& cb) const
   {
-    if ( !this->_suspend ) 
+    if ( !this->_instance_options.suspend ) 
       return false;
 
     this->default_response<Res>(cb);
@@ -300,14 +340,20 @@ public:
     return _workflow;
   }
 
+  std::shared_ptr<workflow_type> get_workflow(const std::string& name, bool disabort = false) const 
+  {
+    return this->global()->registry.template get<workflow>("workflow", name, disabort);
+  }
+
   
 private:
   bool _started;
-  bool _suspend;
+  //bool _suspend;
   const io_id_t _io_id;
   std::string _name;
   global_ptr _global;
   options_type _options;
+  instance_options_type _instance_options;
   owner_type _owner;
   std::shared_ptr<workflow_type > _workflow;
 };

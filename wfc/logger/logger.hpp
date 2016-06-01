@@ -2,13 +2,15 @@
 
 #include <iow/logger/global_log.hpp>
 #include <iow/logger/logger.hpp>
+#include <wfc/wfc_exit.hpp>
+#include <sstream>
 
 #define WFC_WRITE_LOG(NAME, TYPE, X) IOW_WRITE_LOG(NAME, TYPE,   X )
 
 #define WFC_LOG_ERROR(NAME, X)    IOW_WRITE_LOG_ERROR( NAME, X )
 #define WFC_LOG_WARNING(NAME,X)   IOW_WRITE_LOG_WARNING( NAME, X )
 #define WFC_LOG_MESSAGE(NAME, X)  IOW_WRITE_LOG_MESSAGE( NAME, X )
-#define WFC_LOG_FATAL(NAME, X)    IOW_WRITE_LOG_FATAL( NAME, X )
+#define WFC_LOG_FATAL(NAME, X)    {IOW_WRITE_LOG_FATAL( NAME, X ) std::stringstream _l_ss_; _l_ss_ << X;  wfc_exit_with_error(_l_ss_.str());}
 #define WFC_LOG_BEGIN(NAME, X)    IOW_WRITE_LOG_BEGIN( NAME, X )
 #define WFC_LOG_END(NAME, X)      IOW_WRITE_LOG_END( NAME, X )
 #define WFC_LOG_DEBUG(NAME, X)    IOW_WRITE_LOG_DEBUG( NAME, X )

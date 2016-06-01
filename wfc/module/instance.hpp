@@ -51,24 +51,14 @@ public:
     _global = g;
   }
 
-  void reconfigure_instance_(  )
-  {
-    this->configure_(_options.enabled);
-    if ( _object != nullptr )
-    {
-      _object->suspend( _options.suspend );
-      _object->reconfigure_workflow( _options.workflow );
-    }
-  }
-
-  void reconfigure_instance( const base_instance_options& opt )
+  virtual void reconfigure_instance( const base_instance_options& opt )
   {
     std::lock_guard<mutex_type> lk(_mutex);
     static_cast<base_instance_options&>( _options ) = opt;
     this->reconfigure_instance_();
   }
 
-  void reconfigure(const options_type& opt)  
+  virtual void reconfigure(const options_type& opt)  
   {
     std::lock_guard<mutex_type> lk(_mutex);
     _ready_for_start = true;
@@ -144,8 +134,8 @@ public:
   }
   
 private:
-  
-  void configure_(bool enabled) 
+
+  void create_or_stop_if_(bool enabled) 
   {
     // Конфигурирование и регистрация объекта
     // Создание объекта
@@ -154,6 +144,7 @@ private:
       if ( _object == nullptr )
       {
         _object = std::make_shared<object_type>();
+        _object->create_object(_options.name, _global, _options, _options);
       }
 
       if (_global)
@@ -174,12 +165,22 @@ private:
       }
     }
   }
-  
+
+  void reconfigure_instance_(  )
+  {
+    this->create_or_stop_if_(_options.enabled);
+    if ( _object != nullptr )
+    {
+      _object->reconfigure_instance(_options);
+    }
+  }
+
   void initialize_() 
   {
     if ( _object != nullptr )
     {
-      _object->initialize(_options.name, _global, static_cast<const domain_options_type&>(_options) );
+      _object->initialize(/*_options.name, _global,*/ static_cast<const domain_options_type&>(_options) );
+      _ready_for_stop = true;
     }
   }
 
@@ -194,8 +195,8 @@ private:
 
   void forced_start_(const std::string& arg) 
   {
-    configure_(true);
-    initialize_();
+    this->create_or_stop_if_(true);
+    this->initialize_();
     _object->start(arg);
   }
 
@@ -215,14 +216,17 @@ private:
   {
     if ( _object != nullptr )
     {
-      _object->stop(arg);
+      if ( _ready_for_stop )
+        _object->stop(arg);
       _object = nullptr;
     }
+    _ready_for_stop = false;
   }
 
 private:
 
   bool         _ready_for_start = true;
+  bool         _ready_for_stop = false;
   bool         _startup = false;
   global_ptr   _global;
   options_type _options;

@@ -79,8 +79,16 @@ public:
 
   void erase(const std::string& prefix, const std::string& name)
   {
-    std::lock_guard<mutex_type> lk(_mutex);
-    _registry_map.erase( key_type(prefix,name) );
+    interface_ptr ptr;
+    {
+      std::lock_guard<mutex_type> lk(_mutex);
+      auto itr = _registry_map.find(key_type(prefix,name));
+      if ( itr != _registry_map.end() )
+      {
+        ptr = itr->second;
+        _registry_map.erase( itr );
+      }
+    }
   }
 
   void erase(const std::string& name)
@@ -130,8 +138,12 @@ public:
 
   void clear()
   {
-    std::lock_guard<mutex_type> lk(_mutex);
-    _registry_map.clear();
+    registry_map rm;
+    {
+      std::lock_guard<mutex_type> lk(_mutex);
+      _registry_map.swap(rm);
+    }
+    rm.clear();
   }
   
   size_t size() const

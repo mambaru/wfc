@@ -83,7 +83,10 @@ public:
   template<typename Tg, typename Req, typename ...Args>
   void call(Req req, Args... args)
   {
-    this->engine()->template call<Tg>( std::move(req), _target_id, std::forward<Args>(args)... );
+    if ( auto e = this->engine() )
+    {
+      e->template call<Tg>( std::move(req), _target_id, std::forward<Args>(args)... );
+    }
   }
 
 private:
