@@ -1,9 +1,12 @@
 #pragma once
 
-#include <wfc/jsonrpc/ijsonrpc.hpp>
-#include <memory>
+#include <wfc/jsonrpc.hpp>
 #include <wfc/logger.hpp>
 #include <iow/jsonrpc/incoming/aux.hpp>
+#include <memory>
+
+
+
 
 namespace wfc{ namespace jsonrpc{
   
@@ -101,7 +104,24 @@ struct target_adapter: ijsonrpc
     }
     else if ( auto handler = holder.result_handler() )
     {
-      handler( incoming_holder(nullptr) );
+      if ( auto call_id = holder.call_id() )
+      {
+        ::wfc::jsonrpc::outgoing_error< ::wfc::jsonrpc::error > err;
+        err.error = std::make_unique<service_unavailable>();
+        err.id = std::make_unique<data_type>();
+        ::iow::json::value<call_id_t>::serializer()( call_id,  std::back_inserter(*(err.id)) );
+
+        auto d = std::make_unique<data_type>();
+        d->reserve(100);
+        ::wfc::jsonrpc::outgoing_error_json< ::wfc::jsonrpc::error_json >::serializer()(err, std::back_inserter(*d));
+        incoming_holder holder( std::move(d) );
+        holder.parse();
+        handler( std::move(holder) );
+      }
+      else
+      {
+        handler( incoming_holder(nullptr) );
+      }
     }
   }
   

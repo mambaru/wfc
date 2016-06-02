@@ -87,23 +87,6 @@ public:
     {
       _engine->reconfigure( eopt );
     }
-    /*
-    this->get_workflow()->release_timer(_timer_id);
-    if ( opt.remove_outdated_ms != 0 )
-    {
-      _timer_id = this->get_workflow()->create_timer(
-        std::chrono::milliseconds(opt.remove_outdated_ms),
-        [this]() -> bool 
-        {
-          if ( size_t count = this->_engine->remove_outdated() )
-          {
-            COMMON_LOG_WARNING( count << " calls is outdated.")
-          }
-          return true;
-        }
-      );
-    }
-    */
   }
   
   virtual void stop(const std::string& ) final override
@@ -113,7 +96,6 @@ public:
       _engine->stop();
     }
     _engine = nullptr;
-    //this->get_workflow()->release_timer(_timer_id);
   }
 private:
   timer_id_t _timer_id;

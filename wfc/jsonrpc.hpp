@@ -8,6 +8,7 @@
 
 #include <iow/jsonrpc/handler.hpp>
 #include <iow/jsonrpc/method.hpp>
+#include <iow/jsonrpc/errors.hpp>
 
 #include <wfc/jsonrpc/service/service.hpp>
 #include <wfc/jsonrpc/gateway/gateway.hpp>
