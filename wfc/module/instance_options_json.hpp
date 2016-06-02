@@ -38,13 +38,11 @@ struct base_instance_options_json
   
   enum 
   {
-    has_name      =  ( Features & component_features::Singleton       )   == 0 ,
-    has_enabled   =  ( Features & component_features::Fixed           )   == 0 ,
-    has_priority  =  ( Features & component_features::Extraordinary   )   == 0 ,
-    has_suspend   =  ( Features & component_features::DisableSuspend  )   == 0 ,
-    has_workflow  =  ( Features & component_features::CommonWorkflow )    == 0
-    /*has_workflow1  =  ( Features & component_features::Workflow1 )        != 0 ,
-    has_workflow2  =  ( Features & component_features::CommonWorkflow )   == 0 && !has_workflow1*/
+    has_name      =  ( Features & component_features::Singleton        )   == 0 ,
+    has_enabled   =  ( Features & component_features::DisabledEnabled  )   == 0 ,
+    has_priority  =  ( Features & component_features::DisabledPriority )   == 0 ,
+    has_suspend   =  ( Features & component_features::DisabledSuspend  )   == 0 ,
+    has_workflow  =  ( Features & component_features::DisabledWorkflow )   == 0
   };
   
   typedef ::iow::json::object<
