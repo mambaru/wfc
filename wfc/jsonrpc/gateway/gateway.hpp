@@ -23,15 +23,8 @@ public:
   typedef typename super::data_ptr data_ptr;
 
   virtual ~gateway_impl() {}
-  
-  virtual void configure() override{}
-  
-  virtual void start(const std::string&) override
-  {
-    this->reconfigure();
-  }
 
-  virtual void reconfigure() override
+  virtual void initialize() override
   {
     _target_id = ::iow::io::create_id<size_t>();
     auto dopt = this->options();
@@ -41,10 +34,10 @@ public:
     target_type target = this->global()->registry.template get< target_interface >(dopt.incoming_target);
     eopt.target = target;
     eopt.peeper = target;
-    if ( target!=nullptr && dopt.incoming_reg)
-      target->reg_io( this->engine()->get_id(),this->shared_from_this()  );
+    this->initialize_engine(eopt);
 
-    super::reconfigure_(dopt);
+    if ( target!=nullptr && dopt.incoming_reg)
+      target->reg_io( this->engine()->get_id(), this->shared_from_this()  );
 
     const auto& registry = this->global()->registry;
 

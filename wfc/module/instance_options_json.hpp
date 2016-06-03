@@ -34,8 +34,7 @@ struct base_instance_options_json
   JSON_NAME(workflow)
   JSON_NAME(startup_priority)
   JSON_NAME(shutdown_priority)
-  
-  
+
   enum 
   {
     has_name      =  ( Features & component_features::Singleton        )   == 0 ,
@@ -54,9 +53,6 @@ struct base_instance_options_json
       typename optional_member<has_priority, n_startup_priority,  base_instance_options, int,         &base_instance_options::startup_priority>::type,
       typename optional_member<has_priority, n_shutdown_priority, base_instance_options, int,         &base_instance_options::shutdown_priority>::type,
       typename optional_member<has_workflow, n_workflow,          base_instance_options, std::string, &base_instance_options::workflow>::type
-      /*,
-      typename optional_member<has_workflow1, n_workflow,          base_instance_options, workflow_options, &base_instance_options::workflow, workflow_options_json>::type,
-      typename optional_member<has_workflow2, n_workflow,          base_instance_options, workflow_options, &base_instance_options::workflow, workflow_options2_json>::type*/
     >
   > type;
 

@@ -71,12 +71,21 @@ public:
       _engine->perform_io( std::move(d), io_id, std::move(handler) );
     }
   }
-  
+
   engine_ptr engine() const { return _engine; };
-  
-  void reconfigure_(const options_type& opt)
+
+  virtual void stop(const std::string& ) final override
   {
-    engine_options eopt = static_cast<const engine_options&>(opt);
+    if ( _engine != nullptr ) 
+    {
+      _engine->stop();
+    }
+    _engine = nullptr;
+  }
+protected:
+  void initialize_engine(engine_options eopt)
+  {
+    //engine_options eopt = static_cast<const engine_options&>(opt);
     eopt.engine_args.workflow = this->get_workflow();
     if ( _engine == nullptr ) 
     {
@@ -88,15 +97,7 @@ public:
       _engine->reconfigure( eopt );
     }
   }
-  
-  virtual void stop(const std::string& ) final override
-  {
-    if ( _engine != nullptr ) 
-    {
-      _engine->stop();
-    }
-    _engine = nullptr;
-  }
+
 private:
   timer_id_t _timer_id;
   engine_ptr _engine;

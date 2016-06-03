@@ -18,8 +18,11 @@ public:
   typedef std::recursive_mutex mutex_type;
   typedef DomainObject object_type;
   typedef typename object_type::domain_interface domain_interface;
+  typedef typename object_type::options1_type options_type;
+  /*
   typedef typename object_type::options_type domain_options_type;
   typedef domain_instance_options<domain_options_type> options_type;
+  */
 
   typedef std::shared_ptr<object_type> object_ptr;
   typedef std::shared_ptr<wfcglobal> global_ptr;
@@ -51,11 +54,21 @@ public:
     _global = g;
   }
 
-  virtual void reconfigure_instance( const base_instance_options& opt )
+  virtual void configure(const options_type& opt)
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    _options = opt;
+    if ( auto obj = this->create_or_stop_if_() ) 
+      obj->configure_domain(_options);
+  }
+
+  virtual void reconfigure_basic( const base_instance_options& opt )
   {
     std::lock_guard<mutex_type> lk(_mutex);
     static_cast<base_instance_options&>( _options ) = opt;
-    this->reconfigure_instance_();
+    _startup = _startup && !( _object==nullptr && _options.enabled );
+    if ( auto obj = this->create_or_stop_if_() ) 
+      obj->reconfigure_basic( _options );
   }
 
   virtual void reconfigure(const options_type& opt)  
@@ -63,15 +76,27 @@ public:
     std::lock_guard<mutex_type> lk(_mutex);
     _ready_for_start = true;
     _options = opt;
-    
+
     // Reset ready flag for enable startup
     _startup = _startup && !( _object==nullptr && _options.enabled );
-    this->reconfigure_instance_();
+
+    if ( auto obj = this->create_or_stop_if_() ) 
+    {
+      obj->reconfigure_domain(_options);
+    }
   }
 
   virtual void initialize() 
   {
     std::lock_guard<mutex_type> lk(_mutex);
+    if (auto obj = _object )
+    {
+      obj->initialize_domain( );
+    }
+      
+
+    
+    /*
     if ( _ready_for_start )
     {
       this->initialize_();
@@ -81,23 +106,24 @@ public:
     {
       CONFIG_LOG_MESSAGE("Instance '" << _options.name << "' without initialization")
     }
+    */
   }
 
 
   virtual void start(const std::string& arg) override
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    
+
     if ( _ready_for_start )
     {
       this->start_(arg);
-      // CONFIG_LOG_MESSAGE("Instance '" << _options.name << "' is started")
     }
     else
     {
       CONFIG_LOG_MESSAGE("Instance '" << _options.name << "' without restart")
     }
     _ready_for_start = false;
+    _ready_for_stop = true;
   }
 
   virtual void stop(const std::string& arg) override
@@ -110,7 +136,8 @@ public:
 
   void generate(options_type& opt, const std::string& type) const 
   {
-    object_type::generate( opt, type );
+    auto obj = std::make_shared<object_type>();
+    obj->generate( opt, type );
   }
 
 // -------------------------------------------------
@@ -135,16 +162,16 @@ public:
   
 private:
 
-  void create_or_stop_if_(bool enabled) 
+  object_ptr create_or_stop_if_(/*bool enabled*/) 
   {
     // Конфигурирование и регистрация объекта
     // Создание объекта
-    if ( enabled )
+    if ( _options.enabled )
     {
       if ( _object == nullptr )
       {
         _object = std::make_shared<object_type>();
-        _object->create_object(_options.name, _global, _options, _options);
+        _object->create_domain(_options.name, _global);
       }
 
       if (_global)
@@ -164,25 +191,33 @@ private:
         _object = nullptr;
       }
     }
+    return _object;
   }
 
+  /*
   void reconfigure_instance_(  )
   {
     this->create_or_stop_if_(_options.enabled);
     if ( _object != nullptr )
     {
-      _object->reconfigure_instance(_options);
+      _object->reconfigure_basic(_options);
     }
   }
+  */
 
+  /*
   void initialize_() 
   {
+    
     if ( _object != nullptr )
     {
-      _object->initialize(/*_options.name, _global,*/ static_cast<const domain_options_type&>(_options) );
+      //_object->initialize( static_cast<const domain_options_type&>(_options) );
+      _object->initialize_domain( );
       _ready_for_stop = true;
     }
+    
   }
+  */
 
   void startup_(const std::string& arg) 
   {
@@ -195,9 +230,12 @@ private:
 
   void forced_start_(const std::string& arg) 
   {
-    this->create_or_stop_if_(true);
-    this->initialize_();
-    _object->start(arg);
+    _options.enabled = true;
+    if ( auto obj = this->create_or_stop_if_() )
+    {
+      obj->initialize_domain();
+      obj->start(arg);
+    }
   }
 
   void start_(const std::string& arg) 
@@ -206,7 +244,11 @@ private:
     {
       this->startup_(arg);
     }
-    else if ( _object == nullptr )
+    else if ( _object != nullptr )
+    {
+      _object->ready_domain();
+    }
+    else
     {
       this->forced_start_(arg);
     }
@@ -224,9 +266,10 @@ private:
   }
 
 private:
-
+  // Разрешает запуск. После запуска, последующие попытки вызова start игнорируються. Сбрасываеться при переконфигурации
   bool         _ready_for_start = true;
   bool         _ready_for_stop = false;
+  // Объект запущен (вызван метод старт)
   bool         _startup = false;
   global_ptr   _global;
   options_type _options;

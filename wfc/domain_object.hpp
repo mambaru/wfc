@@ -28,6 +28,11 @@ class domain_object
 public:
   typedef Opt options_type;
   typedef base_instance_options instance_options_type;
+  
+  typedef base_instance_options base_options1_type;
+  typedef domain_instance_options<Opt> options1_type;
+  
+  //typedef instance_options<Opt>
   typedef Itf domain_interface;
   typedef std::shared_ptr<wfcglobal> global_ptr;
   typedef ::iow::owner owner_type;
@@ -51,6 +56,91 @@ public:
     , _io_id( ::iow::io::create_id<io_id_t>() )
   {}
   
+  virtual void create() {}
+
+  bool _conf_flag = false;
+
+  virtual void configure() { this->reconfigure(); }
+
+  virtual void initialize() {}
+
+  virtual void start(const std::string&) { this->ready(); }
+
+  virtual void stop(const std::string&)  {}
+
+  virtual void reconfigure() { }
+
+  virtual void reconfigure_basic() {}
+
+  virtual void ready() {};
+
+  virtual void create_domain(const std::string& name, global_ptr g ) final
+  {
+    _name = name;
+    _global = g;
+    this->create();
+  }
+
+  // вызываеться один раз между create_domain и initialize_domain
+  virtual void configure_domain(const options1_type& opt) final
+  {
+    _options1 = opt;
+    _workflow = nullptr; // Ибо нефиг. До инициализации ничем пользоватся нельзя
+    _conf_flag = false;
+    this->configure();
+  }
+
+  // первый раз после configure_domain, последующие после reconfigure_domain или reconfigure_basic
+  virtual void initialize_domain() final
+  {
+    _owner.enable_callback_check(_global->enable_callback_check);
+    _workflow = _options1.workflow.empty()
+                ? this->global()->workflow
+                : this->global()->registry.template get<workflow >("workflow", _options1.workflow);
+
+    if ( _workflow == nullptr )
+    {
+      CONFIG_LOG_FATAL("workflow '" << _options1.workflow << "' for instance '" << _name << "' not found")
+      return;
+    }
+
+    _started = true;
+    this->initialize();
+  }
+
+  virtual void reconfigure_basic(const base_options1_type& opt) final
+  {
+    _conf_flag = false;
+    static_cast<base_options1_type&>(_options1) = opt;
+    this->reconfigure_basic();
+  }
+
+  virtual void reconfigure_domain(const options1_type& opt) final
+  {
+    _conf_flag = true;
+    _options1 = opt;
+    this->reconfigure();
+  }
+  
+  // только после реконфигурации и инициализации
+  virtual void ready_domain() final
+  {
+    if ( _conf_flag )
+      this->ready();
+    _conf_flag = false;
+  }
+
+  // только один раз после конфигурации и инициализации
+  virtual void start_domain(const std::string& arg) final
+  {
+    this->start(arg);
+  }
+
+  virtual void stop_domain(const std::string& arg) final
+  {
+    this->stop(arg);
+  }
+
   const std::string& name() const
   {
     return _name;
@@ -61,15 +151,16 @@ public:
     return _global;
   }
   
-  const options_type& options() const 
+  const options1_type& options() const 
   {
-    return _options;
+    return _options1;
   }
 
   owner_type& owner()
   {
     return _owner;
   }
+
 
   template<typename H>
   auto wrap(H&& h) 
@@ -100,10 +191,41 @@ public:
     return _owner.wrap( std::forward<H>(h), std::forward<H2>(h2));
   }
 
-  static void generate(options_type& opt, const std::string& /*type*/)
+  virtual options_type generate(const std::string&) { return options_type();}
+  void generate(options_type& opt, const std::string& type) 
   {
-    opt = options_type();
+    opt = type.empty() ? options_type() : this->generate(type);
+    /*opt = options_type();
+     * */
   }
+
+  template<typename I>
+  std::shared_ptr<I> get_target(const std::string& prefix, const std::string& name, bool disabort = false) const
+  {
+    if ( auto g = this->global() )
+      return g->registry.template get<I>(prefix, name, disabort);
+    return nullptr;
+  }
+  
+  template<typename I>
+  std::shared_ptr<I> get_target(const std::string& name, bool disabort = false) const
+  {
+    if ( auto g = this->global() )
+      return g->registry.template get<I>(name, disabort);
+    return nullptr;
+  }
+
+  std::shared_ptr<workflow_type> get_workflow() const 
+  {
+    return _workflow;
+  }
+
+  std::shared_ptr<workflow_type> get_workflow(const std::string& name, bool disabort = false) const 
+  {
+    return this->global()->registry.template get<workflow>("workflow", name, disabort);
+  }
+
+  /*
   
   virtual void create() {}
   virtual void create_object(const std::string& name, global_ptr g, const instance_options_type& opt1, const options_type& opt2 ) final
@@ -116,12 +238,8 @@ public:
   }
 
   // Если вызван, то перед этим гарантированно вызван reconfigure_instance
-  virtual void initialize(/*const std::string& name, global_ptr g,*/ const options_type& opt) final
+  virtual void initialize( const options_type& opt) final
   {
-    /*
-    _name = name;
-    _global = g;
-    */
     _options = opt;
     _owner.enable_callback_check(_global->enable_callback_check);
     _workflow = _instance_options.workflow.empty()
@@ -148,6 +266,8 @@ public:
   {
     _instance_options = instance_options;
   }
+  */
+  
   /*
   virtual void suspend( bool suspend ) 
   {
@@ -189,17 +309,8 @@ public:
   }
   */
 
-  virtual void start(const std::string&)
-  {
-    CONFIG_LOG_MESSAGE("instance " << _name << " default START!!!")
-    // TODO: LOG default (empty) start
-  }
 
-  virtual void stop(const std::string&)
-  {
-    // TODO: LOG default (empty) stop
-  }
-
+  /*
   virtual void configure()
   {
     this->reconfigure();
@@ -210,6 +321,7 @@ public:
     // Переконфигурация запущенного объекта!!
     // TODO: LOG default (empty) initialize
   }
+  */
 
   virtual void reg_io(io_id_t , std::weak_ptr<iinterface> ) override
   {
@@ -267,7 +379,7 @@ public:
 
   bool suspended() const 
   {
-    return _instance_options.suspend;
+    return _options1.suspend;
   }
   
   template<typename Res, typename Callback>
@@ -323,27 +435,6 @@ public:
     return true;
   }
   
-  template<typename I>
-  std::shared_ptr<I> get_target(const std::string& prefix, const std::string& name, bool disabort = false) const
-  {
-    return this->global()->registry.template get<I>(prefix, name, disabort);
-  }
-  
-  template<typename I>
-  std::shared_ptr<I> get_target(const std::string& name, bool disabort = false) const
-  {
-    return this->global()->registry.template get<I>(name, disabort);
-  }
-
-  std::shared_ptr<workflow_type> get_workflow() const 
-  {
-    return _workflow;
-  }
-
-  std::shared_ptr<workflow_type> get_workflow(const std::string& name, bool disabort = false) const 
-  {
-    return this->global()->registry.template get<workflow>("workflow", name, disabort);
-  }
 
   
 private:
@@ -352,8 +443,9 @@ private:
   const io_id_t _io_id;
   std::string _name;
   global_ptr _global;
-  options_type _options;
-  instance_options_type _instance_options;
+  //options_type _options;
+  options1_type _options1;
+  //instance_options_type _instance_options;
   owner_type _owner;
   std::shared_ptr<workflow_type > _workflow;
 };

@@ -5,31 +5,29 @@ namespace wfc{
 
 component::~component()
 {
-  
 }
-  
+
 component::component(std::shared_ptr<icomponent> p)
   : _impl(p)
 {
-  
 }
 
-std::string component::name() const
+std::string component::name()
 {
   return _impl->name();
 }
 
-std::string component::description() const
+std::string component::description()
 {
   return _impl->description();
 }
 
-std::string component::interface_name() const
+std::string component::interface_name()
 {
   return _impl->interface_name();
 }
 
-std::string component::generate(const std::string& type) const
+std::string component::generate(const std::string& type)
 {
   return _impl->generate(type);
 }
@@ -43,7 +41,6 @@ void component::configure(const std::string& strjson, const std::string& arg)
 {
   return _impl->configure(strjson, arg);
 }
-
 
 void component::create( std::shared_ptr<wfcglobal> g)
 {

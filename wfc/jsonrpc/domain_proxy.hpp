@@ -33,7 +33,7 @@ public:
     return target_adapter(itf, jrpc);
   }
   
-  virtual void reconfigure() override
+  virtual void initialize() override
   {
     _adapter = this->get_adapter( this->options().target );
   }

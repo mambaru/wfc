@@ -20,7 +20,7 @@ class service_base
   typedef typename engine_type::options_type engine_options;
 public:
   
-  virtual void reconfigure() override
+  virtual void initialize() override
   {
     auto dopt = this->options();
     engine_options& eopt = static_cast<engine_options&>(dopt);
@@ -29,8 +29,7 @@ public:
     target_type target = this->global()->registry.template get< interface_type >(dopt.target);
     eopt.target = target;
     eopt.peeper = target;
-
-    super::reconfigure_(dopt);
+    this->initialize_engine(eopt);
   }
 };
 

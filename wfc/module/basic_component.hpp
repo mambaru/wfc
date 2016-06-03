@@ -73,29 +73,26 @@ public:
     
   virtual ~basic_component()
   {
-    if ( _global )
-    {
-      _global->registry.erase( "component", this->name() );
-    }
+    if ( auto g = _global )
+      g->registry.erase( "component", this->name() );
   }
 
-  virtual std::string name() const 
+  virtual std::string name() override
   {
     return component_name()();
   }
 
-  virtual std::string description() const
+  virtual std::string description() override
   {
     return "no description";
   }
 
-  virtual std::string interface_name() const 
+  virtual std::string interface_name() override
   {
     return typeid( domain_interface ).name();
   }
 
-  // TODO: generate json
-  virtual std::string generate(const std::string& type) const 
+  virtual std::string generate(const std::string& type) override
   {
     component_options opt;
     this->generate_options(opt, type);
@@ -105,38 +102,38 @@ public:
     return std::move(result);
   }
 
-  virtual bool parse(const std::string& stropt)
+  virtual bool parse(const std::string& stropt) override
   {
     component_options opt;
     this->unserialize_(opt, stropt );
     return true;
   }
 
-  virtual void create( std::shared_ptr<wfcglobal> g) 
+  virtual void create( std::shared_ptr<wfcglobal> g) override
   {
     _global = g;
     this->create_(fas::bool_<is_singleton>());
   }
   
-  virtual void configure(const std::string& stropt, const std::string& /*arg*/)
+  virtual void configure(const std::string& stropt, const std::string& /*arg*/) override
   {
     this->configure_(stropt, fas::bool_<is_singleton>() );
   }
 
-  virtual void generate_options(component_options& opt, const std::string& type) const 
-  {
-    this->generate_options_(opt, type, fas::bool_<is_singleton>() );
-  }
-  
   // only for external control
-  virtual void start(const std::string& arg) 
+  virtual void start(const std::string& arg) override
   {
     this->start_(arg, fas::bool_<is_singleton>() );
   }
 
-  virtual void stop(const std::string& arg) 
+  virtual void stop(const std::string& arg) override
   {
     this->stop_(arg, fas::bool_<is_singleton>() );
+  }
+
+  virtual void generate_options(component_options& opt, const std::string& type)
+  {
+    this->generate_options_(opt, type, fas::bool_<is_singleton>() );
   }
 
 private:
@@ -181,7 +178,6 @@ private:
     _instances->create(_global);
     _instances->reconfigure(opt);
     _instances->initialize();
-    // CONFIG_LOG_MESSAGE("Singleton '" << opt.name << "' configured with defaults params")
   }
 
   void create_(fas::false_) { }
@@ -196,14 +192,19 @@ private:
     this->serialize_base_instance_(opt, op.instance );
     this->serialize_domain_(opt, op.domain );
     
-    if ( _options.domain != op.domain )        
+    if ( _options.instance.empty() )
+    {
+      _instances->configure(opt);
+      CONFIG_LOG_MESSAGE("Singleton '" << opt.name << "' is initial configured ")
+    }
+    else if ( _options.domain != op.domain )        
     {
       _instances->reconfigure(opt);
       CONFIG_LOG_MESSAGE("Singleton '" << opt.name << "' is reconfigured (fully)")
     }
     else if ( _options.instance != op.instance ) 
     {
-      _instances->reconfigure_instance(opt);
+      _instances->reconfigure_basic(opt);
       CONFIG_LOG_MESSAGE("Singleton '" << opt.name << "' is reconfigured (basic)")
     }
     else
@@ -238,8 +239,8 @@ private:
         itr = _instances.insert( std::make_pair( opt.name, inst) ).first;
         if ( _global ) _global->registry.set("instance", opt.name, inst);
         inst->create( _global );
-        itr->second->reconfigure(opt);
-        CONFIG_LOG_MESSAGE("Instance '" << opt.name << "' is configured")
+        itr->second->configure(opt);
+        CONFIG_LOG_MESSAGE("Instance '" << opt.name << "' is initial configured")
         _options.insert(std::make_pair(opt.name, op) );
       }
       else
@@ -254,7 +255,7 @@ private:
         }
         else if ( oitr->second.instance != op.instance )
         {
-          itr->second->reconfigure_instance(opt);
+          itr->second->reconfigure_basic(opt);
           CONFIG_LOG_MESSAGE("Instance '" << opt.name << "' is reconfigured (basic)")
         }
         else
@@ -278,100 +279,6 @@ private:
     }
   }
 
-  /*
-  void configure_(const std::string& stropt, fas::false_)
-  {
-    std::set<std::string> stop_list;
-    for (const auto& item : _instances )
-      stop_list.insert(item.first);
-
-    component_options optlist;
-    this->unserialize_( optlist, stropt );
-
-    
-    for (const auto& opt : optlist )
-    {
-      bool suspend_only = false;
-      { // проверям на фактическое изменения опций объекта
-        // для этого сериализуем его и сравнимваем строки
-        // после сериализации пробелов и коментариев в строке не будет
-        
-        std::string dom_json;
-        std::string ins_json;
-        
-        this->serialize_domain_(opt, dom_json );
-        this->serialize_base_instance_(opt, ins_json );
-        
-        auto itr = _options.find(opt.name);
-        if ( itr!=_options.end() )
-        {
-          
-          if ( strins == itr->second )
-          {
-            continue;
-          }
-          
-          {
-            auto test_opt = opt;
-            test_opt.suspend = !opt.suspend;
-            std::string test_strins;
-            this->serialize_(test_opt, test_strins );
-            suspend_only = ( test_strins == itr->second );
-          }
-          
-          itr->second = strins;
-          
-        }
-        else
-        {
-          _options.insert(itr, std::make_pair(opt.name, strins) );
-        }
-      }
-      
-      auto itr = _instances.find(opt.name);
-      if ( itr == _instances.end() )
-      {
-        auto inst =  std::make_shared<instance_type>();
-        itr = _instances.insert( std::make_pair( opt.name, inst) ).first;
-        if ( _global )
-        {
-          _global->registry.set("instance", opt.name, inst);
-        }
-        inst->create( _global );
-      }
-      
-      if ( suspend_only )
-      {
-        DEBUG_LOG_MESSAGE("component: change only suspend " << opt.name)
-        itr->second->suspend(opt.suspend);
-      }
-      else
-      {
-        itr->second->configure(opt);
-        itr->second->suspend(opt.suspend);
-        DEBUG_LOG_MESSAGE("component: configured instance " << opt.name)
-      }
-      stop_list.erase(opt.name);
-    } // for optlist
-    
-    for ( const auto& name: stop_list )
-    {
-      auto itr = _instances.find(name);
-      if ( itr == _instances.end() )
-      {
-        if ( _global )
-        {
-          _global->registry.erase("instance", name);
-        }
-        DEBUG_LOG_MESSAGE("component: stop instance " << itr->first)
-        itr->second->stop("");
-        _instances.erase(itr);
-      }
-    }
-  }
-  
-  */
-  
   void start_(const std::string& arg, fas::true_)
   {
     _instances->start(arg);
@@ -398,12 +305,12 @@ private:
     }
   }
   
-  void generate_options_(component_options& opt, const std::string& type, fas::true_) const 
+  void generate_options_(component_options& opt, const std::string& type, fas::true_) 
   {
     instance_type().generate( opt, type);
   }
 
-  void generate_options_(component_options& opt, const std::string& type, fas::false_) const 
+  void generate_options_(component_options& opt, const std::string& type, fas::false_) 
   {
     instance_options inst;
     inst.name = this->name() + "1";
