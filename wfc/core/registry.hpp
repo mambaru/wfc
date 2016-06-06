@@ -67,7 +67,7 @@ public:
 
   void set(const std::string& prefix, const std::string& name, std::shared_ptr<iinterface> item, bool nomark = false )
   {
-    std::cout << "------------------------ set 1------------------------ >>>" << name << std::endl;
+    //std::cout << "------------------------ set 1------------------------ >>>" << " prefix:" << prefix << ", name: " << name << std::endl;
     if (name.empty() )
     {
       DOMAIN_LOG_FATAL("wfc::registry::set: empty name " )
@@ -81,21 +81,17 @@ public:
       _registry_map.insert( std::make_pair(key, item));
       if ( !nomark ) 
           ++_dirty;
-      std::cout << "------------------------ set 2------------------------ >>>" << name << " prefix:" << prefix<< std::endl;
-
     }
     else
     {
       if ( itr->second!=item && !nomark)
       {
-          std::cout << "------------------------ set 3------------------------ >>>" << " prefix:" << prefix<< std::endl;
           ++_dirty;
       }
       else
       {
-          std::cout << "------------------------ set 4------------------------ >>>" << " prefix:" << prefix<< std::endl;
-          abort();
-        
+          //std::cout << "------------------------ set 4------------------------ >>>" << " prefix:" << prefix << ", name: " << name << std::endl;
+          //abort();
       }
       itr->second = item;
     }
@@ -116,8 +112,6 @@ public:
       auto itr = _registry_map.find(key_type(prefix,name));
       if ( itr != _registry_map.end() )
       {
-            std::cout << "-------------------- erase ----------------------- >>>" << name << std::endl;
-
         ptr = itr->second;
         _registry_map.erase( itr );
         ++_dirty;
@@ -196,7 +190,6 @@ public:
   int reset_dirty()
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    std::cout << "-------------------- RESET ----------------------- >>>" << _dirty << std::endl;
     int result = _dirty;
     _dirty = 0;
     return result;
