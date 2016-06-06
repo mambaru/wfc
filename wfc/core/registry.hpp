@@ -87,14 +87,8 @@ public:
       {
           ++_dirty;
       }
-      else
-      {
-          /*abort();*/
-      }
       itr->second = item;
     }
-    /*_registry_map[ key_type(prefix, name)] = item;
-    ++_dirty;*/
   }
   
   void set(const std::string& name, std::shared_ptr<iinterface> item, bool nomark = false )
@@ -110,8 +104,6 @@ public:
       auto itr = _registry_map.find(key_type(prefix,name));
       if ( itr != _registry_map.end() )
       {
-            std::cout << "-------------------- erase ----------------------- >>>" << name << std::endl;
-
         ptr = itr->second;
         _registry_map.erase( itr );
         ++_dirty;
@@ -190,7 +182,6 @@ public:
   int reset_dirty()
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    std::cout << "-------------------- RESET ----------------------- >>>" << _dirty << std::endl;
     int result = _dirty;
     _dirty = 0;
     return result;
