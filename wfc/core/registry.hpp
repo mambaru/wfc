@@ -31,7 +31,8 @@ public:
   {
     if ( name.empty() )
       return nullptr;
-      
+
+    bool not_found = false;
     std::shared_ptr<I> result = nullptr;
     registry_map::const_iterator itr;
     {
@@ -39,16 +40,25 @@ public:
       itr = _registry_map.find( key_type(prefix, name) );
       if ( itr == _registry_map.end() )
       {
+        not_found = disabort ? false : true;
+        /*
         if ( !disabort )
         {
           DOMAIN_LOG_FATAL("wfc::registry::get: object '" << name << "' not found" )
         }
         return nullptr; 
+        */
       }
- 
-      result = std::dynamic_pointer_cast<I>(itr->second);
+      else
+        result = std::dynamic_pointer_cast<I>(itr->second);
     }
 
+    if ( not_found )
+    {
+      DOMAIN_LOG_FATAL("wfc::registry::get: object '" << name << "' not found" )
+      return nullptr;
+    }
+    
     if ( !disabort && result == nullptr)
     {
       DOMAIN_LOG_FATAL("wfc::registry::get: invalid interface for " << name <<
