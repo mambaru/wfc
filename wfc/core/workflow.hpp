@@ -8,8 +8,10 @@ namespace wfc{
 
 using ::iow::workflow;
 
+/*
 std::shared_ptr<workflow> recreate_and_start_workflow( std::shared_ptr<workflow> wrk,  workflow_options opt );
 std::shared_ptr<workflow> create_and_start_workflow(workflow_options opt);
+*/
 
 /*
 class workflow

@@ -15,22 +15,22 @@ package::package(std::shared_ptr<ipackage> p)
   
 }
 
-std::shared_ptr<ibuild_info> package::build_info() const
+std::shared_ptr<ibuild_info> package::build_info() 
 {
   return _impl->build_info();
 }
 
-std::string package::name() const
+std::string package::name() 
 {
   return _impl->build_info()->name();
 }
 
-std::string package::description() const
+std::string package::description() 
 {
   return _impl->description();
 }
 
-std::vector< std::shared_ptr<imodule> > package::modules() const
+std::vector< std::shared_ptr<imodule> > package::modules() 
 {
   return _impl->modules();
 }

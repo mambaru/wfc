@@ -25,7 +25,7 @@ public:
   typedef std::shared_ptr<iinterface> interface_ptr;
   typedef std::pair< std::string, std::string > key_type;
   typedef std::map< key_type, interface_ptr > registry_map;
-
+  
   template<typename I>
   std::shared_ptr<I> get(const std::string& prefix, const std::string& name, bool disabort = false) const
   {
@@ -39,6 +39,10 @@ public:
       itr = _registry_map.find( key_type(prefix, name) );
       if ( itr == _registry_map.end() )
       {
+        if ( !disabort )
+        {
+          DOMAIN_LOG_FATAL("wfc::registry::get: object '" << name << "' not found" )
+        }
         return nullptr; 
       }
  
@@ -49,7 +53,7 @@ public:
     {
       DOMAIN_LOG_FATAL("wfc::registry::get: invalid interface for " << name <<
                        " (cannot convert from " << typeid(itr->second.get()).name() << " to " << typeid(result.get()).name() << ")" )
-      abort();
+      return nullptr;
     }
 
     return result;
@@ -61,20 +65,47 @@ public:
     return this->get<I>("", name, disabort);
   }
 
-  void set(const std::string& prefix, const std::string& name, std::shared_ptr<iinterface> item )
+  void set(const std::string& prefix, const std::string& name, std::shared_ptr<iinterface> item, bool nomark = false )
   {
+    std::cout << "------------------------ set 1------------------------ >>>" << name << std::endl;
     if (name.empty() )
     {
       DOMAIN_LOG_FATAL("wfc::registry::set: empty name " )
-      abort();
+      return;
     }
     std::lock_guard<mutex_type> lk(_mutex);
-    _registry_map[ key_type(prefix, name)] = item;
+    key_type key(prefix, name);
+    auto itr = _registry_map.find( key );
+    if ( itr == _registry_map.end() )
+    {
+      _registry_map.insert( std::make_pair(key, item));
+      if ( !nomark ) 
+          ++_dirty;
+      std::cout << "------------------------ set 2------------------------ >>>" << name << " prefix:" << prefix<< std::endl;
+
+    }
+    else
+    {
+      if ( itr->second!=item && !nomark)
+      {
+          std::cout << "------------------------ set 3------------------------ >>>" << " prefix:" << prefix<< std::endl;
+          ++_dirty;
+      }
+      else
+      {
+          std::cout << "------------------------ set 4------------------------ >>>" << " prefix:" << prefix<< std::endl;
+          abort();
+        
+      }
+      itr->second = item;
+    }
+    /*_registry_map[ key_type(prefix, name)] = item;
+    ++_dirty;*/
   }
   
-  void set(const std::string& name, std::shared_ptr<iinterface> item )
+  void set(const std::string& name, std::shared_ptr<iinterface> item, bool nomark = false )
   {
-    this->set("", name, item);
+    this->set("", name, item, nomark);
   }
 
   void erase(const std::string& prefix, const std::string& name)
@@ -85,8 +116,11 @@ public:
       auto itr = _registry_map.find(key_type(prefix,name));
       if ( itr != _registry_map.end() )
       {
+            std::cout << "-------------------- erase ----------------------- >>>" << name << std::endl;
+
         ptr = itr->second;
         _registry_map.erase( itr );
+        ++_dirty;
       }
     }
   }
@@ -97,7 +131,7 @@ public:
   }
   
   template<typename I>
-  void for_each( std::function< void(std::string, std::string, std::shared_ptr<I> ) > f )
+  void for_each( std::function< void(std::string, std::string, std::shared_ptr<I> ) > f ) const
   {
     registry_map rm;
     
@@ -115,7 +149,7 @@ public:
   }
 
   template<typename I>
-  void for_each( std::string prefix, std::function< void( std::string, std::shared_ptr<I> ) > f )
+  void for_each( std::string prefix, std::function< void( std::string, std::shared_ptr<I> ) > f ) const
   {
     typedef registry_map::value_type value_type;
     std::vector<value_type> rm;
@@ -142,6 +176,7 @@ public:
     {
       std::lock_guard<mutex_type> lk(_mutex);
       _registry_map.swap(rm);
+      ++_dirty;
     }
     rm.clear();
   }
@@ -151,10 +186,27 @@ public:
     std::lock_guard<mutex_type> lk(_mutex);
     return _registry_map.size();
   }
+
+  int dirty() const
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    return _dirty;
+  }
   
+  int reset_dirty()
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    std::cout << "-------------------- RESET ----------------------- >>>" << _dirty << std::endl;
+    int result = _dirty;
+    _dirty = 0;
+    return result;
+  }
+  
+
 private:
   registry_map _registry_map;
   mutable mutex_type _mutex;
+  int _dirty = 0;
 };
 
 }

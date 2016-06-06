@@ -19,32 +19,32 @@ class module_list
   typedef typename fas::type_list_n< Args... >::type module_types;
   typedef std::shared_ptr<imodule> module_ptr;
   typedef std::map<std::string, module_ptr > module_map;
+  typedef std::shared_ptr<wfcglobal> global_ptr;
 
 public:
 
-  virtual std::shared_ptr<ibuild_info> build_info() const 
+  virtual std::shared_ptr<ibuild_info> build_info()  
   {
     return make_build_info<BuildInfo>();
   }
 
-  virtual std::string name() const 
+  virtual std::string name()  
   {
     return BuildInfo().name();
   }
 
-  virtual std::string description() const 
+  virtual std::string description()  
   {
     return "no description";
   }
 
   virtual void create( std::shared_ptr<wfcglobal> g)
   {
-    _global = g;
-    this->create_( module_types() );
+    
+    this->create_( g, module_types() );
   }
 
-  // virtual std::vector<std::string> objects() 
-  virtual std::vector< std::shared_ptr<imodule> > modules() const
+  virtual std::vector< std::shared_ptr<imodule> > modules() 
   {
     std::vector< std::shared_ptr<imodule> > result;
     for (auto& p : _modules)
@@ -71,40 +71,21 @@ public:
     }
   }
 
-  virtual void reg_io(io_id_t , std::weak_ptr<iinterface> ) override
-  {
-  }
-
-  virtual void perform_io(data_ptr , io_id_t, outgoing_handler_t handler) override
-  {
-    if ( handler!=nullptr )
-      handler(nullptr);
-  }
-
-  virtual void unreg_io(io_id_t ) override
-  {
-  }
-
 private:
 
-  void create_(fas::empty_list) {}
+  void create_(global_ptr, fas::empty_list) {}
 
   template<typename H, typename L>
-  void create_( fas::type_list< H, L > ) 
+  void create_(global_ptr g, fas::type_list< H, L > ) 
   {
-    //typename H::object_name name;
     auto obj = std::make_shared<H>();
     _modules[ obj->name() ] = obj;
-    if ( _global )
-    {
-      _global->registry.set("module", obj->name(), obj);
-    }
-    obj->create(_global);
-    create_( L() );
+    if ( g!=nullptr )
+      g->registry.set("module", obj->name(), obj);
+    obj->create(g);
+    this->create_( g, L() );
   }
-
 private:
-  std::shared_ptr<wfcglobal> _global;
   module_map _modules;
 };
 
