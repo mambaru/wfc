@@ -67,7 +67,6 @@ public:
 
   void set(const std::string& prefix, const std::string& name, std::shared_ptr<iinterface> item, bool nomark = false )
   {
-    std::cout << "------------------------ set 1------------------------ >>>" << name << std::endl;
     if (name.empty() )
     {
       DOMAIN_LOG_FATAL("wfc::registry::set: empty name " )
@@ -81,21 +80,16 @@ public:
       _registry_map.insert( std::make_pair(key, item));
       if ( !nomark ) 
           ++_dirty;
-      std::cout << "------------------------ set 2------------------------ >>>" << name << " prefix:" << prefix<< std::endl;
-
     }
     else
     {
       if ( itr->second!=item && !nomark)
       {
-          std::cout << "------------------------ set 3------------------------ >>>" << " prefix:" << prefix<< std::endl;
           ++_dirty;
       }
       else
       {
-          std::cout << "------------------------ set 4------------------------ >>>" << " prefix:" << prefix<< std::endl;
-          abort();
-        
+          /*abort();*/
       }
       itr->second = item;
     }
