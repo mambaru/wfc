@@ -61,11 +61,13 @@ public:
     while ( d != nullptr )
     {
       incoming_holder holder( std::move(d), false);
-      d = holder.parse();
-      this->perform_incoming( std::move(holder), io_id, [handler](outgoing_holder holder)
+      auto jsonrpc_handler = [handler](outgoing_holder holder)
       {
         handler( holder.detach() );
-      } );
+      };
+      d = holder.parse(jsonrpc_handler);
+      if (holder)
+        this->perform_incoming( std::move(holder), io_id,  jsonrpc_handler);
     }
   }
   

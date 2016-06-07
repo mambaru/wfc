@@ -106,7 +106,10 @@ public:
           {
             incoming_holder holder( std::move(d) );
             // TODO: error try catch 
-            holder.parse(/*TODO: rh*/);
+            holder.parse([rh](outgoing_holder holder) {
+              auto d = holder.detach();
+              rh( incoming_holder( std::move(d) ) );
+            });
             rh( std::move(holder) );
           });
         }

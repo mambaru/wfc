@@ -81,6 +81,22 @@ struct target_adapter: ijsonrpc
     }
   }
   
+  template<typename Error>
+  incoming_holder create_error_holder_(call_id_t call_id)
+  {
+        ::wfc::jsonrpc::outgoing_error< ::wfc::jsonrpc::error > err;
+        err.error = std::make_unique<Error>();
+        err.id = std::make_unique<data_type>();
+        ::iow::json::value<call_id_t>::serializer()( call_id,  std::back_inserter(*(err.id)) );
+
+        auto d = std::make_unique<data_type>();
+        d->reserve(100);
+        ::wfc::jsonrpc::outgoing_error_json< ::wfc::jsonrpc::error_json >::serializer()(err, std::back_inserter(*d));
+        incoming_holder holder( std::move(d) );
+        holder.parse(nullptr);
+        return std::move(holder);
+  }
+
   virtual void perform_outgoing(outgoing_holder holder, io_id_t io_id) override
   {
     if ( auto p = _jsonrpc.lock() )
@@ -97,8 +113,13 @@ struct target_adapter: ijsonrpc
         while ( d!=nullptr )
         {
           incoming_holder holder( std::move(d) );
-          d = holder.parse();
-          handler( std::move(holder) );
+          d = holder.parse([handler](outgoing_holder holder)
+          {
+            auto d = holder.detach();
+            handler( incoming_holder( std::move(d)));
+          });
+          if ( holder )
+            handler( std::move(holder) );
         }
       } );
     }
@@ -106,6 +127,7 @@ struct target_adapter: ijsonrpc
     {
       if ( auto call_id = holder.call_id() )
       {
+        /*
         ::wfc::jsonrpc::outgoing_error< ::wfc::jsonrpc::error > err;
         err.error = std::make_unique<service_unavailable>();
         err.id = std::make_unique<data_type>();
@@ -116,6 +138,8 @@ struct target_adapter: ijsonrpc
         ::wfc::jsonrpc::outgoing_error_json< ::wfc::jsonrpc::error_json >::serializer()(err, std::back_inserter(*d));
         incoming_holder holder( std::move(d) );
         holder.parse();
+        */
+        auto holder = create_error_holder_<service_unavailable>(call_id);
         handler( std::move(holder) );
       }
       else
