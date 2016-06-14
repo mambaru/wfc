@@ -4,7 +4,6 @@
 
 namespace wfc{
 
-using ::iow::queue_options;
 using ::iow::workflow_options;
 
 }
