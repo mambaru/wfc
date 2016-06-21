@@ -64,5 +64,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
 
 include_directories(wfcroot/wfc)
-include_directories(wfcroot/faslib)
 include_directories(wfcroot/iow)
+include_directories(wfcroot/wjson)
+include_directories(wfcroot/faslib)
