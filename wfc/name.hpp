@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <iow/json/name.hpp>
+#include <iow/json2/name.hpp>
 
 #define WFC_NAME(X) JSON_NAME(X)
 #define WFC_NAME2(X,Y) JSON_NAME2(X,Y)

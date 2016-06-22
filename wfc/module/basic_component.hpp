@@ -154,12 +154,10 @@ private:
 
   void unserialize_( component_options& opt,  const std::string& str )
   {
-    try
-    {
-      typename component_json::serializer serializer;
-      serializer( opt, str.begin(), str.end() );
-    }
-    catch(const ::iow::json::json_error& e)
+    typename component_json::serializer serializer;
+    json::json_error e;
+    serializer( opt, str.begin(), str.end(), &e );
+    if ( e )
     {
       std::stringstream ss;
       ss << "Json unserialize error for component '"<< this->name() << "':" << std::endl;
