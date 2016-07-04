@@ -8,6 +8,7 @@
 
 #include <iow/json/json.hpp>
 #include <iow/json/name.hpp>
+#include <iow/json/strerror.hpp>
 
 namespace wfc{ namespace json{
 
