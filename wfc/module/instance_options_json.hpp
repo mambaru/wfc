@@ -5,18 +5,18 @@
 #include <wfc/module/instance_options.hpp>
 #include <wfc/module/component_features.hpp>
 
-#include <iow/json2/json.hpp>
-#include <iow/json2/name.hpp>
+#include <wjson/json.hpp>
+#include <wjson/name.hpp>
 
 namespace wfc{
   
-template<bool, typename N, typename V, typename M, M V::* m, typename W = ::iow::json::value<M> >
+template<bool, typename N, typename V, typename M, M V::* m, typename W = ::wjson::value<M> >
 struct optional_member;
 
 template<typename N, typename V, typename M, M V::* m, typename W >
 struct optional_member<true, N, V, M, m, W>
 {
-  typedef ::iow::json::member<N, V, M, m, W> type;
+  typedef ::wjson::member<N, V, M, m, W> type;
 };
 
 template<typename N, typename V, typename M, M V::* m, typename W >
@@ -44,9 +44,9 @@ struct base_instance_options_json
     has_workflow  =  ( Features & component_features::DisabledWorkflow )   == 0
   };
   
-  typedef ::iow::json::object<
+  typedef ::wjson::object<
     base_instance_options,
-    ::iow::json::member_list<
+    ::wjson::member_list<
       typename optional_member<has_name,     n_name,              base_instance_options, std::string, &base_instance_options::name>::type,
       typename optional_member<has_enabled,  n_enabled,           base_instance_options, bool,        &base_instance_options::enabled>::type,
       typename optional_member<has_suspend,  n_suspend,           base_instance_options, bool,        &base_instance_options::suspend>::type,
@@ -69,11 +69,11 @@ struct domain_instance_options_json
   typedef typename domain_json::target domain_options;
   typedef domain_instance_options<domain_options> options_type;
 
-  typedef ::iow::json::object<
+  typedef ::wjson::object<
     options_type,
-    ::iow::json::member_list<
-      ::iow::json::base<instance_json>,
-      ::iow::json::base<DomainJson>
+    ::wjson::member_list<
+      ::wjson::base<instance_json>,
+      ::wjson::base<DomainJson>
     >
   > type;
 

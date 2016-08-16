@@ -3,9 +3,8 @@
 #include <wfc/jsonrpc.hpp>
 #include <wfc/logger.hpp>
 #include <iow/jsonrpc/incoming/aux.hpp>
+#include <wjson/json.hpp>
 #include <memory>
-
-
 
 
 namespace wfc{ namespace jsonrpc{
@@ -87,7 +86,7 @@ struct target_adapter: ijsonrpc
         ::wfc::jsonrpc::outgoing_error< ::wfc::jsonrpc::error > err;
         err.error = std::make_unique<Error>();
         err.id = std::make_unique<data_type>();
-        ::iow::json::value<call_id_t>::serializer()( call_id,  std::back_inserter(*(err.id)) );
+        ::wjson::value<call_id_t>::serializer()( call_id,  std::back_inserter(*(err.id)) );
 
         auto d = std::make_unique<data_type>();
         d->reserve(100);

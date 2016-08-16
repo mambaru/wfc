@@ -13,6 +13,6 @@
 
 namespace wfc{ namespace json{
 
-using namespace iow::json;
+using namespace wjson;
 
 }}
