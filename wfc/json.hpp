@@ -6,8 +6,10 @@
 
 #pragma once
 
-#include <iow/json2/json.hpp>
-#include <iow/json2/name.hpp>
+#include <wjson/json.hpp>
+#include <wjson/name.hpp>
+#include <wjson/strerror.hpp>
+
 
 namespace wfc{ namespace json{
 
