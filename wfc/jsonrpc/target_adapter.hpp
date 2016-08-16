@@ -2,7 +2,7 @@
 
 #include <wfc/jsonrpc.hpp>
 #include <wfc/logger.hpp>
-#include <iow/jsonrpc/incoming/aux.hpp>
+#include <iow/jsonrpc/incoming/send_error.hpp>
 #include <wjson/json.hpp>
 #include <memory>
 

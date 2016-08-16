@@ -8,11 +8,11 @@ template<typename EngineOptions>
 struct gateway_options: EngineOptions
 {
   typedef EngineOptions engine_options;
-  std::string incoming_target;
-  std::string outgoing_target;
+  std::string incoming_target_name;
+  std::string outgoing_target_name;
   bool incoming_reg = false;
   bool outgoing_reg = true;
-  // time_t remove_outdated_ms = 0;
+  time_t remove_outdated_ms = 0;
 };
 
 }}

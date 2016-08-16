@@ -8,8 +8,8 @@ template<typename EngineOptions>
 struct service_options: EngineOptions
 {
   typedef EngineOptions engine_options;
-  std::string target;
-  //time_t remove_outdated_ms = 0;
+  std::string target_name;
+  time_t remove_outdated_ms = 0;
 };
 
 }}

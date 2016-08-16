@@ -28,7 +28,7 @@ public:
   typedef typename super::data_type data_type;
   typedef typename super::outgoing_handler_t outgoing_handler_t;
   typedef typename super::timer_id_t timer_id_t;
-
+  typedef ::iow::workflow workflow_type;
 public:
 
   virtual ~engine_base()
@@ -78,28 +78,55 @@ public:
   {
     if ( _engine != nullptr ) 
     {
+      if ( auto wf = _workflow.lock() )
+        wf->release_timer(_timer_id);
       _engine->stop();
+
     }
     _engine = nullptr;
   }
 protected:
-  void initialize_engine(engine_options eopt)
+  void initialize_engine(/*engine_options*/ options_type eopt)
   {
-    //engine_options eopt = static_cast<const engine_options&>(opt);
-    eopt.engine_args.workflow = this->get_workflow();
+    //eopt.engine_args.workflow = this->get_workflow();
+
     if ( _engine == nullptr ) 
     {
       _engine = std::make_shared<engine_type>();
-      _engine->start(eopt);
+      _engine->start(eopt, ::iow::io::create_id<size_t>() );
     }
     else
     {
       _engine->reconfigure( eopt );
     }
+
+    _workflow = this->get_workflow();
+    if ( auto wf = _workflow.lock() )
+    {
+      wf->release_timer( _timer_id );
+      if ( eopt.remove_outdated_ms != 0 )
+      {
+        auto engine = this->_engine;
+        _timer_id = wf->create_timer(
+          std::chrono::milliseconds(eopt.remove_outdated_ms),
+          [engine]() -> bool 
+          {
+            JSONRPC_LOG_DEBUG( " JSON-RPC remove outdated...");
+            
+            if ( size_t count = engine->remove_outdated() )
+            {
+              JSONRPC_LOG_WARNING( count << " calls is outdated.");
+            }
+            return true;
+          }
+        );
+      }
+    }
   }
 
 private:
-  timer_id_t _timer_id;
+  timer_id_t _timer_id = 0;
+  std::weak_ptr< workflow_type > _workflow;
   engine_ptr _engine;
   
 };
