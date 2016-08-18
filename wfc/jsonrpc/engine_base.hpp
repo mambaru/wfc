@@ -111,11 +111,11 @@ protected:
           std::chrono::milliseconds(eopt.remove_outdated_ms),
           [engine]() -> bool 
           {
-            JSONRPC_LOG_DEBUG( this, " JSON-RPC remove outdated...");
+            JSONRPC_LOG_DEBUG( " JSON-RPC remove outdated...");
             
             if ( size_t count = engine->remove_outdated() )
             {
-              JSONRPC_LOG_WARNING( this, count << " calls is outdated.");
+              JSONRPC_LOG_WARNING( "JSON-RPC: " << count << " calls is outdated.");
             }
             return true;
           }
