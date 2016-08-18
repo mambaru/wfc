@@ -2,7 +2,7 @@
 
 #include <wfc/jsonrpc.hpp>
 #include <wfc/logger.hpp>
-#include <iow/jsonrpc/incoming/send_error.hpp>
+#include <wjrpc/incoming/send_error.hpp>
 #include <wjson/json.hpp>
 #include <memory>
 
@@ -76,7 +76,7 @@ struct target_adapter: ijsonrpc
     }
     else if ( handler != nullptr )
     {
-      ::iow::jsonrpc::aux::send_error(std::move(holder), std::make_unique< ::iow::jsonrpc::service_unavailable > (), std::move(handler));
+      ::wjrpc::aux::send_error(std::move(holder), std::make_unique< ::wjrpc::service_unavailable > (), std::move(handler));
     }
   }
   

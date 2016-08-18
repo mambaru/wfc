@@ -4,7 +4,7 @@
 #include <wfc/jsonrpc/interface_implementation.hpp>
 #include <wfc/jsonrpc/basic_engine.hpp>
 #include <wfc/jsonrpc/gateway/gateway_options.hpp>
-#include <iow/jsonrpc/handler.hpp>
+#include <wjrpc/handler.hpp>
 
 namespace wfc{ namespace jsonrpc{
 
@@ -48,7 +48,7 @@ public:
       
       std::weak_ptr<ijsonrpc> witf = pitf;
       io_id_t io_id = _target_id;
-      this->engine()->reg_jsonrpc( _target_id, [witf, io_id]( ::iow::jsonrpc::outgoing_holder holder)
+      this->engine()->reg_jsonrpc( _target_id, [witf, io_id]( ::wjrpc::outgoing_holder holder)
       {
         if ( auto pitf = witf.lock() )
         {
@@ -62,7 +62,7 @@ public:
         pitf->reg_io( this->engine()->get_id(), this->shared_from_this() );
       
       std::weak_ptr<iinterface> witf = pitf;
-      this->engine()->reg_io( _target_id, [witf]( data_ptr d, io_id_t io_id, ::iow::io::outgoing_handler_t handler )
+      this->engine()->reg_io( _target_id, [witf]( data_ptr d, io_id_t io_id, ::wjrpc::raw_outgoing_handler_t handler )
       {
         if ( auto pitf = witf.lock() )
         {
@@ -89,7 +89,7 @@ private:
 
 template<typename MethodList, template<typename> class ItfT = interface_implementation>
 class gateway
-  : public ItfT< gateway_impl< typename MethodList::interface_type, ::iow::jsonrpc::handler< ItfT<MethodList> > > >
+  : public ItfT< gateway_impl< typename MethodList::interface_type, ::wjrpc::handler< ItfT<MethodList> > > >
 {
 };
 

@@ -2,7 +2,7 @@
 
 // #include <wfc/jsonrpc/options.hpp>
 #include <wfc/json.hpp>
-#include <iow/jsonrpc/engine/engine_options_json.hpp>
+#include <wjrpc/engine/engine_options_json.hpp>
 
 namespace wfc{ namespace jsonrpc{
 
@@ -30,7 +30,7 @@ struct gateway_options_json
       ::wfc::json::member< n_outgoing_target, options_type, std::string, &options_type::outgoing_target_name>,
       ::wfc::json::member< n_incoming_reg, options_type, bool, &options_type::incoming_reg>,
       ::wfc::json::member< n_outgoing_reg, options_type, bool, &options_type::outgoing_reg>,
-      ::wfc::json::base< ::iow::jsonrpc::engine_options_json<engine_options> >,
+      ::wfc::json::base< ::wjrpc::engine_options_json<engine_options> >,
       ::wfc::json::member< n_remove_outdated_ms, options_type, time_t, &options_type::remove_outdated_ms>
       /*,
       ::wfc::json::member< n_allow_non_jsonrpc, engine_options, bool, &engine_options::allow_non_jsonrpc>,

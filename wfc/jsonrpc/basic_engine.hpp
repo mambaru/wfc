@@ -2,7 +2,7 @@
 
 
 #include <wfc/jsonrpc/engine_base.hpp>
-#include <iow/jsonrpc/engine.hpp>
+#include <wjrpc/engine.hpp>
 
 namespace wfc{ namespace jsonrpc{
 
@@ -10,8 +10,8 @@ template<typename Interface, typename JsonrpcHandler, template<typename> class O
 class basic_engine
   : public engine_base<
               Interface, 
-              ::iow::jsonrpc::engine<JsonrpcHandler>,
-              Opt< typename ::iow::jsonrpc::engine<JsonrpcHandler>::options_type > 
+              ::wjrpc::engine<JsonrpcHandler>,
+              Opt< typename ::wjrpc::engine<JsonrpcHandler>::options_type > 
            >
 {};
 

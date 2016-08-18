@@ -6,7 +6,7 @@
 #include <wfc/jsonrpc/interface_implementation.hpp>
 #include <wfc/jsonrpc/basic_engine.hpp>
 #include <wfc/jsonrpc/ijsonrpc.hpp>
-#include <iow/jsonrpc/handler.hpp>
+#include <wjrpc/handler.hpp>
 #include <wfc/jsonrpc/service/service_options.hpp>
 
 namespace wfc{ namespace jsonrpc{
@@ -35,9 +35,9 @@ public:
 
 template<typename MethodList, template<typename> class Impl = interface_implementation >
 class service
-  : public service_base< ijsonrpc, ::iow::jsonrpc::handler< Impl<MethodList> > >
+  : public service_base< ijsonrpc, ::wjrpc::handler< Impl<MethodList> > >
 {
-  typedef service_base< ijsonrpc, ::iow::jsonrpc::handler< Impl<MethodList> > > super;
+  typedef service_base< ijsonrpc, ::wjrpc::handler< Impl<MethodList> > > super;
 public:
   
   virtual void perform_incoming( ijsonrpc::incoming_holder holder, ijsonrpc::io_id_t io_id, ijsonrpc::rpc_outgoing_handler_t handler) override

@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include <iow/jsonrpc/handler.hpp>
-#include <iow/jsonrpc/method.hpp>
-#include <iow/jsonrpc/errors.hpp>
+#include <wjrpc/handler.hpp>
+#include <wjrpc/method.hpp>
+#include <wjrpc/errors.hpp>
 
 #include <wfc/jsonrpc/service/service.hpp>
 #include <wfc/jsonrpc/gateway/gateway.hpp>
@@ -20,6 +20,6 @@
 
 namespace wfc{ namespace jsonrpc{
 
-using namespace ::iow::jsonrpc;
+using namespace ::wjrpc;
 
 }}

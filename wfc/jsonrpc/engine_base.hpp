@@ -3,7 +3,7 @@
 #include <wfc/domain_object.hpp>
 #include <wfc/iinterface.hpp>
 #include <wfc/memory.hpp>
-#include <iow/jsonrpc/outgoing/outgoing_holder.hpp>
+#include <wjrpc/outgoing/outgoing_holder.hpp>
 
 namespace wfc{ namespace jsonrpc{
 
