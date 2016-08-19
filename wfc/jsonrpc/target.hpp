@@ -1,6 +1,7 @@
 #pragma once 
 
 #include <wfc/jsonrpc/ijsonrpc.hpp>
+#include <wjrpc/incoming/send_error.hpp>
 
 namespace wfc{ namespace jsonrpc{
 
@@ -105,12 +106,29 @@ public:
           _target_io->perform_io( std::move(d), io_id, [rh](data_ptr d)
           {
             incoming_holder holder( std::move(d) );
+            ::wjson::json_error e;
+            holder.parse(&e);
+            if ( !e && holder )
+            {
+              rh( std::move(holder) );
+            }
+            else
+            {
+              ijsonrpc::rpc_outgoing_handler_t error_handler = [rh](outgoing_holder holder) 
+              {
+                auto d = holder.detach();
+                rh( incoming_holder( std::move(d) ) );
+              };
+              aux::send_error( std::move(holder), std::make_unique<parse_error>(), error_handler );
+            }
+            /*
             // TODO: error try catch 
             holder.parse([rh](outgoing_holder holder) {
               auto d = holder.detach();
               rh( incoming_holder( std::move(d) ) );
             });
-            rh( std::move(holder) );
+            */
+            
           });
         }
         else

@@ -112,6 +112,28 @@ struct target_adapter: ijsonrpc
         while ( d!=nullptr )
         {
           incoming_holder holder( std::move(d) );
+          ::wjson::json_error e;
+          d = holder.parse(&e);
+          if ( !e && holder )
+          {
+            handler( std::move(holder) );
+          }
+          else
+          {
+            ijsonrpc::rpc_outgoing_handler_t err_handler = [handler](outgoing_holder err)
+            {
+              auto d = err.detach();
+              handler( incoming_holder( std::move(d)));
+            };
+            
+            aux::send_error(std::move(holder), std::make_unique<parse_error>(), err_handler );
+          }
+
+        }
+        /*
+        while ( d!=nullptr )
+        {
+          incoming_holder holder( std::move(d) );
           d = holder.parse([handler](outgoing_holder holder)
           {
             auto d = holder.detach();
@@ -120,7 +142,8 @@ struct target_adapter: ijsonrpc
           if ( holder )
             handler( std::move(holder) );
         }
-      } );
+        */
+      });
     }
     else if ( auto handler = holder.result_handler() )
     {
