@@ -66,10 +66,24 @@ public:
 
   virtual void perform_io(data_ptr d, io_id_t io_id, outgoing_handler_t handler) override
   {
-    if ( _engine != nullptr )
+    if ( _engine == nullptr )
+      return;
+    
+    /*
+    if ( _allow_non_jsonrpc )
     {
-      _engine->perform_io( std::move(d), io_id, std::move(handler) );
-    }
+      auto beg = ::wjson::parser::parse_space( d->begin(), d->end(), nullptr );
+      if ( beg!=d->end() && *beg!='{' )
+      {
+        if ( auto h = _handler_map.find(io_id) )
+        {
+          h->target()->perform_io(std::move(d), io_id, std::move(handler));
+          return;
+        }
+      }
+    }*/
+
+    _engine->perform_io( std::move(d), io_id, std::move(handler) );
   }
 
   engine_ptr engine() const { return _engine; };
@@ -127,8 +141,8 @@ protected:
 private:
   timer_id_t _timer_id = 0;
   std::weak_ptr< workflow_type > _workflow;
+protected:
   engine_ptr _engine;
-  
 };
 
 }}

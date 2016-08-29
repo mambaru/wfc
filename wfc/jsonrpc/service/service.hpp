@@ -18,6 +18,9 @@ class service_base
   typedef basic_engine<Interface, JsonrpcHandler, service_options> super;
   typedef typename super::engine_type engine_type;
   typedef typename engine_type::options_type engine_options;
+  typedef typename engine_type::data_ptr data_ptr;
+  typedef typename engine_type::io_id_t io_id_t;
+  typedef ::wjrpc::raw_outgoing_handler_t raw_outgoing_handler_t;
 public:
   
   virtual void initialize() override
@@ -30,7 +33,32 @@ public:
     dopt.target = target;
     dopt.peeper = target;
     this->initialize_engine(dopt);
+    _allow_non_jsonrpc = dopt.allow_non_jsonrpc;
   }
+  
+  virtual void perform_io(data_ptr d, io_id_t io_id, raw_outgoing_handler_t handler) override
+  {
+    if ( this->_engine == nullptr )
+      return;
+    
+    if ( !_allow_non_jsonrpc )
+    {
+      auto beg = ::wjson::parser::parse_space( d->begin(), d->end(), nullptr );
+      if ( beg!=d->end() && *beg!='{' )
+      {
+        if ( auto h = this->_engine->find(io_id) )
+        {
+          h->target()->perform_io(std::move(d), io_id, std::move(handler));
+          return;
+        }
+      }
+    }
+
+    super::perform_io( std::move(d), io_id, std::move(handler) );
+  }
+
+private:
+  bool _allow_non_jsonrpc = false;
 };
 
 template<typename MethodList, template<typename> class Impl = interface_implementation >
