@@ -166,7 +166,7 @@ struct target_adapter: ijsonrpc
       }
       else
       {
-        handler( incoming_holder(nullptr) );
+        handler( incoming_holder( data_ptr() ) );
       }
     }
   }

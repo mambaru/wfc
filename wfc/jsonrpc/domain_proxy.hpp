@@ -60,7 +60,7 @@ public:
     //TODO: проверить исключения jsonrpc
     while ( d != nullptr )
     {
-      incoming_holder holder( std::move(d), false);
+      incoming_holder holder( std::move(d));
       outgoing_handler_t jsonrpc_handler = [handler](outgoing_holder holder)
       {
         handler( holder.detach() );

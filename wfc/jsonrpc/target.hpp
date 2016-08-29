@@ -138,12 +138,12 @@ public:
       }
       else if ( auto rh = holder.result_handler() )
       {
-        rh( ijsonrpc::incoming_holder(nullptr) );
+        rh( ijsonrpc::incoming_holder( data_ptr() ) );
       }
     }
     else if ( auto rh = holder.result_handler() )
     {
-      rh( ijsonrpc::incoming_holder(nullptr) );
+      rh( ijsonrpc::incoming_holder( data_ptr() ) );
     }
   }
 
