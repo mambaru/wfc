@@ -20,7 +20,7 @@ class service_base
   typedef typename engine_type::options_type engine_options;
   typedef typename engine_type::data_ptr data_ptr;
   typedef typename engine_type::io_id_t io_id_t;
-  typedef ::wjrpc::raw_outgoing_handler_t raw_outgoing_handler_t;
+  typedef ::wjrpc::output_handler_t output_handler_t;
 public:
   
   virtual void initialize() override
@@ -36,7 +36,7 @@ public:
     _allow_non_jsonrpc = dopt.allow_non_jsonrpc;
   }
   
-  virtual void perform_io(data_ptr d, io_id_t io_id, raw_outgoing_handler_t handler) override
+  virtual void perform_io(data_ptr d, io_id_t io_id, output_handler_t handler) override
   {
     if ( this->_engine == nullptr )
       return;

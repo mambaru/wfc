@@ -62,7 +62,7 @@ public:
         pitf->reg_io( this->engine()->get_id(), this->shared_from_this() );
       
       std::weak_ptr<iinterface> witf = pitf;
-      this->engine()->reg_io( _target_id, [witf]( data_ptr d, io_id_t io_id, ::wjrpc::raw_outgoing_handler_t handler )
+      this->engine()->reg_io( _target_id, [witf]( data_ptr d, io_id_t io_id, ::wjrpc::output_handler_t handler )
       {
         if ( auto pitf = witf.lock() )
         {
