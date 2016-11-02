@@ -6,7 +6,7 @@ MACRO(build_info target_name display_name)
   set(build_prefix ${build_dir}/${display_name}_build_info)
   string(TOUPPER "CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}" cxx_build_type_flags_name)
   set(cxx_build_type_flags "${CMAKE_CXX_FLAGS} ${${cxx_build_type_flags_name}}")
-
+  #set(cxx_build_type_flags "${CMAKE_CXX_FLAGS}")
   add_custom_target(
     ${display_name}_build_info
     COMMAND
