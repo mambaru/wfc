@@ -9,7 +9,7 @@
 #include <memory>
 #include <string>
 #include <mutex>
-#include <list>
+#include <map>
 
 namespace wfc{
 
@@ -23,18 +23,20 @@ class fire_list< std::function<bool(Args...)> >
   typedef std::recursive_mutex mutex_type;
 public:
   typedef std::function<bool(Args...)> fire_fun;
-  typedef std::list< fire_fun > list_type;
+  typedef std::map< size_t, fire_fun > list_type;
+  typedef size_t handler_id_t;
 
-  void push_back( fire_fun f)
+  handler_id_t insert( fire_fun f)
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    _fire_list.push_back(f);
+    _fire_list.insert( std::make_pair(_counter, f));
+    return _counter++;
   }
 
-  void push_front(fire_fun f)
+  
+  void erase(handler_id_t id)
   {
-    std::lock_guard<mutex_type> lk(_mutex);
-    _fire_list.push_front(f);
+    _fire_list.erase(id);
   }
 
   void size() const
@@ -55,7 +57,7 @@ public:
     auto end = lst.end();
     for (;beg!=end;)
     {
-      if ( (*beg)(args...) )
+      if ( beg->second(args...) )
       {
         ++beg;
       }
@@ -67,7 +69,7 @@ public:
   }
 
 private:
-  
+  size_t _counter = 1;
   list_type _fire_list;
   mutable mutex_type _mutex;
 };

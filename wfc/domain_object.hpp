@@ -426,12 +426,12 @@ public:
   {
     if ( this->bad_request<Res>(req, cb) )
       return true;
-    
+
     if ( cb==nullptr )
       return false;
-    
+
     cb(nullptr);
-    
+ 
     return true;
   }
   

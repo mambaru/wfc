@@ -17,6 +17,12 @@ from client import Client
 from jsonrpc import jsonrpc
 from percentile import PercentileMethods
 
+'''
+sudo /sbin/sysctl -w net.ipv4.tcp_fin_timeout=3
+sudo /sbin/sysctl -w net.ipv4.tcp_tw_recycle=1
+sudo /sbin/sysctl -w net.ipv4.tcp_tw_reuse=1
+'''
+
 is_working = 0
 request_counter = 0
 result_code = 0
