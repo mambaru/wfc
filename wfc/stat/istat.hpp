@@ -8,8 +8,9 @@ namespace wfc{
 
 struct istat: iinterface
 {
-  struct time_meter: ::wrtstat::time_meter< std::chrono::nanoseconds > {};
-  typedef std::shared_ptr<time_meter> meter_ptr;
+  typedef std::chrono::nanoseconds duration_type;
+  typedef ::wrtstat::time_meter< duration_type > meter_type;
+  typedef std::shared_ptr<meter_type> meter_ptr;
 
   virtual ~istat(){}
 
