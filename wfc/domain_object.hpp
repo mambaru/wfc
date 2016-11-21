@@ -98,11 +98,13 @@ public:
                 ? this->global()->workflow
                 : this->global()->registry.template get<workflow >("workflow", _options.workflow);
 
+    /*
     if ( _workflow == nullptr )
     {
       CONFIG_LOG_FATAL("workflow '" << _options.workflow << "' for instance '" << _name << "' not found")
       return;
     }
+    */
 
     _started = true;
     this->initialize();

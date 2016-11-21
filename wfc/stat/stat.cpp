@@ -34,4 +34,14 @@ stat::meter_ptr stat::create_handler(const std::string& name)
   return _impl->create_handler< duration_type >( _impl->reg_name(name, now), now);
 }
 
+int stat::count() const
+{
+  return _impl->count();
+}
+
+stat::aggregated_ptr stat::pop(int id)
+{
+  return _impl->pop(id);
+}
+
 }
