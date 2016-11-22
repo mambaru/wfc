@@ -19,8 +19,9 @@ struct istat: iinterface
   virtual ~istat(){}
 
   virtual       int reg_name(const std::string& name) = 0; 
-  virtual meter_ptr create_handler(int id) = 0;
-  virtual meter_ptr create_handler(const std::string& name) = 0;
+  virtual meter_ptr create_meter(int id, size_t count) = 0;
+  virtual meter_ptr create_meter(const std::string& name, size_t count) = 0;
+  virtual meter_ptr clone_meter(meter_ptr m, size_t count) = 0;
 };
 
 }

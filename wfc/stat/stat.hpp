@@ -2,6 +2,7 @@
 
 #include <wfc/stat/istat.hpp>
 #include <wrtstat/wrtstat_options.hpp>
+#include <memory>
 
 namespace wfc{
 
@@ -17,11 +18,13 @@ public:
   virtual ~stat(){}
   stat(const options_type& opt);
   virtual       int reg_name(const std::string& name) final;
-  virtual meter_ptr create_handler(int id) final;
-  virtual meter_ptr create_handler(const std::string& name) final;
-
+  virtual meter_ptr create_meter(int id, size_t count) final;
+  virtual meter_ptr create_meter(const std::string& name, size_t count) final;
+  virtual meter_ptr clone_meter(meter_ptr m, size_t count) final;
+  
   int count() const;
   aggregated_ptr pop(int id);
+  std::string get_name(int id) const;
 
 private:
   std::shared_ptr<impl> _impl;
