@@ -13,7 +13,7 @@ struct base_instance_options
   int  shutdown_priority = 0;
   std::string name;
   std::string workflow;
-  //workflow_options workflow;
+  std::string statistics;
 };
 
 template<typename DomainOptions>
