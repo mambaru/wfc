@@ -10,7 +10,8 @@ struct component_features
     DisabledEnabled = 2,   // Fixed. нет флага включения/отключение (enabled)
     DisabledPriority = 4,  // Extraordinary. нет полей приоритета
     DisabledSuspend  = 8,  // DisableSuspend
-    DisabledWorkflow  = 16 // CommonWorkflow
+    DisabledWorkflow  = 16, // CommonWorkflow
+    DisabledStatistics  = 32 // CommonWorkflow
   } type;
 };
 

@@ -10,7 +10,7 @@ SET(
   core/workflow.cpp
   core/instance_args.cpp
   core/extended_args.cpp
-  stat/stat.cpp
+  statistics/statistics.cpp
   module/component.cpp
   module/module.cpp
   module/package.cpp

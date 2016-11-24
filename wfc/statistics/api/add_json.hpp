@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wfc/json.hpp>
-#include <wfc/stat/api/add.hpp>
+#include <wfc/statistics/api/add.hpp>
 #include "aggregated_json.hpp"
 
 namespace wfc { namespace btp {

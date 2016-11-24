@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wfc/iinterface.hpp>
-#include <wfc/stat/api/add.hpp>
+#include <wfc/statistics/api/add.hpp>
 
 namespace wfc{
 

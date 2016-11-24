@@ -32,27 +32,30 @@ struct base_instance_options_json
   JSON_NAME(enabled)
   JSON_NAME(suspend)
   JSON_NAME(workflow)
+  JSON_NAME(statistics)
   JSON_NAME(startup_priority)
   JSON_NAME(shutdown_priority)
 
   enum 
   {
-    has_name      =  ( Features & component_features::Singleton        )   == 0 ,
-    has_enabled   =  ( Features & component_features::DisabledEnabled  )   == 0 ,
-    has_priority  =  ( Features & component_features::DisabledPriority )   == 0 ,
-    has_suspend   =  ( Features & component_features::DisabledSuspend  )   == 0 ,
-    has_workflow  =  ( Features & component_features::DisabledWorkflow )   == 0
+    has_name       =  ( Features & component_features::Singleton        )   == 0 ,
+    has_enabled    =  ( Features & component_features::DisabledEnabled  )   == 0 ,
+    has_priority   =  ( Features & component_features::DisabledPriority )   == 0 ,
+    has_suspend    =  ( Features & component_features::DisabledSuspend  )   == 0 ,
+    has_workflow   =   ( Features & component_features::DisabledWorkflow )  == 0 ,
+    has_statistics =  ( Features & component_features::DisabledStatistics ) == 0
   };
   
   typedef ::wjson::object<
     base_instance_options,
     ::wjson::member_list<
-      typename optional_member<has_name,     n_name,              base_instance_options, std::string, &base_instance_options::name>::type,
-      typename optional_member<has_enabled,  n_enabled,           base_instance_options, bool,        &base_instance_options::enabled>::type,
-      typename optional_member<has_suspend,  n_suspend,           base_instance_options, bool,        &base_instance_options::suspend>::type,
-      typename optional_member<has_priority, n_startup_priority,  base_instance_options, int,         &base_instance_options::startup_priority>::type,
-      typename optional_member<has_priority, n_shutdown_priority, base_instance_options, int,         &base_instance_options::shutdown_priority>::type,
-      typename optional_member<has_workflow, n_workflow,          base_instance_options, std::string, &base_instance_options::workflow>::type
+      typename optional_member<has_name,       n_name,              base_instance_options, std::string, &base_instance_options::name>::type,
+      typename optional_member<has_enabled,    n_enabled,           base_instance_options, bool,        &base_instance_options::enabled>::type,
+      typename optional_member<has_suspend,    n_suspend,           base_instance_options, bool,        &base_instance_options::suspend>::type,
+      typename optional_member<has_priority,   n_startup_priority,  base_instance_options, int,         &base_instance_options::startup_priority>::type,
+      typename optional_member<has_priority,   n_shutdown_priority, base_instance_options, int,         &base_instance_options::shutdown_priority>::type,
+      typename optional_member<has_workflow,   n_workflow,          base_instance_options, std::string, &base_instance_options::workflow>::type,
+      typename optional_member<has_statistics, n_statistics,        base_instance_options, std::string, &base_instance_options::statistics>::type
     >
   > type;
 

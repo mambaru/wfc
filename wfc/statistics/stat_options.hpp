@@ -1,8 +1,8 @@
 #pragma once
 
-#include <wfc/stat/istat.hpp>
 #include <wrtstat/wrtstat_options.hpp>
-#include <memory>
+#include <vector>
+#include <string>
 
 namespace wfc{
 

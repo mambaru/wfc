@@ -68,7 +68,7 @@ public:
     static_cast<base_instance_options&>( _options ) = opt;
     _startup = _startup && !( _object==nullptr && _options.enabled );
     if ( auto obj = this->create_or_stop_if_() ) 
-      obj->reconfigure_basic( _options );
+      obj->reconfigure_domain_basic( _options );
   }
 
   virtual void reconfigure(const options_type& opt)  
@@ -93,20 +93,6 @@ public:
     {
       obj->initialize_domain( );
     }
-      
-
-    
-    /*
-    if ( _ready_for_start )
-    {
-      this->initialize_();
-      // CONFIG_LOG_MESSAGE("Instance '" << _options.name << "' is initialized")
-    }
-    else
-    {
-      CONFIG_LOG_MESSAGE("Instance '" << _options.name << "' without initialization")
-    }
-    */
   }
 
 

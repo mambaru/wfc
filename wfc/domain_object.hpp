@@ -4,6 +4,8 @@
 #include <iow/owner/owner.hpp>
 #include <iow/io/io_id.hpp>
 #include <wfc/json.hpp>
+#include <wfc/statistics/statistics.hpp>
+#include <wfc/statistics/multi_meter.hpp>
 #include <wfc/workflow.hpp>
 #include <wfc/module/instance_options.hpp>
 #include <wfc/wfc_exit.hpp>
@@ -47,7 +49,14 @@ public:
   typedef typename domain_interface::shutdown_handler_t shutdown_handler_t;
   
   typedef ::wfc::workflow workflow_type;
+  typedef std::shared_ptr<workflow_type> workflow_ptr;
   typedef workflow_type::timer_id_t timer_id_t;
+
+  typedef ::wfc::statistics statistics_type;
+  typedef std::shared_ptr<statistics_type> statistics_ptr;
+  typedef ::wfc::multi_meter meter_type;
+  typedef std::shared_ptr<meter_type> meter_ptr;
+
 
   virtual ~domain_object(){}
   
@@ -98,11 +107,13 @@ public:
                 ? this->global()->workflow
                 : this->global()->registry.template get<workflow >("workflow", _options.workflow);
 
+    _statistics = this->global()->registry.template get<statistics>("statistics", _options.statistics);
+
     _started = true;
     this->initialize();
   }
 
-  virtual void reconfigure_basic(const base_options_type& opt) final
+  virtual void reconfigure_domain_basic(const base_options_type& opt) final
   {
     _conf_flag = false;
     static_cast<base_options_type&>(_options) = opt;
@@ -209,6 +220,53 @@ public:
     return nullptr;
   }
 
+  statistics_ptr get_statistics() const 
+  {
+    return _statistics;
+  }
+
+  meter_ptr create_meter( meter_ptr m) const
+  {
+    if ( _statistics == nullptr )
+      return nullptr;
+    return _statistics->create_meter(m, 0);
+  }
+
+  meter_ptr create_meter( meter_ptr m, meter_type::size_type size ) const
+  {
+    if ( _statistics == nullptr )
+      return nullptr;
+    return _statistics->create_meter(m, size);
+  }
+
+  meter_ptr create_meter(const std::string& rate_name) const
+  {
+    if ( _statistics== nullptr )
+      return nullptr;
+    return _statistics->create_meter(rate_name);
+  }
+
+  meter_ptr create_meter(const std::string& rate_name, const std::string& size_name, meter_type::size_type size) const
+  {
+    if ( _statistics== nullptr )
+      return nullptr;
+    return _statistics->create_meter(rate_name, size_name, size);
+  }
+
+  meter_ptr create_meter_prototype(const std::string& rate_name) const
+  {
+    if ( _statistics== nullptr )
+      return nullptr;
+    return _statistics->create_meter_prototype(rate_name);
+  }
+
+  meter_ptr create_meter_prototype(const std::string& rate_name, const std::string& size_name) const
+  {
+    if ( _statistics== nullptr )
+      return nullptr;
+    return _statistics->create_meter_prototype(rate_name, size_name);
+  }
+
   std::shared_ptr<workflow_type> get_workflow() const 
   {
     return _workflow;
@@ -218,104 +276,6 @@ public:
   {
     return this->global()->registry.template get<workflow>("workflow", name, disabort);
   }
-
-  /*
-  
-  virtual void create() {}
-  virtual void create_object(const std::string& name, global_ptr g, const instance_options_type& opt1, const options_type& opt2 ) final
-  {
-    _name = name;
-    _global = g;
-    _instance_options = opt1;
-    _options = opt2;
-    this->create();
-  }
-
-  // Если вызван, то перед этим гарантированно вызван reconfigure_instance
-  virtual void initialize( const options_type& opt) final
-  {
-    _options = opt;
-    _owner.enable_callback_check(_global->enable_callback_check);
-    _workflow = _instance_options.workflow.empty()
-                ? this->global()->workflow
-                : this->global()->registry.template get<workflow >("workflow", _instance_options.workflow);
-    if ( _workflow == nullptr )
-    {
-      CONFIG_LOG_FATAL("workflow '" << _instance_options.workflow << "' for instance '" << _name << "' not found")
-      return;
-    }
-
-    if ( !_started )
-    {
-      this->configure();
-      _started = true;
-    }
-    else
-    {
-      this->reconfigure();
-    }
-  }
-  
-  virtual void reconfigure_instance(instance_options_type instance_options)
-  {
-    _instance_options = instance_options;
-  }
-  */
-  
-  /*
-  virtual void suspend( bool suspend ) 
-  {
-    if ( _suspend != suspend )
-    {
-      CONFIG_LOG_MESSAGE("instance " << _name << " suspend mode " << (suspend ? "ON" : "OFF") )
-    }
-    _suspend = suspend;
-  }
-  
-  virtual void reconfigure_workflow( std::string name ) 
-  {
-    if (false) {if ( auto g =  this->global() )
-    {
-      if ( name.empty() )
-      {
-        _workflow = g->workflow;
-      }
-      else
-      {
-        _workflow = g->registry.template get<workflow >("workflow", name);
-      }
-      
-      if ( auto w =  g->registry.template get< ::wfc::workflow >("workflow", name, true) )
-      {
-        _workflow = w;
-      }
-      else
-      {
-        _workflow = g->workflow;
-      }
-      
-    }}
-    else
-    {
-      _workflow = std::make_shared<workflow_type>( this->global()->io_service, workflow_options() );
-      _workflow->start();
-    }
-  }
-  */
-
-
-  /*
-  virtual void configure()
-  {
-    this->reconfigure();
-  }
-  
-  virtual void reconfigure()
-  {
-    // Переконфигурация запущенного объекта!!
-    // TODO: LOG default (empty) initialize
-  }
-  */
 
   virtual void reg_io(io_id_t , std::weak_ptr<iinterface> ) override
   {
@@ -429,16 +389,15 @@ public:
     return true;
   }
   
-
-  
 private:
   bool _started;
-  const io_id_t _io_id;
-  std::string _name;
-  global_ptr _global;
-  options1_type _options;
-  owner_type _owner;
-  std::shared_ptr<workflow_type > _workflow;
+  const io_id_t  _io_id;
+  std::string    _name;
+  global_ptr     _global;
+  options1_type  _options;
+  owner_type     _owner;
+  workflow_ptr   _workflow;
+  statistics_ptr _statistics;
 };
   
 }
