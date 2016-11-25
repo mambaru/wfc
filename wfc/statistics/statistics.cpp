@@ -48,8 +48,8 @@ statistics::meter_ptr statistics::create_meter_prototype(const std::string& rate
     
     typedef multi_meter::meter_type pair_meter;
     meter->push_back( std::make_shared<pair_meter>( 
-      rate_id!=-1 ? _impl->create_meter< duration_type >(rate_id, 0, 0) : nullptr,
-      rate_id!=-1 ? _impl->create_meter< duration_type >(size_id, 0, 0) : nullptr
+      rate_id!=-1 ? _impl->create_time_meter< duration_type >(rate_id, 0, 0) : nullptr,
+      size_id!=-1 ? _impl->create_size_meter(size_id, 0, 0) : nullptr
     ));
   }
   return meter;
@@ -76,8 +76,8 @@ statistics::meter_ptr statistics::create_meter(const std::string& rate_name, con
     
     typedef multi_meter::meter_type pair_meter;
     meter->push_back( std::make_shared<pair_meter>( 
-      rate_id!=-1 ? _impl->create_meter< duration_type >(rate_id, now, size) : nullptr,
-      rate_id!=-1 ? _impl->create_meter< duration_type >(size_id, now, size) : nullptr
+      rate_id!=-1 ? _impl->create_time_meter< duration_type >(rate_id, now, size) : nullptr,
+      size_id!=-1 ? _impl->create_size_meter(size_id, now, size) : nullptr
     ));
   }
   return meter;

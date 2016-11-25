@@ -180,31 +180,6 @@ private:
     return _object;
   }
 
-  /*
-  void reconfigure_instance_(  )
-  {
-    this->create_or_stop_if_(_options.enabled);
-    if ( _object != nullptr )
-    {
-      _object->reconfigure_basic(_options);
-    }
-  }
-  */
-
-  /*
-  void initialize_() 
-  {
-    
-    if ( _object != nullptr )
-    {
-      //_object->initialize( static_cast<const domain_options_type&>(_options) );
-      _object->initialize_domain( );
-      _ready_for_stop = true;
-    }
-    
-  }
-  */
-
   void startup_(const std::string& arg) 
   {
     if ( _object != nullptr )
