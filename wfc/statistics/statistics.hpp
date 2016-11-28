@@ -10,7 +10,6 @@
 namespace wfc{
 
 class statistics
-  /*: public iinterface*/
 {
   class impl;
 public:
@@ -24,7 +23,7 @@ public:
   typedef stat_options options_type;
 
   virtual ~statistics(){}
-  statistics(const options_type& opt);
+  statistics(options_type opt);
 
   virtual meter_ptr create_meter_prototype(const std::string& rate_name);
   virtual meter_ptr create_meter_prototype(const std::string& rate_name, const std::string& size_name);

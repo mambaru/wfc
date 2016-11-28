@@ -15,9 +15,10 @@ public:
   {}
 };
 
-statistics::statistics(const options_type& opt)
+statistics::statistics(options_type opt)
   : _prefixes(opt.prefixes)
 {
+  opt.step_ts *= 1000;
   _impl = std::make_shared<impl>(opt);
   if ( _prefixes.empty() ) 
     _prefixes.push_back("");
@@ -49,7 +50,7 @@ statistics::meter_ptr statistics::create_meter_prototype(const std::string& rate
     typedef multi_meter::meter_type pair_meter;
     meter->push_back( std::make_shared<pair_meter>( 
       rate_id!=-1 ? _impl->create_time_meter< duration_type >(rate_id, 0, 0) : nullptr,
-      size_id!=-1 ? _impl->create_size_meter(size_id, 0, 0) : nullptr
+      size_id!=-1 ? _impl->create_size_meter(size_id, 0, 1000, 0) : nullptr
     ));
   }
   return meter;
@@ -77,7 +78,7 @@ statistics::meter_ptr statistics::create_meter(const std::string& rate_name, con
     typedef multi_meter::meter_type pair_meter;
     meter->push_back( std::make_shared<pair_meter>( 
       rate_id!=-1 ? _impl->create_time_meter< duration_type >(rate_id, now, size) : nullptr,
-      size_id!=-1 ? _impl->create_size_meter(size_id, now, size) : nullptr
+      size_id!=-1 ? _impl->create_size_meter(size_id, now, size, 1000) : nullptr
     ));
   }
   return meter;
@@ -94,29 +95,7 @@ statistics::meter_ptr statistics::create_meter(meter_ptr m)
 {
   return this->create_meter(m, 1);
 }
-/*
-int stat::reg_name(const std::string& name) 
-{
-  return _impl->reg_name(name, std::time(0)*1000000 );
-}
 
-stat::meter_ptr stat::create_meter(int id, size_t count)
-{
-  return _impl->create_meter< duration_type >(id, std::time(0)*1000000, count);
-}
-
-stat::meter_ptr stat::create_meter(const std::string& name, size_t count)
-{
-  auto now = std::time(0)*1000000;
-  return _impl->create_meter< duration_type >( _impl->reg_name(name, now), now, count);
-}
-
-stat::meter_ptr stat::clone_meter(meter_ptr m, size_t count)
-{
-  auto now = std::time(0)*1000000;
-  return m->clone(now, count);
-}
-*/
 int statistics::count() const
 {
   return _impl->count();
