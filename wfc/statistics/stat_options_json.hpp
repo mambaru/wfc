@@ -12,7 +12,7 @@ struct stat_options_json
   JSON_NAME(limit)
   JSON_NAME(levels)
   JSON_NAME(prefixes)
-  
+
   typedef json::object<
     stat_options,
     json::member_list<
@@ -20,7 +20,7 @@ struct stat_options_json
       json::member< n_step_ms, ::wrtstat::separator_options, ::wrtstat::types::time_type, &::wrtstat::separator_options::step_ts>,
       json::member< n_limit, ::wrtstat::reducer_options, ::wrtstat::types::size_type, &::wrtstat::reducer_options::limit>,
       json::member< n_levels, ::wrtstat::reducer_options, ::wrtstat::types::size_type, &::wrtstat::reducer_options::levels>,
-      json::member< n_prefixes, stat_options, std::vector<std::string>, &stat_options::prefixes, json::vector_of_strings<> >
+      json::member< n_prefixes, ::wrtstat::wrtstat_options, std::vector<std::string>, &::wrtstat::wrtstat_options::prefixes, json::vector_of_strings<> >
      >
   > type;
   

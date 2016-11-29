@@ -16,12 +16,12 @@ public:
 };
 
 statistics::statistics(options_type opt)
-  : _prefixes(opt.prefixes)
+  //: _prefixes(opt.prefixes)
 {
   opt.step_ts *= 1000;
   _impl = std::make_shared<impl>(opt);
-  if ( _prefixes.empty() ) 
-    _prefixes.push_back("");
+  /*if ( _prefixes.empty() ) 
+    _prefixes.push_back("");*/
 }
 
 void statistics::enable(bool val)
@@ -29,13 +29,21 @@ void statistics::enable(bool val)
   _impl->enable(val);
 }
 
-statistics::meter_ptr statistics::create_meter_prototype(const std::string& rate_name) 
+
+statistics::meter_ptr statistics::create_meter_prototype(const std::string& time_name) 
 {
-  return this->create_meter_prototype(rate_name);
+  return this->create_meter_prototype(time_name, "");
 }
 
-statistics::meter_ptr statistics::create_meter_prototype(const std::string& rate_name, const std::string& size_name) 
+statistics::meter_ptr statistics::create_meter_prototype(const std::string& time_name, const std::string& size_name) 
 {
+  auto now = std::time(0)*1000000;
+  auto meter = _impl->create_multi_meter<duration_type>(time_name, size_name, now, 0, 1000);
+  meter->reset();
+  abort();
+  return meter;
+  
+  /*
   auto meter = std::make_shared<meter_type>();
   auto now = std::time(0)*1000000;
   for ( auto prefix : _prefixes )
@@ -54,16 +62,26 @@ statistics::meter_ptr statistics::create_meter_prototype(const std::string& rate
     ));
   }
   return meter;
-}
-
-statistics::meter_ptr statistics::create_meter(const std::string& rate_name)
-{
-  return this->create_meter(rate_name, "", 0);
+  */
 }
 
 
-statistics::meter_ptr statistics::create_meter(const std::string& rate_name, const std::string& size_name, size_type size) 
+statistics::meter_ptr statistics::create_meter(const std::string& time_name)
 {
+  return this->create_meter(time_name, "", 1);
+}
+
+statistics::meter_ptr statistics::create_meter(const std::string& time_name, size_type count)
+{
+  return this->create_meter(time_name, "", count);
+}
+
+statistics::meter_ptr statistics::create_meter(const std::string& time_name, const std::string& size_name, size_type size) 
+{
+  auto now = std::time(0)*1000000;
+  return _impl->create_multi_meter<duration_type>(time_name, size_name, now, size, 1000);
+
+  /*
   auto meter = std::make_shared<meter_type>();
   auto now = std::time(0)*1000000;
   for ( auto prefix : _prefixes )
@@ -82,7 +100,9 @@ statistics::meter_ptr statistics::create_meter(const std::string& rate_name, con
     ));
   }
   return meter;
+  */
 }
+
 
 
 statistics::meter_ptr statistics::create_meter(meter_ptr m, size_type size )
@@ -91,10 +111,12 @@ statistics::meter_ptr statistics::create_meter(meter_ptr m, size_type size )
   return m->clone(now, size);
 }
 
+
 statistics::meter_ptr statistics::create_meter(meter_ptr m)
 {
   return this->create_meter(m, 1);
 }
+
 
 int statistics::count() const
 {
