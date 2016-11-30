@@ -40,7 +40,6 @@ statistics::meter_ptr statistics::create_meter_prototype(const std::string& time
   auto now = std::time(0)*1000000;
   auto meter = _impl->create_multi_meter<duration_type>(time_name, size_name, now, 0, 1000);
   meter->reset();
-  abort();
   return meter;
   
   /*
