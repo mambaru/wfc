@@ -38,6 +38,7 @@ public:
   typedef Itf domain_interface;
   typedef std::shared_ptr<wfcglobal> global_ptr;
   typedef ::iow::owner owner_type;
+  typedef ::wfc::json::json_error json_error;
   
   typedef typename domain_interface::data_type data_type;
   typedef typename domain_interface::data_ptr  data_ptr;
@@ -318,17 +319,15 @@ public:
   }
 
   template<typename T>
-  T get_arg_t(const std::string& arg) const
+  T get_arg_t(const std::string& arg, json_error* e = nullptr) const
   {
     T val = T();
     auto str = this->get_arg(arg);
     if ( str.empty() )
       return val;
     
-    try {
-      typedef typename ::wfc::json::value<T>::serializer serializer;
-      serializer()(val, str.begin(), str.end() );
-    }catch(...){}
+    typedef typename ::wfc::json::value<T>::serializer serializer;
+    serializer()(val, str.begin(), str.end(), e );
     
     return val;
   }
