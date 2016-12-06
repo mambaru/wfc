@@ -1,10 +1,9 @@
 #include <wfc/statistics/statistics.hpp>
 #include <wrtstat/wrtstat.hpp>
 #include <ctime>
+#include <cstdlib>
 
 namespace wfc{
-
-
 
 class statistics::impl
   : public ::wrtstat::wrtstat
@@ -37,31 +36,10 @@ statistics::meter_ptr statistics::create_meter_prototype(const std::string& time
 
 statistics::meter_ptr statistics::create_meter_prototype(const std::string& time_name, const std::string& size_name) 
 {
-  auto now = std::time(0)*1000000;
+  auto now = std::time(0)*1000000 + std::rand()%1000000;
   auto meter = _impl->create_multi_meter<duration_type>(time_name, size_name, now, 0, 1000);
   meter->reset();
   return meter;
-  
-  /*
-  auto meter = std::make_shared<meter_type>();
-  auto now = std::time(0)*1000000;
-  for ( auto prefix : _prefixes )
-  {
-    int rate_id = -1;
-    int size_id = -1;
-    if ( !rate_name.empty() )
-      rate_id = _impl->reg_name(prefix + rate_name, now );
-    if ( !size_name.empty() )
-      size_id = _impl->reg_name(prefix + size_name, now );
-    
-    typedef multi_meter::meter_type pair_meter;
-    meter->push_back( std::make_shared<pair_meter>( 
-      rate_id!=-1 ? _impl->create_time_meter< duration_type >(rate_id, 0, 0) : nullptr,
-      size_id!=-1 ? _impl->create_size_meter(size_id, 0, 1000, 0) : nullptr
-    ));
-  }
-  return meter;
-  */
 }
 
 
@@ -77,36 +55,15 @@ statistics::meter_ptr statistics::create_meter(const std::string& time_name, siz
 
 statistics::meter_ptr statistics::create_meter(const std::string& time_name, const std::string& size_name, size_type size) 
 {
-  auto now = std::time(0)*1000000;
+  auto now = std::time(0)*1000000 + std::rand()%1000000;
   return _impl->create_multi_meter<duration_type>(time_name, size_name, now, size, 1000);
-
-  /*
-  auto meter = std::make_shared<meter_type>();
-  auto now = std::time(0)*1000000;
-  for ( auto prefix : _prefixes )
-  {
-    int rate_id = -1;
-    int size_id = -1;
-    if ( !rate_name.empty() )
-      rate_id = _impl->reg_name(prefix + rate_name, now );
-    if ( !size_name.empty() )
-      size_id = _impl->reg_name(prefix + size_name, now );
-    
-    typedef multi_meter::meter_type pair_meter;
-    meter->push_back( std::make_shared<pair_meter>( 
-      rate_id!=-1 ? _impl->create_time_meter< duration_type >(rate_id, now, size) : nullptr,
-      size_id!=-1 ? _impl->create_size_meter(size_id, now, size, 1000) : nullptr
-    ));
-  }
-  return meter;
-  */
 }
 
 
 
 statistics::meter_ptr statistics::create_meter(meter_ptr m, size_type size )
 {
-  auto now = std::time(0)*1000000;
+  auto now = std::time(0)*1000000 + std::rand()%1000000;
   return m->clone(now, size);
 }
 
