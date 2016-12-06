@@ -231,15 +231,15 @@ public:
   {
     if ( _statistics == nullptr )
       return nullptr;
-    return _statistics->create_meter(m);
+    return _statistics->create_meter(m, 1);
   }
   
 
-  meter_ptr create_meter( meter_ptr m, meter_type::size_type size ) const
+  meter_ptr create_meter( meter_ptr m, meter_type::size_type size, meter_type::size_type count ) const
   {
     if ( _statistics == nullptr )
       return nullptr;
-    return _statistics->create_meter(m, size);
+    return _statistics->create_meter(m, size, count);
   }
 
   
@@ -247,21 +247,21 @@ public:
   {
     if ( _statistics== nullptr )
       return nullptr;
-    return _statistics->create_meter(time_name);
+    return _statistics->create_meter(time_name, 1);
   }
 
-  meter_ptr create_meter(const std::string& size_name, meter_type::size_type size) const
+  meter_ptr create_meter(const std::string& size_name, meter_type::size_type size, meter_type::size_type count) const
   {
     if ( _statistics== nullptr )
       return nullptr;
-    return _statistics->create_meter(size_name, size);
+    return _statistics->create_meter(size_name, size, count);
   }
 
-  meter_ptr create_meter(const std::string& time_name, const std::string& size_name, meter_type::size_type size) const
+  meter_ptr create_meter(const std::string& time_name, const std::string& size_name, meter_type::size_type size, meter_type::size_type count) const
   {
     if ( _statistics== nullptr )
       return nullptr;
-    return _statistics->create_meter(time_name, size_name, size);
+    return _statistics->create_meter(time_name, size_name, size, count);
   }
 
   meter_ptr create_meter_prototype(const std::string& time_name) const

@@ -6,18 +6,18 @@
 namespace wfc{
 
 class statistics::impl
-  : public ::wrtstat::wrtstat
+  : public ::wrtstat::wrtstat_mt
 {
 public:
   impl(const ::wrtstat::wrtstat_options& opt )
-    : wrtstat( opt)
+    : wrtstat_mt( opt)
   {}
 };
 
 statistics::statistics(options_type opt)
   //: _prefixes(opt.prefixes)
 {
-  opt.step_ts *= 1000;
+  //opt.step_ts *= 1000;
   _impl = std::make_shared<impl>(opt);
   /*if ( _prefixes.empty() ) 
     _prefixes.push_back("");*/
@@ -37,40 +37,40 @@ statistics::meter_ptr statistics::create_meter_prototype(const std::string& time
 statistics::meter_ptr statistics::create_meter_prototype(const std::string& time_name, const std::string& size_name) 
 {
   auto now = std::time(0)*1000000 + std::rand()%1000000;
-  auto meter = _impl->create_multi_meter<duration_type>(time_name, size_name, now, 0, 1000);
+  auto meter = _impl->create_multi_meter<duration_type>(time_name, size_name, now, 0, 0);
   meter->reset();
   return meter;
 }
 
 
-statistics::meter_ptr statistics::create_meter(const std::string& time_name)
-{
-  return this->create_meter(time_name, "", 1);
-}
-
 statistics::meter_ptr statistics::create_meter(const std::string& time_name, size_type count)
 {
-  return this->create_meter(time_name, "", count);
+  return this->create_meter(time_name, "", 0, count);
 }
 
-statistics::meter_ptr statistics::create_meter(const std::string& time_name, const std::string& size_name, size_type size) 
+statistics::meter_ptr statistics::create_meter(const std::string& size_name, size_type size, size_type count)
+{
+  return this->create_meter("", size_name, size, count);
+}
+
+statistics::meter_ptr statistics::create_meter(const std::string& time_name, const std::string& size_name, size_type size, size_type count) 
 {
   auto now = std::time(0)*1000000 + std::rand()%1000000;
-  return _impl->create_multi_meter<duration_type>(time_name, size_name, now, size, 1000);
+  return _impl->create_multi_meter<duration_type>(time_name, size_name, now, size, count);
 }
 
 
 
-statistics::meter_ptr statistics::create_meter(meter_ptr m, size_type size )
+statistics::meter_ptr statistics::create_meter(meter_ptr m, size_type size, size_type count )
 {
   auto now = std::time(0)*1000000 + std::rand()%1000000;
-  return m->clone(now, size);
+  return m->clone(now, size, count);
 }
 
 
-statistics::meter_ptr statistics::create_meter(meter_ptr m)
+statistics::meter_ptr statistics::create_meter(meter_ptr m, size_type count)
 {
-  return this->create_meter(m, 1);
+  return this->create_meter(m, 0, count);
 }
 
 
