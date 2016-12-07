@@ -12,7 +12,7 @@ else
    path="$2"
 fi
 
-if [[ ! -n "$2" ]]; then
+if [[ ! -n "$3" ]]; then
    build_type=""
 else
    build_type=$3
