@@ -16,6 +16,7 @@ public:
 
 statistics::statistics(options_type opt)
 {
+  opt.step_ts *= 1000;
   _impl = std::make_shared<impl>(opt);
 }
 
