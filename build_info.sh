@@ -12,7 +12,7 @@ else
    path="$2"
 fi
 
-if [[ ! -n "$2" ]]; then
+if [[ ! -n "$3" ]]; then
    build_type=""
 else
    build_type=$3
@@ -91,11 +91,6 @@ o2_file="$path/$1_build_info2.o"
 a_file="$path/$1_build_info.a"
 
 mkdir -p $path
-#c1_file="$path/build_info/$1_build_info1.c"
-#c2_file="$path/build_info/$1_build_info2.c"
-#o1_file="$path/build_info/$1_build_info1.o"
-#o2_file="$path/build_info/$1_build_info2.o"
-#a_file="$path/build_info/$1_build_info.a"
 
 #
 # create basic cpp
