@@ -18,7 +18,7 @@ public:
   target(const std::string& name, std::shared_ptr<wfcglobal> g)
   {
     if (!g) return;
-    
+
     if ( auto t = g->registry.get<ijsonrpc>(name, true) )
     {
       _target_jsonrpc = t;
@@ -121,14 +121,6 @@ public:
               };
               aux::send_error( std::move(holder), std::make_unique<parse_error>(), error_handler );
             }
-            /*
-            // TODO: error try catch 
-            holder.parse([rh](outgoing_holder holder) {
-              auto d = holder.detach();
-              rh( incoming_holder( std::move(d) ) );
-            });
-            */
-            
           });
         }
         else

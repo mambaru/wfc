@@ -62,7 +62,8 @@ statistics::meter_ptr statistics::create_meter(const std::string& time_name, con
 
 statistics::meter_ptr statistics::create_meter(meter_ptr m, size_type size, size_type count )
 {
-  //auto now = std::time(0)*1000000 + std::rand()%1000000;
+  if ( m == nullptr )
+    return nullptr;
   auto now = ::wrtstat::aggregator::now<std::chrono::microseconds>();
   return m->clone(now, size, count);
 }
@@ -70,6 +71,8 @@ statistics::meter_ptr statistics::create_meter(meter_ptr m, size_type size, size
 
 statistics::meter_ptr statistics::create_meter(meter_ptr m, size_type count)
 {
+  if ( m == nullptr )
+    return nullptr;
   return this->create_meter(m, 0, count);
 }
 
