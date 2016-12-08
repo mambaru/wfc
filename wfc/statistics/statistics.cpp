@@ -15,12 +15,8 @@ public:
 };
 
 statistics::statistics(options_type opt)
-  //: _prefixes(opt.prefixes)
 {
-  //opt.step_ts *= 1000;
   _impl = std::make_shared<impl>(opt);
-  /*if ( _prefixes.empty() ) 
-    _prefixes.push_back("");*/
 }
 
 void statistics::enable(bool val)
@@ -36,7 +32,8 @@ statistics::meter_ptr statistics::create_meter_prototype(const std::string& time
 
 statistics::meter_ptr statistics::create_meter_prototype(const std::string& time_name, const std::string& size_name) 
 {
-  auto now = std::time(0)*1000000 + std::rand()%1000000;
+  //auto now = std::time(0)*1000000 + std::rand()%1000000;
+  auto now = ::wrtstat::aggregator::now<std::chrono::microseconds>();
   auto meter = _impl->create_multi_meter<duration_type>(time_name, size_name, now, 0, 0);
   meter->reset();
   return meter;
@@ -55,7 +52,8 @@ statistics::meter_ptr statistics::create_meter(const std::string& size_name, siz
 
 statistics::meter_ptr statistics::create_meter(const std::string& time_name, const std::string& size_name, size_type size, size_type count) 
 {
-  auto now = std::time(0)*1000000 + std::rand()%1000000;
+  //auto now = std::time(0)*1000000 + std::rand()%1000000;
+  auto now = ::wrtstat::aggregator::now<std::chrono::microseconds>();
   return _impl->create_multi_meter<duration_type>(time_name, size_name, now, size, count);
 }
 
@@ -63,7 +61,8 @@ statistics::meter_ptr statistics::create_meter(const std::string& time_name, con
 
 statistics::meter_ptr statistics::create_meter(meter_ptr m, size_type size, size_type count )
 {
-  auto now = std::time(0)*1000000 + std::rand()%1000000;
+  //auto now = std::time(0)*1000000 + std::rand()%1000000;
+  auto now = ::wrtstat::aggregator::now<std::chrono::microseconds>();
   return m->clone(now, size, count);
 }
 
