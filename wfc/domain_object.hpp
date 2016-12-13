@@ -250,18 +250,22 @@ public:
     return _statistics->create_meter(time_name, count);
   }
 
-  meter_ptr create_meter(const std::string& size_name, meter_type::size_type size, meter_type::size_type count) const
+  meter_ptr create_meter(const std::string& read_name, const std::string& write_name, meter_type::size_type size) const
   {
     if ( _statistics== nullptr )
       return nullptr;
-    return _statistics->create_meter(size_name, size, count);
+    return _statistics->create_meter(read_name, write_name, size);
   }
 
-  meter_ptr create_meter(const std::string& time_name, const std::string& size_name, meter_type::size_type size, meter_type::size_type count) const
+  meter_ptr create_meter(const std::string& time_name, 
+                         const std::string& read_name, 
+                         const std::string& write_name,
+                          meter_type::size_type count,
+                         meter_type::size_type size) const
   {
     if ( _statistics== nullptr )
       return nullptr;
-    return _statistics->create_meter(time_name, size_name, size, count);
+    return _statistics->create_meter(time_name, read_name, write_name, count, size);
   }
 
   meter_ptr create_meter_prototype(const std::string& time_name) const
@@ -272,11 +276,11 @@ public:
   }
 
   
-  meter_ptr create_meter_prototype(const std::string& time_name, const std::string& size_name) const
+  meter_ptr create_meter_prototype(const std::string& time_name, const std::string& read_name, const std::string& write_name) const
   {
     if ( _statistics== nullptr )
       return nullptr;
-    return _statistics->create_meter_prototype(time_name, size_name);
+    return _statistics->create_meter_prototype(time_name, read_name, write_name);
   }
 
   std::shared_ptr<workflow_type> get_workflow() const 

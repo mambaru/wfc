@@ -26,10 +26,10 @@ public:
   statistics(options_type opt);
 
   virtual meter_ptr create_meter_prototype(const std::string& time_name);
-  virtual meter_ptr create_meter_prototype(const std::string& time_name, const std::string& size_name);
+  virtual meter_ptr create_meter_prototype(const std::string& time_name, const std::string& read_name, const std::string& write_name);
   
-  virtual meter_ptr create_meter(const std::string& time_name, const std::string& size_name, size_type size, size_type count);
-  virtual meter_ptr create_meter(const std::string& size_name, size_type size, size_type count);
+  virtual meter_ptr create_meter(const std::string& time_name, const std::string& read_name, const std::string& write_name, size_type count, size_type size);
+  virtual meter_ptr create_meter(const std::string& read_name, const std::string& write_name, size_type size);
   virtual meter_ptr create_meter(const std::string& time_name, size_type count);
 
   virtual meter_ptr create_meter(meter_ptr m, size_type size, size_type count );
