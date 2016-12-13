@@ -286,7 +286,7 @@ public:
 
   std::shared_ptr<workflow_type> get_workflow(const std::string& name, bool disabort = false) const 
   {
-    return this->global()->registry.template get<workflow>("workflow", name, disabort);
+    return this->global()->registry.template get<workflow_type>("workflow", name, disabort);
   }
 
   virtual void reg_io(io_id_t , std::weak_ptr<iinterface> ) override
