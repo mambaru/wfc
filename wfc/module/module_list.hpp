@@ -8,7 +8,7 @@
 #include <fas/type_list.hpp>
 #include <memory>
 #include <string>
-#include <map>
+#include <list>
 
 namespace wfc{
 
@@ -18,56 +18,56 @@ class module_list
 {
   typedef typename fas::type_list_n< Args... >::type module_types;
   typedef std::shared_ptr<imodule> module_ptr;
-  typedef std::map<std::string, module_ptr > module_map;
+  typedef std::list< module_ptr > module_map;
   typedef std::shared_ptr<wfcglobal> global_ptr;
 
 public:
 
-  virtual std::shared_ptr<ibuild_info> build_info()  
+  virtual std::shared_ptr<ibuild_info> build_info() override
   {
     return make_build_info<BuildInfo>();
   }
 
-  virtual std::string name()  
+  virtual std::string name() override
   {
     return BuildInfo().name();
   }
 
-  virtual std::string description()  
+  virtual std::string description() override
   {
     return "no description";
   }
 
-  virtual void create( std::shared_ptr<wfcglobal> g)
+  virtual void create( std::shared_ptr<wfcglobal> g) override
   {
     
     this->create_( g, module_types() );
   }
 
-  virtual std::vector< std::shared_ptr<imodule> > modules() 
+  virtual std::vector< std::shared_ptr<imodule> > modules() override
   {
     std::vector< std::shared_ptr<imodule> > result;
     for (auto& p : _modules)
     {
-      result.push_back(p.second);
+      result.push_back(p/*.second*/);
     }
     return result;
   }
 
   // only for external control
-  virtual void start(const std::string& arg) 
+  virtual void start(const std::string& arg) override
   {
     for (auto& p : _modules)
     {
-      p.second->start(arg);
+      p/*.second*/->start(arg);
     }
   }
 
-  virtual void stop(const std::string& arg)
+  virtual void stop(const std::string& arg) override
   {
     for (auto& p : _modules)
     {
-      p.second->stop(arg);
+      p/*.second*/->stop(arg);
     }
   }
 
@@ -79,7 +79,8 @@ private:
   void create_(global_ptr g, fas::type_list< H, L > ) 
   {
     auto obj = std::make_shared<H>();
-    _modules[ obj->name() ] = obj;
+    //_modules[ obj->name() ] = obj;
+    _modules.push_back( obj );
     if ( g!=nullptr )
       g->registry.set("module", obj->name(), obj);
     obj->create(g);
