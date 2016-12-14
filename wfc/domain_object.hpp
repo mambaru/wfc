@@ -5,7 +5,6 @@
 #include <iow/io/io_id.hpp>
 #include <wfc/json.hpp>
 #include <wfc/statistics/statistics.hpp>
-#include <wfc/statistics/multi_meter.hpp>
 #include <wfc/workflow.hpp>
 #include <wfc/module/instance_options.hpp>
 #include <wfc/wfc_exit.hpp>
@@ -55,8 +54,7 @@ public:
 
   typedef ::wfc::statistics statistics_type;
   typedef std::shared_ptr<statistics_type> statistics_ptr;
-  typedef ::wfc::multi_meter meter_type;
-  typedef std::shared_ptr<meter_type> meter_ptr;
+  
 
 
   virtual ~domain_object(){}
@@ -226,7 +224,7 @@ public:
     return _statistics;
   }
 
-  
+  /*
   meter_ptr create_meter( meter_ptr m, meter_type::size_type count) const
   {
     if ( _statistics == nullptr )
@@ -282,6 +280,7 @@ public:
       return nullptr;
     return _statistics->create_meter_prototype(time_name, read_name, write_name);
   }
+  */
 
   std::shared_ptr<workflow_type> get_workflow() const 
   {

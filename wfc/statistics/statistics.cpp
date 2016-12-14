@@ -25,6 +25,77 @@ void statistics::enable(bool val)
   _impl->enable(val);
 }
 
+statistics::composite_meter_ptr 
+  statistics::create_composite_prototype(const std::string& time_name, const std::string& read_name, const std::string& write_name)
+{
+  auto now = ::wrtstat::aggregator::now<std::chrono::microseconds>();
+  auto meter = _impl->create_multi_meter<duration_type>(time_name, read_name, write_name, now, 0);
+  meter->reset();
+  return meter;
+}
+
+statistics::time_meter_ptr 
+  statistics::create_time_prototype(const std::string& time_name)
+{
+  auto now = ::wrtstat::aggregator::now<std::chrono::microseconds>();
+  auto meter = _impl->create_multi_meter< ::wrtstat::time_meter<duration_type> >(time_name, now, 0);
+  meter->reset();
+  return meter;
+}
+
+statistics::size_meter_ptr 
+  statistics::create_size_prototype(const std::string& size_name)
+{
+  auto now = ::wrtstat::aggregator::now<std::chrono::microseconds>();
+  auto meter = _impl->create_multi_meter< ::wrtstat::size_meter >(size_name, now, 0);
+  meter->reset();
+  return meter;
+
+}
+
+statistics::value_meter_ptr 
+  statistics::create_value_prototype(const std::string& value_name)
+{
+  auto now = ::wrtstat::aggregator::now<std::chrono::microseconds>();
+  auto meter = _impl->create_multi_meter< ::wrtstat::value_meter >(value_name, now, 0);
+  meter->reset();
+  return meter;
+}
+
+
+statistics::composite_meter_ptr 
+  statistics::create_meter(composite_meter_ptr m, size_type size )
+{
+  if ( m == nullptr ) return nullptr;
+  auto now = ::wrtstat::aggregator::now<std::chrono::microseconds>();
+  return m->clone(now, size);
+}
+
+statistics::time_meter_ptr 
+  statistics::create_meter(time_meter_ptr m, size_type count )
+{
+  if ( m == nullptr ) return nullptr;
+  auto now = ::wrtstat::aggregator::now<std::chrono::microseconds>();
+  return m->clone(now, count);
+}
+
+statistics::size_meter_ptr 
+  statistics::create_meter(size_meter_ptr m, size_type size )
+{
+  if ( m == nullptr ) return nullptr;
+  auto now = ::wrtstat::aggregator::now<std::chrono::microseconds>();
+  return m->clone(now, size);
+}
+
+statistics::value_meter_ptr 
+  statistics::create_meter(value_meter_ptr m, size_type value, size_type count )
+{
+  if ( m == nullptr ) return nullptr;
+  auto now = ::wrtstat::aggregator::now<std::chrono::microseconds>();
+  return m->clone(now, value, count);
+}
+
+/*
 
 statistics::meter_ptr statistics::create_meter_prototype(const std::string& time_name) 
 {
@@ -82,6 +153,7 @@ statistics::meter_ptr statistics::create_meter(meter_ptr m, size_type count)
     return nullptr;
   return this->create_meter(m, count, 0);
 }
+*/
 
 
 int statistics::count() const
