@@ -28,6 +28,8 @@ void statistics::enable(bool val)
 statistics::composite_meter_ptr 
   statistics::create_composite_prototype(const std::string& time_name, const std::string& read_name, const std::string& write_name)
 {
+  if (time_name.empty() && read_name.empty() && write_name.empty() ) 
+    return nullptr;
   auto now = ::wrtstat::aggregator::now<std::chrono::microseconds>();
   auto meter = _impl->create_multi_meter<duration_type>(time_name, read_name, write_name, now, 0);
   meter->reset();
@@ -37,6 +39,9 @@ statistics::composite_meter_ptr
 statistics::time_meter_ptr 
   statistics::create_time_prototype(const std::string& time_name)
 {
+  if (time_name.empty() ) 
+    return nullptr;
+
   auto now = ::wrtstat::aggregator::now<std::chrono::microseconds>();
   auto meter = _impl->create_multi_meter< ::wrtstat::time_meter<duration_type> >(time_name, now, 0);
   meter->reset();
@@ -46,6 +51,9 @@ statistics::time_meter_ptr
 statistics::size_meter_ptr 
   statistics::create_size_prototype(const std::string& size_name)
 {
+  if (size_name.empty() ) 
+    return nullptr;
+
   auto now = ::wrtstat::aggregator::now<std::chrono::microseconds>();
   auto meter = _impl->create_multi_meter< ::wrtstat::size_meter >(size_name, now, 0);
   meter->reset();
@@ -56,6 +64,9 @@ statistics::size_meter_ptr
 statistics::value_meter_ptr 
   statistics::create_value_prototype(const std::string& value_name)
 {
+  if (value_name.empty() ) 
+    return nullptr;
+
   auto now = ::wrtstat::aggregator::now<std::chrono::microseconds>();
   auto meter = _impl->create_multi_meter< ::wrtstat::value_meter >(value_name, now, 0);
   meter->reset();
