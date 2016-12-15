@@ -41,7 +41,7 @@ public:
     if ( this->_engine == nullptr )
       return;
     
-    if ( !_allow_non_jsonrpc )
+    if ( _allow_non_jsonrpc )
     {
       auto beg = ::wjson::parser::parse_space( d->begin(), d->end(), nullptr );
       if ( beg!=d->end() && *beg!='{' )
