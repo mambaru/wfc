@@ -74,9 +74,9 @@ public:
       }
       else 
       {
-        aux::send_error( std::move(holder), std::make_unique<parse_error>(), jsonrpc_handler );
+        //aux::send_error( std::move(holder), std::make_unique<parse_error>(), jsonrpc_handler );
         JSONRPC_LOG_ERROR( "domain_proxy: Parse error: " << holder.str() )
-        aux::send_error( std::move(holder), std::make_unique<invalid_request>(), [handler](outgoing_holder holder)
+        aux::send_error( std::move(holder), std::make_unique<parse_error>(), [handler](outgoing_holder holder)
         {
           auto d = holder.detach();
           if ( d!=nullptr )
