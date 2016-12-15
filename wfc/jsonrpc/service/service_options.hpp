@@ -10,6 +10,7 @@ struct service_options: EngineOptions
   typedef EngineOptions engine_options;
   std::string target_name;
   time_t remove_outdated_ms = 0;
+  bool allow_non_jsonrpc = false;
 };
 
 }}
