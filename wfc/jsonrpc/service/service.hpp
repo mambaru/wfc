@@ -26,7 +26,6 @@ public:
   virtual void initialize() override
   {
     auto dopt = this->options();
-    //engine_options& eopt = static_cast<engine_options&>(dopt);
     typedef typename engine_type::target_type target_type;
     typedef typename target_type::element_type interface_type;
     target_type target = this->global()->registry.template get< interface_type >(dopt.target_name);

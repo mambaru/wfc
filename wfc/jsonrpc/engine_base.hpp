@@ -88,8 +88,11 @@ public:
 protected:
   void initialize_engine(/*engine_options*/ options_type eopt)
   {
-    //eopt.engine_args.workflow = this->get_workflow();
-
+    eopt.log_error = [](const std::string& m) { JSONRPC_LOG_ERROR( m ); m.size();};
+    eopt.log_fatal = [](const std::string& m) { JSONRPC_LOG_FATAL( m ); m.size();};
+    eopt.log_debug = [](const std::string& m) { JSONRPC_LOG_DEBUG( m ); m.size();};
+    eopt.log_trace = [](const std::string& m) { JSONRPC_LOG_TRACE( m ); m.size(); };
+    
     if ( _engine == nullptr ) 
     {
       _engine = std::make_shared<engine_type>();
