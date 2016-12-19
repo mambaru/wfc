@@ -8,6 +8,8 @@ SET(
   system/system.cpp
   core/global.cpp
   core/workflow.cpp
+  core/threads_map.cpp
+  core/detail/get_procstat.cpp
   core/instance_args.cpp
   core/extended_args.cpp
   statistics/statistics.cpp

@@ -11,6 +11,7 @@
 #include <wfc/core/extended_args.hpp>
 #include <wfc/core/ibuild_info.hpp>
 #include <wfc/core/workflow.hpp>
+#include <wfc/core/threads_map.hpp>
 #include <iow/asio.hpp>
 
 
@@ -34,7 +35,7 @@ struct wfcglobal
   fakir before_stop;
   fakir after_stop;
   bool enable_callback_check  = false;
-
+  threads_map threads;
   object_registry registry;
 
   typedef ::iow::asio::io_service io_service_type;
@@ -44,10 +45,6 @@ struct wfcglobal
   static ptr static_global;
 
   wfcglobal( io_service_type& io_service);
-    /*: io_service(io_service)
-    , workflow( new ::wfc::workflow(io_service) )
-  {}
-  */
 };
 
 }
