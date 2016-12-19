@@ -29,10 +29,13 @@ class domain_object
 public:
   typedef Opt options_type;
   typedef base_instance_options instance_options_type;
+  typedef domain_instance_options<Opt> config_type;
   
+  
+  /*
   typedef base_instance_options base_options_type;
   typedef domain_instance_options<Opt> options1_type;
-  
+  */
   //typedef instance_options<Opt>
   typedef Itf domain_interface;
   typedef std::shared_ptr<wfcglobal> global_ptr;
@@ -54,19 +57,14 @@ public:
 
   typedef ::wfc::statistics statistics_type;
   typedef std::shared_ptr<statistics_type> statistics_ptr;
-  
-
 
   virtual ~domain_object(){}
   
   domain_object()
-    : _started(false)
-    , _io_id( ::iow::io::create_id<io_id_t>() )
+    : _io_id( ::iow::io::create_id<io_id_t>() )
   {}
   
   virtual void create() {}
-
-  bool _conf_flag = false;
 
   virtual void configure() { this->reconfigure(); }
 
@@ -96,9 +94,9 @@ public:
   }
 
   // вызываеться один раз между create_domain и initialize_domain
-  virtual void configure_domain(const options1_type& opt) final
+  virtual void configure_domain(const config_type& opt) final
   {
-    _options = opt;
+    _config = opt;
     _workflow = nullptr; // Ибо нефиг. До инициализации ничем пользоватся нельзя
     _conf_flag = false;
     this->configure();
@@ -108,27 +106,27 @@ public:
   virtual void initialize_domain() final
   {
     _owner.enable_callback_check(_global->enable_callback_check);
-    _workflow = _options.workflow.empty()
+    _workflow = _config.workflow.empty()
                 ? this->global()->workflow
-                : this->global()->registry.template get<workflow >("workflow", _options.workflow);
+                : this->global()->registry.template get<workflow >("workflow", _config.workflow);
 
-    _statistics = this->global()->registry.template get<statistics>("statistics", _options.statistics);
+    _statistics = this->global()->registry.template get<statistics>("statistics", _config.statistics);
     _started = true;
     _conf_flag = true;
     this->initialize();
   }
 
-  virtual void reconfigure_domain_basic(const base_options_type& opt) final
+  virtual void reconfigure_domain_basic(const instance_options_type& opt) final
   {
     _conf_flag = false;
-    static_cast<base_options_type&>(_options) = opt;
+    static_cast<instance_options_type&>(_config) = opt;
     this->reconfigure_basic();
   }
 
-  virtual void reconfigure_domain(const options1_type& opt) final
+  virtual void reconfigure_domain(const config_type& conf) final
   {
     _conf_flag = true;
-    _options = opt;
+    _config = conf;
     this->reconfigure();
   }
   
@@ -162,9 +160,14 @@ public:
     return _global;
   }
   
-  const options1_type& options() const 
+  const options_type& options() const 
   {
-    return _options;
+    return _config;
+  }
+
+  const config_type& config() const 
+  {
+    return _config;
   }
 
   owner_type& owner()
@@ -202,12 +205,10 @@ public:
     return _owner.wrap( std::forward<H>(h), std::forward<H2>(h2));
   }
 
-  virtual options_type generate(const std::string&) { return options_type();}
-  void generate(options_type& opt, const std::string& type) 
+  virtual config_type generate(const std::string&) { return config_type();}
+  void generate(config_type& conf, const std::string& type) 
   {
-    opt = type.empty() ? options_type() : this->generate(type);
-    /*opt = options_type();
-     * */
+    conf = type.empty() ? config_type() : this->generate(type);
   }
 
   template<typename I>
@@ -294,6 +295,11 @@ public:
     return _workflow;
   }
 
+  std::shared_ptr<workflow_type> get_core_workflow() const 
+  {
+    return this->global()->workflow;
+  }
+
   std::shared_ptr<workflow_type> get_workflow(const std::string& name, bool disabort = false) const 
   {
     return this->global()->registry.template get<workflow_type>("workflow", name, disabort);
@@ -353,7 +359,7 @@ public:
 
   bool suspended() const 
   {
-    return _options.suspend;
+    return _config.suspend;
   }
   
   template<typename Res, typename Callback>
@@ -367,7 +373,7 @@ public:
   template<typename Res, typename Req, typename Callback>
   bool suspended(const Req& /*req*/, const Callback& cb) const
   {
-    if ( !this->_options.suspend ) 
+    if ( !this->_config.suspend ) 
       return false;
 
     this->default_response<Res>(cb);
@@ -410,11 +416,12 @@ public:
   }
   
 private:
-  bool _started;
+  bool _conf_flag = false;
+  bool _started = false;
   const io_id_t  _io_id;
   std::string    _name;
   global_ptr     _global;
-  options1_type  _options;
+  config_type  _config;
   owner_type     _owner;
   workflow_ptr   _workflow;
   statistics_ptr _statistics;

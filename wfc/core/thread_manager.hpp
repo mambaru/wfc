@@ -10,26 +10,30 @@
 #include <mutex>
 #include <vector>
 #include <map>
+#include <set>
 
 
 namespace wfc{
 
   
-class threads_map
+class thread_manager
 {
   typedef std::mutex mutex_type;
+  typedef std::set<pid_t> pid_set;
+  typedef std::set<int> cpu_set;
 public:
 
-  struct thread_stat
+  struct statistics
   {
     size_t utime = 0;                    /** user mode jiffies **/
     size_t stime = 0;                    /** kernel mode jiffies **/
     size_t vsize = 0;                    /** Virtual memory size **/
     size_t rss  = 0;                      /** Resident Set Size **/
     int pid = 0;
-    thread_stat operator - (const thread_stat& t) const
+    
+    statistics operator - (const statistics& t) const
     {
-      thread_stat r;
+      statistics r;
       r.utime = utime - t.utime;                    /** user mode jiffies **/
       r.stime = stime - t.stime;                    /** kernel mode jiffies **/
       r.vsize = vsize - t.vsize;                    /** Virtual memory size **/
@@ -39,19 +43,35 @@ public:
     }
   };
 
+  /*
   void set_cpu(std::vector<int> cpu);
   std::vector<int> get_cpu();
   void set_self();
   std::vector<pid_t> get_pids() const;
   std::vector<std::thread::id> get_ids() const;
-  
-  thread_stat get_proc_stat();
+  */
+  bool update_thread_list(); 
+  statistics process_statistics();
 public:
   mutable mutex_type _mutex;
-  std::vector<int> _cpu;
-  std::map<std::thread::id, pid_t> _std;
-  std::map<pid_t, std::thread::id> _pid;
-  std::map<pid_t, thread_stat>     _stat;
+  
+  // Зарегестрированные потоки
+  std::map<std::thread::id, pid_t> _id_by_pid;
+  std::map<pid_t, std::thread::id> _pid_by_id;
+  // Все потоки
+  pid_set _all_pids;
+  // Не зарегестрированные потоки
+  pid_set _unreg_pids;
+  // Именованые наборы потоков
+  std::map<std::string, pid_set > _named_pid_set;
+  
+  // Настройки CPU для зарегистрированных
+  cpu_set _reg_cpu;
+  // Настройки CPU для не зарегистрированных
+  cpu_set _unreg_cpu;
+  // Индивидуальные настройки CPU
+  std::map<pid_t, cpu_set > _cpu_by_pid;
+
   
 };
 

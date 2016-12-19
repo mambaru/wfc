@@ -19,6 +19,8 @@ basic_wfc::basic_wfc(std::shared_ptr<ibuild_info> bi, package_list packages )
   : _packages(packages)
 {
   _global = std::make_shared<wfcglobal>(_io_service);
+  _global->program_build_info = bi;
+  _global->wfc_build_info = make_build_info<wfc_build_info>();
 
   for (const auto& p: packages)
   {
@@ -30,8 +32,6 @@ basic_wfc::basic_wfc(std::shared_ptr<ibuild_info> bi, package_list packages )
     p->create(_global);
   }
 
-  _global->program_build_info = bi;
-  _global->wfc_build_info = make_build_info<wfc_build_info>();
 }
 
 int basic_wfc::run(int argc, char* argv[], std::string helpstring)

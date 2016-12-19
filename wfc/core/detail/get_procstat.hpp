@@ -7,6 +7,7 @@
 namespace wfc{ namespace detail{
 
 int get_procstat(procstat* pinfo);
-int get_proc_threads(std::vector<pid_t> pids);
+int get_threadstat(pid_t pid, procstat* pinfo);
+int get_pids_threads(std::vector<pid_t>& pids);
 
 }}

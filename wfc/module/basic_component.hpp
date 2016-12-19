@@ -35,14 +35,14 @@ public:
   typedef domain_instance_options_json<domain_json, Features> instance_json;
 
   typedef std::shared_ptr<wfcglobal> global_ptr;
-  typedef typename instance_type::options_type instance_options;
+  typedef typename instance_type::config_type instance_config;
   typedef typename instance_type::domain_interface domain_interface;
   
   typedef typename std::conditional<
     is_singleton,
-    instance_options,
-    std::vector<instance_options>
-  >::type component_options;
+    instance_config,
+    std::vector<instance_config>
+  >::type component_config;
 
   typedef typename std::conditional<
     is_singleton,
@@ -58,12 +58,12 @@ public:
     std::map< std::string, instance_ptr>
   >::type instance_map;
 
-  struct options_pair { std::string instance, domain;};
+  struct config_pair { std::string instance, domain;};
   typedef typename std::conditional<
     is_singleton,
-    options_pair,
-    std::map< std::string, options_pair>
-  >::type options_map;
+    config_pair,
+    std::map< std::string, config_pair>
+  >::type config_map;
 
   typedef typename std::conditional<
     is_singleton,
@@ -94,8 +94,8 @@ public:
 
   virtual std::string generate(const std::string& type) override
   {
-    component_options opt;
-    this->generate_options(opt, type);
+    component_config opt;
+    this->generate_config(opt, type);
     typename component_json::serializer serializer;
     std::string result;
     serializer( opt, std::back_inserter( result ) );
@@ -104,7 +104,7 @@ public:
 
   virtual bool parse(const std::string& stropt) override
   {
-    component_options opt;
+    component_config opt;
     this->unserialize_(opt, stropt );
     return true;
   }
@@ -131,28 +131,28 @@ public:
     this->stop_(arg, fas::bool_<is_singleton>() );
   }
 
-  virtual void generate_options(component_options& opt, const std::string& type)
+  virtual void generate_config(component_config& opt, const std::string& type)
   {
-    this->generate_options_(opt, type, fas::bool_<is_singleton>() );
+    this->generate_config_(opt, type, fas::bool_<is_singleton>() );
   }
 
 private:
 
-  void serialize_base_instance_( const instance_options& opt,  std::string& str )
+  void serialize_base_instance_( const instance_config& opt,  std::string& str )
   {
     typename base_instance_json::serializer serializer;
     str.clear();
     serializer( opt, std::back_inserter(str) );
   }
 
-  void serialize_domain_( const instance_options& opt,  std::string& str )
+  void serialize_domain_( const instance_config& opt,  std::string& str )
   {
     typename domain_json::serializer serializer;
     str.clear();
     serializer( opt, std::back_inserter(str) );
   }
 
-  void unserialize_( component_options& opt,  const std::string& str )
+  void unserialize_( component_config& opt,  const std::string& str )
   {
     typename component_json::serializer serializer;
     ::wjson::json_error e;
@@ -169,7 +169,7 @@ private:
   void create_(fas::true_)
   {
     _instances = std::make_shared<instance_type>();
-    instance_options opt;
+    instance_config opt;
     opt.name = this->name();
     opt.enabled = true;
     _global->registry.set("instance", this->name(), _instances);
@@ -182,25 +182,25 @@ private:
 
   void configure_(const std::string& stropt, fas::true_)
   {
-    component_options opt;
+    component_config opt;
     this->unserialize_(opt, stropt );
     opt.name = this->name();
     
-    options_pair op;
+    config_pair op;
     this->serialize_base_instance_(opt, op.instance );
     this->serialize_domain_(opt, op.domain );
     
-    if ( _options.instance.empty() )
+    if ( _config.instance.empty() )
     {
       _instances->configure(opt);
       CONFIG_LOG_MESSAGE("Singleton '" << opt.name << "' is initial configured ")
     }
-    else if ( _options.domain != op.domain )        
+    else if ( _config.domain != op.domain )        
     {
       _instances->reconfigure(opt);
       CONFIG_LOG_MESSAGE("Singleton '" << opt.name << "' is reconfigured (fully)")
     }
-    else if ( _options.instance != op.instance ) 
+    else if ( _config.instance != op.instance ) 
     {
       _instances->reconfigure_basic(opt);
       CONFIG_LOG_MESSAGE("Singleton '" << opt.name << "' is reconfigured (basic)")
@@ -210,7 +210,7 @@ private:
       CONFIG_LOG_MESSAGE("Singleton '" << opt.name << "' without reconfiguration")
     }
     
-    _options = op;
+    _config = op;
   }
 
 
@@ -220,13 +220,13 @@ private:
     for (const auto& item : _instances )
       stop_list.insert(item.first);
     
-    component_options optlist;
+    component_config optlist;
     this->unserialize_( optlist, stropt );
 
     for (const auto& opt : optlist )
     {
       stop_list.erase(opt.name);
-      options_pair op;
+      config_pair op;
       this->serialize_domain_(opt, op.domain );
       this->serialize_base_instance_(opt, op.instance );
       
@@ -239,12 +239,12 @@ private:
         inst->create( _global );
         itr->second->configure(opt);
         CONFIG_LOG_MESSAGE("Instance '" << opt.name << "' is initial configured")
-        _options.insert(std::make_pair(opt.name, op) );
+        _config.insert(std::make_pair(opt.name, op) );
       }
       else
       {
-        auto oitr = _options.find(opt.name);
-        if ( oitr == _options.end() ) abort();
+        auto oitr = _config.find(opt.name);
+        if ( oitr == _config.end() ) abort();
       
         if ( oitr->second.domain != op.domain )
         {
@@ -303,14 +303,14 @@ private:
     }
   }
   
-  void generate_options_(component_options& opt, const std::string& type, fas::true_) 
+  void generate_config_(component_config& opt, const std::string& type, fas::true_) 
   {
     instance_type().generate( opt, type);
   }
 
-  void generate_options_(component_options& opt, const std::string& type, fas::false_) 
+  void generate_config_(component_config& opt, const std::string& type, fas::false_) 
   {
-    instance_options inst;
+    instance_config inst;
     inst.name = this->name() + "1";
     instance_type().generate( inst, type);
     opt.push_back(inst);
@@ -320,7 +320,7 @@ private:
   
   global_ptr   _global;
   instance_map _instances;
-  options_map  _options;
+  config_map  _config;
 };
 
 }

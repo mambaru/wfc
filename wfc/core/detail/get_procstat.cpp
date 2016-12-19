@@ -80,6 +80,13 @@ std::string get_procname()
   return ss.str();
 }
 
+std::string get_threadname(pid_t pid)
+{
+  std::stringstream ss;
+  ss << "/proc/" << ::getpid() << "/task/" << pid;
+  return ss.str();
+}
+
 } // namespace 
 
 int get_procstat(procstat* pinfo)
@@ -87,7 +94,13 @@ int get_procstat(procstat* pinfo)
   return read_stat(get_procname(), pinfo);
 }
 
-int get_proc_threads(std::vector<pid_t> pids)
+int get_threadstat(pid_t pid, procstat* pinfo)
+{
+  return read_stat(get_threadname(pid), pinfo);
+}
+
+
+int get_pids_threads(std::vector<pid_t>& pids)
 {
   std::stringstream ss;
   ss << "/proc/" << ::getpid() << "/task";
@@ -107,14 +120,6 @@ int get_proc_threads(std::vector<pid_t> pids)
         pids.push_back(pid);
     }
   });
-  /*
-  std::transform(ditr, boost::filesystem::directory_iterator(), std::back_inserter(pids), [](const boost::filesystem::directory_entry& de) -> pid_t
-  {
-    return 0;
-  })
-  ;
-  */
-  
   return 0;
 }
 }}
