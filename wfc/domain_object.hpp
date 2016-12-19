@@ -72,15 +72,21 @@ public:
 
   virtual void initialize() {}
 
-  virtual void start(const std::string&) { this->ready(); }
+  // Только при первом запуске
+  virtual void start() { this->ready(); }
 
-  virtual void stop(const std::string&)  {}
+  // Каждый раз при реконфигурации или переинициализации
+  virtual void ready() {};
+  
+  virtual void stop( /*const std::string&*/ )  {}
 
   virtual void reconfigure() { }
 
   virtual void reconfigure_basic() {}
 
-  virtual void ready() {};
+  ///
+  /// -----------------------------------------------------------------
+  /// 
 
   virtual void create_domain(const std::string& name, global_ptr g ) final
   {
@@ -107,8 +113,8 @@ public:
                 : this->global()->registry.template get<workflow >("workflow", _options.workflow);
 
     _statistics = this->global()->registry.template get<statistics>("statistics", _options.statistics);
-
     _started = true;
+    _conf_flag = true;
     this->initialize();
   }
 
@@ -135,14 +141,15 @@ public:
   }
 
   // только один раз после конфигурации и инициализации
-  virtual void start_domain(const std::string& arg) final
+  virtual void start_domain() final
   {
-    this->start(arg);
+    this->start();
   }
+  
 
-  virtual void stop_domain(const std::string& arg) final
+  virtual void stop_domain() final
   {
-    this->stop(arg);
+    this->stop();
   }
 
   const std::string& name() const

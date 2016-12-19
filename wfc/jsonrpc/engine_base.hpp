@@ -74,7 +74,7 @@ public:
 
   engine_ptr engine() const { return _engine; };
 
-  virtual void stop(const std::string& ) final override
+  virtual void stop() final override
   {
     if ( _engine != nullptr ) 
     {

@@ -27,6 +27,16 @@ public:
     size_t vsize = 0;                    /** Virtual memory size **/
     size_t rss  = 0;                      /** Resident Set Size **/
     int pid = 0;
+    thread_stat operator - (const thread_stat& t) const
+    {
+      thread_stat r;
+      r.utime = utime - t.utime;                    /** user mode jiffies **/
+      r.stime = stime - t.stime;                    /** kernel mode jiffies **/
+      r.vsize = vsize - t.vsize;                    /** Virtual memory size **/
+      r.rss   = rss - t.rss;                      /** Resident Set Size **/
+      r.pid   = t.pid;
+      return r;
+    }
   };
 
   void set_cpu(std::vector<int> cpu);

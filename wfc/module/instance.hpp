@@ -169,7 +169,7 @@ private:
     {
       if ( _object != nullptr )
       {
-        _object->stop("");
+        _object->stop();
         if ( _global )
         {
           _global->registry.erase(_options.name);
@@ -180,22 +180,22 @@ private:
     return _object;
   }
 
-  void startup_(const std::string& arg) 
+  void startup_(const std::string& ) 
   {
     if ( _object != nullptr )
     {
-      _object->start(arg);
+      _object->start();
     }
     _startup = true;
   }
 
-  void forced_start_(const std::string& arg) 
+  void forced_start_(const std::string& ) 
   {
     _options.enabled = true;
     if ( auto obj = this->create_or_stop_if_() )
     {
       obj->initialize_domain();
-      obj->start(arg);
+      obj->start();
     }
   }
 
@@ -215,12 +215,12 @@ private:
     }
   }
 
-  void stop_(const std::string& arg)
+  void stop_(const std::string& /*arg*/)
   {
     if ( _object != nullptr )
     {
       if ( _ready_for_stop )
-        _object->stop(arg);
+        _object->stop();
       _object = nullptr;
     }
     _ready_for_stop = false;
