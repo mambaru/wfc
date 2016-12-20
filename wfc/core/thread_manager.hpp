@@ -21,6 +21,7 @@ class thread_manager
   typedef std::mutex mutex_type;
   typedef std::set<pid_t> pid_set;
   typedef std::set<int> cpu_set;
+  
 public:
 
   struct statistics
@@ -50,20 +51,30 @@ public:
   std::vector<pid_t> get_pids() const;
   std::vector<std::thread::id> get_ids() const;
   */
+  void set_reg_cpu(const cpu_set& cpu);
+  void set_unreg_cpu(const cpu_set&  cpu);
   bool update_thread_list(); 
   statistics process_statistics();
+private:
+  void update_cpu_sets_();
+  void setaffinity_(pid_t pid, const cpu_set& cpu);
+  void erase_(pid_t pid);
 public:
   mutable mutex_type _mutex;
   
   // Зарегестрированные потоки
-  std::map<std::thread::id, pid_t> _id_by_pid;
-  std::map<pid_t, std::thread::id> _pid_by_id;
+  /*std::map<std::thread::id, pid_t> _id_by_pid;
+  std::map<pid_t, std::thread::id> _id_by_pid;
+  */
   // Все потоки
   pid_set _all_pids;
   // Не зарегестрированные потоки
   pid_set _unreg_pids;
+  // Зарегестрированные потоки
+  pid_set _reg_pids;
   // Именованые наборы потоков
   std::map<std::string, pid_set > _named_pid_set;
+  std::map<std::string, cpu_set > _named_cpu;
   
   // Настройки CPU для зарегистрированных
   cpu_set _reg_cpu;
@@ -71,7 +82,7 @@ public:
   cpu_set _unreg_cpu;
   // Индивидуальные настройки CPU
   std::map<pid_t, cpu_set > _cpu_by_pid;
-
+  
   
 };
 

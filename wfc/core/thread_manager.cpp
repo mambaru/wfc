@@ -14,6 +14,10 @@
 #include "detail/get_procstat.hpp"
 #include "detail/procstat.hpp"
 
+
+#include <sys/resource.h>
+#include <sched.h>
+
 namespace wfc{
 
   /*
@@ -81,24 +85,20 @@ bool thread_manager::update_thread_list()
   bool changed = false;
   std::vector<pid_t> pids;
   detail::get_pids_threads( pids );
+
   std::lock_guard<mutex_type> lk(_mutex);
+  
   auto trash = this->_all_pids;
-  // потоки для обновления распределения по cpu
-  pid_set update_cpu;
   for (auto pid : pids )
   {
-    if ( _all_pids.insert(pid).second )
-      changed = true;
-    
-    // Если незарегистрированный поток
-    auto itr = _pid_by_id.find( pid );
-    if ( itr == _pid_by_id.end() )
-    {
-      _unreg_pids.insert(pid);
-      _cpu_by_pid[pid] = _unreg_cpu;
-      update_cpu.insert(pid);
-    }
     trash.erase(pid);
+    if ( _all_pids.insert(pid).second )
+    {
+      // Если незарегистрированный поток
+      auto itr = _reg_pids.find( pid );
+      if ( itr == _reg_pids.end() && _unreg_pids.insert(pid).second )
+       changed =true;
+    }
   }
 
   if ( !trash.empty() )
@@ -106,11 +106,79 @@ bool thread_manager::update_thread_list()
     
   // Удаляем старые потоки
   for (auto pid : trash )
+    this->erase_(pid);
+  
+  this->update_cpu_sets_();
+  /*
+  for (auto pid : update_cpu )
   {
-    pid = 0;
+    const  auto &cpu = _cpu_by_pid[pid];
+    cpu_set_t  mask;
+    CPU_ZERO(&mask);
+    for (int id : cpu )
+      CPU_SET(id, &mask);
+    ::sched_setaffinity( ::getpid(), sizeof(mask), &mask);
   }
-  // TODO: обновить установки cpu
+  */
+  
   return changed;
+}
+
+void thread_manager::erase_(pid_t pid)
+{
+  _all_pids.erase(pid);
+  _reg_pids.erase(pid);
+  _unreg_pids.erase(pid);
+  _cpu_by_pid.erase(pid);
+  for ( auto& p : _named_pid_set )
+    p.second.erase(pid);
+}
+
+
+void thread_manager::set_reg_cpu(const std::set<int>& cpu)
+{
+  std::lock_guard<mutex_type> lk(_mutex);
+  _reg_cpu = cpu;
+  this->update_cpu_sets_();
+}
+
+void thread_manager::set_unreg_cpu(const std::set<int>& cpu)
+{
+  std::lock_guard<mutex_type> lk(_mutex);
+  _unreg_cpu = cpu;
+  this->update_cpu_sets_();
+}
+
+void thread_manager::update_cpu_sets_()
+{
+  for ( pid_t p : _unreg_pids )
+    _cpu_by_pid[p] = _unreg_cpu;
+  for ( pid_t p : _reg_pids )
+    _cpu_by_pid[p] = _reg_cpu;
+
+  // Обновление именованых настроек
+  for ( const auto& n : _named_cpu )
+  {
+    auto itr = _named_pid_set.find(n.first);
+    if ( itr != _named_pid_set.end() )
+    {
+      for ( auto p : itr->second )
+        _cpu_by_pid[p] = n.second;
+    }
+  }
+  
+  for ( auto& p : _cpu_by_pid)
+    this->setaffinity_(p.first, p.second);
+  this->setaffinity_( ::getpid(), _reg_cpu);
+}
+
+void thread_manager::setaffinity_(pid_t pid, const cpu_set& cpu)
+{
+  cpu_set_t  mask;
+  CPU_ZERO(&mask);
+  for (int id : cpu )
+    CPU_SET(id, &mask);
+  ::sched_setaffinity( pid, sizeof(mask), &mask);
 }
 
 thread_manager::statistics thread_manager::process_statistics()
