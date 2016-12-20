@@ -142,6 +142,34 @@ void thread_manager::set_reg_cpu(const std::set<int>& cpu)
   this->update_cpu_sets_();
 }
 
+void thread_manager::reg_thread(std::string group)
+{
+  pid_t pid = detail::get_thread_pid();
+  
+  std::lock_guard<mutex_type> lk(_mutex);
+  this->erase_(pid);
+  _all_pids.insert(pid);
+  _reg_pids.insert(pid);
+  auto itr = _named_pid_set.find(group);
+  if ( itr != _named_pid_set.end() )
+  {
+    _cpu_by_pid[pid] = itr->second;
+  }
+  else
+  {
+    _cpu_by_pid[pid] = _reg_cpu;
+  }
+  this->update_cpu_sets_();
+}
+
+void thread_manager::unreg_thread()
+{
+  pid_t pid = detail::get_thread_pid();
+  
+  std::lock_guard<mutex_type> lk(_mutex);
+  this->erase_(pid);
+}
+
 void thread_manager::set_unreg_cpu(const std::set<int>& cpu)
 {
   std::lock_guard<mutex_type> lk(_mutex);
@@ -170,6 +198,13 @@ void thread_manager::update_cpu_sets_()
   for ( auto& p : _cpu_by_pid)
     this->setaffinity_(p.first, p.second);
   this->setaffinity_( ::getpid(), _reg_cpu);
+}
+
+void thread_manager::set_reg_cpu(std::string group, const cpu_set& cpu)
+{
+  std::lock_guard<mutex_type> lk(_mutex);
+  _named_cpu[group] = cpu;
+  this->update_cpu_sets_();
 }
 
 void thread_manager::setaffinity_(pid_t pid, const cpu_set& cpu)

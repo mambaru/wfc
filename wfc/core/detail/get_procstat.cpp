@@ -1,6 +1,8 @@
 #include "get_procstat.hpp"
 #include <stdio.h>
 #include <sys/stat.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
 #include <errno.h>
 #include <string.h>
 #include <string>
@@ -122,4 +124,10 @@ int get_pids_threads(std::vector<pid_t>& pids)
   });
   return 0;
 }
+
+pid_t get_thread_pid()
+{
+  return syscall(SYS_gettid);
+}
+
 }}

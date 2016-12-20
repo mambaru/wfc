@@ -51,8 +51,11 @@ public:
   std::vector<pid_t> get_pids() const;
   std::vector<std::thread::id> get_ids() const;
   */
+  void set_reg_cpu(std::string group, const cpu_set& cpu);
   void set_reg_cpu(const cpu_set& cpu);
   void set_unreg_cpu(const cpu_set&  cpu);
+  void reg_thread(std::string group);
+  void unreg_thread();
   bool update_thread_list(); 
   statistics process_statistics();
 private:
