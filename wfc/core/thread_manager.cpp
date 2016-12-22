@@ -222,11 +222,18 @@ void thread_manager::update_cpu_sets_()
 
 void thread_manager::setaffinity_(pid_t pid, const cpu_set& cpu)
 {
+  std::stringstream ss;
+  ss << "CPUs for pid=" << pid << " [";
   cpu_set_t  mask;
   CPU_ZERO(&mask);
   for (int id : cpu )
+  {
+    ss << id << ",";
     CPU_SET(id, &mask);
+  }
+  ss << "]";
   ::sched_setaffinity( pid, sizeof(mask), &mask);
+  COMMON_LOG_MESSAGE(ss.str())
 }
 
 thread_manager::statistics thread_manager::process_statistics()
