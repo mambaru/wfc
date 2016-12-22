@@ -182,7 +182,10 @@ void thread_manager::set_unreg_cpu(const std::set<int>& cpu)
 void thread_manager::set_reg_cpu(std::string group, const cpu_set& cpu)
 {
   std::lock_guard<mutex_type> lk(_mutex);
-  _named_cpu[group] = cpu;
+  if ( cpu.empty() )
+    _named_cpu.erase(group);
+  else
+    _named_cpu[group] = cpu;
   this->update_cpu_sets_();
 }
 
@@ -197,6 +200,8 @@ void thread_manager::update_cpu_sets_()
   for ( const auto& n : _named_cpu )
   {
     auto itr = _named_pid_set.find(n.first);
+    if ( n.second.empty() )
+      continue;
     if ( itr != _named_pid_set.end() )
     {
       for ( auto p : itr->second )
