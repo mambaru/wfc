@@ -189,6 +189,11 @@ void thread_manager::set_reg_cpu(std::string group, const cpu_set& cpu)
   this->update_cpu_sets_();
 }
 
+std::vector<pid_t> thread_manager::get_unreg_pids()
+{
+  return std::vector<pid_t>( _unreg_pids.begin(), _unreg_pids.end() );
+}
+
 void thread_manager::update_cpu_sets_()
 {
   for ( pid_t p : _unreg_pids )

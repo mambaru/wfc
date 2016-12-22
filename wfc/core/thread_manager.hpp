@@ -58,6 +58,8 @@ public:
   void unreg_thread();
   bool update_thread_list(); 
   statistics process_statistics();
+
+  std::vector<pid_t> get_unreg_pids();
 private:
   void update_cpu_sets_();
   void setaffinity_(pid_t pid, const cpu_set& cpu);
