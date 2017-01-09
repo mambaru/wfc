@@ -19,7 +19,8 @@ namespace wfc{
 
 template<
   typename Itf,
-  typename Opt
+  typename Opt,
+  typename StatOpt = nostat
 >
 class domain_object
   : public Itf
@@ -28,8 +29,10 @@ class domain_object
   //typedef void interface_type;
 public:
   typedef Opt options_type;
-  typedef base_instance_options instance_options_type;
-  typedef domain_instance_options<Opt> config_type;
+  //typedef base_instance_options<StatOpt> instance_options_type;
+  typedef StatOpt statistics_options_type;
+  typedef domain_instance_options<Opt, StatOpt> config_type;
+  typedef typename config_type::instance_options instance_options_type;
   
   
   /*
@@ -110,7 +113,7 @@ public:
                 ? this->global()->workflow
                 : this->global()->registry.template get<workflow >("workflow", _config.workflow);
 
-    _statistics = this->global()->registry.template get<statistics>("statistics", _config.statistics);
+    _statistics = this->global()->registry.template get<statistics>("statistics", _config.statistics.target);
     _started = true;
     _conf_flag = true;
     this->initialize();

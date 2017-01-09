@@ -140,16 +140,16 @@ private:
 
   void serialize_base_instance_( const instance_config& opt,  std::string& str )
   {
-    typename base_instance_json::serializer serializer;
+    typedef typename base_instance_json::serializer serializer;
     str.clear();
-    serializer( opt, std::back_inserter(str) );
+    serializer()( opt, std::back_inserter(str) );
   }
 
   void serialize_domain_( const instance_config& opt,  std::string& str )
   {
-    typename domain_json::serializer serializer;
+    typedef typename domain_json::serializer serializer;
     str.clear();
-    serializer( opt, std::back_inserter(str) );
+    serializer()( opt, std::back_inserter(str) );
   }
 
   void unserialize_( component_config& opt,  const std::string& str )

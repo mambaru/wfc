@@ -19,6 +19,7 @@ public:
   typedef DomainObject object_type;
   typedef typename object_type::domain_interface domain_interface;
   typedef typename object_type::config_type config_type;
+  typedef typename object_type::instance_options_type instance_options_type;
   /*
   typedef typename object_type::options_type domain_options_type;
   typedef domain_instance_options<domain_options_type> options_type;
@@ -62,10 +63,10 @@ public:
       obj->configure_domain(_config);
   }
 
-  virtual void reconfigure_basic( const base_instance_options& opt )
+  virtual void reconfigure_basic( const instance_options_type& opt )
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    static_cast<base_instance_options&>( _config ) = opt;
+    static_cast<instance_options_type&>( _config ) = opt;
     _startup = _startup && !( _object==nullptr && _config.enabled );
     if ( auto obj = this->create_or_stop_if_() ) 
       obj->reconfigure_domain_basic( _config );
