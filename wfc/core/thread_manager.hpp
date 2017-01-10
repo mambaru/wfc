@@ -24,26 +24,27 @@ class thread_manager
   
 public:
 
+  /*
   struct statistics
   {
-    size_t utime = 0;                    /** user mode jiffies **/
-    size_t stime = 0;                    /** kernel mode jiffies **/
-    size_t vsize = 0;                    /** Virtual memory size **/
-    size_t rss  = 0;                      /** Resident Set Size **/
+    size_t utime = 0;
+    size_t stime = 0;
+    size_t vsize = 0;
+    size_t rss  = 0;
     int pid = 0;
     
     statistics operator - (const statistics& t) const
     {
       statistics r;
-      r.utime = utime - t.utime;                    /** user mode jiffies **/
-      r.stime = stime - t.stime;                    /** kernel mode jiffies **/
-      r.vsize = vsize - t.vsize;                    /** Virtual memory size **/
-      r.rss   = rss - t.rss;                      /** Resident Set Size **/
+      r.utime = utime - t.utime;                  
+      r.stime = stime - t.stime;                  
+      r.vsize = vsize - t.vsize;                  
+      r.rss   = rss - t.rss;                      
       r.pid   = t.pid;
       return r;
     }
   };
-
+  */
   /*
   void set_cpu(std::vector<int> cpu);
   std::vector<int> get_cpu();
@@ -57,7 +58,7 @@ public:
   void reg_thread(std::string group);
   void unreg_thread();
   bool update_thread_list(); 
-  statistics process_statistics();
+  // statistics process_statistics();
 
   std::vector<pid_t> get_unreg_pids();
 private:

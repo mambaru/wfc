@@ -1,6 +1,7 @@
 #pragma once 
 
 #include <wfc/jsonrpc/interface_implementation.hpp>
+#include <wfc/jsonrpc/statistics_options_json.hpp>
 #include <wfc/jsonrpc/gateway/gateway.hpp>
 #include <wfc/jsonrpc/gateway/gateway_options_json.hpp>
 #include <wfc/module/multiton.hpp>
@@ -12,7 +13,9 @@ template< typename Name, typename MethodList, template<typename> class Impl = in
 class gateway_multiton: public ::wfc::multiton<
   Name,
   ::wfc::instance< gateway< MethodList, Impl > >,
-  ::wfc::jsonrpc::gateway_options_json< typename gateway< MethodList, Impl >::options_type >
+  ::wfc::jsonrpc::gateway_options_json< typename gateway< MethodList, Impl >::options_type >,
+  ::wfc::component_features::Defaults,
+  statistics_options_json
 >
 {
 };

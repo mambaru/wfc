@@ -3,6 +3,7 @@
 #include <wfc/jsonrpc/interface_implementation.hpp>
 #include <wfc/jsonrpc/service/service.hpp>
 #include <wfc/jsonrpc/service/service_options_json.hpp>
+#include <wfc/jsonrpc/statistics_options_json.hpp>
 #include <wfc/module/multiton.hpp>
 #include <wfc/module/instance.hpp>
 
@@ -12,7 +13,9 @@ template< typename Name, typename MethodList, template<typename> class Impl = in
 class service_multiton: public ::wfc::multiton<
   Name,
   ::wfc::instance< service< MethodList, Impl > >,
-  ::wfc::jsonrpc::service_options_json< typename service< MethodList, Impl >::options_type >
+  ::wfc::jsonrpc::service_options_json< typename service< MethodList, Impl >::options_type >,
+  ::wfc::component_features::Defaults,
+  statistics_options_json
 >
 {
 public:

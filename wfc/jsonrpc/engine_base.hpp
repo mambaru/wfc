@@ -4,16 +4,17 @@
 #include <wfc/iinterface.hpp>
 #include <wfc/memory.hpp>
 #include <wjrpc/outgoing/outgoing_holder.hpp>
+#include <wfc/jsonrpc/statistics_options.hpp>
 
 namespace wfc{ namespace jsonrpc{
 
 template<typename Interface, typename EngineType, typename OptionsType >
 class engine_base
-  : public domain_object< Interface, OptionsType>
+  : public domain_object< Interface, OptionsType, statistics_options>
 {
 public:
   typedef engine_base<Interface, EngineType, OptionsType> self;
-  typedef domain_object< Interface, OptionsType> super;
+  typedef domain_object< Interface, OptionsType, statistics_options> super;
   
   typedef Interface interface_type;
   typedef EngineType engine_type;
@@ -29,6 +30,7 @@ public:
   typedef typename super::outgoing_handler_t outgoing_handler_t;
   typedef typename super::timer_id_t timer_id_t;
   typedef ::iow::workflow workflow_type;
+
 public:
 
   virtual ~engine_base()

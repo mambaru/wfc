@@ -19,7 +19,8 @@ template<
   typename Name,
   typename Instance,
   typename DomainJson,
-  int Features = component_features::Multiton
+  int Features /*= component_features::Multiton*/, 
+  typename StatJson /*= defstat_json*/
 >
 class basic_component
   : public icomponent
@@ -31,8 +32,14 @@ public:
   typedef Instance    instance_type;
   
   typedef DomainJson  domain_json;
-  typedef base_instance_options_json<Features> base_instance_json;
-  typedef domain_instance_options_json<domain_json, Features> instance_json;
+  typedef typename std::conditional< 
+    instance_type::basic_options::statistics_enabled,
+    StatJson,
+    nostat_json
+  >::type stat_json;
+ 
+  typedef instance_options_json<domain_json, Features, stat_json> instance_json;
+  typedef typename instance_json::basic_json basic_json;
 
   typedef std::shared_ptr<wfcglobal> global_ptr;
   typedef typename instance_type::config_type instance_config;
@@ -138,18 +145,20 @@ public:
 
 private:
 
-  void serialize_base_instance_( const instance_config& opt,  std::string& str )
+  std::string serialize_base_instance_( const instance_config& opt )
   {
-    typedef typename base_instance_json::serializer serializer;
-    str.clear();
+    typedef typename basic_json::serializer serializer;
+    std::string str;
     serializer()( opt, std::back_inserter(str) );
+    return str;
   }
 
-  void serialize_domain_( const instance_config& opt,  std::string& str )
+  std::string serialize_domain_( const instance_config& opt )
   {
     typedef typename domain_json::serializer serializer;
-    str.clear();
+    std::string str;
     serializer()( opt, std::back_inserter(str) );
+    return str;
   }
 
   void unserialize_( component_config& opt,  const std::string& str )
@@ -187,8 +196,8 @@ private:
     opt.name = this->name();
     
     config_pair op;
-    this->serialize_base_instance_(opt, op.instance );
-    this->serialize_domain_(opt, op.domain );
+    op.instance = this->serialize_base_instance_(opt);
+    op.domain = this->serialize_domain_(opt);
     
     if ( _config.instance.empty() )
     {
@@ -227,8 +236,8 @@ private:
     {
       stop_list.erase(opt.name);
       config_pair op;
-      this->serialize_domain_(opt, op.domain );
-      this->serialize_base_instance_(opt, op.instance );
+      op.domain = this->serialize_domain_(opt);
+      op.instance = this->serialize_base_instance_(opt);
       
       auto itr = _instances.find(opt.name);
       if ( itr == _instances.end() )

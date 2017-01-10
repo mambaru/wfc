@@ -20,7 +20,7 @@ namespace wfc{
 template<
   typename Itf,
   typename Opt,
-  typename StatOpt = nostat
+  typename StatOpt = defstat
 >
 class domain_object
   : public Itf
@@ -31,10 +31,9 @@ public:
   typedef Opt options_type;
   //typedef base_instance_options<StatOpt> instance_options_type;
   typedef StatOpt statistics_options_type;
-  typedef domain_instance_options<Opt, StatOpt> config_type;
-  typedef typename config_type::instance_options instance_options_type;
-  
-  
+  typedef instance_options<Opt, StatOpt> config_type;
+  typedef typename config_type::basic_options basic_options;
+
   /*
   typedef base_instance_options base_options_type;
   typedef domain_instance_options<Opt> options1_type;
@@ -113,16 +112,19 @@ public:
                 ? this->global()->workflow
                 : this->global()->registry.template get<workflow >("workflow", _config.workflow);
 
-    _statistics = this->global()->registry.template get<statistics>("statistics", _config.statistics.target);
-    _started = true;
+    _statistics = ! _config.statistics.disabled 
+                  ? this->global()->registry.template get<statistics>("statistics", _config.statistics.target)
+                  : nullptr
+                  ;
+    //_started = true;
     _conf_flag = true;
     this->initialize();
   }
 
-  virtual void reconfigure_domain_basic(const instance_options_type& opt) final
+  virtual void reconfigure_domain_basic(const basic_options& opt) final
   {
     _conf_flag = false;
-    static_cast<instance_options_type&>(_config) = opt;
+    static_cast<basic_options&>(_config) = opt;
     this->reconfigure_basic();
   }
 
@@ -171,6 +173,11 @@ public:
   const config_type& config() const 
   {
     return _config;
+  }
+  
+  const statistics_options_type& statistics_options() const
+  {
+    return _config.statistics;
   }
 
   owner_type& owner()
@@ -420,11 +427,10 @@ public:
   
 private:
   bool _conf_flag = false;
-  bool _started = false;
   const io_id_t  _io_id;
   std::string    _name;
   global_ptr     _global;
-  config_type  _config;
+  config_type    _config;
   owner_type     _owner;
   workflow_ptr   _workflow;
   statistics_ptr _statistics;

@@ -4,13 +4,20 @@
 
 namespace wfc{
 
-template< typename Name, typename Instance, typename DomainJson, int Features = component_features::Multiton >
+template<
+  typename Name,
+  typename Instance,
+  typename DomainJson,
+  int Features = component_features::Multiton,
+  typename StatJson = defstat_json 
+>
 class multiton
   : public basic_component<
       Name, 
       Instance, 
       DomainJson, 
-      int(component_features::Multiton) | Features
+      int(component_features::Multiton) | Features,
+      StatJson
     > 
 {};
 

@@ -12,7 +12,7 @@
 #include <string.h>
 #include <wfc/logger.hpp>
 #include "detail/get_procstat.hpp"
-#include "detail/procstat.hpp"
+//#include "detail/procstat.hpp"
 
 
 #include <sys/resource.h>
@@ -65,7 +65,8 @@ std::vector<std::thread::id> thread_manager::get_ids() const
   return std::vector<std::thread::id>();
 }
   */
-  
+
+/*
 namespace {
 
   thread_manager::statistics init_stat( detail::procstat p )
@@ -79,6 +80,7 @@ namespace {
     return ts;
   }  
 }
+*/
 
 bool thread_manager::update_thread_list()
 {
@@ -236,12 +238,14 @@ void thread_manager::setaffinity_(pid_t pid, const cpu_set& cpu)
   COMMON_LOG_MESSAGE(ss.str())
 }
 
+/*
 thread_manager::statistics thread_manager::process_statistics()
 {
   detail::procstat p;
   get_procstat(&p);
   return init_stat(p);
 }
+*/
 
 }
 

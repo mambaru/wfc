@@ -4,8 +4,21 @@
 
 namespace wfc{
 
-template< typename Name, typename Instance, typename DomainJson, int Features = 0>
-class singleton: public basic_component<Name, Instance, DomainJson, int(component_features::Singleton) | Features> {};
+template<
+  typename Name,
+  typename Instance,
+  typename DomainJson,
+  int Features = 0,
+  typename StatJson = defstat_json
+>
+class singleton
+  : public basic_component<
+      Name,
+      Instance,
+      DomainJson,
+      int(component_features::Singleton) | Features, 
+      StatJson
+    > {};
 
 }
 
