@@ -150,9 +150,9 @@ private:
         {
           JSONRPC_LOG_MESSAGE( "JSON-RPC: DEBUG STAT -3-");
           auto name = this->name();
-          auto handler_map  = stat->create_size_prototype(name + sopt.handler_map);
-          auto result_map   = stat->create_size_prototype(name + sopt.result_map);
-          auto result_queue = stat->create_size_prototype(name + sopt.result_queue);
+          auto handler_map  = stat->create_value_prototype(name + sopt.handler_map);
+          auto result_map   = stat->create_value_prototype(name + sopt.result_map);
+          auto result_queue = stat->create_value_prototype(name + sopt.result_queue);
           _stat_timer_id = wf->create_timer( 
             std::chrono::milliseconds(sopt.interval_ms), 
             [handler_map, result_map, result_queue, this]()->bool
@@ -161,9 +161,9 @@ private:
               {
                 JSONRPC_LOG_MESSAGE( "JSON-RPC: DEBUG STAT Ready! " << this->name());
                 auto si = this->_engine->sizes();
-                stat->create_meter(handler_map,  si.handler_map);
-                stat->create_meter(result_map,   si.result_map);
-                stat->create_meter(result_queue, si.result_queue);
+                stat->create_meter(handler_map,  si.handler_map, 0);
+                stat->create_meter(result_map,   si.result_map, 0);
+                stat->create_meter(result_queue, si.result_queue, 0);
                 return true;
               }
               return false;
