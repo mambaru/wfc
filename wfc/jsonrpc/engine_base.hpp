@@ -137,6 +137,7 @@ protected:
 private:
   void initialize_statistics_() 
   {
+    
     JSONRPC_LOG_MESSAGE( "JSON-RPC: DEBUG STAT -1-");
     if ( auto stat = this->get_statistics() )
     {
@@ -156,10 +157,9 @@ private:
             std::chrono::milliseconds(sopt.interval_ms), 
             [handler_map, result_map, result_queue, this]()->bool
             {
-              JSONRPC_LOG_MESSAGE( "JSON-RPC: DEBUG STAT -4-");
               if ( auto stat = this->get_statistics() )
               {
-                JSONRPC_LOG_MESSAGE( "JSON-RPC: DEBUG STAT Ready!");
+                JSONRPC_LOG_MESSAGE( "JSON-RPC: DEBUG STAT Ready! " << this->name());
                 auto si = this->_engine->sizes();
                 stat->create_meter(handler_map,  si.handler_map);
                 stat->create_meter(result_map,   si.result_map);
