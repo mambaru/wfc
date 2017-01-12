@@ -37,10 +37,23 @@ public:
   {
     _engine=nullptr;
   }
-  
-  engine_base()
-    : _timer_id(0) 
-  {}
+
+
+  virtual void stop() final override
+  {
+    if ( _engine != nullptr ) 
+    {
+      if ( auto wf = this->get_workflow() )
+      {
+        wf->release_timer(_timer_id);
+        wf->release_timer(_stat_timer_id);
+      }
+      _engine->stop();
+
+    }
+    _engine = nullptr;
+  }
+
 
   virtual void reg_io(io_id_t io_id, std::weak_ptr<iinterface> witf) override
   {
@@ -76,19 +89,10 @@ public:
 
   engine_ptr engine() const { return _engine; };
 
-  virtual void stop() final override
-  {
-    if ( _engine != nullptr ) 
-    {
-      if ( auto wf = _workflow.lock() )
-        wf->release_timer(_timer_id);
-      _engine->stop();
 
-    }
-    _engine = nullptr;
-  }
 protected:
-  void initialize_engine(/*engine_options*/ options_type eopt)
+
+  void initialize_engine(options_type eopt)
   {
     eopt.log_error = [](const std::string& m) { JSONRPC_LOG_ERROR( m ); m.size();};
     eopt.log_fatal = [](const std::string& m) { JSONRPC_LOG_FATAL( m ); m.size();};
@@ -105,8 +109,8 @@ protected:
       _engine->reconfigure( eopt );
     }
 
-    _workflow = this->get_workflow();
-    if ( auto wf = _workflow.lock() )
+    //_workflow = this->get_workflow();
+    if ( auto wf = this->get_workflow() )
     {
       wf->release_timer( _timer_id );
       if ( eopt.remove_outdated_ms != 0 )
@@ -127,11 +131,49 @@ protected:
         );
       }
     }
+    this->initialize_statistics_();
   }
 
 private:
+  void initialize_statistics_() 
+  {
+    if ( auto stat = this->get_statistics() )
+    {
+      auto sopt = this->statistics_options();
+      if ( auto wf = this->get_workflow() )
+      {
+        wf->release_timer(_stat_timer_id);
+        if ( sopt.interval_ms != 0 )
+        {
+          auto name = this->name();
+          auto handler_map  = stat->create_size_prototype(name + sopt.handler_map);
+          auto result_map   = stat->create_size_prototype(name + sopt.result_map);
+          auto result_queue = stat->create_size_prototype(name + sopt.result_queue);
+          _stat_timer_id = wf->create_timer( 
+            std::chrono::milliseconds(sopt.interval_ms), 
+            [handler_map, result_map, result_queue, this]()->bool
+            {
+              if ( auto stat = this->get_statistics() )
+              {
+                auto si = this->_engine->sizes();
+                stat->create_meter(handler_map,  si.handler_map);
+                stat->create_meter(result_map,   si.result_map);
+                stat->create_meter(result_queue, si.result_queue);
+                return true;
+              }
+              return false;
+            }
+          );
+        }
+      }
+    }
+  }
+
+  
+private:
   timer_id_t _timer_id = 0;
-  std::weak_ptr< workflow_type > _workflow;
+  timer_id_t _stat_timer_id = 0;
+  //std::weak_ptr< workflow_type > _workflow;
 protected:
   engine_ptr _engine;
 };
