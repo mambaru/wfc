@@ -121,7 +121,7 @@ protected:
           [engine]() -> bool 
           {
             JSONRPC_LOG_DEBUG( " JSON-RPC remove outdated...");
-            JSONRPC_LOG_MESSAGE( "=1= JSON-RPC remove outdated..." );
+            //JSONRPC_LOG_MESSAGE( "=1= JSON-RPC remove outdated..." );
             if ( size_t count = engine->remove_outdated() )
             {
               JSONRPC_LOG_WARNING( "JSON-RPC: " << count << " calls is outdated.");
@@ -137,18 +137,17 @@ protected:
 private:
   void initialize_statistics_() 
   {
-    
-    JSONRPC_LOG_MESSAGE( "JSON-RPC: DEBUG STAT -1-");
+    //JSONRPC_LOG_MESSAGE( "JSON-RPC: DEBUG STAT -1-");
     if ( auto stat = this->get_statistics() )
     {
       auto sopt = this->statistics_options();
       if ( auto wf = this->get_workflow() )
       {
-        JSONRPC_LOG_MESSAGE( "JSON-RPC: DEBUG STAT -2-");
+        //JSONRPC_LOG_MESSAGE( "JSON-RPC: DEBUG STAT -2-");
         wf->release_timer(_stat_timer_id);
         if ( sopt.interval_ms != 0 )
         {
-          JSONRPC_LOG_MESSAGE( "JSON-RPC: DEBUG STAT -3-");
+          //JSONRPC_LOG_MESSAGE( "JSON-RPC: DEBUG STAT -3-");
           auto name = this->name();
           auto handler_map  = stat->create_value_prototype(name + sopt.handler_map);
           auto result_map   = stat->create_value_prototype(name + sopt.result_map);
@@ -159,7 +158,7 @@ private:
             {
               if ( auto stat = this->get_statistics() )
               {
-                JSONRPC_LOG_MESSAGE( "JSON-RPC: DEBUG STAT Ready! " << this->name());
+                //JSONRPC_LOG_MESSAGE( "JSON-RPC: DEBUG STAT Ready! " << this->name());
                 auto si = this->_engine->sizes();
                 stat->create_meter(handler_map,  si.handler_map, 0);
                 stat->create_meter(result_map,   si.result_map, 0);
