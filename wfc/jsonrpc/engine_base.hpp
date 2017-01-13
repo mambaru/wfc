@@ -121,7 +121,7 @@ protected:
           [engine]() -> bool 
           {
             JSONRPC_LOG_DEBUG( " JSON-RPC remove outdated...");
-            JSONRPC_LOG_MESSAGE( " JSON-RPC remove outdated..." );
+            JSONRPC_LOG_MESSAGE( "=1= JSON-RPC remove outdated..." );
             if ( size_t count = engine->remove_outdated() )
             {
               JSONRPC_LOG_WARNING( "JSON-RPC: " << count << " calls is outdated.");
