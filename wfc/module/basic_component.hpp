@@ -320,8 +320,9 @@ private:
   void generate_config_(component_config& opt, const std::string& type, fas::false_) 
   {
     instance_config inst;
-    inst.name = this->name() + "1";
     instance_type().generate( inst, type);
+    if ( inst.name.empty() )
+      inst.name = this->name() + "1";
     opt.push_back(inst);
   }
 
