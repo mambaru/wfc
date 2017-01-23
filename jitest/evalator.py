@@ -219,7 +219,7 @@ class Evalator:
     if beg==0 and end==len(arg):
       return obj
     if self.is_str(obj) or isPy:
-      return arg[:beg] + str(obj) + arg[end:]
+      return arg[:beg] + unicode(obj) + arg[end:]
     return arg[:beg] + json.dumps(obj)+arg[end:]
       
   # Поиск {% code %} в строке

@@ -39,29 +39,20 @@ public:
       std::lock_guard<mutex_type> lk(_mutex);
       itr = _registry_map.find( key_type(prefix, name) );
       if ( itr == _registry_map.end() )
-      {
         not_found = disabort ? false : true;
-        /*
-        if ( !disabort )
-        {
-          DOMAIN_LOG_FATAL("wfc::registry::get: object '" << name << "' not found" )
-        }
-        return nullptr; 
-        */
-      }
       else
         result = std::dynamic_pointer_cast<I>(itr->second);
     }
 
     if ( not_found )
     {
-      DOMAIN_LOG_FATAL("wfc::registry::get: object '" << name << "' not found" )
+      DOMAIN_LOG_FATAL("wfc::registry::get: object '" << prefix << "::" << name << "' not found" )
       return nullptr;
     }
     
     if ( !disabort && result == nullptr)
     {
-      DOMAIN_LOG_FATAL("wfc::registry::get: invalid interface for " << name <<
+      DOMAIN_LOG_FATAL("wfc::registry::get: invalid interface for " << prefix << "::" << name <<
                        " (cannot convert from " << typeid(itr->second.get()).name() << " to " << typeid(result.get()).name() << ")" )
       return nullptr;
     }

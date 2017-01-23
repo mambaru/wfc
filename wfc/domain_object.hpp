@@ -98,7 +98,6 @@ public:
     conf = this->generate(type);
   }
 
-
   virtual void create_domain(const std::string& name, global_ptr g ) final
   {
     _name = name;
@@ -127,7 +126,6 @@ public:
                   ? this->global()->registry.template get<statistics>("statistics", _config.statistics.target)
                   : nullptr
                   ;
-    //_started = true;
     _conf_flag = true;
     this->initialize();
   }
@@ -230,6 +228,9 @@ public:
   template<typename I>
   std::shared_ptr<I> get_target(const std::string& prefix, const std::string& name, bool disabort = false) const
   {
+    if (!is_configured_())
+      return nullptr;
+
     if ( auto g = this->global() )
       return g->registry.template get<I>(prefix, name, disabort);
     return nullptr;
@@ -238,6 +239,9 @@ public:
   template<typename I>
   std::shared_ptr<I> get_target(const std::string& name, bool disabort = false) const
   {
+    if (!is_configured_())
+      return nullptr;
+
     if ( auto g = this->global() )
       return g->registry.template get<I>(name, disabort);
     return nullptr;
@@ -245,79 +249,30 @@ public:
 
   statistics_ptr get_statistics() const 
   {
+    if (!is_configured_())
+      return nullptr;
+
     return _statistics;
   }
 
-  /*
-  meter_ptr create_meter( meter_ptr m, meter_type::size_type count) const
-  {
-    if ( _statistics == nullptr )
-      return nullptr;
-    return _statistics->create_meter(m, count);
-  }
-  
-
-  meter_ptr create_meter( meter_ptr m, meter_type::size_type size, meter_type::size_type count ) const
-  {
-    if ( _statistics == nullptr )
-      return nullptr;
-    return _statistics->create_meter(m, size, count);
-  }
-
-  
-  meter_ptr create_meter(const std::string& time_name, meter_type::size_type count) const
-  {
-    if ( _statistics== nullptr )
-      return nullptr;
-    return _statistics->create_meter(time_name, count);
-  }
-
-  meter_ptr create_meter(const std::string& read_name, const std::string& write_name, meter_type::size_type size) const
-  {
-    if ( _statistics== nullptr )
-      return nullptr;
-    return _statistics->create_meter(read_name, write_name, size);
-  }
-
-  meter_ptr create_meter(const std::string& time_name, 
-                         const std::string& read_name, 
-                         const std::string& write_name,
-                          meter_type::size_type count,
-                         meter_type::size_type size) const
-  {
-    if ( _statistics== nullptr )
-      return nullptr;
-    return _statistics->create_meter(time_name, read_name, write_name, count, size);
-  }
-
-  meter_ptr create_meter_prototype(const std::string& time_name) const
-  {
-    if ( _statistics== nullptr )
-      return nullptr;
-    return _statistics->create_meter_prototype(time_name);
-  }
-
-  
-  meter_ptr create_meter_prototype(const std::string& time_name, const std::string& read_name, const std::string& write_name) const
-  {
-    if ( _statistics== nullptr )
-      return nullptr;
-    return _statistics->create_meter_prototype(time_name, read_name, write_name);
-  }
-  */
-
   std::shared_ptr<workflow_type> get_workflow() const 
   {
+    if (!is_configured_())
+      return nullptr;
     return _workflow;
   }
 
   std::shared_ptr<workflow_type> get_core_workflow() const 
   {
+    if (!is_configured_())
+      return nullptr;
     return this->global()->workflow;
   }
 
   std::shared_ptr<workflow_type> get_workflow(const std::string& name, bool disabort = false) const 
   {
+    if (!is_configured_())
+      return nullptr;
     return this->global()->registry.template get<workflow_type>("workflow", name, disabort);
   }
 
@@ -430,7 +385,14 @@ public:
  
     return true;
   }
-  
+private:
+  bool is_configured_() const
+  {
+    if ( _workflow!=nullptr )
+      return true;
+    DOMAIN_LOG_FATAL("Attempting to use is not initialized object '" << _name <<"'")
+    return false;
+  }
 private:
   bool _conf_flag = false;
   const io_id_t  _io_id;

@@ -503,8 +503,10 @@ if __name__ == '__main__':
   parser.add_argument('-p', '--port',     help="Номер порта", type=int, default=options['port'])
   parser.add_argument('-u', '--udp',      help="Использовать udp-протокол", default=options['udp'], action='store_true') 
   #parser.add_argument('-P', '--pconn',    help="Постоянное подключение", action='store_true')
-  parser.add_argument('-P', '--pconn',    nargs='?', help="Постоянное подключение", type=int, default=options['pconn'])
+  #parser.add_argument('-P', '--pconn',    nargs='?', help="Постоянное подключение", type=int, default=options['pconn'])
+  parser.add_argument('-P', '--pconn',    help="Постоянное подключение", action='store_true')
 
+  # криво работает
   parser.add_argument('-t', '--threads', help="Число потоков", type=int,  default=options['threads'])
   parser.add_argument('-r', '--rate',    help="Ограничение скорости (запросов в секунду)", type=int, default=options['rate'])
   parser.add_argument('-c', '--count',   help="Количество повторений на каждый поток", type=int, default=options['count'])
