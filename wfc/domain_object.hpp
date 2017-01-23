@@ -65,6 +65,11 @@ public:
   domain_object()
     : _io_id( ::iow::io::create_id<io_id_t>() )
   {}
+
+  virtual config_type generate(const std::string&) 
+  {
+    return config_type();
+  }
   
   virtual void create() {}
 
@@ -87,6 +92,12 @@ public:
   ///
   /// -----------------------------------------------------------------
   /// 
+  
+  virtual void domain_generate(config_type& conf, const std::string& type) final
+  {
+    conf = this->generate(type);
+  }
+
 
   virtual void create_domain(const std::string& name, global_ptr g ) final
   {
@@ -215,11 +226,6 @@ public:
     return _owner.wrap( std::forward<H>(h), std::forward<H2>(h2));
   }
 
-  virtual config_type generate(const std::string&) { return config_type();}
-  void generate(config_type& conf, const std::string& type) 
-  {
-    conf = type.empty() ? config_type() : this->generate(type);
-  }
 
   template<typename I>
   std::shared_ptr<I> get_target(const std::string& prefix, const std::string& name, bool disabort = false) const

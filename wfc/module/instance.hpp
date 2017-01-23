@@ -124,7 +124,7 @@ public:
   void generate(config_type& opt, const std::string& type) const 
   {
     auto obj = std::make_shared<object_type>();
-    obj->generate( opt, type );
+    obj->domain_generate( opt, type );
   }
 
 // -------------------------------------------------
@@ -141,15 +141,9 @@ public:
     return _global;
   }
 
-/*  options_type options() const 
-  {
-    std::lock_guard<mutex_type> lk(_mutex);
-    return _config;
-  }*/
-  
 private:
 
-  object_ptr create_or_stop_if_(/*bool enabled*/) 
+  object_ptr create_or_stop_if_() 
   {
     // Конфигурирование и регистрация объекта
     // Создание объекта
