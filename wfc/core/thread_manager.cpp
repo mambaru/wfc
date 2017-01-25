@@ -235,7 +235,7 @@ void thread_manager::setaffinity_(pid_t pid, const cpu_set& cpu)
   }
   ss << "]";
   ::sched_setaffinity( pid, sizeof(mask), &mask);
-  COMMON_LOG_MESSAGE(ss.str())
+  // COMMON_LOG_MESSAGE(ss.str())
 }
 
 /*
