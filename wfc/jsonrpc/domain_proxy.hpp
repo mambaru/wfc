@@ -10,11 +10,11 @@
 
 namespace wfc{ namespace jsonrpc{
   
-template<typename Config>
+template<typename Config, typename StatConfig>
 class domain_proxy
-  : public ::wfc::domain_object< ijsonrpc, Config>
+  : public ::wfc::domain_object< ijsonrpc, Config, StatConfig>
 {
-  typedef ::wfc::domain_object< ijsonrpc, Config> super;
+  typedef ::wfc::domain_object< ijsonrpc, Config, StatConfig> super;
   typedef std::weak_ptr<ijsonrpc> jsonrpc_wptr;
 public:
   typedef typename super::io_id_t  io_id_t;
