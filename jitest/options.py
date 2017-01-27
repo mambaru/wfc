@@ -1,6 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+'''
+sudo /sbin/sysctl -w net.ipv4.tcp_fin_timeout=3
+sudo /sbin/sysctl -w net.ipv4.tcp_tw_recycle=1
+sudo /sbin/sysctl -w net.ipv4.tcp_tw_reuse=1
+'''
+
+#Опциии по умолчанию 
 options={
   # Режим работы (см. документацию)
   'mode'     : 'test',
