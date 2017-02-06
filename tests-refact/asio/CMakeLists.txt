@@ -1,5 +1,0 @@
-add_executable(asio_test asio_test.cpp)
-add_definitions(-DFAS_USE_RT_LIB)
-#link_directories(../../build/wfc)
-target_link_libraries(asio_test wfc boost_system pthread rt)
-add_test(asio_test asio_test)
