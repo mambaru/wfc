@@ -14,13 +14,15 @@ struct target_adapter: ijsonrpc
   typedef std::weak_ptr<iinterface> itf_ptr_t;
   typedef std::weak_ptr<ijsonrpc> jsonrpc_ptr_t;
   
-  target_adapter() = default;
+  target_adapter() {};
+  /*
   target_adapter(const target_adapter&) = default;
   target_adapter(target_adapter&&) = default;
 
   target_adapter& operator=(const target_adapter&) = default;
   target_adapter& operator=(target_adapter&&) = default;
-  
+  */
+
   target_adapter(itf_ptr_t itf, jsonrpc_ptr_t jsonrpc)
     : _itf(itf), _jsonrpc(jsonrpc)
   {};
