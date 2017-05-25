@@ -196,14 +196,14 @@ public:
 
 
   template<typename H>
-  auto wrap(H&& h) 
+  auto wrap(H&& h) const
     -> ::iow::owner_handler<typename std::remove_reference<H>::type>
   {
     return _owner.wrap( std::forward<H>(h));
   }
 
   template<typename H, typename H2>
-  auto wrap(H&& h, H2&& h2) 
+  auto wrap(H&& h, H2&& h2) const
     -> ::iow::owner_handler2<typename std::remove_reference<H>::type, typename std::remove_reference<H2>::type>
   {
     return _owner.wrap( std::forward<H>(h), std::forward<H2>(h2));
@@ -211,14 +211,14 @@ public:
 
   // TODO: callback, с проверкой одного обязательного вызова, сейчас синоним wrap
   template<typename H>
-  auto callback(H&& h) 
+  auto callback(H&& h) const
     -> ::iow::owner_handler<typename std::remove_reference<H>::type>
   {
     return _owner.wrap( std::forward<H>(h));
   }
 
   template<typename H, typename H2>
-  auto callback(H&& h, H2&& h2) 
+  auto callback(H&& h, H2&& h2) const
     -> ::iow::owner_handler2<typename std::remove_reference<H>::type, typename std::remove_reference<H2>::type>
   {
     return _owner.wrap( std::forward<H>(h), std::forward<H2>(h2));
