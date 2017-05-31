@@ -25,20 +25,12 @@ template<
 class domain_object
   : public Itf
 {
-  // compile debug - убрать
-  //typedef void interface_type;
 public:
   typedef Opt options_type;
-  //typedef base_instance_options<StatOpt> instance_options_type;
   typedef StatOpt statistics_options_type;
   typedef instance_options<Opt, StatOpt> config_type;
   typedef typename config_type::basic_options basic_options;
 
-  /*
-  typedef base_instance_options base_options_type;
-  typedef domain_instance_options<Opt> options1_type;
-  */
-  //typedef instance_options<Opt>
   typedef Itf domain_interface;
   typedef std::shared_ptr<wfcglobal> global_ptr;
   typedef ::iow::owner owner_type;
@@ -83,7 +75,7 @@ public:
   // Каждый раз при реконфигурации или переинициализации
   virtual void ready() {};
   
-  virtual void stop( /*const std::string&*/ )  {}
+  virtual void stop( )  {}
 
   virtual void reconfigure() { }
 
@@ -288,7 +280,6 @@ public:
 
   virtual void unreg_io(io_id_t ) override
   {
-
   }
 
   constexpr io_id_t get_id() const { return _io_id;}

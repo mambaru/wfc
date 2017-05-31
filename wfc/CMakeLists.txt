@@ -7,7 +7,6 @@ SET(
   wfc_exit.cpp
   system/system.cpp
   core/global.cpp
-  core/workflow.cpp
   core/thread_manager.cpp
   core/detail/get_procstat.cpp
   core/instance_args.cpp
