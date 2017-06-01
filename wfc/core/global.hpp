@@ -12,6 +12,7 @@
 #include <wfc/core/ibuild_info.hpp>
 #include <wfc/core/workflow.hpp>
 #include <wfc/core/thread_manager.hpp>
+#include <wfc/core/cpuset.hpp>
 #include <iow/asio.hpp>
 
 
@@ -36,6 +37,7 @@ struct wfcglobal
   fakir after_stop;
   bool enable_callback_check  = false;
   thread_manager threads;
+  cpuset cpu;
   object_registry registry;
 
   typedef ::iow::asio::io_service io_service_type;

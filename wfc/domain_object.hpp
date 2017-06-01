@@ -112,12 +112,16 @@ public:
     _owner.enable_callback_check(_global->enable_callback_check);
     _workflow = _config.workflow.empty()
                 ? this->global()->workflow
-                : this->global()->registry.template get<workflow >("workflow", _config.workflow);
+                : this->global()->registry.template get<workflow >("workflow", _config.workflow)
+                ;
 
     _statistics = ! _config.statistics.disabled 
                   ? this->global()->registry.template get<statistics>("statistics", _config.statistics.target)
                   : nullptr
                   ;
+
+    basic_options bopt = static_cast<basic_options>(_config);
+    _global->cpu.set_cpu(_name, bopt.cpu);
     _conf_flag = true;
     this->initialize();
   }
@@ -216,7 +220,6 @@ public:
     return _owner.wrap( std::forward<H>(h), std::forward<H2>(h2));
   }
 
-
   template<typename I>
   std::shared_ptr<I> get_target(const std::string& prefix, const std::string& name, bool disabort = false) const
   {
@@ -282,7 +285,10 @@ public:
   {
   }
 
-  constexpr io_id_t get_id() const { return _io_id;}
+  constexpr io_id_t get_id() const
+  {
+    return _io_id;
+  }
   
   std::string get_arg(const std::string& arg) const
   {
@@ -318,19 +324,21 @@ public:
     auto args = _global->args.get(_name);
     return args.has(arg);
   }
+  
+  void reg_thread()
+  {
+    _global->cpu.set_current_thread(_name);
+  }
+
+  void unreg_thread()
+  {
+    _global->cpu.del_current_thread();
+  }
 
   bool suspended() const 
   {
     return _config.suspend;
   }
-  
-  template<typename Res, typename Callback>
-  void default_response(const Callback& cb) const
-  {
-    if ( cb != nullptr )
-      cb( std::make_unique<Res>() );
-  }
-
 
   template<typename Res, typename Req, typename Callback>
   bool suspended(const Req& /*req*/, const Callback& cb) const
@@ -340,6 +348,13 @@ public:
 
     this->default_response<Res>(cb);
     return true;
+  }
+
+  template<typename Res, typename Callback>
+  void default_response(const Callback& cb) const
+  {
+    if ( cb != nullptr )
+      cb( std::make_unique<Res>() );
   }
 
   template<typename Res, typename Req, typename Callback>

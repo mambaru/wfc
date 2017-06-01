@@ -6,53 +6,39 @@
 
 #pragma once
 
-#include <thread>
 #include <mutex>
-#include <vector>
 #include <map>
 #include <set>
 
-
 namespace wfc{
-
   
 class cpuset
 {
   typedef std::mutex mutex_type;
   typedef std::set<pid_t> pid_set;
   typedef std::set<int> cpu_set;
+  struct cpu_pids
+  {
+    cpu_set cpu;
+    pid_set pids;
+  };
+  
 public:
   void set_cpu(std::string group, const cpu_set& cpu);
-  void reg_thread(std::string group);
-  void unreg_thread();
-  bool update_thread_list(); 
-
-  std::vector<pid_t> get_unreg_pids();
+  void set_current_thread(std::string group);
+  void del_current_thread();
+  pid_set get_pids() const;
+  cpu_set get_cpu(pid_t pid) const;
+  bool clean_dirty();
 
 private:
-
-  void update_cpu_sets_();
-  void setaffinity_(pid_t pid, const cpu_set& cpu);
-  void erase_(pid_t pid);
-public:
+  void del_thread_(pid_t pid);
+  pid_t get_thread_pid_() const;
   mutable mutex_type _mutex;
   
-  // Все потоки
-  pid_set _all_pids;
-  // Не зарегестрированные потоки
-  pid_set _unreg_pids;
-  // Зарегестрированные потоки
-  pid_set _reg_pids;
-  // Именованые наборы потоков
-  std::map<std::string, pid_set > _named_pid_set;
-  std::map<std::string, cpu_set > _named_cpu;
-  
-  // Настройки CPU для зарегистрированных
-  cpu_set _reg_cpu;
-  // Настройки CPU для не зарегистрированных
-  cpu_set _unreg_cpu;
-  // Индивидуальные настройки CPU
-  std::map<pid_t, cpu_set > _cpu_by_pid;
+private:
+  std::map<std::string, cpu_pids > _cpu_map;
+  bool _dirty = false;
 };
 
 }

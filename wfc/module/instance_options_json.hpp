@@ -112,19 +112,19 @@ struct basic_instance_options_json
   JSON_NAME(suspend)
   JSON_NAME(startup_priority)
   JSON_NAME(shutdown_priority)
+  JSON_NAME(cpu)
   JSON_NAME(workflow)
   JSON_NAME(statistics)
 
   enum 
   {
-    has_name       =  ( Features & component_features::Singleton        )   == 0 ,
-    has_enabled    =  ( Features & component_features::DisabledEnabled  )   == 0 ,
-    has_suspend    =  ( Features & component_features::DisabledSuspend  )   == 0 ,
-    has_priority   =  ( Features & component_features::DisabledPriority )   == 0 ,
-    has_workflow   =  ( Features & component_features::DisabledWorkflow )  == 0,
+    has_name       =  ( Features & component_features::Singleton        ) == 0,
+    has_enabled    =  ( Features & component_features::DisabledEnabled  ) == 0,
+    has_suspend    =  ( Features & component_features::DisabledSuspend  ) == 0,
+    has_priority   =  ( Features & component_features::DisabledPriority ) == 0,
+    has_workflow   =  ( Features & component_features::DisabledWorkflow ) == 0,
+    has_cpu        =  ( Features & component_features::EnableCPU        ) != 0,
     has_statistics =  options_type::statistics_enabled
-    /*,
-    has_statistics =  ( Features & component_features::DisabledStatistics ) == 0*/
   };
   
   typedef ::wjson::object<
@@ -171,8 +171,15 @@ struct basic_instance_options_json
         options_type,
         std::string,
         &options_type::workflow
-      >::type
-      ,
+      >::type,
+      typename optional_member<
+        has_cpu,
+        n_cpu,
+        options_type,
+        std::set<int>,
+        &options_type::cpu,
+        ::wjson::array< std::set< ::wjson::value<int> >  >
+      >::type,
       typename optional_member<
         has_statistics,
         n_statistics,

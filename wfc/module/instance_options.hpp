@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <set>
 
 namespace wfc{
 
@@ -36,6 +37,7 @@ struct basic_instance_options
   int  shutdown_priority = 0;
   std::string name;
   std::string workflow;
+  std::set<int> cpu;
   statistics_options statistics;
 };
 
