@@ -16,15 +16,13 @@
 namespace wfc{
 
   
-class thread_manager
+class cpuset
 {
   typedef std::mutex mutex_type;
   typedef std::set<pid_t> pid_set;
   typedef std::set<int> cpu_set;
 public:
-  void set_reg_cpu(std::string group, const cpu_set& cpu);
-  void set_reg_cpu(const cpu_set& cpu);
-  void set_unreg_cpu(const cpu_set&  cpu);
+  void set_cpu(std::string group, const cpu_set& cpu);
   void reg_thread(std::string group);
   void unreg_thread();
   bool update_thread_list(); 

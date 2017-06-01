@@ -9,6 +9,8 @@
 #include <wjrpc/handler.hpp>
 #include <wjrpc/method.hpp>
 #include <wjrpc/errors.hpp>
+#include <wjrpc/engine.hpp>
+#include <wjrpc/incoming/incoming_holder.hpp>
 
 #include <wfc/jsonrpc/service/service.hpp>
 #include <wfc/jsonrpc/gateway/gateway.hpp>

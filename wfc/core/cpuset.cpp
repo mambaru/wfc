@@ -1,11 +1,11 @@
 //
-// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2016
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2017
 //
 // Copyright: See COPYING file that comes with this distribution
 //
 
 
-#include "thread_manager.hpp"
+#include "cpuset.hpp"
 #include <unistd.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
@@ -20,7 +20,7 @@
 
 namespace wfc{
 
-bool thread_manager::update_thread_list()
+bool cpuset::update_thread_list()
 {
   bool changed = false;
   std::vector<pid_t> pids;
@@ -53,7 +53,7 @@ bool thread_manager::update_thread_list()
   return changed;
 }
 
-void thread_manager::erase_(pid_t pid)
+void cpuset::erase_(pid_t pid)
 {
   _all_pids.erase(pid);
   _reg_pids.erase(pid);
@@ -64,14 +64,14 @@ void thread_manager::erase_(pid_t pid)
 }
 
 
-void thread_manager::set_reg_cpu(const std::set<int>& cpu)
+void cpuset::set_reg_cpu(const std::set<int>& cpu)
 {
   std::lock_guard<mutex_type> lk(_mutex);
   _reg_cpu = cpu;
   this->update_cpu_sets_();
 }
 
-void thread_manager::reg_thread(std::string group)
+void cpuset::reg_thread(std::string group)
 {
   pid_t pid = detail::get_thread_pid();
   
@@ -93,7 +93,7 @@ void thread_manager::reg_thread(std::string group)
   this->update_cpu_sets_();
 }
 
-void thread_manager::unreg_thread()
+void cpuset::unreg_thread()
 {
   pid_t pid = detail::get_thread_pid();
   
@@ -101,14 +101,14 @@ void thread_manager::unreg_thread()
   this->erase_(pid);
 }
 
-void thread_manager::set_unreg_cpu(const std::set<int>& cpu)
+void cpuset::set_unreg_cpu(const std::set<int>& cpu)
 {
   std::lock_guard<mutex_type> lk(_mutex);
   _unreg_cpu = cpu;
   this->update_cpu_sets_();
 }
 
-void thread_manager::set_reg_cpu(std::string group, const cpu_set& cpu)
+void cpuset::set_reg_cpu(std::string group, const cpu_set& cpu)
 {
   std::lock_guard<mutex_type> lk(_mutex);
   if ( cpu.empty() )
@@ -118,12 +118,12 @@ void thread_manager::set_reg_cpu(std::string group, const cpu_set& cpu)
   this->update_cpu_sets_();
 }
 
-std::vector<pid_t> thread_manager::get_unreg_pids()
+std::vector<pid_t> cpuset::get_unreg_pids()
 {
   return std::vector<pid_t>( _unreg_pids.begin(), _unreg_pids.end() );
 }
 
-void thread_manager::update_cpu_sets_()
+void cpuset::update_cpu_sets_()
 {
   for ( pid_t p : _unreg_pids )
     _cpu_by_pid[p] = _unreg_cpu;
@@ -149,7 +149,7 @@ void thread_manager::update_cpu_sets_()
 }
 
 
-void thread_manager::setaffinity_(pid_t pid, const cpu_set& cpu)
+void cpuset::setaffinity_(pid_t pid, const cpu_set& cpu)
 {
   std::stringstream ss;
   ss << "CPUs for pid=" << pid << " [";
