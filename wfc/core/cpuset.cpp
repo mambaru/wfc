@@ -53,9 +53,18 @@ cpuset::cpu_set cpuset::get_cpu(pid_t pid) const
 {
   std::lock_guard<mutex_type> lk(_mutex);
   for ( const auto& p : _cpu_map)
-    if ( p.second.pids.count(pid) )
+    if ( p.second.pids.count(pid)!=0 )
       return p.second.cpu;
   return cpu_set();
+}
+
+std::string cpuset::get_name(pid_t pid) const
+{
+  std::lock_guard<mutex_type> lk(_mutex);
+  for ( const auto& p : _cpu_map)
+    if ( p.second.pids.count(pid)!=0 )
+      return p.first;
+  return "";
 }
 
 void cpuset::del_thread_(pid_t pid)

@@ -36,7 +36,7 @@ struct wfcglobal
   fakir before_stop;
   fakir after_stop;
   bool enable_callback_check  = false;
-  thread_manager threads;
+  //thread_manager threads;
   cpuset cpu;
   object_registry registry;
 
