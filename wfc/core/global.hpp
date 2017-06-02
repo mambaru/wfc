@@ -11,7 +11,7 @@
 #include <wfc/core/extended_args.hpp>
 #include <wfc/core/ibuild_info.hpp>
 #include <wfc/core/workflow.hpp>
-#include <wfc/core/thread_manager.hpp>
+//#include <wfc/core/thread_manager.hpp>
 #include <wfc/core/cpuset.hpp>
 #include <iow/asio.hpp>
 

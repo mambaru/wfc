@@ -20,6 +20,7 @@
 
 namespace wfc{
 
+  /*
 bool thread_manager::update_thread_list()
 {
   bool changed = false;
@@ -80,16 +81,6 @@ void thread_manager::reg_thread(std::string group)
   _all_pids.insert(pid);
   _reg_pids.insert(pid);
   _named_pid_set[group].insert(pid);
-  /*auto itr = _named_pid_set.find(group);
-  if ( itr != _named_pid_set.end() )
-  {
-    _cpu_by_pid[pid] = itr->second;
-  }
-  else
-  {
-    _cpu_by_pid[pid] = _reg_cpu;
-  }
-  */
   this->update_cpu_sets_();
 }
 
@@ -164,6 +155,7 @@ void thread_manager::setaffinity_(pid_t pid, const cpu_set& cpu)
   ::sched_setaffinity( pid, sizeof(mask), &mask);
   // COMMON_LOG_MESSAGE(ss.str())
 }
-
+*/
+  
 }
 

@@ -15,7 +15,7 @@
 
 namespace wfc{
 
-  
+  /*
 class thread_manager
 {
   typedef std::mutex mutex_type;
@@ -56,5 +56,5 @@ public:
   // Индивидуальные настройки CPU
   std::map<pid_t, cpu_set > _cpu_by_pid;
 };
-
+*/
 }
