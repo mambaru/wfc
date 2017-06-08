@@ -112,6 +112,7 @@ class JsonrpcRequester:
   def __init__(self, cli, stat, args):
     self.check = args.check
     self.pconn = args.pconn
+    self.async = args.async
     self.jrp = jsonrpc( cli, stat=stat, trace=args.trace )
     self.multi_count = 0
     self.check_list = []
@@ -122,9 +123,9 @@ class JsonrpcRequester:
     else:
       return self.request_multi(query)
 
-  def request_once(self, query, async = False):
+  def request_once(self, query):
     try:
-      if not async:
+      if not self.async:
         result = self.jrp.request(query['method'], query['params'])
       else:
         self.jrp.async_request(query['method'], query['params'])
@@ -153,7 +154,7 @@ class JsonrpcRequester:
     
   
   def request_multi(self, query):
-    self.request_once(query, async=True)
+    self.request_once(query)
     if self.check:
       self.check_list += [query]
       
@@ -237,6 +238,7 @@ def work_thread(args, stat):
   if stat and stat.id==0:
     stat.show_head()
     stat.show(timeout=1)
+    
   try:
     limiter = SpeedLimiter(args.rate)
     rate_max = args.rate
@@ -503,8 +505,9 @@ if __name__ == '__main__':
   parser.add_argument('-p', '--port',     help="Номер порта", type=int, default=options['port'])
   parser.add_argument('-u', '--udp',      help="Использовать udp-протокол", default=options['udp'], action='store_true') 
   #parser.add_argument('-P', '--pconn',    help="Постоянное подключение", action='store_true')
-  #parser.add_argument('-P', '--pconn',    nargs='?', help="Постоянное подключение", type=int, default=options['pconn'])
+  #parser.add_argument('-P', '--pconn',    nargs='?', help="Постоянное подключение. Число запросов >1 - асинхронныq ", type=int, default=1)
   parser.add_argument('-P', '--pconn',    help="Постоянное подключение", action='store_true')
+  parser.add_argument('-A', '--async',    help="Постоянное подключение", action='store_true')
 
   # криво работает
   parser.add_argument('-t', '--threads', help="Число потоков", type=int,  default=options['threads'])
@@ -530,6 +533,7 @@ if __name__ == '__main__':
   options['port']     = args.port
   options['udp']      = args.udp
   options['pconn']    = args.pconn
+  options['async']    = args.async
 
   options['threads']  = args.threads
   options['rate']     = args.rate

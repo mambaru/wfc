@@ -158,10 +158,6 @@ class jsonrpc:
       if res_str:
         print(res_str)
       raise e
-      
-    
-
-  
   
   def async_result2(self, seq=True):
     res_str = self.cli.recv()
