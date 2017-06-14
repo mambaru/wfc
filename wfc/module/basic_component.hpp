@@ -35,7 +35,8 @@ public:
   typedef typename std::conditional< 
     instance_type::basic_options::statistics_enabled,
     StatJson,
-    nostat_json
+    //nostat_json
+    empty_stat_json_t<typename StatJson::target>
   >::type stat_json;
  
   typedef instance_options_json<domain_json, Features, stat_json> instance_json;

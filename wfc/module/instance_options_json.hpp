@@ -25,10 +25,11 @@ struct optional_member<false, N, V, M, m, W>
   typedef ::fas::empty_list type;
 };
 
-struct nostat_json
+template<typename T>
+struct empty_stat_json_t
 {
   typedef ::wjson::object<
-    nostat,
+    T,
     ::wjson::member_list<
     >
   > type;
@@ -38,8 +39,24 @@ struct nostat_json
   typedef typename type::serializer  serializer;
 };
 
-struct defstat_json
+struct nostat_json: empty_stat_json_t<nostat>
 {
+  /*
+  typedef ::wjson::object<
+    nostat,
+    ::wjson::member_list<
+    >
+  > type;
+
+  typedef typename type::target      target;
+  typedef typename type::member_list member_list;
+  typedef typename type::serializer  serializer;
+  */
+};
+
+struct defstat_json: empty_stat_json_t<defstat>
+{
+  /*
   typedef ::wjson::object<
     defstat,
     ::wjson::member_list<
@@ -49,6 +66,7 @@ struct defstat_json
   typedef typename type::target      target;
   typedef typename type::member_list member_list;
   typedef typename type::serializer  serializer;
+  */
 };
 
 

@@ -20,7 +20,7 @@ namespace wfc{
 template<
   typename Itf,
   typename Opt,
-  typename StatOpt = defstat
+  typename StatOpt = nostat
 >
 class domain_object
   : public Itf

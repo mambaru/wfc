@@ -9,7 +9,7 @@ template<
   typename Instance,
   typename DomainJson,
   int Features = 0,
-  typename StatJson = defstat_json
+  typename StatJson = nostat_json
 >
 class singleton
   : public basic_component<

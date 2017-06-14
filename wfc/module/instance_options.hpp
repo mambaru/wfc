@@ -21,7 +21,11 @@ struct statistics_options<nostat>: nostat
 template<typename StatOpt>
 struct statistics_options: StatOpt
 {
+#ifdef WFC_ENABLE_STAT
   static constexpr bool enabled = true;
+#else
+  static constexpr bool enabled = false;
+#endif
   bool disabled = true;
   std::string target;
 };

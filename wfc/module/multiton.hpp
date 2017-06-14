@@ -9,7 +9,7 @@ template<
   typename Instance,
   typename DomainJson,
   int Features = component_features::Multiton,
-  typename StatJson = defstat_json 
+  typename StatJson = nostat_json 
 >
 class multiton
   : public basic_component<
@@ -18,7 +18,7 @@ class multiton
       DomainJson, 
       int(component_features::Multiton) | Features,
       StatJson
-    > 
+  > 
 {};
 
 }

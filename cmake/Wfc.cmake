@@ -23,6 +23,10 @@ else()
   set(BUILD_SHARED_LIBS ON)
 endif()
 
+if ( WFC_ENABLE_STAT )
+  add_definitions(-DWFC_ENABLE_STAT)
+endif()
+
 find_package(Boost COMPONENTS system program_options filesystem date_time REQUIRED)
 
 IF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
