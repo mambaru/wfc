@@ -14,7 +14,7 @@ class gateway_multiton: public ::wfc::multiton<
   Name,
   ::wfc::instance< gateway< MethodList, Impl > >,
   ::wfc::jsonrpc::gateway_options_json< typename gateway< MethodList, Impl >::options_type >,
-  ::wfc::component_features::Defaults,
+  ::wfc::component_features::DisabledPriority,
   statistics_options_json
 >
 {

@@ -23,7 +23,6 @@ bool cpuset::clean_dirty()
 void cpuset::set_cpu(std::string group, const cpu_set& cpu)
 {
   std::lock_guard<mutex_type> lk(_mutex);
-  std::cout << "--------> set_cpu " << group << std::endl;
   _dirty = true;
   _cpu_map[group].cpu = cpu;
 }
@@ -31,7 +30,6 @@ void cpuset::set_cpu(std::string group, const cpu_set& cpu)
 void cpuset::set_current_thread(std::string group)
 {
   std::lock_guard<mutex_type> lk(_mutex);
-  std::cout << "--------> set_current_thread " << group << std::endl;
   _dirty = true;
   pid_t pid = this->get_thread_pid_();
   this->del_thread_(pid);

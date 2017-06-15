@@ -31,7 +31,7 @@ public:
     //engine_options& eopt = static_cast<engine_options&>(dopt);
     typedef typename engine_type::target_type target_type;
     typedef typename target_type::element_type target_interface;
-    target_type target = this->global()->registry.template get< target_interface >(dopt.incoming_target_name);
+    target_type target = this->template get_target<target_interface>(dopt.incoming_target_name);
     dopt.target = target;
     dopt.peeper = target;
     this->initialize_engine( dopt);
@@ -39,9 +39,9 @@ public:
     if ( target!=nullptr && dopt.incoming_reg)
       target->reg_io( this->engine()->get_id(), this->shared_from_this()  );
 
-    const auto& registry = this->global()->registry;
+    //const auto& registry = this->global()->registry;
 
-    if ( auto pitf = registry.template get<ijsonrpc>(dopt.outgoing_target_name, true) )
+    if ( auto pitf = this->template get_target<ijsonrpc>(dopt.outgoing_target_name, true) )
     {
       if ( dopt.outgoing_reg )
         pitf->reg_io( this->engine()->get_id(), this->shared_from_this() );
@@ -56,7 +56,7 @@ public:
         }
       });
     }
-    else if ( auto pitf = registry.template get<iinterface>(dopt.outgoing_target_name, false) )
+    else if ( auto pitf = this->template get_target<iinterface>(dopt.outgoing_target_name, false) )
     {
       if ( dopt.outgoing_reg )
         pitf->reg_io( this->engine()->get_id(), this->shared_from_this() );

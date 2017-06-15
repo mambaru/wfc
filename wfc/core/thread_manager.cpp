@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #include <string.h>
 #include <wfc/logger.hpp>
-#include "detail/get_procstat.hpp"
+//#include "detail/get_procstat.hpp"
 //#include "detail/procstat.hpp"
 
 

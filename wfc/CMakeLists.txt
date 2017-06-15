@@ -7,9 +7,7 @@ SET(
   wfc_exit.cpp
   system/system.cpp
   core/global.cpp
-  core/thread_manager.cpp
   core/cpuset.cpp
-  core/detail/get_procstat.cpp
   core/instance_args.cpp
   core/extended_args.cpp
   statistics/statistics.cpp

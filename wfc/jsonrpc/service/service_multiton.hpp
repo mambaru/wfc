@@ -14,7 +14,7 @@ class service_multiton: public ::wfc::multiton<
   Name,
   ::wfc::instance< service< MethodList, Impl > >,
   ::wfc::jsonrpc::service_options_json< typename service< MethodList, Impl >::options_type >,
-  ::wfc::component_features::Defaults,
+  ::wfc::component_features::DisabledPriority,
   statistics_options_json
 >
 {
