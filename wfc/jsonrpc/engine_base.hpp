@@ -66,7 +66,7 @@ public:
         {
           pitf->perform_io( std::move(d), io_id, handler);
         }
-      }));
+      }, nullptr));
     }
   }
 
