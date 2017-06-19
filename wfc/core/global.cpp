@@ -17,6 +17,7 @@ wfcglobal::wfcglobal( io_service_type& io_service)
   : io_service(io_service)
   , workflow( new ::wfc::workflow(io_service) )
 {
+  stop_signal_flag = false;
   workflow->start();
 }
 

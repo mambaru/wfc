@@ -113,6 +113,7 @@ class JsonrpcRequester:
     self.check = args.check
     self.pconn = args.pconn
     self.async = args.async
+    self.async_count = 0
     self.jrp = jsonrpc( cli, stat=stat, trace=args.trace )
     self.multi_count = 0
     self.check_list = []
@@ -129,6 +130,7 @@ class JsonrpcRequester:
         result = self.jrp.request(query['method'], query['params'])
       else:
         self.jrp.async_request(query['method'], query['params'])
+        self.async_count+=1
         return 0
       if self.check and not self.check_result(query, result):
         return 1
@@ -164,14 +166,20 @@ class JsonrpcRequester:
       return self.read_all()
     return 0
 
-  def read_all(self):
-    while self.multi_count!=0:
+  def read_once(self):
+    if self.async_count!=0:
       result = self.jrp.async_result()
       if self.check:
         if not self.check_result( self.check_list[0], result):
           return 1
         del self.check_list[0]
-      self.multi_count -= 1
+      self.async_count -= 1
+    return 0
+      
+  def read_all(self):
+    while self.async_count!=0:
+      if self.read_once()!=0 :
+        return 1
     return 0
       
   def is_valid(self, query):
@@ -190,11 +198,14 @@ class Requester:
   def request(self, query):
     if self.jrp.is_valid(query):
       return self.jrp.request(query)
-    elif self.jrp.is_valid(query):
+    elif self.custom.is_valid(query):
       return self.custom.request(query)
     else:
       print("Не верный запрос:")
       return 4
+
+  def read_all(self):
+    self.jrp.read_all()
     
 class SpeedLimiter:
   def __init__(self, rate):
@@ -277,7 +288,7 @@ def work_thread(args, stat):
           time.sleep( (1000000.0 - microseconds)/1000000.0)
         start = datetime.datetime.now()
       '''
-        
+    req.read_all()
   except IOError as e:
     print "I/O error({0}): {1}".format(e.errno, e.strerror)
     raise

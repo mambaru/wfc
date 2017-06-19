@@ -57,6 +57,8 @@ public:
 
   virtual void reg_io(io_id_t io_id, std::weak_ptr<iinterface> witf) override
   {
+    if ( this->suspended() )
+      return;
     DEBUG_LOG_DEBUG( "engine_base::reg_io " << io_id )
     if ( _engine != nullptr )
     {
@@ -72,6 +74,8 @@ public:
 
   virtual void unreg_io(io_id_t io_id) override
   {
+    if ( this->suspended() )
+      return;
     DEBUG_LOG_DEBUG( "engine_base::unreg_io " << io_id )
     if ( _engine != nullptr )
     {
@@ -81,6 +85,13 @@ public:
 
   virtual void perform_io(data_ptr d, io_id_t io_id, outgoing_handler_t handler) override
   {
+    if ( this->suspended() )
+    {
+      if (handler!=nullptr)
+        handler(std::move(d) );
+      return;
+    }
+    
     if ( _engine == nullptr )
       return;
 

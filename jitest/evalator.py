@@ -51,17 +51,22 @@ class Evalator:
     
     if "import" in orig:
       for im in orig["import"]:
-        self.modules[im] = importlib.import_module(im)
-
+        try:
+          self.modules[im] = importlib.import_module(im)
+        except Exception as e:
+          print("Ошибка импорта '{0}': {1}".format(im, e.args))
+    
     # в плоскую структуру
     self.flat = {}
     # тестовые последовательности в формате [type, int, type, int, ..., "описание"]
     self.lists = {}
     for k1, v1 in orig.iteritems():
+      if k1=="import":
+        continue
       if isinstance(v1, dict):
         for k2, v2 in v1.iteritems():
           self.flat[k2]=v2
-      elif isinstance(v1, list) and k1!="import":
+      elif isinstance(v1, list):
         self.lists[k1]=v1
       else:
         self.lists[k1]=[v1,1,""]

@@ -45,6 +45,7 @@ struct wfcglobal
   std::shared_ptr< ::wfc::workflow > workflow;
   
   static ptr static_global;
+  std::atomic<bool> stop_signal_flag;
 
   wfcglobal( io_service_type& io_service);
 };
