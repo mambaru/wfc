@@ -21,7 +21,8 @@ struct iinstance: iinterface
   virtual std::string name() const = 0;
   virtual int startup_priority() const = 0;
   virtual int shutdown_priority() const = 0;
-
+  virtual bool is_reconfigured() const = 0;
+  
   virtual void initialize() = 0;
   virtual void start(const std::string& arg) = 0;
   virtual void stop(const std::string& arg) = 0;

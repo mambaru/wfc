@@ -35,14 +35,16 @@ public:
     dopt.target = target;
     dopt.peeper = target;
     this->initialize_engine( dopt);
-
+    
     if ( target!=nullptr && dopt.incoming_reg)
       target->reg_io( this->engine()->get_id(), this->shared_from_this()  );
 
     //const auto& registry = this->global()->registry;
 
+    this->engine()->unreg_io(_target_id);
     if ( auto pitf = this->template get_target<ijsonrpc>(dopt.outgoing_target_name, true) )
     {
+      _no_outgoing_target = false;
       if ( dopt.outgoing_reg )
         pitf->reg_io( this->engine()->get_id(), this->shared_from_this() );
       
@@ -58,6 +60,7 @@ public:
     }
     else if ( auto pitf = this->template get_target<iinterface>(dopt.outgoing_target_name, false) )
     {
+      _no_outgoing_target = false;
       if ( dopt.outgoing_reg )
         pitf->reg_io( this->engine()->get_id(), this->shared_from_this() );
       
@@ -71,18 +74,29 @@ public:
 
       });
     }
+    else
+    {
+      _no_outgoing_target = true;
+    }
   }
 
-  template<typename Tg, typename Req, typename ...Args>
-  void call(Req req, Args... args)
+  template<typename Tg, typename Handler, typename Req, typename ...Args>
+  void call(Req req, Handler cb, Args... args)
   {
-    if ( auto e = this->engine() )
+    if ( _no_outgoing_target )
     {
-      e->template call<Tg>( std::move(req), _target_id, std::forward<Args>(args)... );
+      if ( cb != nullptr )
+        cb(nullptr);
+    }
+    else if ( auto e = this->engine() )
+    {
+      
+      e->template call<Tg>( std::move(req), _target_id, cb, std::forward<Args>(args)... );
     }
   }
 
 private:
+  bool _no_outgoing_target = false;
   std::atomic<io_id_t> _target_id;
 };
 

@@ -58,6 +58,7 @@ public:
   virtual void configure(const config_type& opt)
   {
     std::lock_guard<mutex_type> lk(_mutex);
+    _instance_reconfigured = true;
     _config = opt;
     if ( auto obj = this->create_or_stop_if_() ) 
       obj->configure_domain(_config);
@@ -75,7 +76,7 @@ public:
   virtual void reconfigure(const config_type& opt)  
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    _ready_for_start = true;
+    _instance_reconfigured = true;
     _config = opt;
 
     // Reset ready flag for enable startup
@@ -87,7 +88,7 @@ public:
     }
   }
 
-  virtual void initialize() 
+  virtual void initialize() override
   {
     std::lock_guard<mutex_type> lk(_mutex);
     if (auto obj = _object )
@@ -96,12 +97,17 @@ public:
     }
   }
 
+  virtual bool is_reconfigured() const override
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    return _instance_reconfigured;
+  }
 
   virtual void start(const std::string& arg) override
   {
     std::lock_guard<mutex_type> lk(_mutex);
 
-    if ( _ready_for_start )
+    if ( _instance_reconfigured )
     {
       this->start_(arg);
     }
@@ -109,7 +115,7 @@ public:
     {
       CONFIG_LOG_MESSAGE("Instance '" << _config.name << "' without restart")
     }
-    _ready_for_start = false;
+    _instance_reconfigured = false;
     _ready_for_stop = true;
   }
 
@@ -223,12 +229,12 @@ private:
 
 private:
   // Разрешает запуск. После запуска, последующие попытки вызова start игнорируються. Сбрасываеться при переконфигурации
-  bool         _ready_for_start = true;
+  bool         _instance_reconfigured = true;
   bool         _ready_for_stop = false;
   // Объект запущен (вызван метод старт)
   bool         _startup = false;
   global_ptr   _global;
-  config_type _config;
+  config_type  _config;
   object_ptr   _object;
 
   mutable mutex_type _mutex;
