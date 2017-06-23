@@ -14,7 +14,6 @@ namespace wfc{ namespace jsonrpc{
 template<typename Interface, typename JsonrpcHandler>
 class service_base
   : public basic_engine<Interface, JsonrpcHandler, service_options>
-  , std::enable_shared_from_this< service_base<Interface, JsonrpcHandler> >
 {
   typedef basic_engine<Interface, JsonrpcHandler, service_options> super;
   typedef typename super::engine_type engine_type;
