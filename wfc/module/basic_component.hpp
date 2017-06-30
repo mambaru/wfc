@@ -35,7 +35,6 @@ public:
   typedef typename std::conditional< 
     instance_type::basic_options::statistics_enabled,
     StatJson,
-    //nostat_json
     empty_stat_json_t<typename StatJson::target>
   >::type stat_json;
  
@@ -44,8 +43,9 @@ public:
 
   typedef std::shared_ptr<wfcglobal> global_ptr;
   typedef typename instance_type::config_type instance_config;
+  typedef std::map<std::string, std::string> instance_config_map;
   typedef typename instance_type::domain_interface domain_interface;
-  
+  typedef json::dict_map< json::value<std::string> > instance_map_json;
   typedef typename std::conditional<
     is_singleton,
     instance_config,
@@ -54,9 +54,22 @@ public:
 
   typedef typename std::conditional<
     is_singleton,
+    instance_config_map,
+    std::vector<instance_config_map>
+  >::type component_map_config;
+
+  
+  typedef typename std::conditional<
+    is_singleton,
     instance_json,
     ::wfc::json::array< std::vector< instance_json> >
   >::type component_json;
+
+  typedef typename std::conditional<
+    is_singleton,
+    instance_map_json,
+    ::wfc::json::array< instance_map_json >
+  >::type component_map_json;
   
   typedef std::shared_ptr<instance_type> instance_ptr;
 
@@ -110,11 +123,10 @@ public:
     return std::move(result);
   }
 
-  virtual bool parse(const std::string& stropt) override
+  virtual bool parse(const std::string& stropt, json::json_error* err) override
   {
     component_config opt;
-    this->unserialize_(opt, stropt );
-    return true;
+    return this->unserialize_(opt, stropt, err);
   }
 
   virtual void create( std::shared_ptr<wfcglobal> g) override
@@ -123,9 +135,9 @@ public:
     this->create_(fas::bool_<is_singleton>());
   }
   
-  virtual void configure(const std::string& stropt, const std::string& /*arg*/) override
+  virtual bool configure(const std::string& stropt, json::json_error* err) override
   {
-    this->configure_(stropt, fas::bool_<is_singleton>() );
+    return this->configure_(stropt, fas::bool_<is_singleton>(), err );
   }
 
   // only for external control
@@ -162,18 +174,91 @@ private:
     return str;
   }
 
-  void unserialize_( component_config& opt,  const std::string& str )
+  std::vector<std::string> unknown_names_( const instance_config_map& lead, const instance_config_map& inst )
+  {
+    std::vector<std::string> unk;
+    for (auto& ii: inst)
+    {
+      std::cout << std::endl << ii.first << std::endl;
+      if ( lead.find(ii.first) == lead.end() )
+        unk.push_back( ii.first );
+    }
+    return unk;
+  }
+
+  std::vector<std::string> 
+    check_instance_names_( const instance_config_map& lead, std::string instjson )
+  {
+    instance_config_map inst;
+    instance_map_json::serializer()( inst, instjson.begin(), instjson.end(), nullptr );
+    return this->unknown_names_( lead, inst);
+  }
+
+  // Позиция неизвестного имени поля, 0 если все ок
+  size_t check_names_( std::string instjson )
+  {
+    instance_config opt;
+    std::string leadjson;
+    
+    typename instance_json::serializer()( opt, std::back_inserter(leadjson) );
+    instance_config_map lead;
+    instance_map_json::serializer()( lead, leadjson.begin(), leadjson.end(), nullptr );
+    
+    auto unk = this->check_instance_names_( lead, instjson);
+    if ( unk.empty() )
+      return 0;
+    std::string rawname = std::string("\"") + unk.front() + std::string("\"");
+    size_t pos = instjson.find( rawname );
+    if ( pos == std::string::npos )
+      return 0;
+    return pos;
+  }
+  
+  bool check_names_( std::string compjson, fas::true_, json::json_error& err )
+  {
+    if ( auto pos = this->check_names_(compjson) )
+    {
+      err = json::json_error(json::error_code::InvalidMember, compjson.size() - pos);
+      return false;
+    }
+    return true;
+  }
+  
+  bool check_names_( std::string /*compjson*/, fas::false_, json::json_error& /*err*/ )
+  {
+    /*
+    if ( auto pos = this->check_names_(compjson) )
+    {
+      err = json::json_error(json::json_code::InvalidMember, compjson.size() - pos);
+    }
+    */
+    return true;
+  }
+
+  bool unserialize_( component_config& opt,  const std::string& str, json::json_error* err )
   {
     typename component_json::serializer serializer;
-    ::wjson::json_error e;
-    serializer( opt, str.begin(), str.end(), &e );
-    if ( e )
+    auto beg = str.begin();
+    beg = json::parser::parse_space(beg, str.end(), err);
+    serializer( opt, beg, str.end(), err );
+    if ( err == nullptr )
+      return true;
+    
+    if ( !*err )
+    {
+      // поиск неизвестных полей (чтобы проще было находть опечатки )
+      return this->check_names_(str, fas::bool_<is_singleton>(), *err);
+    }
+      
+    return false;
+    /*if ( e )
     {
       std::stringstream ss;
       ss << "Json unserialize error for component '"<< this->name() << "':" << std::endl;
       ss << ::wjson::strerror::message_trace( e, str.begin(), str.end() ) ;
       throw std::domain_error(ss.str());
     }
+    */
   }
   
   void create_(fas::true_)
@@ -190,10 +275,11 @@ private:
 
   void create_(fas::false_) { }
 
-  void configure_(const std::string& stropt, fas::true_)
+  bool configure_(const std::string& stropt, fas::true_, json::json_error* err)
   {
     component_config opt;
-    this->unserialize_(opt, stropt );
+    if ( !this->unserialize_(opt, stropt, err ) )
+      return false;
     opt.name = this->name();
     
     config_pair op;
@@ -219,19 +305,19 @@ private:
     {
       CONFIG_LOG_MESSAGE("Singleton '" << opt.name << "' without reconfiguration")
     }
-    
     _config = op;
+    return true;
   }
 
-
-  void configure_(const std::string& stropt, fas::false_)
+  bool configure_(const std::string& stropt, fas::false_, json::json_error* err)
   {
     std::set<std::string> stop_list;
     for (const auto& item : _instances )
       stop_list.insert(item.first);
     
     component_config optlist;
-    this->unserialize_( optlist, stropt );
+    if ( !this->unserialize_( optlist, stropt, err ) )
+      return false;
 
     for (const auto& opt : optlist )
     {
@@ -285,6 +371,7 @@ private:
         CONFIG_LOG_MESSAGE("Instance '" << name << "' is deleted")
       }
     }
+    return true;
   }
 
   void start_(const std::string& arg, fas::true_)

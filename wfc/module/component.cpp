@@ -32,14 +32,14 @@ std::string component::generate(const std::string& type)
   return _impl->generate(type);
 }
 
-bool component::parse(const std::string& strjson)
+bool component::parse(const std::string& strjson, json::json_error* err)
 {
-  return _impl->parse(strjson);
+  return _impl->parse(strjson, err);
 }
 
-void component::configure(const std::string& strjson, const std::string& arg)
+bool component::configure(const std::string& strjson, json::json_error* err)
 {
-  return _impl->configure(strjson, arg);
+  return _impl->configure(strjson, err);
 }
 
 void component::create( std::shared_ptr<wfcglobal> g)
