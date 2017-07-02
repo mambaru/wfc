@@ -176,13 +176,19 @@ private:
 
   std::vector<std::string> unknown_names_( const instance_config_map& lead, const instance_config_map& inst )
   {
+    std::cout << std::endl;
+    for (auto& ll: lead)
+      std::cout << ll.first << std::endl;
+    std::cout << "--------------"<< std::endl;
+    
     std::vector<std::string> unk;
     for (auto& ii: inst)
     {
-      std::cout << std::endl << ii.first << std::endl;
+      std::cout << ii.first << std::endl;
       if ( lead.find(ii.first) == lead.end() )
         unk.push_back( ii.first );
     }
+    std::cout << "===============" << std::endl;
     return unk;
   }
 
