@@ -26,7 +26,8 @@ struct service_options_json
       */
       ::wfc::json::base< ::wjrpc::engine_options_json<engine_options> >,
       ::wfc::json::member< n_remove_outdated_ms, options_type, time_t, &options_type::remove_outdated_ms>
-    >
+    >,
+    ::wjson::strict_mode
   > type;
   typedef typename type::target      target;
   typedef typename type::member_list member_list;

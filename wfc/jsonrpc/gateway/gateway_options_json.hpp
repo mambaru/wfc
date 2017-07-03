@@ -37,7 +37,8 @@ struct gateway_options_json
       ::wfc::json::member< n_call_lifetime_ms, engine_options, time_t, &engine_options::call_lifetime_ms>,
       
       */
-    >
+    >,
+    ::wjson::strict_mode
   > type;
   typedef typename type::target      target;
   typedef typename type::member_list member_list;

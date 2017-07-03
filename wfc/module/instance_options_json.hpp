@@ -102,7 +102,8 @@ struct statistics_options_json
       ::wjson::member<n_disabled, statistics_type, bool, &statistics_type::disabled>,
       ::wjson::member<n_target, statistics_type, std::string, &statistics_type::target>,
       ::wjson::base<StatOptJson>
-    >
+    >, 
+    ::wjson::strict_mode
   > type;
 
   typedef typename type::target      target;
@@ -206,7 +207,8 @@ struct basic_instance_options_json
         &options_type::statistics,
         stat_json
       >::type
-    >
+    >,
+    ::wjson::strict_mode
   > type;
 
   typedef typename type::target      target;
@@ -229,7 +231,8 @@ struct instance_options_json
     ::wjson::member_list<
       ::wjson::base< basic_json >,
       ::wjson::base< domain_json >
-    >
+    >,
+    ::wjson::strict_mode
   > type;
 
   typedef typename type::target      target;

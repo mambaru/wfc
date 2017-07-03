@@ -23,7 +23,8 @@ struct stat_options_json
       json::member< n_levels, ::wrtstat::reducer_options, ::wrtstat::types::size_type, &::wrtstat::reducer_options::levels>,
       json::member< n_pool, ::wrtstat::manager_options, size_t, &::wrtstat::manager_options::pool>,
       json::member< n_prefixes, ::wrtstat::wrtstat_options, std::vector<std::string>, &::wrtstat::wrtstat_options::prefixes, json::vector_of_strings<> >
-     >
+     >,
+     ::wjson::strict_mode
   > type;
   
   typedef type::target target;

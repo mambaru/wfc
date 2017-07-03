@@ -19,7 +19,8 @@ struct statistics_options_json
       wfc::json::member<n_interval_ms, statistics_options, time_t, &statistics_options::interval_ms>,
       wfc::json::member<n_handler_map, statistics_options, std::string, &statistics_options::handler_map>,
       wfc::json::member<n_result_queue, statistics_options, std::string, &statistics_options::result_queue>
-    >
+    >,
+    ::wjson::strict_mode
   > type;
   typedef typename type::target      target;
   typedef typename type::member_list member_list;

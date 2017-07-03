@@ -205,10 +205,11 @@ private:
   {
     instance_config opt;
     std::string leadjson;
-    
+    std::cout << "instjson: " << instjson << std::endl;
     typename instance_json::serializer()( opt, std::back_inserter(leadjson) );
     instance_config_map lead;
     instance_map_json::serializer()( lead, leadjson.begin(), leadjson.end(), nullptr );
+    std::cout << "leadjson: " << leadjson << std::endl;
     
     auto unk = this->check_instance_names_( lead, instjson);
     if ( unk.empty() )
