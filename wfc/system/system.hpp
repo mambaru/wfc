@@ -34,6 +34,10 @@ void sleep( int millisec );
 
 void daemonize();
 
+bool change_user(std::string username);
+
+bool change_working_directory(std::string working_directory);
+
 void autoup(time_t timeout, std::function<bool(bool, int, time_t)> f = nullptr);
 
 int dumpable();

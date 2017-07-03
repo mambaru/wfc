@@ -58,4 +58,5 @@
 #include <fcntl.h>
 #endif
 
+#include <pwd.h>
 

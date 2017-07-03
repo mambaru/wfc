@@ -174,74 +174,6 @@ private:
     return str;
   }
 
-  std::vector<std::string> unknown_names_( const instance_config_map& lead, const instance_config_map& inst )
-  {
-    std::cout << std::endl;
-    for (auto& ll: lead)
-      std::cout << ll.first << std::endl;
-    std::cout << "--------------"<< std::endl;
-    
-    std::vector<std::string> unk;
-    for (auto& ii: inst)
-    {
-      std::cout << ii.first << std::endl;
-      if ( lead.find(ii.first) == lead.end() )
-        unk.push_back( ii.first );
-    }
-    std::cout << "===============" << std::endl;
-    return unk;
-  }
-
-  std::vector<std::string> 
-    check_instance_names_( const instance_config_map& lead, std::string instjson )
-  {
-    instance_config_map inst;
-    instance_map_json::serializer()( inst, instjson.begin(), instjson.end(), nullptr );
-    return this->unknown_names_( lead, inst);
-  }
-
-  // Позиция неизвестного имени поля, 0 если все ок
-  size_t check_names_( std::string instjson )
-  {
-    instance_config opt;
-    std::string leadjson;
-    std::cout << "instjson: " << instjson << std::endl;
-    typename instance_json::serializer()( opt, std::back_inserter(leadjson) );
-    instance_config_map lead;
-    instance_map_json::serializer()( lead, leadjson.begin(), leadjson.end(), nullptr );
-    std::cout << "leadjson: " << leadjson << std::endl;
-    
-    auto unk = this->check_instance_names_( lead, instjson);
-    if ( unk.empty() )
-      return 0;
-    std::string rawname = std::string("\"") + unk.front() + std::string("\"");
-    size_t pos = instjson.find( rawname );
-    if ( pos == std::string::npos )
-      return 0;
-    return pos;
-  }
-  
-  bool check_names_( std::string compjson, fas::true_, json::json_error& err )
-  {
-    if ( auto pos = this->check_names_(compjson) )
-    {
-      err = json::json_error(json::error_code::InvalidMember, compjson.size() - pos);
-      return false;
-    }
-    return true;
-  }
-  
-  bool check_names_( std::string /*compjson*/, fas::false_, json::json_error& /*err*/ )
-  {
-    /*
-    if ( auto pos = this->check_names_(compjson) )
-    {
-      err = json::json_error(json::json_code::InvalidMember, compjson.size() - pos);
-    }
-    */
-    return true;
-  }
-
   bool unserialize_( component_config& opt,  const std::string& str, json::json_error* err )
   {
     typename component_json::serializer serializer;
@@ -251,21 +183,7 @@ private:
     if ( err == nullptr )
       return true;
     
-    if ( !*err )
-    {
-      // поиск неизвестных полей (чтобы проще было находть опечатки )
-      return this->check_names_(str, fas::bool_<is_singleton>(), *err);
-    }
-      
-    return false;
-    /*if ( e )
-    {
-      std::stringstream ss;
-      ss << "Json unserialize error for component '"<< this->name() << "':" << std::endl;
-      ss << ::wjson::strerror::message_trace( e, str.begin(), str.end() ) ;
-      throw std::domain_error(ss.str());
-    }
-    */
+    return !*err;
   }
   
   void create_(fas::true_)

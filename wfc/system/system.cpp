@@ -11,7 +11,7 @@
 #include <cstring>
 //#include <unistd.h>
 
-
+#include <iostream>
 namespace wfc{
 
 int error_code()
@@ -142,5 +142,34 @@ int dumpable()
 #endif
   return -1;
 }
+
+bool change_user(std::string username)
+{
+  struct passwd *pwd = ::getpwnam(username.c_str() ); /* don't free, see getpwnam() for details */
+  if( pwd == NULL )
+  {
+    std::cerr << strerror(errno) << std::endl;
+    return false; 
+  }
+  uid_t uid = pwd->pw_uid;
+  std::clog << "new uid=" << uid << std::endl;
+  if ( 0 != ::setuid(uid) )
+  {
+    std::cerr << strerror(errno) << std::endl;
+    return false; 
+  };
+  return true;
+}
+
+bool change_working_directory(std::string working_directory)
+{
+  if ( 0 != ::chdir( working_directory.c_str() ) )
+  {
+    std::cerr << strerror(errno) << std::endl;
+    return false; 
+  }
+  return true;
+}
+
 
 }
