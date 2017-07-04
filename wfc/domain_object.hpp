@@ -170,6 +170,13 @@ public:
     return _global;
   }
   
+  bool system_is_stopped() const
+  {
+    if ( auto g = _global )
+      return g->stop_signal_flag;
+    return false;
+  }
+  
   const options_type& options() const 
   {
     return _config;
