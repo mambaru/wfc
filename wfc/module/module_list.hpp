@@ -40,7 +40,6 @@ public:
 
   virtual void create( std::shared_ptr<wfcglobal> g) override
   {
-    
     this->create_( g, module_types() );
   }
 
@@ -49,7 +48,7 @@ public:
     std::vector< std::shared_ptr<imodule> > result;
     for (auto& p : _modules)
     {
-      result.push_back(p/*.second*/);
+      result.push_back(p);
     }
     return result;
   }
@@ -59,7 +58,7 @@ public:
   {
     for (auto& p : _modules)
     {
-      p/*.second*/->start(arg);
+      p->start(arg);
     }
   }
 
@@ -67,7 +66,7 @@ public:
   {
     for (auto& p : _modules)
     {
-      p/*.second*/->stop(arg);
+      p->stop(arg);
     }
   }
 

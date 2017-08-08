@@ -17,7 +17,7 @@ class component_list
 {
   typedef typename fas::type_list_n< Args... >::type component_types;
   typedef std::shared_ptr<icomponent> component_ptr;
-  typedef std::list</*std::string,*/ component_ptr > component_map;
+  typedef std::list< component_ptr > component_map;
 public:
   virtual std::string name() const override
   {
@@ -40,7 +40,7 @@ public:
     std::vector< std::shared_ptr<icomponent> > result;
     for (auto& p : _components)
     {
-      result.push_back(p /*.second*/);
+      result.push_back(p );
     }
     return result;
   }
@@ -50,7 +50,7 @@ public:
   {
     for (auto& p : _components)
     {
-      p/*.second*/->start(arg);
+      p->start(arg);
     }
   }
 
@@ -58,7 +58,7 @@ public:
   {
     for (auto& p : _components)
     {
-      p/*.second*/->stop(arg);
+      p->stop(arg);
     }
   }
 

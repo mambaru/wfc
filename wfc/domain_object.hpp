@@ -249,7 +249,7 @@ public:
     return _workflow;
   }
 
-  std::shared_ptr<workflow_type> get_core_workflow() const 
+  std::shared_ptr<workflow_type> get_common_workflow() const 
   {
     if (!is_configured_())
       return nullptr;

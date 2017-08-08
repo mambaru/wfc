@@ -55,6 +55,17 @@ public:
     _global = g;
   }
 
+  void create( std::string name, std::shared_ptr<wfcglobal> g) 
+  {
+    // для синглетонов
+    std::lock_guard<mutex_type> lk(_mutex);
+    _global = g;
+    _object = std::make_shared<object_type>();
+    _object->create_domain(name, _global);
+    if ( _global != nullptr )
+      _global->registry.set(name, _object);
+  }
+
   virtual void configure(const config_type& opt)
   {
     std::lock_guard<mutex_type> lk(_mutex);

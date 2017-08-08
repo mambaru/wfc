@@ -190,12 +190,14 @@ private:
   {
     _instances = std::make_shared<instance_type>();
     instance_config opt;
+    _global->registry.set("instance", this->name(), _instances);
+    _instances->create(this->name(), _global);
+    /*
     opt.name = this->name();
     opt.enabled = true;
-    _global->registry.set("instance", this->name(), _instances);
-    _instances->create(_global);
     _instances->reconfigure(opt);
     _instances->initialize();
+    */
   }
 
   void create_(fas::false_) { }
