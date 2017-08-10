@@ -41,7 +41,7 @@ public:
   typedef typename domain_interface::io_id_t   io_id_t;
 
   typedef typename domain_interface::output_handler_t output_handler_t;
-  typedef typename domain_interface::incoming_handler_t incoming_handler_t;
+  typedef typename domain_interface::input_handler_t input_handler_t;
   typedef typename domain_interface::startup_handler_t  startup_handler_t;
   typedef typename domain_interface::shutdown_handler_t shutdown_handler_t;
   
