@@ -19,7 +19,7 @@ class domain_proxy
 public:
   typedef typename super::io_id_t  io_id_t;
   typedef typename super::data_ptr  data_ptr;
-  typedef typename super::io_outgoing_handler_t  io_outgoing_handler_t;
+  typedef typename super::output_handler_t  output_handler_t;
   typedef typename super::rpc_outgoing_handler_t  rpc_outgoing_handler_t;
   typedef typename super::incoming_holder incoming_holder;
   typedef typename super::outgoing_holder outgoing_holder;
@@ -49,7 +49,7 @@ public:
     _adapter.unreg_io( io_id);
   }
   
-  virtual void perform_io(data_ptr d, io_id_t io_id, io_outgoing_handler_t handler) final override
+  virtual void perform_io(data_ptr d, io_id_t io_id, output_handler_t handler) final override
   {
     if ( this->suspended() )
     {

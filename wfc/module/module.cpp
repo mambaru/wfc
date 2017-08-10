@@ -49,7 +49,7 @@ void module::reg_io(io_id_t io_id, std::weak_ptr<iinterface> itf)
   return _impl->reg_io( std::move(io_id), itf );
 }
 
-void module::perform_io(data_ptr d, io_id_t io_id, outgoing_handler_t handler)
+void module::perform_io(data_ptr d, io_id_t io_id, output_handler_t handler)
 {
   return _impl->perform_io(std::move(d), std::move(io_id),  std::move(handler) );
 }

@@ -27,7 +27,8 @@ public:
   typedef typename super::io_id_t io_id_t;
   typedef typename super::data_ptr data_ptr;
   typedef typename super::data_type data_type;
-  typedef typename super::outgoing_handler_t outgoing_handler_t;
+  //typedef typename super::rpc_outgoing_handler_t outgoing_handler_t;
+  typedef typename super::output_handler_t output_handler_t;
   typedef typename super::timer_id_t timer_id_t;
   typedef ::iow::workflow workflow_type;
 
@@ -62,7 +63,7 @@ public:
     DEBUG_LOG_DEBUG( "engine_base::reg_io " << io_id )
     if ( _engine != nullptr )
     {
-      _engine->reg_io( io_id, this->wrap([witf]( data_ptr d, io_id_t io_id, ::iow::io::outgoing_handler_t handler)
+      _engine->reg_io( io_id, this->wrap([witf]( data_ptr d, io_id_t io_id, output_handler_t handler)
       {
         if (auto pitf = witf.lock() )
         {
@@ -83,7 +84,7 @@ public:
     }
   }
 
-  virtual void perform_io(data_ptr d, io_id_t io_id, outgoing_handler_t handler) override
+  virtual void perform_io(data_ptr d, io_id_t io_id, output_handler_t handler) override
   {
     if ( this->suspended() )
     {
