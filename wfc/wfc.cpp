@@ -41,7 +41,7 @@ int basic_wfc::run(int argc, char* argv[], std::string helpstring)
   if ( auto startup = _global->registry.get<istartup>("startup") )
   {
     if ( !startup->startup(argc, argv, helpstring) )
-      return 0;
+      return 1;
   }
   else
   {
