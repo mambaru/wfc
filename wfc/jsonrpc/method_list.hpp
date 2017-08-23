@@ -10,6 +10,7 @@ class method_list
   , public method_list_helper<Args...>::interface_type
 {
 public:
+  typedef typename method_list_helper<Args...>::interface_type interface_type;
   typedef typename method_list_helper<Args...>::base super;
   typedef typename super::io_id_t   io_id_t;
   typedef typename super::data_type data_type;
