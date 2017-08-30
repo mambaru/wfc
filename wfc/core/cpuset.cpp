@@ -8,7 +8,7 @@
 #include "cpuset.hpp"
 #include <unistd.h>
 #include <sys/syscall.h>
-#include <iostream>
+#include <thread>
 
 namespace wfc{
 

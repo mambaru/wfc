@@ -120,8 +120,6 @@ public:
                   : nullptr
                   ;
 
-    basic_options bopt = static_cast<basic_options>(_config);
-    _global->cpu.set_cpu(_name, bopt.cpu);
     _conf_flag = true;
     this->initialize();
   }
@@ -130,6 +128,7 @@ public:
   {
     _conf_flag = false;
     static_cast<basic_options&>(_config) = opt;
+    _global->cpu.set_cpu(_name, opt.cpu);
     this->reconfigure_basic();
   }
 
@@ -137,6 +136,7 @@ public:
   {
     _conf_flag = true;
     _config = conf;
+    _global->cpu.set_cpu(_name, static_cast<basic_options&>(_config).cpu);
     this->reconfigure();
   }
   
