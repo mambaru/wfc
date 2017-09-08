@@ -14,8 +14,9 @@ struct ibuild_info
   virtual ~ibuild_info(){}
   virtual bool enabled() = 0;
   virtual std::string name() = 0;
+  virtual std::string version_tag() = 0;
+  virtual std::string version_ex() = 0;
   virtual std::string version() = 0;
-  virtual std::string verex() = 0;
   virtual std::string build_type() = 0;
   virtual std::string build_date() = 0;
   virtual std::string build_flags() = 0;

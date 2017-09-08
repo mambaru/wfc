@@ -22,9 +22,7 @@ add_library(
   ${wfc_source_list}
 )
 
-message(STATUS "WFC CMAKELIST ${Boost_LIBRARIES}")
 target_link_libraries(wfc iow ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
-
 
 build_info(wfc wfc)
 
