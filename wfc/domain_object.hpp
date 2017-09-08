@@ -354,6 +354,9 @@ public:
   {
     if ( this->suspended<Res>(req, cb) ) 
       return true;
+
+    if ( this->system_is_stopped() ) 
+      return true;
     
     if ( req!=nullptr )
       return false;
