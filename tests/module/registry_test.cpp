@@ -26,7 +26,7 @@ struct number_greater
 int main()
 {
   
-  interface_registry reg;
+  object_registry reg;
   std::shared_ptr<number> i0 = std::make_shared<number>(0);
   std::shared_ptr<number> i1 = std::make_shared<number>(1);
   std::shared_ptr<number> i2 = std::make_shared<number>(2);

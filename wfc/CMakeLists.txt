@@ -1,5 +1,11 @@
-include(BuildInfo)
-include(Wfc)
+
+if ( WFC_READY )
+  include(BuildInfo)
+  include(Wfc)
+  #set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+  #include(Wfc)
+  #link_directories( "${CMAKE_CURRENT_SOURCE_DIR}../iow/build/")
+endif()
 
 SET(
   wfc_source_list
@@ -24,6 +30,8 @@ add_library(
 
 target_link_libraries(wfc iow ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
 
-build_info(wfc wfc)
+if ( WFC_READY )
+  build_info(wfc wfc)
+endif()
 
 install(TARGETS wfc DESTINATION ${CMAKE_INSTALL_PREFIX})

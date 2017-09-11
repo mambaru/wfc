@@ -3,7 +3,7 @@
 #include <wfc/domain_object.hpp>
 #include <wfc/module/instance.hpp>
 #include <wfc/module/singleton.hpp>
-#include <wfc/module/object_list.hpp>
+#include <wfc/module/component_list.hpp>
 #include <wfc/module/module_list.hpp>
 
 template<typename Name, bool Singleton>
