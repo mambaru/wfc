@@ -3,8 +3,10 @@
 #include <wfc/domain_object.hpp>
 #include <wfc/module/instance.hpp>
 #include <wfc/module/singleton.hpp>
+#include <wfc/module/package.hpp>
 #include <wfc/module/component_list.hpp>
 #include <wfc/module/module_list.hpp>
+#include <wfc/json.hpp>
 
 template<typename Name, bool Singleton>
 struct helper
@@ -20,7 +22,7 @@ struct helper
   };
   
   struct itest: 
-    public ::wfc::iinterface
+    public wfc::iinterface
   {
     ~itest(){}
     virtual void doit() = 0;
@@ -31,21 +33,21 @@ struct helper
   {
     JSON_NAME(test)
     JSON_NAME(value)
-    typedef ::iow::json::object<
+    typedef wfc::json::object<
       options,
       typename fas::type_list_n<
-        //::iow::json::member<n_value, options, std::string, &options::value>,
-        ::iow::json::member<n_test, options, int, &options::test>
+        wfc::json::member<n_test, options, int, &options::test>
       >::type
     > type;
 
     typedef typename type::member_list member_list;
     typedef typename type::target target;
+    typedef typename type::serializer serializer;
 
   };
 
   class test:
-    public ::wfc::domain_object<itest, options>
+    public wfc::domain_object<itest, options>
   {
   public:
     int doit_count = 0;
@@ -55,7 +57,7 @@ struct helper
     }
   };
   
-  class object: public ::wfc::basic_object< Name, ::wfc::instance<test>, options_json, Singleton > {};
+  class object: public ::wfc::basic_component< Name, wfc::instance<test>, options_json, Singleton, wfc::nostat_json > {};
 };
 
 
@@ -66,7 +68,7 @@ JSON_NAME(object2)
 JSON_NAME(object3)
 JSON_NAME(object4)
 
-class test_module: public ::wfc::object_list<
+class test_module: public ::wfc::component_list<
     n_module1,
     helper<n_object1, true>::object,
     helper<n_object2, true>::object,
@@ -76,13 +78,13 @@ class test_module: public ::wfc::object_list<
 {
 };
 
-class test_package: public ::wfc::module_list< n_package1, test_module> {};
+class test_package: public wfc::module_list< wfc::build_info< wfc::empty_build_info>, test_module> {};
 
 int main()
 {
-  test_package t;
+  auto t = std::make_shared<wfc::package>( std::make_shared<test_package>() ) ;
   iow::asio::io_service io;
   auto g = std::make_shared< wfc::wfcglobal>(io);
-  t.create(g);
+  t->create(g);
   std::cout << g->registry.size() << std::endl;
 }

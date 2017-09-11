@@ -2,9 +2,8 @@
 if ( WFC_READY )
   include(BuildInfo)
   include(Wfc)
-  #set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-  #include(Wfc)
-  #link_directories( "${CMAKE_CURRENT_SOURCE_DIR}../iow/build/")
+else()
+  find_package(Boost COMPONENTS system program_options filesystem date_time REQUIRED)
 endif()
 
 SET(
@@ -28,7 +27,7 @@ add_library(
   ${wfc_source_list}
 )
 
-target_link_libraries(wfc iow ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
+target_link_libraries(wfc iow  ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 if ( WFC_READY )
   build_info(wfc wfc)
