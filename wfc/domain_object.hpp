@@ -103,6 +103,7 @@ public:
     _config = opt;
     _workflow = nullptr; // Ибо нефиг. До инициализации ничем пользоватся нельзя
     _conf_flag = false;
+    _global->cpu.set_cpu(_name, opt.cpu);
     this->configure();
   }
 
