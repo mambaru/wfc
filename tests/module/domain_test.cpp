@@ -2,19 +2,21 @@
 
 #include <wfc/domain_object.hpp>
 
+using namespace wfc;
+
 struct options
 {
   bool test = false;
 };
 
-struct itest
+struct itest: iinterface
 {
   virtual ~itest(){}
   virtual void testtest() = 0;
 };
 
 class test
-  : public ::wfc::domain_object<itest, options>
+  : public domain_object<itest, options>
 {
 public:
  
@@ -36,30 +38,35 @@ int main()
   test t;
   
   if ( t.options().test != false )
-    return -1;
+    return 1;
 
+  
   if ( !t.name().empty() )
-    return -2;
+    return 2;
   
-  options opt;
+  test::config_type opt;
   opt.test = true;
+  opt.name = "name";
   
-  t.start("");
-  t.initialize("name", nullptr, opt);
+  t.create_domain("name", nullptr);
+  t.start();
+  t.configure_domain(opt);
+  t.initialize();
 
   if ( t.options().test != true )
-    return -3;
+    return 3;
 
+  //std::cout << t.name() << std::endl;
   if ( t.name() != "name" )
-    return -2;
+    return 5;
 
   if ( t.testval != true )
-    return -4;
+    return 6;
   
   options opt2; 
-  test::generate(opt2, "");
+  opt2 = t.generate("");
   if ( opt2.test != false )
-    return -5;
+    return 7;
   
   return 0;
 }

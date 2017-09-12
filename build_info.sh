@@ -100,8 +100,8 @@ echo "// $1 $lastmodifytime" > $c1_file
 echo "#include \"`pwd`/$h_file\"" >> $c1_file
 echo "bool $1_build_info::enabled() const { return true;}" >> $c1_file
 echo "const char* $1_build_info::name() const { return \"$basename\";}" >> $c1_file
-echo "const char* $1_build_info::version() const { return \"$version\"; }" >> $c1_file
-echo "const char* $1_build_info::verex() const { return \"$verex\"; }" >> $c1_file
+echo "const char* $1_build_info::version_tag() const { return \"$version\"; }" >> $c1_file
+echo "const char* $1_build_info::version_ex() const { return \"$verex\"; }" >> $c1_file
 echo "const char* $1_build_info::build_type() const { return \"$build_type\"; }" >> $c1_file
 echo "const char* $1_build_info::build_flags() const { return \"$buildflags\"; }" >> $c1_file
 echo "const char* $1_build_info::branch() const { return \"$branch\"; }" >> $c1_file
@@ -147,8 +147,8 @@ if [[ ! -f "$h_file" ]]; then
   echo "struct $1_build_info{" > $h_file
   echo "  bool enabled() const;" >> $h_file
   echo "  const char* name() const;" >> $h_file
-  echo "  const char* version() const;" >> $h_file
-  echo "  const char* verex() const;" >> $h_file
+  echo "  const char* version_tag() const;" >> $h_file
+  echo "  const char* version_ex() const;" >> $h_file
   echo "  const char* build_type() const;" >> $h_file
   echo "  const char* build_date() const;" >> $h_file
   echo "  const char* build_flags() const;" >> $h_file

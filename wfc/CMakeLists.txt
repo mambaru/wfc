@@ -1,5 +1,10 @@
-include(BuildInfo)
-include(Wfc)
+
+if ( WFC_READY )
+  include(BuildInfo)
+  include(Wfc)
+else()
+  find_package(Boost COMPONENTS system program_options filesystem date_time REQUIRED)
+endif()
 
 SET(
   wfc_source_list
@@ -22,10 +27,10 @@ add_library(
   ${wfc_source_list}
 )
 
-message(STATUS "WFC CMAKELIST ${Boost_LIBRARIES}")
-target_link_libraries(wfc iow ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
+target_link_libraries(wfc iow  ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
-
-build_info(wfc wfc)
+if ( WFC_READY )
+  build_info(wfc wfc)
+endif()
 
 install(TARGETS wfc DESTINATION ${CMAKE_INSTALL_PREFIX})

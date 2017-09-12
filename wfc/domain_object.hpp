@@ -103,6 +103,7 @@ public:
     _config = opt;
     _workflow = nullptr; // Ибо нефиг. До инициализации ничем пользоватся нельзя
     _conf_flag = false;
+    _global->cpu.set_cpu(_name, opt.cpu);
     this->configure();
   }
 
@@ -120,8 +121,6 @@ public:
                   : nullptr
                   ;
 
-    basic_options bopt = static_cast<basic_options>(_config);
-    _global->cpu.set_cpu(_name, bopt.cpu);
     _conf_flag = true;
     this->initialize();
   }
@@ -130,6 +129,7 @@ public:
   {
     _conf_flag = false;
     static_cast<basic_options&>(_config) = opt;
+    _global->cpu.set_cpu(_name, opt.cpu);
     this->reconfigure_basic();
   }
 
@@ -137,6 +137,7 @@ public:
   {
     _conf_flag = true;
     _config = conf;
+    _global->cpu.set_cpu(_name, static_cast<basic_options&>(_config).cpu);
     this->reconfigure();
   }
   
@@ -353,6 +354,9 @@ public:
   bool bad_request(const Req& req, const Callback& cb) const
   {
     if ( this->suspended<Res>(req, cb) ) 
+      return true;
+
+    if ( this->system_is_stopped() ) 
       return true;
     
     if ( req!=nullptr )

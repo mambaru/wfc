@@ -21,5 +21,6 @@ wfcglobal::wfcglobal( io_service_type& io_service)
   workflow->start();
 }
 
+
 }
 
