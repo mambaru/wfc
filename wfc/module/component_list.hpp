@@ -23,7 +23,7 @@ public:
   {
     return Name()();
   }
-  
+                      
   virtual std::string description() const override
   {
     return "no description";

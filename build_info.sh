@@ -58,7 +58,10 @@ fi
 untaged_commits=`expr $commits_head - $commits_tag`
 uncommited=`expr $(git status --porcelain 2>/dev/null | egrep "^(M| M)" | wc -l)`
 unpushed=$(git log --branches --not --remotes --simplify-by-decoration --decorate --oneline | wc -l)
-lastmodifytime=$(stat -c %z `pwd`)
+#lastmodifytime=$(stat -c %z `pwd`)
+#lastmodifytime=$(find . -exec stat -c %z '{}' ';' | sort -r | head -n 1)
+lastmodifytime=$(find . | grep -v "build\.counter" | xargs stat -c %z | sort -r | head -n 1)
+scriptmodifytime=$(stat -c %z $0)
 
 verex=""
 if [[ $(expr $untaged_commits + $uncommited + $unpushed) -ne "0"  ]]; then
@@ -75,8 +78,8 @@ message=$(git log -1 --pretty=format:"%s")
 commitdate=$(date "+%F %T %:z" -d @`git log -1 --pretty=format:"%ct"`)
 builddate=$(date "+%F %T %:z")
 #date="$builddate (commit: $commitdate)"
-authors=$(git log --format="%aN <%aE>" | sort | uniq -c | sort -nr | awk '{for(i=2;i<=NF;i++) printf "%s ",$i; printf "(%s), ",$1;}')
-
+authors=$(git log --format="%aN <%aE>" | sort | uniq -c | sort -nr | awk '{for(i=2;i<=NF;i++) printf "%s ",$i; printf "(%s), ",$1;}'|head -c -2)
+compiler_version=$($compiler --version | head -n 1)
 
 #
 # create file names
@@ -98,12 +101,14 @@ mkdir -p $path
 # create basic cpp
 #
 
+echo "// $0 $scriptmodifytime " > $c1_file
 echo "// $1 $lastmodifytime" > $c1_file
 echo "#include \"`pwd`/$h_file\"" >> $c1_file
 echo "bool $1_build_info::enabled() const { return true;}" >> $c1_file
 echo "const char* $1_build_info::name() const { return \"$basename\";}" >> $c1_file
 echo "const char* $1_build_info::version_tag() const { return \"$version\"; }" >> $c1_file
 echo "const char* $1_build_info::version_ex() const { return \"$verex\"; }" >> $c1_file
+echo "const char* $1_build_info::compiler_version() const { return \"$compiler_version\"; }" >> $c1_file
 echo "const char* $1_build_info::build_type() const { return \"$build_type\"; }" >> $c1_file
 echo "const char* $1_build_info::build_flags() const { return \"$buildflags\"; }" >> $c1_file
 echo "const char* $1_build_info::branch() const { return \"$branch\"; }" >> $c1_file
@@ -150,6 +155,7 @@ echo "  bool enabled() const;" >> $h_file_blank
 echo "  const char* name() const;" >> $h_file_blank
 echo "  const char* version_tag() const;" >> $h_file_blank
 echo "  const char* version_ex() const;" >> $h_file_blank
+echo "  const char* compiler_version() const;" >> $h_file_blank
 echo "  const char* build_type() const;" >> $h_file_blank
 echo "  const char* build_date() const;" >> $h_file_blank
 echo "  const char* build_flags() const;" >> $h_file_blank
@@ -165,9 +171,9 @@ echo "};" >> $h_file_blank
 
 
 if cmp -s "$h_file" "$h_file_blank" ; then
- echo Равны
+ echo "$h_file is exist."
 else
-  echo Не Равны
+  echo "create $h_file."
   mv "$h_file_blank" "$h_file"
 fi
 
@@ -185,6 +191,7 @@ cp $c1_file "$c1_file~1"
 echo "BuildInfo"
 echo -e "\tName:            $basename"
 echo -e "\tVersion:         $version[$verex]-$count"
+echo -e "\tCompiler:        $compiler_version"
 echo -e "\tBuild Type:      $build_type"
 echo -e "\tBuild Date:      $builddate"
 echo -e "\tBuild Flags:     $buildflags"

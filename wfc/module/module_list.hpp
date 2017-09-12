@@ -28,12 +28,12 @@ public:
     return make_build_info<BuildInfo>();
   }
 
-  virtual std::string name() override
+  virtual std::string name() const override
   {
     return BuildInfo().name();
   }
 
-  virtual std::string description() override
+  virtual std::string description() const override
   {
     return "no description";
   }

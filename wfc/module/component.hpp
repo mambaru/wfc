@@ -14,9 +14,9 @@ public:
   virtual ~component();
   
   // icomponent
-  virtual std::string name() override;
-  virtual std::string description() override;
-  virtual std::string interface_name() override;
+  virtual std::string name() const override;
+  virtual std::string description() const override;
+  virtual std::string interface_name() const override;
 
   virtual std::string generate(const std::string& type) override;
   virtual bool parse(const std::string& conf, json::json_error* err) override;

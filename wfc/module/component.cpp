@@ -12,17 +12,17 @@ component::component(std::shared_ptr<icomponent> p)
 {
 }
 
-std::string component::name()
+std::string component::name() const
 {
   return _impl->name();
 }
 
-std::string component::description()
+std::string component::description() const
 {
   return _impl->description();
 }
 
-std::string component::interface_name()
+std::string component::interface_name() const
 {
   return _impl->interface_name();
 }

@@ -20,12 +20,12 @@ std::shared_ptr<ibuild_info> package::build_info()
   return _impl->build_info();
 }
 
-std::string package::name() 
+std::string package::name() const
 {
   return _impl->build_info()->name();
 }
 
-std::string package::description() 
+std::string package::description() const
 {
   return _impl->description();
 }

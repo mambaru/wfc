@@ -19,7 +19,7 @@ class service_multiton: public ::wfc::multiton<
 >
 {
 public:
-  virtual std::string interface_name() override
+  virtual std::string interface_name() const override
   {
     return "ijsonrpc";
   }

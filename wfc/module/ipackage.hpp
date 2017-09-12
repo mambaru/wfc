@@ -21,8 +21,8 @@ struct ipackage: iinterface
 {
   virtual ~ipackage() {}
   virtual std::shared_ptr<ibuild_info> build_info() = 0;
-  virtual std::string name() = 0;
-  virtual std::string description() = 0;
+  virtual std::string name() const = 0;
+  virtual std::string description() const = 0;
   virtual std::vector< std::shared_ptr<imodule> > modules() = 0;
   virtual void create( std::shared_ptr<wfcglobal> ) = 0;
 

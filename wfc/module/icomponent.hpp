@@ -21,9 +21,9 @@ struct icomponent: iinterface
 {
   virtual ~icomponent(){}
 
-  virtual std::string name()  = 0;
-  virtual std::string description()  = 0;
-  virtual std::string interface_name()  = 0;
+  virtual std::string name() const  = 0;
+  virtual std::string description() const = 0;
+  virtual std::string interface_name() const = 0;
 
   virtual std::string generate(const std::string& type)  = 0;
   virtual bool parse(const std::string& conf, json::json_error* err) = 0;

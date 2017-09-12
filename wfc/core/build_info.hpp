@@ -44,7 +44,12 @@ public:
     ss << "-" << this->build_count();
     return ss.str();
   }
-
+  
+  virtual std::string compiler_version() override
+  {
+    return BuildInfo().compiler_version();
+  }
+  
   virtual std::string version_ex() override
   {
     return BuildInfo().version_ex();
@@ -136,10 +141,16 @@ struct empty_build_info
     return std::string();
   }
 
-   std::string version_ex() 
+   std::string compiler_version() 
   {
     return std::string();
   }
+  
+  std::string version_ex() 
+  {
+    return std::string();
+  }
+
 
    std::string build_type() 
   {

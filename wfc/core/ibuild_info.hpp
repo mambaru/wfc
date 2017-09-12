@@ -17,6 +17,7 @@ struct ibuild_info
   virtual std::string version_tag() = 0;
   virtual std::string version_ex() = 0;
   virtual std::string version() = 0;
+  virtual std::string compiler_version() = 0;
   virtual std::string build_type() = 0;
   virtual std::string build_date() = 0;
   virtual std::string build_flags() = 0;

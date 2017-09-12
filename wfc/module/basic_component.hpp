@@ -98,17 +98,17 @@ public:
       g->registry.erase( "component", this->name() );
   }
 
-  virtual std::string name() override
+  virtual std::string name() const override
   {
     return component_name()();
   }
 
-  virtual std::string description() override
+  virtual std::string description() const override
   {
     return "no description";
   }
 
-  virtual std::string interface_name() override
+  virtual std::string interface_name() const override
   {
     return typeid( domain_interface ).name();
   }

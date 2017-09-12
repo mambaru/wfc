@@ -16,7 +16,8 @@ struct global;
 struct istartup: iinterface
 {
   virtual ~istartup() {}
-  virtual bool startup(int argc, char* argv[], std::string helpstring) = 0;
+  virtual int startup(int argc, char* argv[], std::string helpstring) = 0;
+  virtual bool ready_for_run() = 0;
 };
 
 }
