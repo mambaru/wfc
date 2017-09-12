@@ -11,13 +11,6 @@ endif()
 INCLUDE(FindThreads)
 set(Boost_USE_MULTITHREADED ON)
 
-add_custom_target(clean-cmake-files1
-  message(STATUS "==================== clean ============================")
-   #COMMAND ${CMAKE_BUILD_TOOL} clean
-   #COMMAND ${CMAKE_COMMAND} -P clean-all.cmake
-)
-
-
 if (NOT CMAKE_BUILD_TYPE)
   message(STATUS "No build type selected, default to Release")
   set(CMAKE_BUILD_TYPE "Release")
