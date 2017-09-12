@@ -83,6 +83,8 @@ authors=$(git log --format="%aN <%aE>" | sort | uniq -c | sort -nr | awk '{for(i
 #
 
 h_file="$1_build_info.h"
+h_file_blank="$path/$1_build_info.h"
+
 count_file=".$1_build.counter"
 c1_file="$path/$1_build_info1.c"
 c2_file="$path/$1_build_info2.c"
@@ -143,25 +145,34 @@ echo "const char* $1_build_info::build_count() const { return \"$count\"; }" >> 
 # create hpp
 #
 
-if [[ ! -f "$h_file" ]]; then
-  echo "struct $1_build_info{" > $h_file
-  echo "  bool enabled() const;" >> $h_file
-  echo "  const char* name() const;" >> $h_file
-  echo "  const char* version_tag() const;" >> $h_file
-  echo "  const char* version_ex() const;" >> $h_file
-  echo "  const char* build_type() const;" >> $h_file
-  echo "  const char* build_date() const;" >> $h_file
-  echo "  const char* build_flags() const;" >> $h_file
-  echo "  const char* build_count() const;" >> $h_file
-  echo "  const char* branch() const;" >> $h_file
-  echo "  const char* commit() const;" >> $h_file
-  echo "  const char* commit_date() const;" >> $h_file
-  echo "  const char* commit_author() const;" >> $h_file
-  echo "  const char* commit_message() const;" >> $h_file
-  echo "  const char* initial_author() const;" >> $h_file
-  echo "  const char* all_authors() const;" >> $h_file
-  echo "};" >> $h_file
+echo "struct $1_build_info{" > $h_file_blank
+echo "  bool enabled() const;" >> $h_file_blank
+echo "  const char* name() const;" >> $h_file_blank
+echo "  const char* version_tag() const;" >> $h_file_blank
+echo "  const char* version_ex() const;" >> $h_file_blank
+echo "  const char* build_type() const;" >> $h_file_blank
+echo "  const char* build_date() const;" >> $h_file_blank
+echo "  const char* build_flags() const;" >> $h_file_blank
+echo "  const char* build_count() const;" >> $h_file_blank
+echo "  const char* branch() const;" >> $h_file_blank
+echo "  const char* commit() const;" >> $h_file_blank
+echo "  const char* commit_date() const;" >> $h_file_blank
+echo "  const char* commit_author() const;" >> $h_file_blank
+echo "  const char* commit_message() const;" >> $h_file_blank
+echo "  const char* initial_author() const;" >> $h_file_blank
+echo "  const char* all_authors() const;" >> $h_file_blank
+echo "};" >> $h_file_blank
+
+
+if cmp -s "$h_file" "$h_file_blank" ; then
+ echo Равны
+else
+  echo Не Равны
+  mv "$h_file_blank" "$h_file"
 fi
+
+#if [[ ! -f "$h_file" ]]; then
+#fi
 
 # build
 g++ -c $c1_file -fPIC -o $o1_file
