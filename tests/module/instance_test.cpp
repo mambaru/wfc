@@ -16,11 +16,11 @@ struct itest
 };
 
 class test
-  : public ::wfc::domain_object<itest, options1>
+  : public wfc::domain_object<itest, options1>
 {
 public:
- 
-  virtual void reconfigure()
+  typedef domain_object::config_type config_type;
+  virtual void initialize() override
   {
     testval = true;
   }
@@ -30,9 +30,11 @@ public:
     return testval; 
   }
   
-  static void generate(options1& opt, const std::string&)
+  virtual config_type generate(const std::string&) override
   {
+    config_type opt;
     opt.test = true;
+    return opt;
   }
   
   bool testval = false;
@@ -46,28 +48,30 @@ int main()
   ::iow::asio::io_service io;
   auto g = std::make_shared<wfc::wfcglobal>(io);
   t.create(g);
-  test_impl::options_type opt;
+  test_impl::config_type opt;
   t.generate(opt, "true");
   
   if ( !opt.test || !opt.enabled || !opt.name.empty() 
         || opt.startup_priority!=0 || opt.shutdown_priority!=0)
-    return -1;
+    return 1;
 
   opt.name = "test";
   t.configure(opt);
   auto tmp1 = g->registry.get<itest>("test");
   
   if ( tmp1 == nullptr )
-    return -1;
+    return 2;
   if ( tmp1->testtest() != false )
-    return -2;
+    return 3;
   t.initialize();
   if ( tmp1->testtest() != true )
-    return -3;
+    return 4;
   t.start("");
   t.configure(opt);
   t.initialize();
   t.stop("");
+  
+  return 0;
   /*
   if ( t.options().test != false )
     return -1;

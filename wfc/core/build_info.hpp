@@ -113,5 +113,89 @@ make_build_info()
   return std::make_shared< build_info<BuildInfo> >();
 }
 
+struct empty_build_info
+{
+
+  bool enabled()
+  {
+    return true;
+  }
+
+   std::string name() 
+  {
+    return std::string();
+  }
+
+   std::string version_tag() 
+  {
+    return std::string();
+  }
+  
+   std::string version() 
+  {
+    return std::string();
+  }
+
+   std::string version_ex() 
+  {
+    return std::string();
+  }
+
+   std::string build_type() 
+  {
+    return std::string();
+  }
+
+   std::string build_date() 
+  {
+    return std::string();
+  }
+
+   std::string build_flags() 
+  {
+    return std::string();
+  }
+
+   std::string build_count() 
+  {
+    return std::string();
+  }
+
+   std::string branch() 
+  {
+    return std::string();
+  }
+
+   std::string commit() 
+  {
+    return std::string();
+  }
+
+   std::string commit_date() 
+  {
+    return std::string();
+  }
+
+   std::string commit_author() 
+  {
+    return std::string();
+  }
+
+   std::string initial_author() 
+  {
+    return std::string();
+  }
+
+   std::string commit_message() 
+  {
+    return std::string();
+  }
+
+   std::string all_authors() 
+  {
+    return std::string();
+  }
+};
+
 
 }

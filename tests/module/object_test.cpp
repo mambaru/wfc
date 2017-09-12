@@ -6,7 +6,7 @@
 #include <wfc/module/multiton.hpp>
 
 struct itest: 
-  public ::wfc::iinterface
+  public wfc::iinterface
 {
   ~itest(){}
 };
@@ -19,13 +19,14 @@ struct options
 struct options_json
 {
   JSON_NAME(test)
-  typedef ::iow::json::object<
+  typedef wfc::json::object<
     options,
     fas::type_list_n<
-      ::iow::json::member<n_test, options, int, &options::test>
+      wfc::json::member<n_test, options, int, &options::test>
     >::type
   > type;
 
+  typedef typename type::serializer serializer;
   typedef typename type::member_list member_list;
   typedef typename type::target target;
 };
@@ -51,10 +52,11 @@ template<typename T>
 void test_gen()
 {
   T t;
+  t.create(nullptr);
   std::cout << "[" << t.interface_name() << "]" << std::endl;
   std::string genstr = t.generate("");
   std::cout << genstr << std::endl;
-  t.configure(genstr, "");
+  t.configure(genstr, nullptr);
 }
 
 int main()
