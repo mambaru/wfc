@@ -25,10 +25,3 @@ std::string operator "" _json(const char* str, size_t size)
   return ss;
 }
 */
-
-/*
-int main()
-{
-  std::cout << "{'method':'plus','params':{'first':2,'second':3},'id':1}"_json << std::endl;
-}
-*/
