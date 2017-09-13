@@ -42,8 +42,10 @@ public:
 
   typedef typename domain_interface::output_handler_t output_handler_t;
   typedef typename domain_interface::input_handler_t input_handler_t;
+  /*
   typedef typename domain_interface::startup_handler_t  startup_handler_t;
   typedef typename domain_interface::shutdown_handler_t shutdown_handler_t;
+  */
   
   typedef ::wfc::workflow workflow_type;
   typedef std::shared_ptr<workflow_type> workflow_ptr;
@@ -58,9 +60,16 @@ public:
     : _io_id( ::iow::io::create_id<io_id_t>() )
   {}
 
-  virtual config_type generate(const std::string&) 
+  virtual config_type generate(const std::string& arg) 
   {
-    return config_type();
+    config_type conf =config_type();
+    if ( arg=="example" )
+    {
+      conf.cpu.insert(0);
+      conf.cpu.insert(1);
+      conf.cpu.insert(2);
+    }
+    return conf;
   }
   
   virtual void create() {}

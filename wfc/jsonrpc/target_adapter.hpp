@@ -59,7 +59,7 @@ struct target_adapter: ijsonrpc
     }
   }
   
-  virtual void perform_incoming(incoming_holder holder, io_id_t io_id, rpc_outgoing_handler_t handler) override
+  virtual void perform_incoming(incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) override
   {
     if ( auto p = _jsonrpc.lock() )
     {
@@ -67,14 +67,16 @@ struct target_adapter: ijsonrpc
     }
     else if ( auto p = _itf.lock() )
     {
-      this->perform_io( holder.detach(), io_id, [handler](data_ptr d)
-      { 
-        if ( handler !=nullptr )
-        {
+      if ( handler!=nullptr )
+      {
+        this->perform_io( holder.detach(), io_id, [handler](data_ptr d)
+        { 
           outgoing_holder holder;
           handler( outgoing_holder( std::move(d) ) );
-        }
-      });
+        });
+      }
+      else
+        this->perform_io( holder.detach(), io_id, nullptr );
     }
     else if ( handler != nullptr )
     {
@@ -122,7 +124,7 @@ struct target_adapter: ijsonrpc
           }
           else
           {
-            ijsonrpc::rpc_outgoing_handler_t err_handler = [handler](outgoing_holder err)
+            ijsonrpc::outgoing_handler_t err_handler = [handler](outgoing_holder err)
             {
               auto d = err.detach();
               handler( incoming_holder( std::move(d)));

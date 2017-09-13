@@ -68,7 +68,7 @@ class service
   typedef service_base< ijsonrpc, ::wjrpc::handler< Impl<MethodList> > > super;
 public:
   
-  virtual void perform_incoming( ijsonrpc::incoming_holder holder, ijsonrpc::io_id_t io_id, ijsonrpc::rpc_outgoing_handler_t handler) override
+  virtual void perform_incoming( ijsonrpc::incoming_holder holder, ijsonrpc::io_id_t io_id, ijsonrpc::outgoing_handler_t handler) override
   {
     if ( this->suspended() )
       handler( ijsonrpc::outgoing_holder() );

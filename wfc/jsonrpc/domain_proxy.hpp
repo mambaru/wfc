@@ -20,7 +20,7 @@ public:
   typedef typename super::io_id_t  io_id_t;
   typedef typename super::data_ptr  data_ptr;
   typedef typename super::output_handler_t  output_handler_t;
-  typedef typename super::rpc_outgoing_handler_t  rpc_outgoing_handler_t;
+  typedef typename super::outgoing_handler_t  outgoing_handler_t;
   typedef typename super::incoming_holder incoming_holder;
   typedef typename super::outgoing_holder outgoing_holder;
   
@@ -91,7 +91,7 @@ public:
   }
   
 // ijsonrpc
-  virtual void perform_incoming( incoming_holder holder, io_id_t io_id, rpc_outgoing_handler_t handler) override
+  virtual void perform_incoming( incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) override
   {
     _adapter.perform_incoming( std::move(holder), io_id, handler);
   }
