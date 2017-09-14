@@ -119,7 +119,19 @@ public:
   // первый раз после configure_domain, последующие после reconfigure_domain или reconfigure_basic
   virtual void initialize_domain() final
   {
-    _owner.enable_callback_check(_global->enable_callback_check);
+    //!!_owner.enable_callback_check(_global->enable_callback_check);
+    
+    if ( _global->enable_callback_check)
+    {
+      _owner.set_callback_check(this->wrap([this](){
+          DOMAIN_LOG_FATAL( "Double call callback for '" << this->name() << "'" )
+      }, nullptr) );
+    }
+    else
+    {
+      _owner.set_callback_check(nullptr);
+      
+    }
     _workflow = _config.workflow.empty()
                 ? this->global()->workflow
                 : this->global()->registry.template get<workflow >("workflow", _config.workflow)
