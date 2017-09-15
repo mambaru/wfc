@@ -119,30 +119,66 @@ public:
   // первый раз после configure_domain, последующие после reconfigure_domain или reconfigure_basic
   virtual void initialize_domain() final
   {
-    //!!_owner.enable_callback_check(_global->enable_callback_check);
-    
-    if ( _global->enable_callback_check)
+    if ( auto g = this->global() )
     {
-      _owner.set_callback_check(this->wrap([this](){
-          DOMAIN_LOG_FATAL( "Double call callback for '" << this->name() << "'" )
-      }, nullptr) );
-    }
-    else
-    {
-      _owner.set_callback_check(nullptr);
-      
-    }
-    _workflow = _config.workflow.empty()
-                ? this->global()->workflow
-                : this->global()->registry.template get<workflow >("workflow", _config.workflow)
-                ;
+      auto pname = std::make_shared<std::string>( this->name() );
+      _owner.set_double_call_handler([g, pname]()
+      {
+        if ( g->stop_signal_flag )
+          return;
+        
+        if ( g->double_callback_abort )
+        {
+          DOMAIN_LOG_FATAL("Double call callback functions for '" << *pname << "'")
+        }
+        else if ( g->double_callback_show )
+        {
+          DOMAIN_LOG_ERROR("Double call callback functions for '" << *pname << "'")
+        }
+      });
 
-    _statistics = ! _config.statistics.disabled 
-                  ? this->global()->registry.template get<statistics>("statistics", _config.statistics.target)
-                  : nullptr
+      _owner.set_no_call_handler([g, pname]()
+      {
+        if ( g->stop_signal_flag )
+          return;
+
+        if ( g->nocall_callback_abort )
+        {
+          DOMAIN_LOG_FATAL("Lost call callback for '" << *pname << "'")
+        }
+        else if ( g->nocall_callback_show )
+        {
+          DOMAIN_LOG_ERROR("Lost callback for '" << *pname << "'")
+        }
+      });
+      
+      
+      //!!_owner.enable_callback_check(_global->enable_callback_check);
+      /*
+      if ( _global->enable_callback_check)
+      {
+        _owner.set_callback_check(this->wrap([this](){
+            DOMAIN_LOG_FATAL( "Double call callback for '" << this->name() << "'" )
+        }, nullptr) );
+      }
+      else
+      {
+        _owner.set_callback_check(nullptr);
+        
+      } */
+    
+      _workflow = _config.workflow.empty()
+                  ? this->global()->workflow
+                  : this->global()->registry.template get<workflow >("workflow", _config.workflow)
                   ;
 
-    _conf_flag = true;
+      _statistics = ! _config.statistics.disabled 
+                    ? this->global()->registry.template get<statistics>("statistics", _config.statistics.target)
+                    : nullptr
+                    ;
+
+      _conf_flag = true;
+    }
     this->initialize();
   }
 
@@ -227,11 +263,11 @@ public:
   }
 
 
-  template<typename H, typename H2>
-  auto callback(H&& h, H2&& h2) const
-    -> ::iow::owner_handler<typename std::remove_reference<H>::type, typename std::remove_reference<H2>::type>
+  template<typename H>
+  auto callback(H&& h) const
+    -> ::iow::callback_handler<typename std::remove_reference<H>::type>
   {
-    return _owner.wrap( std::forward<H>(h), std::forward<H2>(h2));
+    return _owner.callback( std::forward<H>(h) );
   }
 
   template<typename I>
