@@ -83,8 +83,35 @@ public:
     }
   }
 
-  virtual void perform_outgoing( ijsonrpc::outgoing_holder /*holder*/, ijsonrpc::io_id_t /*io_id*/) override
+  virtual void perform_outgoing( ijsonrpc::outgoing_holder holder, ijsonrpc::io_id_t io_id) override
   {
+    std::cout << "perform_outgoing -1-" << std::endl;
+    auto d = holder.detach();
+    auto rh = holder.result_handler();
+    if ( auto e = this->engine())
+    {
+      std::cout << "perform_outgoing -2-: " << d << std::endl;
+      e->perform_io( std::move(d), io_id, [rh](ijsonrpc::data_ptr rd)
+      {
+        std::cout << "perform_outgoing -3-" << rd << std::endl;
+        ijsonrpc::incoming_holder ih( std::move(rd) );
+        ih.parse(nullptr);
+        rh( std::move(ih) );
+        std::cout << "perform_outgoing -4-" << std::endl;
+      });
+    }
+    std::cout << "perform_outgoing -5-" << std::endl;
+
+    /*
+    ijsonrpc::incoming_holder iholder( std::move(d) );
+    json::json_error er;
+    iholder.parse(&er);
+    this->perform_incoming( std::move(iholder), io_id, [rh](ijsonrpc::outgoing_holder oholder){
+      auto od = oholder.detach();
+      ijsonrpc::incoming_holder iholder2( std::move(od) );
+      rh( std::move(iholder2) );
+    });*/
+    
     // TODO :  Преобразование outgoing_holder в incoming_holder и в engine + плюс захват response handler
     // Плюс нужен call_id реестр
     // TODO: сделать в endine 
