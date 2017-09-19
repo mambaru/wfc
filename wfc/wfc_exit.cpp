@@ -13,7 +13,8 @@ void wfc_exit()
 {
   if ( auto g = ::wfc::wfcglobal::static_global )
   {
-    g->registry.get< ::wfc::icore >("core")->core_stop();
+    if (auto c = g->registry.get< ::wfc::icore >("core", true) )
+      c->core_stop();
   }
 }
 
@@ -21,7 +22,8 @@ void wfc_exit_with_error(std::string message)
 {
   if ( auto g = ::wfc::wfcglobal::static_global )
   {
-    g->registry.get< ::wfc::icore >("core")->core_abort(message);
+    if (auto c = g->registry.get< ::wfc::icore >("core", true) )
+      c->core_abort(message);
   }
 }
 

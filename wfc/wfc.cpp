@@ -38,7 +38,7 @@ int basic_wfc::run(int argc, char* argv[], std::string helpstring)
 {
   wfcglobal::static_global = _global;
 
-  if ( auto startup = _global->registry.get<istartup>("startup") )
+  if ( auto startup = _global->registry.get<istartup>("startup", true) )
   {
     if ( int err = startup->startup(argc, argv, helpstring) )
       return err;
@@ -48,14 +48,19 @@ int basic_wfc::run(int argc, char* argv[], std::string helpstring)
   }
   else
   {
-    std::cerr << "no startup module" << std::endl;
+    return 1;
   }
+
 
   int status = 0;
 
-  if ( auto core = _global->registry.get<icore>("core") )
+  if ( auto core = _global->registry.get<icore>("core", true) )
   {
     status = core->run();
+  }
+  else
+  {
+    return 2;
   }
 
   std::clog << "wfc::run finalize ... " << std::endl;
