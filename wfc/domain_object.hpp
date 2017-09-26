@@ -444,6 +444,21 @@ public:
  
     return true;
   }
+  
+  template<typename Res>
+  std::unique_ptr<Res> create_response( const std::function<void(std::unique_ptr<Res>)>& cb)
+  {
+    if ( cb != nullptr )
+      return std::make_unique<Res>();
+    return nullptr;
+  }
+  
+  template<typename ResPtr, typename Callback>
+  void send_response(ResPtr&& res, Callback&& cb)
+  {
+    if (res!=nullptr && cb!=nullptr)
+      cb( std::move(res) );
+  }
 private:
   bool is_configured_() const
   {

@@ -23,6 +23,7 @@ namespace request {
     JSON_NAME(name)
     JSON_NAME(ag)
     JSON_NAME(cl)
+    JSON_NAME(count)
  
     typedef wfc::json::object<
       add,
@@ -30,7 +31,8 @@ namespace request {
         json::member<n_ts,   add, time_type, &add::ts>,
         json::member<n_name, add, std::string, &add::name>,
         json::member<n_ag,   add, aggregated, &add::ag, aggregated_json>,
-        json::member<n_cl,   add, data_type, &add::cl, data_json >
+        json::member<n_cl,   add, data_type, &add::cl, data_json >,
+        json::member<n_count,   add, size_t, &add::count>
       >
     > type;
     

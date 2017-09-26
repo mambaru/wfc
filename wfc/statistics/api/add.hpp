@@ -17,6 +17,7 @@ namespace request
     std::string name;
     aggregated ag;
     data_type cl;
+    size_t count;
 
     typedef std::unique_ptr<add> ptr;
   };
