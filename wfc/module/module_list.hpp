@@ -38,6 +38,11 @@ public:
     return "no description";
   }
 
+  virtual int order() const override
+  {
+    return 1000;
+  }
+
   virtual void create( std::shared_ptr<wfcglobal> g) override
   {
     this->create_( g, module_types() );

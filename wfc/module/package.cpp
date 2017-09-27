@@ -30,6 +30,11 @@ std::string package::description() const
   return _impl->description();
 }
 
+int package::order() const
+{
+  return _impl->order();
+}
+
 std::vector< std::shared_ptr<imodule> > package::modules() 
 {
   return _impl->modules();

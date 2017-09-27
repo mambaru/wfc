@@ -22,10 +22,9 @@ basic_wfc::basic_wfc(std::shared_ptr<ibuild_info> bi, package_list packages )
   _global->program_build_info = bi;
   _global->wfc_build_info = make_build_info<wfc_build_info>();
 
-  int i = 0;
   for (const auto& p: packages)
   {
-    _global->registry.set("package", std::to_string(++i) + p->build_info()->name(), p);
+    _global->registry.set("package", p->build_info()->name(), p);
   }
 
   for (const auto& p: packages)

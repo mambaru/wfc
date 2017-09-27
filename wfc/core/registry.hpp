@@ -6,13 +6,14 @@
 
 #pragma once
 
+#include <wfc/iinterface.hpp>
+#include <wfc/logger.hpp>
+
 #include <map>
 #include <vector>
 #include <string>
 #include <mutex>
-
-#include <wfc/iinterface.hpp>
-#include <wfc/logger.hpp>
+#include <algorithm>
 
 namespace wfc{
 
@@ -136,25 +137,41 @@ public:
   }
 
   template<typename I>
-  void for_each( std::string prefix, std::function< void( std::string, std::shared_ptr<I> ) > f ) const
+  void for_each( 
+    std::string prefix, 
+    std::function< void( std::string, std::shared_ptr<I> ) > f,
+    std::function< bool( std::shared_ptr<I>, std::shared_ptr<I> ) > cmp = nullptr) const
   {
-    typedef registry_map::value_type value_type;
-    std::vector<value_type> rm;
+    typedef std::pair< std::string, std::shared_ptr<I> > value_type;
+    std::vector< value_type > rm;
     
     {
       std::lock_guard<mutex_type> lk(_mutex);
       rm.reserve(_registry_map.size());
       auto beg = _registry_map.lower_bound( key_type(prefix, "")  );
       auto end = _registry_map.lower_bound( key_type(prefix+" ", "")  );
-      std::copy( beg, end, std::back_inserter(rm) );
+      for (;beg!=end; ++beg)
+      {
+        if (std::shared_ptr<I> ptr = std::dynamic_pointer_cast<I>( beg->second) )
+          rm.push_back( std::make_pair( beg->first.second, ptr ) );
+      };
+    }
+    
+    if ( cmp != nullptr )
+    {
+      std::sort(
+        rm.begin(), 
+        rm.end(), 
+        [cmp](value_type left, value_type right)->bool
+        {
+          return cmp(left.second, right.second);
+        } 
+      );
     }
 
     for (const auto& a : rm)
-    {
-      std::shared_ptr<I> ptr = std::dynamic_pointer_cast<I>(a.second);
-      if ( ptr != nullptr )
-        f( a.first.second, ptr );
-    }
+      f( a.first, a.second );
+
   }
 
   void clear()

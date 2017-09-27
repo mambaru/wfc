@@ -34,9 +34,8 @@ struct aggregated_json
   typedef ::wrtstat::aggregated_data aggregated;
   typedef aggregated::value_type     value_type;
   typedef aggregated::size_type      size_type;
+  typedef reduced_data::data_type    data_type;
 
-  
-  
   JSON_NAME(count)
   JSON_NAME(lossy)
   JSON_NAME(min)
@@ -47,6 +46,7 @@ struct aggregated_json
   JSON_NAME(perc100)
   JSON_NAME(max)
   JSON_NAME(avg)
+  JSON_NAME(data)
 
   typedef wfc::json::object<
     aggregated,
@@ -60,8 +60,9 @@ struct aggregated_json
        json::member<n_perc80,   aggregated,   value_type,  &aggregated::perc80>,
        json::member<n_perc95,   aggregated,   value_type,  &aggregated::perc95>,
        json::member<n_perc99,   aggregated,   value_type,  &aggregated::perc99>,
-       json::member<n_perc100,  aggregated,   value_type,  &aggregated::perc100>
-       
+       json::member<n_perc100,  aggregated,   value_type,  &aggregated::perc100>,
+       json::member<n_data,     reduced_data,   data_type,  &reduced_data::data, 
+          json::array< std::vector< json::value<value_type> >, 128 > >
     >
   > type;
   typedef type::target target;

@@ -6,19 +6,9 @@ namespace wfc{ namespace btp{
 
 namespace request
 {
-  struct add
+  struct add: wrtstat::aggregated_data
   {
-    typedef ::wrtstat::aggregated_data aggregated;
-    typedef aggregated::data_type data_type;
-    typedef ::wrtstat::types::time_type time_type;
-    typedef ::wrtstat::types::data_ptr  data_ptr;
-
-    time_type ts = 0;
     std::string name;
-    aggregated ag;
-    data_type cl;
-    size_t count;
-
     typedef std::unique_ptr<add> ptr;
   };
 }
@@ -27,6 +17,7 @@ namespace response
 {
   struct add
   {
+    // false - нет места для нового счетчика
     bool result = true;
     typedef std::unique_ptr<add> ptr;
     typedef std::function< void(ptr)> handler;
