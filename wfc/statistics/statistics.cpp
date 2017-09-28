@@ -166,9 +166,14 @@ statistics::meter_ptr statistics::create_meter(meter_ptr m, size_type count)
 }
 */
 
-statistics::handler_fun_t statistics::create_handler(std::string&& name, time_type ts_now)
+statistics::handler_fun_t statistics::create_handler(const std::string& name, time_type ts_now)
 {
-  return _impl->create_handler( std::move(name), ts_now );
+  return _impl->create_handler( name, ts_now );
+}
+
+statistics::aggregator_fun_t statistics::create_aggregator( const std::string& name, time_type ts_now)
+{
+  return _impl->create_aggregator_handler( name, ts_now );
 }
 
 int statistics::count() const

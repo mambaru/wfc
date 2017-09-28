@@ -5,7 +5,7 @@
 #include <wfc/statistics/stat_options.hpp>
 #include <wrtstat/wrtstat_options.hpp>
 #include <wrtstat/aggregated_data.hpp>
-#include <wrtstat/types.hpp>
+#include <wrtstat/reduced_data.hpp>
 #include <memory>
 
 namespace wfc{
@@ -20,6 +20,7 @@ public:
   typedef std::shared_ptr<value_meter> value_meter_ptr;
   typedef ::wrtstat::aggregated_data aggregated_data;
   typedef ::wrtstat::types::handler_fun_t handler_fun_t;
+  typedef std::function< void(const wrtstat::reduced_data&) > aggregator_fun_t;
   typedef std::shared_ptr<aggregated_data> aggregated_ptr;
   typedef std::chrono::microseconds  duration_type; 
   typedef size_meter::size_type size_type;
@@ -41,7 +42,8 @@ public:
   
 
   //bool add(int id, time_type ts_now, value_type v, size_type count);
-  handler_fun_t create_handler(std::string&& name, time_type ts_now);
+  handler_fun_t create_handler( const std::string& name, time_type ts_now);
+  aggregator_fun_t create_aggregator( const std::string& name, time_type ts_now);
   int count() const;
   aggregated_ptr pop(int id);
   std::string get_name(int id) const;
