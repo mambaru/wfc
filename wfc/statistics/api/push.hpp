@@ -6,20 +6,20 @@ namespace wfc{ namespace btp{
 
 namespace request
 {
-  struct add: wrtstat::aggregated_data
+  struct push: wrtstat::aggregated_data
   {
     std::string name;
-    typedef std::unique_ptr<add> ptr;
+    typedef std::unique_ptr<push> ptr;
   };
 }
 
 namespace response
 {
-  struct add
+  struct push
   {
     // false - нет места для нового счетчика
     bool result = true;
-    typedef std::unique_ptr<add> ptr;
+    typedef std::unique_ptr<push> ptr;
     typedef std::function< void(ptr)> handler;
   };
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <wfc/json.hpp>
-#include <wfc/statistics/api/add.hpp>
+#include <wfc/statistics/api/push.hpp>
 #include "aggregated_json.hpp"
 
 namespace wfc { namespace btp {
@@ -9,15 +9,15 @@ namespace wfc { namespace btp {
 
 namespace request {
   
-  struct add_json
+  struct push_json
   {
     JSON_NAME(name)
  
     typedef wfc::json::object<
-      add,
+      push,
       json::member_list<
         json::base<aggregated_json>,
-        json::member<n_name, add, std::string, &add::name>
+        json::member<n_name, push, std::string, &push::name>
       >
     > type;
     
@@ -28,14 +28,14 @@ namespace request {
 
 namespace response
 {
-  struct add_json
+  struct push_json
   {
     FAS_NAME(result)
     
     typedef wfc::json::object<
-      add,
+      push,
       fas::type_list_n<
-        wfc::json::member<n_result, add, bool, &add::result>
+        wfc::json::member<n_result, push, bool, &push::result>
       >::type
     > type;
 
