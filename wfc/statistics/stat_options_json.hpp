@@ -3,7 +3,7 @@
 #include "stat_options.hpp"
 #include <wfc/json.hpp>
 
-namespace wfc{
+namespace wfc{ namespace statistics{
 
 struct stat_options_json
 {
@@ -32,4 +32,4 @@ struct stat_options_json
   typedef type::member_list member_list;
 };
 
-}
+}}

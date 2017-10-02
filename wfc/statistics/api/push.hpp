@@ -2,7 +2,7 @@
 #include <wrtstat/aggregated_data.hpp>
 #include <wrtstat/types.hpp>
 
-namespace wfc{ namespace btp{
+namespace wfc{ namespace statistics{
 
 namespace request
 {

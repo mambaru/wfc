@@ -2,7 +2,7 @@
 #include <wfc/json.hpp>
 #include <wrtstat/reduced_data.hpp>
   
-namespace wfc { namespace btp{
+namespace wfc { namespace statistics{
 
 struct reduced_json
 {

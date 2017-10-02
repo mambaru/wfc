@@ -4,10 +4,10 @@
 #include <vector>
 #include <string>
 
-namespace wfc{
+namespace wfc{ namespace statistics{
 
 struct stat_options: public ::wrtstat::wrtstat_options
 {
 };
 
-}
+}}

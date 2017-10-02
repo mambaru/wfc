@@ -4,7 +4,7 @@
 #include <wfc/statistics/api/push.hpp>
 #include "aggregated_json.hpp"
 
-namespace wfc { namespace btp {
+namespace wfc { namespace statistics {
 
 
 namespace request {

@@ -51,7 +51,7 @@ public:
   typedef std::shared_ptr<workflow_type> workflow_ptr;
   typedef workflow_type::timer_id_t timer_id_t;
 
-  typedef ::wfc::statistics statistics_type;
+  typedef ::wfc::statistics::statistics statistics_type;
   typedef std::shared_ptr<statistics_type> statistics_ptr;
 
   virtual ~domain_object(){}
@@ -173,7 +173,7 @@ public:
                   ;
 
       _statistics = ! _config.statistics.disabled 
-                    ? this->global()->registry.template get<statistics>("statistics", _config.statistics.target)
+                    ? this->global()->registry.template get<statistics::statistics>("statistics", _config.statistics.target)
                     : nullptr
                     ;
 

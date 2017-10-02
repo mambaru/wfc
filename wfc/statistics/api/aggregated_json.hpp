@@ -3,7 +3,7 @@
 #include <wrtstat/aggregated_data.hpp>
 #include <wfc/statistics/api/reduced_json.hpp>  
 
-namespace wfc { namespace btp{
+namespace wfc { namespace statistics{
 
 struct aggregated_json
 {

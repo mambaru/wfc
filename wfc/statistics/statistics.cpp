@@ -3,7 +3,7 @@
 #include <ctime>
 #include <cstdlib>
 
-namespace wfc{
+namespace wfc{ namespace statistics{
 
 class statistics::impl
   : public ::wrtstat::wrtstat_mt
@@ -25,7 +25,7 @@ void statistics::enable(bool val)
   _impl->enable(val);
 }
 
-statistics::composite_meter_ptr 
+composite_meter_ptr 
   statistics::create_composite_prototype(const std::string& time_name, const std::string& read_name, const std::string& write_name)
 {
   if (time_name.empty() && read_name.empty() && write_name.empty() ) 
@@ -36,7 +36,7 @@ statistics::composite_meter_ptr
   return meter;
 }
 
-statistics::time_meter_ptr 
+time_meter_ptr 
   statistics::create_time_prototype(const std::string& time_name)
 {
   if (time_name.empty() ) 
@@ -48,7 +48,7 @@ statistics::time_meter_ptr
   return meter;
 }
 
-statistics::size_meter_ptr 
+size_meter_ptr 
   statistics::create_size_prototype(const std::string& size_name)
 {
   if (size_name.empty() ) 
@@ -61,7 +61,7 @@ statistics::size_meter_ptr
 
 }
 
-statistics::value_meter_ptr 
+value_meter_ptr 
   statistics::create_value_prototype(const std::string& value_name)
 {
   if (value_name.empty() ) 
@@ -74,7 +74,7 @@ statistics::value_meter_ptr
 }
 
 
-statistics::composite_meter_ptr 
+composite_meter_ptr 
   statistics::create_meter(composite_meter_ptr m, size_type size )
 {
   if ( m == nullptr ) return nullptr;
@@ -82,7 +82,7 @@ statistics::composite_meter_ptr
   return m->clone(now, size);
 }
 
-statistics::time_meter_ptr 
+time_meter_ptr 
   statistics::create_meter(time_meter_ptr m, size_type count )
 {
   if ( m == nullptr ) return nullptr;
@@ -90,7 +90,7 @@ statistics::time_meter_ptr
   return m->clone(now, count);
 }
 
-statistics::size_meter_ptr 
+size_meter_ptr 
   statistics::create_meter(size_meter_ptr m, size_type size )
 {
   if ( m == nullptr ) return nullptr;
@@ -98,7 +98,7 @@ statistics::size_meter_ptr
   return m->clone(now, size);
 }
 
-statistics::value_meter_ptr 
+value_meter_ptr 
   statistics::create_meter(value_meter_ptr m, size_type value, size_type count )
 {
   if ( m == nullptr ) return nullptr;
@@ -192,4 +192,4 @@ std::string statistics::get_name(int id) const
 }
 
 
-}
+}}

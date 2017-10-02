@@ -8,16 +8,12 @@
 #include <wrtstat/reduced_data.hpp>
 #include <memory>
 
-namespace wfc{
+namespace wfc{ namespace statistics{
 
 class statistics
 {
   class impl;
 public:
-  typedef std::shared_ptr<composite_meter> composite_meter_ptr;
-  typedef std::shared_ptr<time_meter> time_meter_ptr;
-  typedef std::shared_ptr<size_meter> size_meter_ptr;
-  typedef std::shared_ptr<value_meter> value_meter_ptr;
   typedef ::wrtstat::aggregated_data aggregated_data;
   typedef ::wrtstat::types::handler_fun_t handler_fun_t;
   typedef std::function< void(const wrtstat::reduced_data&) > aggregator_fun_t;
@@ -53,4 +49,4 @@ private:
   //std::vector<std::string> _prefixes;
 };
 
-}
+}}
