@@ -44,6 +44,9 @@ public:
   aggregated_ptr pop(int id);
   std::string get_name(int id) const;
   void enable(bool val);
+  
+  bool del( const std::string& name );
+  
 private:
   std::shared_ptr<impl> _impl;
   //std::vector<std::string> _prefixes;

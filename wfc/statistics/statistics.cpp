@@ -20,6 +20,11 @@ statistics::statistics(options_type opt)
   _impl = std::make_shared<impl>(opt);
 }
 
+bool statistics::del( const std::string& name )
+{
+  return _impl->del(name);
+}
+
 void statistics::enable(bool val)
 {
   _impl->enable(val);

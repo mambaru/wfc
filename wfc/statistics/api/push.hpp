@@ -18,7 +18,7 @@ namespace response
   struct push
   {
     // false - нет места для нового счетчика
-    bool result = true;
+    bool status = true;
     typedef std::unique_ptr<push> ptr;
     typedef std::function< void(ptr)> handler;
   };
