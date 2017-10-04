@@ -42,10 +42,6 @@ public:
 
   typedef typename domain_interface::output_handler_t output_handler_t;
   typedef typename domain_interface::input_handler_t input_handler_t;
-  /*
-  typedef typename domain_interface::startup_handler_t  startup_handler_t;
-  typedef typename domain_interface::shutdown_handler_t shutdown_handler_t;
-  */
   
   typedef ::wfc::workflow workflow_type;
   typedef std::shared_ptr<workflow_type> workflow_ptr;
@@ -390,27 +386,27 @@ public:
     return _config.suspend;
   }
 
-  template<typename Res, typename Req, typename Callback>
-  bool suspended(const Req& /*req*/, const Callback& cb) const
+  template<typename Res>
+  bool suspended(const std::function< void(std::unique_ptr<Res>) > & cb) const
   {
     if ( !this->_config.suspend ) 
       return false;
 
-    this->default_response<Res>(cb);
+    this->default_response(cb);
     return true;
   }
 
-  template<typename Res, typename Callback>
-  void default_response(const Callback& cb) const
+  template<typename Res>
+  void default_response(const std::function< void(std::unique_ptr<Res>) >& cb) const
   {
     if ( cb != nullptr )
       cb( std::make_unique<Res>() );
   }
 
-  template<typename Res, typename Req, typename Callback>
-  bool bad_request(const Req& req, const Callback& cb) const
+  template<typename Req, typename Res>
+  bool bad_request(const Req& req, const std::function< void(std::unique_ptr<Res>) >& cb) const
   {
-    if ( this->suspended<Res>(req, cb) ) 
+    if ( this->suspended(cb) ) 
       return true;
 
     if ( this->system_is_stopped() ) 
@@ -425,16 +421,16 @@ public:
     return true;
   }
   
-  template<typename Res, typename Req, typename Callback>
-  bool notify_ban(const Req& req, const Callback& cb) const
+  template<typename Req, typename Res>
+  bool notify_ban(const Req& req, const std::function< void(std::unique_ptr<Res>) >& cb) const
   {
-    return cb==nullptr || this->bad_request<Res>(req, cb);
+    return cb==nullptr || this->bad_request(req, cb);
   }
   
-  template<typename Res, typename Req, typename Callback>
-  bool request_ban(const Req& req, const Callback& cb) const
+  template<typename Req, typename Res>
+  bool request_ban(const Req& req, const std::function< void(std::unique_ptr<Res>) >& cb) const
   {
-    if ( this->bad_request<Res>(req, cb) )
+    if ( this->bad_request(req, cb) )
       return true;
 
     if ( cb==nullptr )
@@ -453,8 +449,8 @@ public:
     return nullptr;
   }
   
-  template<typename ResPtr, typename Callback>
-  void send_response(ResPtr&& res, Callback&& cb)
+  template<typename Res>
+  void send_response(std::unique_ptr<Res>&& res, std::function< void(std::unique_ptr<Res>) >&& cb)
   {
     if (res!=nullptr && cb!=nullptr)
       cb( std::move(res) );
