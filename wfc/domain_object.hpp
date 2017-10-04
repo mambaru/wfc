@@ -450,7 +450,7 @@ public:
   }
   
   template<typename Res>
-  void send_response(std::unique_ptr<Res>&& res, std::function< void(std::unique_ptr<Res>) >&& cb)
+  void send_response(std::unique_ptr<Res>&& res, const std::function< void(std::unique_ptr<Res>) >& cb)
   {
     if (res!=nullptr && cb!=nullptr)
       cb( std::move(res) );
