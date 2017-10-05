@@ -20,6 +20,7 @@ public:
   typedef typename object_type::domain_interface domain_interface;
   typedef typename object_type::config_type config_type;
   typedef typename object_type::basic_options basic_options;
+  typedef typename object_type::statoptions_type statistics_options;
   /*
   typedef typename object_type::options_type domain_options_type;
   typedef domain_instance_options<domain_options_type> options_type;

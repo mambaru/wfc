@@ -9,7 +9,10 @@ template<
   typename Instance,
   typename DomainJson,
   int Features = component_features::Multiton,
-  typename StatJson = nostat_json 
+  typename StatJson = typename std::conditional< 
+                        std::is_same<typename Instance::statistics_options, nostat>::value, 
+                        nostat_json, defstat_json 
+                      >::type
 >
 class multiton
   : public basic_component<

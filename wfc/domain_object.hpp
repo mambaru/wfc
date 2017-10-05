@@ -27,7 +27,7 @@ class domain_object
 {
 public:
   typedef Opt options_type;
-  typedef StatOpt statistics_options_type;
+  typedef StatOpt statoptions_type;
   typedef instance_options<Opt, StatOpt> config_type;
   typedef typename config_type::basic_options basic_options;
 
@@ -241,7 +241,7 @@ public:
     return _config;
   }
   
-  const statistics_options_type& statistics_options() const
+  const statoptions_type& statistics_options() const
   {
     return _config.statistics;
   }
