@@ -290,6 +290,12 @@ public:
 
   statistics_ptr get_statistics() const 
   {
+    if ( auto g = this->global() )
+    {
+      if ( g->disable_statistics )
+        return nullptr;
+    }
+
     if (!is_configured_())
       return nullptr;
 

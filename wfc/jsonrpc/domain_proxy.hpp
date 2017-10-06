@@ -49,7 +49,7 @@ public:
     _adapter.unreg_io( io_id);
   }
   
-  virtual void perform_io(data_ptr d, io_id_t io_id, output_handler_t handler) final override
+  virtual void perform_io(data_ptr d, io_id_t io_id, output_handler_t handler) override
   {
     if ( this->suspended() )
     {

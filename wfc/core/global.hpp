@@ -13,7 +13,7 @@
 #include <wfc/core/workflow.hpp>
 #include <wfc/core/cpuset.hpp>
 #include <iow/asio.hpp>
-
+#include <atomic>
 
 namespace wfc{
 
@@ -34,7 +34,8 @@ struct wfcglobal
   fakir after_start;
   fakir before_stop;
   fakir after_stop;
-  bool enable_callback_check  = false;
+  //bool enable_callback_check  = false;
+  std::atomic<bool> disable_statistics;
   
   std::atomic<bool> nocall_callback_abort;
   std::atomic<bool> nocall_callback_show;
