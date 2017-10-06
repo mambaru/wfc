@@ -5,17 +5,17 @@
 
 namespace wfc{ namespace jsonrpc{
 
-class target
+class target_depr
   : public ijsonrpc
 {
 public:
   
 
-  virtual ~target()
+  virtual ~target_depr()
   {
   }
 
-  target(const std::string& name, std::shared_ptr<wfcglobal> g)
+  target_depr(const std::string& name, std::shared_ptr<wfcglobal> g)
   {
     if (!g) return;
 
