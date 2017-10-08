@@ -41,7 +41,7 @@ public:
 
     //const auto& registry = this->global()->registry;
 
-    this->engine()->unreg_io(_target_id);
+    this->engine()->unreg_io(_target_id); // видимо какой-то грязный хак
     if ( auto pitf = this->template get_target<ijsonrpc>(dopt.outgoing_target_name, true) )
     {
       _no_outgoing_target = false;
@@ -91,7 +91,6 @@ public:
     }
     else if ( auto e = this->engine() )
     {
-      
       e->template call<Tg>( std::move(req), _target_id, cb, std::forward<Args>(args)... );
     }
   }
