@@ -28,22 +28,22 @@ struct aggregator_options_json
     >
   > resolution_json;
 
-  JSON_NAME(reduced_size)
-  JSON_NAME(step_ts)
-  JSON_NAME(limit)
-  JSON_NAME(levels)
+  JSON_NAME(reducer_limit)
+  JSON_NAME(reducer_levels)
   JSON_NAME(resolution)
-  JSON_NAME(soiled_start)
+  JSON_NAME(soiled_start_ts)
+  JSON_NAME(outgoing_reduced_size)
+  JSON_NAME(aggregation_step_ts)
 
   typedef json::object<
     aggregator_options,
     json::member_list<
-      json::member< n_reduced_size,  aggregator_options, size_type, &aggregator_options::reduced_size>,
-      json::member< n_step_ts, separator_options, time_type, &separator_options::step_ts>,
+      json::member< n_reducer_limit, reducer_options, size_type, &reducer_options::reducer_limit>,
+      json::member< n_reducer_levels, reducer_options, size_type, &reducer_options::reducer_levels>,
       json::member< n_resolution, separator_options, time_type, &separator_options::resolution, resolution_json>,
-      json::member< n_soiled_start, separator_options, time_type, &separator_options::soiled_start>,
-      json::member< n_limit, reducer_options, size_type, &reducer_options::limit>,
-      json::member< n_levels, reducer_options, size_type, &reducer_options::levels>
+      json::member< n_outgoing_reduced_size,  aggregator_options, size_type, &aggregator_options::outgoing_reduced_size>,
+      json::member< n_aggregation_step_ts, separator_options, time_type, &separator_options::aggregation_step_ts>,
+      json::member< n_soiled_start_ts, separator_options, time_type, &separator_options::soiled_start_ts>
     >,
     json::strict_mode
   > type;
@@ -55,14 +55,14 @@ struct aggregator_options_json
   
 struct stat_options_json
 {
-  JSON_NAME(pool)
+  JSON_NAME(data_pool)
   JSON_NAME(prefixes)
 
   typedef json::object<
     stat_options,
     json::member_list<
       json::base<aggregator_options_json>,
-      json::member< n_pool, ::wrtstat::manager_options, size_t, &::wrtstat::manager_options::pool>,
+      json::member< n_data_pool, ::wrtstat::manager_options, size_t, &::wrtstat::manager_options::data_pool>,
       json::member< n_prefixes, ::wrtstat::wrtstat_options, std::vector<std::string>, &::wrtstat::wrtstat_options::prefixes, json::vector_of_strings<> >
      >,
      json::strict_mode

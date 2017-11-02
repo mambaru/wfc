@@ -16,7 +16,6 @@ public:
 
 statistics::statistics(options_type opt)
 {
-  opt.step_ts *= 1000;
   _impl = std::make_shared<impl>(opt);
 }
 
@@ -176,14 +175,20 @@ statistics::meter_ptr statistics::create_meter(meter_ptr m, size_type count)
 }
 */
 
-statistics::handler_fun_t statistics::create_handler(const std::string& name, time_type ts_now)
+statistics::value_adder_t statistics::create_value_adder(const std::string& name, time_type ts_now)
 {
-  return _impl->create_handler( name, ts_now );
+  return _impl->create_value_adder( name, ts_now );
 }
 
-statistics::aggregator_fun_t statistics::create_aggregator( const std::string& name, time_type ts_now)
+
+statistics::data_adder_t statistics::create_data_adder(const std::string& name, time_type ts_now)
 {
-  return _impl->create_aggregator_handler( name, ts_now );
+  return _impl->create_data_adder( name, ts_now );
+}
+
+statistics::reduced_adder_t statistics::create_reduced_adder( const std::string& name, time_type ts_now)
+{
+  return _impl->create_reduced_adder( name, ts_now );
 }
 
 int statistics::count() const
