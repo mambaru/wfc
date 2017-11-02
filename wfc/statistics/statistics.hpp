@@ -52,6 +52,7 @@ public:
   void enable(bool val);
 private:
   std::shared_ptr<impl> _impl;
+  time_type _resolution;
 };
 
 }}
