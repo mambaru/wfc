@@ -7,8 +7,8 @@ namespace wfc{ namespace statistics{
 
 struct aggregator_options_json
 {
-  typedef ::wrtstat::types::time_type time_type;
-  typedef ::wrtstat::types::size_type size_type;
+  typedef ::wrtstat::time_type time_type;
+  typedef ::wrtstat::size_type size_type;
   typedef ::wrtstat::reducer_options reducer_options;
   typedef ::wrtstat::separator_options separator_options;
   typedef ::wrtstat::aggregator_options aggregator_options;

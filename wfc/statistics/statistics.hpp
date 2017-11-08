@@ -16,9 +16,9 @@ class statistics
 public:
   typedef ::wrtstat::aggregated_data aggregated_data;
   typedef ::wrtstat::reduced_data reduced_data;
-  typedef ::wrtstat::types::time_type time_type;
-  typedef ::wrtstat::types::size_type size_type;
-  typedef ::wrtstat::types::data_type data_type;
+  typedef ::wrtstat::time_type time_type;
+  typedef ::wrtstat::size_type size_type;
+  typedef ::wrtstat::data_type data_type;
   typedef std::function< void(time_type now, time_type value, size_type count) > value_adder_t;
   typedef std::function< void(time_type now, data_type&& value, size_type count) > data_adder_t;
   typedef std::function< void(const reduced_data&) > reduced_adder_t;
