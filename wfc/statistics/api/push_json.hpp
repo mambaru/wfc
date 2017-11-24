@@ -16,8 +16,8 @@ namespace request {
     typedef wfc::json::object<
       push,
       json::member_list<
-        json::base<aggregated_json>,
-        json::member<n_name, push, std::string, &push::name>
+        json::member<n_name, push, std::string, &push::name>,
+        json::base<aggregated_data_json>
       >
     > type;
     
