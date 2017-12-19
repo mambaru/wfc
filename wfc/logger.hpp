@@ -10,5 +10,5 @@
 
 namespace wfc
 {
-  using ::iow::only_for_log;
+  using ::wlog::only_for_log;
 }

@@ -34,21 +34,12 @@ struct wfcglobal
   fakir after_start;
   fakir before_stop;
   fakir after_stop;
-  //bool enable_callback_check  = false;
-  std::atomic<bool> disable_statistics;
   
+  std::atomic<bool> disable_statistics;
   std::atomic<bool> nocall_callback_abort;
   std::atomic<bool> nocall_callback_show;
   std::atomic<bool> double_callback_abort;
   std::atomic<bool> double_callback_show;
-
-  /*
-  typedef std::function<void(std::string, std::string)> callback_error_handler;
-  // небыло вызова
-  callback_error_handler no_call_callback;
-  // двойной вызов 
-  callback_error_handler double_call_callback;
-  */
   
   //thread_manager threads;
   cpuset cpu;

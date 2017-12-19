@@ -19,7 +19,6 @@ SET(
   module/component.cpp
   module/module.cpp
   module/package.cpp
-  ../../iow/iow/logger/global_log.cpp
 )
 
 add_library(
