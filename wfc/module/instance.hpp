@@ -125,7 +125,7 @@ public:
     }
     else
     {
-      CONFIG_LOG_MESSAGE("Instance '" << _config.name << "' without restart")
+      SYSTEM_LOG_MESSAGE("Instance '" << _config.name << "' without restart")
     }
     _instance_reconfigured = false;
     _ready_for_stop = true;

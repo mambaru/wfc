@@ -280,7 +280,7 @@ public:
   template<typename I>
   std::shared_ptr<I> get_target(const std::string& name, bool disabort = false) const
   {
-    if (!is_configured_())
+    if (!this->is_configured_())
       return nullptr;
 
     if ( auto g = this->global() )
@@ -288,6 +288,27 @@ public:
     return nullptr;
   }
 
+  template<typename I>
+  std::map<std::string, std::shared_ptr<I> > select_targets(const std::string& prefix) const
+  {
+    std::map<std::string, std::shared_ptr<I> > result;
+    if ( this->is_configured_() )
+    {
+      if ( auto g = this->global() )
+        result = g->registry.template select<I>(prefix);
+    }
+    return result;
+  }
+  
+  template<typename I>
+  void set_target(const std::string& prefix, const std::string& name, std::shared_ptr<I> p)
+  {
+    if ( auto g = this->global() )
+    {
+      g->registry.template set<I>(prefix, name, p);
+    }
+  }
+  
   statistics_ptr get_statistics() const 
   {
     if ( auto g = this->global() )

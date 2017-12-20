@@ -67,6 +67,16 @@ public:
     return this->get<I>("", name, disabort);
   }
 
+  template<typename I>
+  std::map<std::string, std::shared_ptr<I> > select(const std::string& prefix) const
+  {
+    std::map<std::string, std::shared_ptr<I> > mp;
+    this->for_each<I>(prefix, [&mp](std::string name, std::shared_ptr<I> p){
+      mp[name] = p;
+    });
+    return mp;
+  }
+  
   void set(const std::string& prefix, const std::string& name, std::shared_ptr<iinterface> item, bool nomark = false )
   {
     if (name.empty() )
@@ -138,7 +148,7 @@ public:
 
   template<typename I>
   void for_each( 
-    std::string prefix, 
+    std::string prefix,
     std::function< void( std::string, std::shared_ptr<I> ) > f,
     std::function< bool( std::shared_ptr<I>, std::shared_ptr<I> ) > cmp = nullptr) const
   {

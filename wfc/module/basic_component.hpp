@@ -217,21 +217,21 @@ private:
     if ( _config.instance.empty() )
     {
       _instances->configure(opt);
-      CONFIG_LOG_MESSAGE("Singleton '" << opt.name << "' is initial configured ")
+      SYSTEM_LOG_MESSAGE("Singleton '" << opt.name << "' is initial configured ")
     }
     else if ( _config.domain != op.domain )        
     {
       _instances->reconfigure(opt);
-      CONFIG_LOG_MESSAGE("Singleton '" << opt.name << "' is reconfigured (fully)")
+      SYSTEM_LOG_MESSAGE("Singleton '" << opt.name << "' is reconfigured (fully)")
     }
     else if ( _config.instance != op.instance ) 
     {
       _instances->reconfigure_basic(opt);
-      CONFIG_LOG_MESSAGE("Singleton '" << opt.name << "' is reconfigured (basic)")
+      SYSTEM_LOG_MESSAGE("Singleton '" << opt.name << "' is reconfigured (basic)")
     }
     else
     {
-      CONFIG_LOG_MESSAGE("Singleton '" << opt.name << "' without reconfiguration")
+      SYSTEM_LOG_MESSAGE("Singleton '" << opt.name << "' without reconfiguration")
     }
     _config = op;
     return true;
@@ -262,7 +262,7 @@ private:
         if ( _global ) _global->registry.set("instance", opt.name, inst);
         inst->create( _global );
         itr->second->configure(opt);
-        CONFIG_LOG_MESSAGE("Instance '" << opt.name << "' is initial configured")
+        SYSTEM_LOG_MESSAGE("Instance '" << opt.name << "' is initial configured")
         _config.insert(std::make_pair(opt.name, op) );
       }
       else
@@ -273,16 +273,16 @@ private:
         if ( oitr->second.domain != op.domain )
         {
           itr->second->reconfigure(opt);
-          CONFIG_LOG_MESSAGE("Instance '" << opt.name << "' is reconfigured (fully)")
+          SYSTEM_LOG_MESSAGE("Instance '" << opt.name << "' is reconfigured (fully)")
         }
         else if ( oitr->second.instance != op.instance )
         {
           itr->second->reconfigure_basic(opt);
-          CONFIG_LOG_MESSAGE("Instance '" << opt.name << "' is reconfigured (basic)")
+          SYSTEM_LOG_MESSAGE("Instance '" << opt.name << "' is reconfigured (basic)")
         }
         else
         {
-          CONFIG_LOG_MESSAGE("Instance '" << opt.name << "' without reconfiguration")
+          SYSTEM_LOG_MESSAGE("Instance '" << opt.name << "' without reconfiguration")
         }
         oitr->second = op;
       }
@@ -296,7 +296,7 @@ private:
         if ( _global ) _global->registry.erase("instance", name);
         itr->second->stop("");
         _instances.erase(itr);
-        CONFIG_LOG_MESSAGE("Instance '" << name << "' is deleted")
+        SYSTEM_LOG_MESSAGE("Instance '" << name << "' is deleted")
       }
     }
     return true;
