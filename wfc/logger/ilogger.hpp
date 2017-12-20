@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wfc/iinterface.hpp>
+#include <wlog/logger_fun.hpp>
 
 #include <string>
 
@@ -9,7 +10,8 @@ namespace wfc{
 struct ilogger: iinterface
 {
   virtual ~ilogger(){}
-  virtual void write(const std::string& name, const std::string& ident, std::string str) = 0;
+  typedef wlog::formatter_fun formatter_t;
+  virtual formatter_t formatter() = 0;
 };
 
 }

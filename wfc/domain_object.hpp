@@ -300,12 +300,12 @@ public:
     return result;
   }
   
-  template<typename I>
-  void set_target(const std::string& prefix, const std::string& name, std::shared_ptr<I> p)
+  //template<typename I>
+  void set_target(const std::string& prefix, const std::string& name, std::shared_ptr<wfc::iinterface> p, bool nomark = false)
   {
     if ( auto g = this->global() )
     {
-      g->registry.template set<I>(prefix, name, p);
+      g->registry.set(prefix, name, p, nomark);
     }
   }
   
