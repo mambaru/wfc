@@ -80,7 +80,12 @@ struct target_adapter: ijsonrpc
     }
     else if ( handler != nullptr )
     {
+      COMMON_LOG_ERROR("jsonrpc taraget: service_unavailable")
       ::wjrpc::aux::send_error(std::move(holder), std::make_unique< ::wjrpc::service_unavailable > (), std::move(handler));
+    }
+    else
+    {
+      COMMON_LOG_ERROR("jsonrpc taraget: service_unavailable")
     }
   }
   
