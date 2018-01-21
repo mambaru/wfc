@@ -26,7 +26,7 @@ add_library(
   ${wfc_source_list}
 )
 
-target_link_libraries(wfc iow  ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(wfc ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 if ( WFC_READY )
   build_info(wfc wfc)
