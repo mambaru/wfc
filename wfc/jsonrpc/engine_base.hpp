@@ -30,7 +30,7 @@ public:
   //typedef typename super::rpc_outgoing_handler_t outgoing_handler_t;
   typedef typename super::output_handler_t output_handler_t;
   typedef typename super::timer_id_t timer_id_t;
-  typedef ::iow::workflow workflow_type;
+  typedef wflow::workflow workflow_type;
 
 public:
 

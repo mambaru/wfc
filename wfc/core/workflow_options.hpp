@@ -1,9 +1,9 @@
 #pragma once
 
-#include <iow/workflow/workflow_options.hpp>
+#include <wflow/workflow_options.hpp>
 
 namespace wfc{
 
-using ::iow::workflow_options;
+using wflow::workflow_options;
 
 }
