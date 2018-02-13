@@ -73,9 +73,9 @@ struct reduced_info_json_array
   >::type head_list;
 
   typedef fas::type_list_n<
-    json::member_array<reduced_info,  size_type,  &reduced_info::lossy>,
     json::member_array<reduced_info,  value_type, &reduced_info::min>,
-    json::member_array<reduced_info,  value_type, &reduced_info::max>
+    json::member_array<reduced_info,  value_type, &reduced_info::max>,
+    json::member_array<reduced_info,  size_type,  &reduced_info::lossy>
   >::type tail_list;
   
   typedef wfc::json::object_array<
