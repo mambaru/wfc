@@ -32,7 +32,7 @@ bool is_atty_stderr();
 
 void sleep( int millisec );
 
-void daemonize();
+std::function<void()> daemonize(bool wait = false);
 
 bool change_user(std::string username);
 

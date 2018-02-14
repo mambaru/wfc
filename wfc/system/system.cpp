@@ -66,7 +66,7 @@ void sleep( int millisec )
 #endif
 }
 
-void daemonize()
+std::function<void()> daemonize(bool wait)
 {
   int null = ::open("/dev/null", O_RDWR);
   if(-1 == null)
@@ -75,9 +75,14 @@ void daemonize()
     ::exit(EXIT_FAILURE);
   }
 
-  switch(::fork())
+  if (wait)
+    ::signal(SIGTERM, [](int){ ::exit(EXIT_SUCCESS); });
+  pid_t pid = ::fork();
+  switch(pid)
   {
   case 0:
+    if (wait)
+      ::signal(SIGTERM, SIG_DFL);
     ::setsid();
     ::umask(0);
     ::close(0);
@@ -93,8 +98,19 @@ void daemonize()
     ::exit(EXIT_FAILURE);
 
   default:
-    ::exit(EXIT_SUCCESS);
+    // Wait SIGTERM from children for exit
+    int status = EXIT_SUCCESS;
+    if (wait) ::wait(&status);
+    ::exit(status);
+    return nullptr;
   }
+  
+  pid_t ppid = ::getppid();
+  return [ppid, wait]()
+  {
+    if ( wait )
+      ::kill( ppid, SIGTERM);
+  };
 }
 
 void autoup(time_t timeout, std::function<bool(bool, int, time_t)> f )
