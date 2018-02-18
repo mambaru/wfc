@@ -38,7 +38,12 @@ bool change_user(std::string username);
 
 bool change_working_directory(std::string working_directory);
 
-void autoup(time_t timeout, std::function<bool(bool, int, time_t)> f = nullptr);
+void autoup(
+  time_t timeout,
+  bool success_autoup = false, 
+  std::function<bool(int, int, time_t)> before = nullptr,
+  std::function<void(int, int, time_t)> after = nullptr
+);
 
 int dumpable();
 

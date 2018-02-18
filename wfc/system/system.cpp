@@ -113,12 +113,16 @@ std::function<void()> daemonize(bool wait)
   };
 }
 
-void autoup(time_t timeout, std::function<bool(bool, int, time_t)> f )
+void autoup(time_t timeout, bool success_autoup, 
+            std::function<bool(int, int, time_t)> before, 
+            std::function<void(int, int, time_t)> after )
 {
-  for (;;)
+  int status = 0;
+  time_t worktime = 0;
+  for ( int i=0; true ; ++i )
   {
+    time_t t = std::time(0);
     pid_t pid = ::fork();
-
     if (pid==0)
     {
       int null = ::open("/dev/null", O_RDWR);
@@ -131,18 +135,18 @@ void autoup(time_t timeout, std::function<bool(bool, int, time_t)> f )
         ::dup2(null, 1);
         ::dup2(null, 2);
       }
+      
+      if ( i!=0 && after!=nullptr )
+        after(i, status, worktime);
       break;
     }
     
-    int status = 0;
-    time_t t = std::time(0);
+    status = 0;
     ::waitpid(pid, &status, 0);
-    time_t worktime = std::time(0) - t;
-    bool restart = status!=0 && ( worktime >= timeout );
-    if ( f!=nullptr )
-    {
-      restart = f(restart, status, worktime);
-    }
+    worktime = std::time(0) - t;
+    bool restart = ( status!=0 || success_autoup) && ( worktime >= timeout );
+    if ( restart && before!=nullptr )
+      restart = before(i, status, worktime);
     
     kill(pid, SIGKILL);
     if ( !restart )
