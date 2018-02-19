@@ -379,7 +379,7 @@ public:
   T get_arg_t(const std::string& arg, json_error* e = nullptr) const
   {
     T val = T();
-    auto str = this->get_arg(arg);
+    std::string str = this->get_arg(arg);
     if ( str.empty() )
       return val;
     
