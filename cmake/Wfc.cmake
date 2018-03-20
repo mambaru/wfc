@@ -36,9 +36,8 @@ endif()
 find_package(Boost COMPONENTS system program_options filesystem date_time REQUIRED)
 
 IF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
-    exec_program(
-      ${CMAKE_CXX_COMPILER}
-      ARGS -dumpversion
+    execute_process(
+      ${CMAKE_CXX_COMPILER} -dumpversion
       OUTPUT_VARIABLE gcc_compiler_version
     )
 
