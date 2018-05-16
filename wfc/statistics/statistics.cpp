@@ -1,10 +1,62 @@
 #include <wfc/statistics/statistics.hpp>
+#include <wfc/statistics/meters.hpp>
 #include <wrtstat/wrtstat.hpp>
 #include <ctime>
 #include <cstdlib>
 
 namespace wfc{ namespace statistics{
 
+class statistics::impl
+  : public ::wrtstat::wrtstat
+{
+public:
+  impl(const ::wrtstat::wrtstat_options& opt )
+    : wrtstat( opt)
+  {}
+};
+
+statistics::~statistics()
+{
+  _impl = nullptr;
+}
+statistics::statistics(options_type opt)
+{
+  _impl = std::make_shared<impl>(opt);
+}
+
+void statistics::enable(bool val)
+{
+  _impl->enable(val);
+}
+
+/*
+size_t statistics::count() const
+{
+  return _impl->aggregators_count();
+}
+*/
+
+value_factory statistics::create_value_factory(const std::string& name)
+{
+  return _impl->create_value_multi_meter_factory(name);
+}
+
+size_factory statistics::create_size_factory(const std::string& name)
+{
+  return _impl->create_size_multi_meter_factory(name);
+}
+
+time_factory statistics::create_time_factory(const std::string& name)
+{
+  return _impl->create_time_multi_meter_factory<statistics_duration>(name);
+}
+
+
+composite_factory statistics::create_composite_factory(const std::string& time, const std::string& read, const std::string& write, bool summary_size)
+{
+  return _impl->create_composite_multi_meter_factory<statistics_duration>(time, read, write, summary_size);
+}
+  /*
 class statistics::impl
   : public ::wrtstat::wrtstat_mt
 {
@@ -146,6 +198,6 @@ std::string statistics::get_name(int id) const
 {
   return _impl->get_name(id);
 }
-
+*/
 
 }}
