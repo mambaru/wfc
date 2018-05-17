@@ -12,7 +12,7 @@ class statistics
 {
   class impl;
 public:
-  typedef stat_options options_type;
+  typedef wrtstat::wrtstat_options options_type;
   virtual ~statistics();
   statistics(options_type opt);
   void enable(bool val);
