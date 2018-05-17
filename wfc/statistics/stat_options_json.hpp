@@ -6,7 +6,7 @@
 
 namespace wfc{ namespace statistics{
 
-typedef ::wrtstat::wrtstat_options_json stat_options_json;
+//typedef ::wrtstat::wrtstat_options_json stat_options_json;
   /*
 struct aggregator_options_json
 {

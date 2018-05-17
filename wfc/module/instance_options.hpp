@@ -33,7 +33,7 @@ struct statistics_options: StatOpt
 template<typename StatOpt /*= nostat*/>
 struct basic_instance_options
 {
-  typedef ::wfc::statistics_options<StatOpt> statistics_options;
+  typedef wfc::statistics_options<StatOpt> statistics_options;
   static constexpr bool statistics_enabled = statistics_options::enabled;
   bool enabled = true;
   bool suspend = false;
