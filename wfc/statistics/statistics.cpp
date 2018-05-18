@@ -29,12 +29,22 @@ void statistics::enable(bool val)
   _impl->enable(val);
 }
 
-/*
-size_t statistics::count() const
+
+size_t statistics::aggregators_count() const
 {
   return _impl->aggregators_count();
 }
-*/
+
+std::string statistics::get_name(size_t i) const
+{
+  return _impl->get_name(i);
+}
+
+statistics::aggregated_ptr statistics::pop(size_t i)
+{
+  return _impl->pop(i);
+}
+
 
 value_factory statistics::create_value_factory(const std::string& name)
 {

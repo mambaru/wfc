@@ -13,10 +13,14 @@ class statistics
   class impl;
 public:
   typedef wrtstat::wrtstat_options options_type;
+  typedef wrtstat::aggregated_data::ptr aggregated_ptr;
+
   virtual ~statistics();
   statistics(options_type opt);
   void enable(bool val);
-  /*size_t count() const;*/
+  size_t aggregators_count() const;
+  std::string get_name(size_t i) const;
+  aggregated_ptr pop(size_t i);
   
   value_factory create_value_factory(const std::string& name);
   size_factory create_size_factory(const std::string& name);
