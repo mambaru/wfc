@@ -1,15 +1,39 @@
 #pragma once
 
 #include <wfc/iinterface.hpp>
-#include <wfc/statistics/meters.hpp>
 #include <wfc/statistics/stat_options.hpp>
-#include <wrtstat/wrtstat_options.hpp>
-#include <wrtstat/aggregated_data.hpp>
-#include <wrtstat/reduced_data.hpp>
+#include <wfc/statistics/meters.hpp>
+#include <wrtstat/wrtstat.hpp>
 #include <memory>
 
 namespace wfc{ namespace statistics{
 
+class statistics
+{
+  class impl;
+public:
+  typedef wrtstat::wrtstat_options options_type;
+  typedef wrtstat::aggregated_data::ptr aggregated_ptr;
+
+  virtual ~statistics();
+  statistics(options_type opt);
+  void enable(bool val);
+  size_t aggregators_count() const;
+  std::string get_name(size_t i) const;
+  aggregated_ptr pop(size_t i);
+  
+  value_factory create_value_factory(const std::string& name);
+  size_factory create_size_factory(const std::string& name);
+  time_factory create_time_factory(const std::string& name);
+  composite_factory create_composite_factory(const std::string& time, const 
+    std::string& read, const std::string& write, bool summary_size);
+private:
+  std::shared_ptr<impl> _impl;
+};
+
+
+/*typedef ::wrtstat::wrtstat statistics;*/
+  /*
 class statistics
 {
   class impl;
@@ -54,5 +78,6 @@ private:
   std::shared_ptr<impl> _impl;
   time_type _resolution;
 };
+*/
 
 }}

@@ -7,5 +7,4 @@ namespace wfc{
 using wflow::workflow_options_json;
 using wflow::workflow_options_basic_json;
 
-
 }
