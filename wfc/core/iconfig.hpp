@@ -16,7 +16,8 @@ struct iconfig: iinterface
 {
   virtual ~iconfig() {}
   virtual bool reload_and_reconfigure() = 0;
-  virtual bool load_and_parse(std::string path) = 0;
+  virtual bool load_and_configure(std::string path) = 0;
+  virtual bool load_and_check(std::string path) = 0;
   virtual std::string get_config(std::string name) = 0;
   typedef std::map<std::string, std::string> generate_options;
   virtual bool generate_config( const generate_options& go, const std::string& path, std::string& result) = 0;
