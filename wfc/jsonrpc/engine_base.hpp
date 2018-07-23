@@ -104,10 +104,12 @@ protected:
 
   void initialize_engine(options_type eopt)
   {
+    /*
     eopt.log_error = [](const std::string& m) { JSONRPC_LOG_ERROR( m ); m.size();};
     eopt.log_fatal = [](const std::string& m) { JSONRPC_LOG_FATAL( m ); m.size();};
     eopt.log_debug = [](const std::string& m) { JSONRPC_LOG_DEBUG( m ); m.size();};
     eopt.log_trace = [](const std::string& m) { JSONRPC_LOG_TRACE( m ); m.size(); };
+    */
     
     if ( _engine == nullptr ) 
     {
@@ -154,9 +156,9 @@ private:
         if ( sopt.interval_ms != 0 )
         {
           auto name = this->name();
-          auto handler_map  = stat->create_value_prototype(name + sopt.handler_map);
-          auto result_map   = stat->create_value_prototype(name + sopt.result_map);
-          auto result_queue = stat->create_value_prototype(name + sopt.result_queue);
+          auto handler_map  = stat->create_value_factory(name + sopt.handler_map);
+          auto result_map   = stat->create_value_factory(name + sopt.result_map);
+          auto result_queue = stat->create_value_factory(name + sopt.result_queue);
           _stat_timer_id = wf->create_timer( 
             std::chrono::milliseconds(sopt.interval_ms), 
             [handler_map, result_map, result_queue, this]()->bool
@@ -164,9 +166,9 @@ private:
               if ( auto stat = this->get_statistics() )
               {
                 auto si = this->_engine->sizes();
-                stat->create_meter(handler_map,  si.handler_map, 0);
-                stat->create_meter(result_map,   si.result_map, 0);
-                stat->create_meter(result_queue, si.result_queue, 0);
+                handler_map.create(si.handler_map, 0);
+                result_map.create(si.result_map, 0);
+                result_queue.create(si.result_queue, 0);
                 return true;
               }
               return false;

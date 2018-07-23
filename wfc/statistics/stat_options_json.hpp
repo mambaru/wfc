@@ -2,9 +2,12 @@
 
 #include "stat_options.hpp"
 #include <wfc/json.hpp>
+#include <wrtstat/json/wrtstat_options_json.hpp>
 
 namespace wfc{ namespace statistics{
 
+//typedef ::wrtstat::wrtstat_options_json stat_options_json;
+  /*
 struct aggregator_options_json
 {
   typedef ::wrtstat::time_type time_type;
@@ -72,5 +75,6 @@ struct stat_options_json
   typedef type::serializer serializer;
   typedef type::member_list member_list;
 };
+*/
 
 }}
