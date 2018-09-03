@@ -1,10 +1,10 @@
+message(STATUS "=========2============> ${IOW_DIR}")
+message(STATUS "=========3============> ${IOW_LIB}")
 
-if ( WFC_READY )
-  include(BuildInfo)
-  include(Wfc)
-else()
-  find_package(Boost COMPONENTS system program_options filesystem date_time REQUIRED)
-endif()
+include(BuildInfo)
+include(mambaopt)
+
+find_package(Boost COMPONENTS system program_options filesystem date_time REQUIRED)
 
 SET(
   wfc_source_list
@@ -26,10 +26,8 @@ add_library(
   ${wfc_source_list}
 )
 
-target_link_libraries(wfc ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(wfc ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${WLOG_LIB})
 
-if ( WFC_READY )
-  build_info(wfc wfc)
-endif()
+build_info(wfc wfc)
 
 install(TARGETS wfc DESTINATION ${CMAKE_INSTALL_PREFIX})
