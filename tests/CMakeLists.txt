@@ -1,6 +1,6 @@
-include_directories(..)
-include_directories(../../faslib)
-include_directories(../../iow)
+#include_directories(..)
+#include_directories(../../faslib)
+#include_directories(../../iow)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${WFC_TEST_DIR})
 

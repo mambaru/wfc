@@ -47,7 +47,7 @@ struct wfcglobal
 
   typedef ::iow::asio::io_service io_service_type;
   io_service_type& io_service;
-  std::shared_ptr< ::wfc::workflow > workflow;
+  std::shared_ptr< workflow > common_workflow;
   
   static ptr static_global;
   std::atomic<bool> stop_signal_flag;

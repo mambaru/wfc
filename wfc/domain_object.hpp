@@ -5,6 +5,7 @@
 #include <iow/io/io_id.hpp>
 #include <wfc/json.hpp>
 #include <wfc/statistics/statistics.hpp>
+#include <wfc/iinterface.hpp>
 #include <wfc/workflow.hpp>
 #include <wfc/module/instance_options.hpp>
 #include <wfc/wfc_exit.hpp>
@@ -108,7 +109,8 @@ public:
     _config = opt;
     _workflow = nullptr; // Ибо нефиг. До инициализации ничем пользоватся нельзя
     _conf_flag = false;
-    _global->cpu.set_cpu(_name, opt.cpu);
+    if (auto g = this->global() )
+      g->cpu.set_cpu(_name, opt.cpu);
     this->configure();
   }
 
@@ -147,24 +149,9 @@ public:
           DOMAIN_LOG_ERROR("Lost callback for '" << *pname << "'")
         }
       });
-      
-      
-      //!!_owner.enable_callback_check(_global->enable_callback_check);
-      /*
-      if ( _global->enable_callback_check)
-      {
-        _owner.set_callback_check(this->wrap([this](){
-            DOMAIN_LOG_FATAL( "Double call callback for '" << this->name() << "'" )
-        }, nullptr) );
-      }
-      else
-      {
-        _owner.set_callback_check(nullptr);
-        
-      } */
-    
+
       _workflow = _config.workflow.empty()
-                  ? this->global()->workflow
+                  ? this->global()->common_workflow
                   : this->global()->registry.template get<workflow >("workflow", _config.workflow)
                   ;
 
@@ -182,7 +169,8 @@ public:
   {
     _conf_flag = false;
     static_cast<basic_options&>(_config) = opt;
-    _global->cpu.set_cpu(_name, opt.cpu);
+    if (auto g = this->global() )
+      g->cpu.set_cpu(_name, opt.cpu);
     this->reconfigure_basic();
   }
 
@@ -190,7 +178,8 @@ public:
   {
     _conf_flag = true;
     _config = conf;
-    _global->cpu.set_cpu(_name, static_cast<basic_options&>(_config).cpu);
+    if (auto g = this->global() )
+      g->cpu.set_cpu(_name, static_cast<basic_options&>(_config).cpu);
     this->reconfigure();
   }
   
@@ -221,12 +210,15 @@ public:
 
   global_ptr global() const 
   {
-    return _global;
+    if ( _global!=nullptr)
+      return _global;
+    else
+      return wfcglobal::static_global;
   }
   
   bool system_is_stopped() const
   {
-    if ( auto g = _global )
+    if (auto g = this->global() )
       return g->stop_signal_flag;
     return false;
   }
@@ -301,7 +293,7 @@ public:
   }
   
   //template<typename I>
-  void set_target(const std::string& prefix, const std::string& name, std::shared_ptr<wfc::iinterface> p, bool nomark = false)
+  void set_target(const std::string& prefix, const std::string& name, std::shared_ptr<iinterface> p, bool nomark = false)
   {
     if ( auto g = this->global() )
     {
@@ -365,14 +357,18 @@ public:
   
   std::string get_arg(const std::string& arg) const
   {
-    if ( !_global->args.has(_name) )
-      return std::string();
-    
-    auto args = _global->args.get(_name);
-    if ( !args.has(arg) )
-      return std::string();
-    
-    return args.get(arg);
+    if (auto g = this->global() )
+    {
+      if ( !g->args.has(_name) )
+        return std::string();
+      
+      auto args = g->args.get(_name);
+      if ( !args.has(arg) )
+        return std::string();
+      
+      return args.get(arg);
+    }
+    return std::string();
   }
 
   template<typename T>
@@ -383,7 +379,7 @@ public:
     if ( str.empty() )
       return val;
     
-    typedef typename ::wfc::json::value<T>::serializer serializer;
+    typedef typename json::value<T>::serializer serializer;
     serializer()(val, str.begin(), str.end(), e );
     
     return val;
@@ -391,21 +387,27 @@ public:
 
   bool has_arg(const std::string& arg) const
   {
-    if ( !_global->args.has(_name) )
-      return false;
-    
-    auto args = _global->args.get(_name);
-    return args.has(arg);
+    if (auto g = this->global() )
+    {
+      if ( !g->args.has(_name) )
+        return false;
+      
+      auto args = g->args.get(_name);
+      return args.has(arg);
+    }
+    return false;
   }
   
   void reg_thread()
   {
-    _global->cpu.set_current_thread(_name);
+    if (auto g = this->global() )
+      g->cpu.set_current_thread(_name);
   }
 
   void unreg_thread()
   {
-    _global->cpu.del_current_thread();
+    if (auto g = this->global() )
+      g->cpu.del_current_thread();
   }
 
   bool suspended() const 

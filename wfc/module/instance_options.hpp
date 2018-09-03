@@ -33,8 +33,8 @@ struct statistics_options: StatOpt
 template<typename StatOpt /*= nostat*/>
 struct basic_instance_options
 {
-  typedef wfc::statistics_options<StatOpt> statistics_options;
-  static constexpr bool statistics_enabled = statistics_options::enabled;
+  typedef statistics_options<StatOpt> stat_options;
+  static constexpr bool statistics_enabled = stat_options::enabled;
   bool enabled = true;
   bool suspend = false;
   int  startup_priority = 0;
@@ -42,7 +42,7 @@ struct basic_instance_options
   std::string name;
   std::string workflow;
   std::set<int> cpu;
-  statistics_options statistics;
+  stat_options statistics;
 };
 
 template<typename DomainOptions, typename StatOpt /*=nostat */>
@@ -52,7 +52,7 @@ struct instance_options
 {
   typedef basic_instance_options<StatOpt> basic_options;
   typedef DomainOptions domain_options;
-  typedef typename basic_options::statistics_options statistics_options;
+  typedef typename basic_options::stat_options stat_options;
 };
 
 

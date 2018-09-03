@@ -23,15 +23,13 @@ struct ipackage: iinterface
   virtual std::shared_ptr<ibuild_info> build_info() = 0;
   virtual std::string name() const = 0;
   virtual std::string description() const = 0;
+  // dedrecated
   virtual int order() const = 0;
-  virtual std::vector< std::shared_ptr<imodule> > modules() = 0;
   virtual void create( std::shared_ptr<wfcglobal> ) = 0;
   // only for external control
+  virtual std::vector< std::shared_ptr<imodule> > modules() = 0;
   virtual void start(const std::string& arg) = 0;
   virtual void stop(const std::string& arg) = 0;
-  
-  
-
 };
 
 }

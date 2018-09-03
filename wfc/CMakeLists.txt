@@ -1,10 +1,9 @@
-message(STATUS "=========2============> ${IOW_DIR}")
-message(STATUS "=========3============> ${IOW_LIB}")
-
 include(BuildInfo)
 include(mambaopt)
 
+include(FindThreads)
 find_package(Boost COMPONENTS system program_options filesystem date_time REQUIRED)
+
 
 SET(
   wfc_source_list
@@ -26,7 +25,23 @@ add_library(
   ${wfc_source_list}
 )
 
-target_link_libraries(wfc ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${WLOG_LIB})
+set(
+  liblst
+  ${WLOG_LIB}
+  ${WFLOW_LIB}
+  ${Boost_LIBRARIES} 
+  ${CMAKE_THREAD_LIBS_INIT} 
+)
+
+if (WFC_ENABLE_STAT)
+  set(
+    liblst
+    ${liblst}
+    ${WRTSTAT_LIB}
+  )
+endif()
+
+target_link_libraries(wfc ${liblst})
 
 build_info(wfc wfc)
 
