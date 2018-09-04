@@ -15,3 +15,7 @@ target_link_libraries(example05 wfc)
 
 add_executable(example06 example06.cpp)
 target_link_libraries(example06 wfc)
+
+add_subdirectory(core_package)
+add_executable(example07 example07.cpp)
+target_link_libraries(example07 core_package wfc )
