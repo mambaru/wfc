@@ -5,6 +5,7 @@
 #include <wfc/core/build_info.hpp>
 #include <wfc/core/global.hpp>
 #include <memory>
+#include <iostream>
 
 struct example_package: 
   wfc::module_list<

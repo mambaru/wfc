@@ -288,15 +288,15 @@ private:
       }
     } // for optlist
 
-    for ( const auto& name: stop_list )
+    for ( const auto& n: stop_list )
     {
-      auto itr = _instances.find(name);
+      auto itr = _instances.find(n);
       if ( itr == _instances.end() )
       {
-        if ( _global ) _global->registry.erase("instance", name);
+        if ( _global ) _global->registry.erase("instance", n);
         itr->second->stop("");
         _instances.erase(itr);
-        SYSTEM_LOG_MESSAGE("Instance '" << name << "' is deleted")
+        SYSTEM_LOG_MESSAGE("Instance '" << n << "' is deleted")
       }
     }
     return true;

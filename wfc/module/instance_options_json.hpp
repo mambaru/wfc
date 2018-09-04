@@ -39,36 +39,9 @@ struct empty_stat_json_t
   typedef typename type::serializer  serializer;
 };
 
-struct nostat_json: empty_stat_json_t<nostat>
-{
-  /*
-  typedef ::wjson::object<
-    nostat,
-    ::wjson::member_list<
-    >
-  > type;
+struct nostat_json: empty_stat_json_t<nostat> {};
 
-  typedef typename type::target      target;
-  typedef typename type::member_list member_list;
-  typedef typename type::serializer  serializer;
-  */
-};
-
-struct defstat_json: empty_stat_json_t<defstat>
-{
-  /*
-  typedef ::wjson::object<
-    defstat,
-    ::wjson::member_list<
-    >
-  > type;
-
-  typedef typename type::target      target;
-  typedef typename type::member_list member_list;
-  typedef typename type::serializer  serializer;
-  */
-};
-
+struct defstat_json: empty_stat_json_t<defstat> {};
 
 template<typename StatOptJson = nostat_json >
 struct statistics_options_json;

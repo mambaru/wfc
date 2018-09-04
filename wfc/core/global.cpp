@@ -13,8 +13,8 @@ namespace wfc{
 
 std::shared_ptr<wfcglobal> wfcglobal::static_global;
 
-wfcglobal::wfcglobal( io_service_type& io_service)
-  : io_service(io_service)
+wfcglobal::wfcglobal( io_service_type& ios)
+  : io_service(ios)
 {
   stop_signal_flag = false;
 }

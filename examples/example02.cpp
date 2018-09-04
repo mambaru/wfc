@@ -2,6 +2,7 @@
 #include <wfc/module/ipackage.hpp>
 #include <wfc/core/build_info.hpp>
 #include <memory>
+#include <iostream>
 
 class example_package
   : public wfc::ipackage

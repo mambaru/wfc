@@ -12,3 +12,6 @@ target_link_libraries(example04 wfc)
 
 add_executable(example05 example05.cpp)
 target_link_libraries(example05 wfc)
+
+add_executable(example06 example06.cpp)
+target_link_libraries(example06 wfc)

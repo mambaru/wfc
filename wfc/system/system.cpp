@@ -60,7 +60,7 @@ bool is_atty_stderr()
 void sleep( int millisec )
 {
 #ifdef HAVE_USLEEP_FUNC
-  ::usleep(millisec*1000);
+  ::usleep( static_cast<useconds_t>(millisec*1000));
 #else
   ::sleep(millisec/1000);
 #endif
@@ -156,7 +156,7 @@ void autoup(time_t timeout, bool success_autoup,
 
 int dumpable()
 {
-#if HAVE_SYS_PRCTL_H
+#ifdef HAVE_SYS_PRCTL_H
   rlimit core = { RLIM_INFINITY, RLIM_INFINITY };
   return ::prctl(PR_SET_DUMPABLE, 1) || ::setrlimit(RLIMIT_CORE, &core) ? -1 : 0;
 #endif

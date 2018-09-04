@@ -5,6 +5,7 @@
 #include <wfc/core/build_info.hpp>
 #include <wfc/core/global.hpp>
 #include <memory>
+#include <iostream>
 
 class example_startup
   : public wfc::istartup

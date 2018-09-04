@@ -96,9 +96,9 @@ public:
     conf = this->generate(type);
   }
 
-  virtual void create_domain(const std::string& name, global_ptr g ) final
+  virtual void create_domain(const std::string& objname, global_ptr g ) final
   {
-    _name = name;
+    _name = objname;
     _global = g;
     this->create();
   }
@@ -259,24 +259,24 @@ public:
   }
 
   template<typename I>
-  std::shared_ptr<I> get_target(const std::string& prefix, const std::string& name, bool disabort = false) const
+  std::shared_ptr<I> get_target(const std::string& prefix, const std::string& tg_name, bool disabort = false) const
   {
     if (!is_configured_())
       return nullptr;
 
     if ( auto g = this->global() )
-      return g->registry.template get<I>(prefix, name, disabort);
+      return g->registry.template get<I>(prefix, tg_name, disabort);
     return nullptr;
   }
   
   template<typename I>
-  std::shared_ptr<I> get_target(const std::string& name, bool disabort = false) const
+  std::shared_ptr<I> get_target(const std::string& tg_name, bool disabort = false) const
   {
     if (!this->is_configured_())
       return nullptr;
 
     if ( auto g = this->global() )
-      return g->registry.template get<I>(name, disabort);
+      return g->registry.template get<I>(tg_name, disabort);
     return nullptr;
   }
 
@@ -292,12 +292,11 @@ public:
     return result;
   }
   
-  //template<typename I>
-  void set_target(const std::string& prefix, const std::string& name, std::shared_ptr<iinterface> p, bool nomark = false)
+  void set_target(const std::string& prefix, const std::string& tg_name, std::shared_ptr<iinterface> p, bool nomark = false)
   {
     if ( auto g = this->global() )
     {
-      g->registry.set(prefix, name, p, nomark);
+      g->registry.set(prefix, tg_name, p, nomark);
     }
   }
   
@@ -329,11 +328,11 @@ public:
     return this->global()->workflow;
   }
 
-  std::shared_ptr<workflow_type> get_workflow(const std::string& name, bool disabort = false) const 
+  std::shared_ptr<workflow_type> get_workflow(const std::string& wf_name, bool disabort = false) const 
   {
     if (!is_configured_())
       return nullptr;
-    return this->global()->registry.template get<workflow_type>("workflow", name, disabort);
+    return this->global()->registry.template get<workflow_type>("workflow", wf_name, disabort);
   }
 
   virtual void reg_io(io_id_t , std::weak_ptr<iinterface> ) override

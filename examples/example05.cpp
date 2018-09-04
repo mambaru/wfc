@@ -10,15 +10,32 @@
 #include <wfc/core/build_info.hpp>
 #include <wfc/core/global.hpp>
 #include <memory>
+#include <iostream>
 
 struct empty_conf{};
+struct empty_conf_json                                                                                                                                                          
+{                                                                                                                                                                                 
+  typedef wfc::json::object<
+    empty_conf,
+    wfc::json::member_list<
+    >
+  > type;                                                                                                                                                                         
+
+  typedef typename type::target      target;                                                                                                                                      
+  typedef typename type::member_list member_list;                                                                                                                                 
+  typedef typename type::serializer  serializer;                                                                                                                                  
+};
+
 
 class example_core
   : public wfc::domain_object< wfc::icore, empty_conf >
 {
+public:
+  typedef wfc::domain_object< wfc::icore, empty_conf >::config_type config_type;
+  
   virtual int run( ) override
   {
-    std::cout << "example_core::run()" << std::endl;
+    std::cout << "example_core::run()!" << std::endl;
     return 0;
   }
   virtual void core_reconfigure() override{ }
@@ -58,20 +75,6 @@ WFC_NAME2(module_name, "example-module")
 WFC_NAME2(core_name, "core")
 WFC_NAME2(startup_name, "startup")
 
-
-struct empty_conf_json                                                                                                                                                          
-{                                                                                                                                                                                 
-  typedef wfc::json::object<
-    empty_conf,
-    wfc::json::member_list<
-    >
-  > type;                                                                                                                                                                         
-
-  typedef typename type::target      target;                                                                                                                                      
-  typedef typename type::member_list member_list;                                                                                                                                 
-  typedef typename type::serializer  serializer;                                                                                                                                  
-};
-
 struct example_package: 
   wfc::module_list<
     wfc::empty_build_info,
@@ -92,5 +95,5 @@ int main(int argc, char* argv[])
 {
   wfc::wfc< wfc::empty_build_info >({
     std::make_shared<example_package>()
-  }).run(argc, argv);
+  }).run(argc, argv, "example5");
 }

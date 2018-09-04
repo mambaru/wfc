@@ -79,7 +79,7 @@ void cpuset::del_thread_(pid_t pid)
 
 pid_t cpuset::get_thread_pid_() const
 {
-  return syscall(SYS_gettid);
+  return static_cast<pid_t>(syscall(SYS_gettid));
 }
 
 }
