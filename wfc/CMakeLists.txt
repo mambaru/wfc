@@ -27,19 +27,12 @@ add_library(
 
 set(
   liblst
+  ${WRTSTAT_LIB}
   ${WLOG_LIB}
   ${WFLOW_LIB}
   ${Boost_LIBRARIES} 
   ${CMAKE_THREAD_LIBS_INIT} 
 )
-
-if (WFC_ENABLE_STAT)
-  set(
-    liblst
-    ${liblst}
-    ${WRTSTAT_LIB}
-  )
-endif()
 
 target_link_libraries(wfc ${liblst})
 

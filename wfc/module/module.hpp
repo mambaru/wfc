@@ -12,7 +12,7 @@ class module
   : public imodule
 {
 public:
-  module(std::shared_ptr<imodule>);
+  explicit module(const std::shared_ptr<imodule>& p);
   virtual ~module();
   virtual std::string name() const override;
   virtual std::string description() const override;

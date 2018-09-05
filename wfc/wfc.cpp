@@ -15,7 +15,7 @@
 
 namespace wfc{
 
-basic_wfc::basic_wfc(std::shared_ptr<ibuild_info> bi, package_list packages )
+basic_wfc::basic_wfc(std::shared_ptr<ibuild_info> bi, const package_list& packages )
   : _packages(packages)
 {
   _global = std::make_shared<wfcglobal>(_io_service);

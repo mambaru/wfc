@@ -16,7 +16,7 @@ public:
   typedef wrtstat::aggregated_data::ptr aggregated_ptr;
 
   virtual ~statistics();
-  statistics(options_type opt);
+  explicit statistics(options_type opt);
   void enable(bool val);
   size_t aggregators_count() const;
   std::string get_name(size_t i) const;

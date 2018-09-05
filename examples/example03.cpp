@@ -39,6 +39,7 @@ class example_core
   virtual int run( ) override
   {
     std::cout << "example_core::run()" << std::endl;
+    this->core_reconfigure();
     return 0;
   }
   

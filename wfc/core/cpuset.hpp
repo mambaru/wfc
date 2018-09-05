@@ -34,7 +34,7 @@ public:
 
 private:
   void del_thread_(pid_t pid);
-  pid_t get_thread_pid_() const;
+  static pid_t get_thread_pid_();
   mutable mutex_type _mutex;
   
 private:

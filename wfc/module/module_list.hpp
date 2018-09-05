@@ -77,7 +77,7 @@ public:
 
 private:
 
-  void create_(global_ptr, fas::empty_list) {}
+  static void create_(global_ptr, fas::empty_list) {}
 
   template<typename H, typename L>
   void create_(global_ptr g, fas::type_list< H, L > ) 

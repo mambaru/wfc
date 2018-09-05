@@ -8,7 +8,7 @@ module::~module()
   
 }
   
-module::module(std::shared_ptr<imodule> p)
+module::module(const std::shared_ptr<imodule>& p)
   : _impl(p)
 {
   

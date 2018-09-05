@@ -9,7 +9,7 @@ package::~package()
   
 }
   
-package::package(std::shared_ptr<ipackage> p)
+package::package(const std::shared_ptr<ipackage>& p)
   : _impl(p)
 {
   

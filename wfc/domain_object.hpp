@@ -470,7 +470,7 @@ public:
   }
   
   template<typename Res>
-  std::unique_ptr<Res> create_response( const std::function<void(std::unique_ptr<Res>)>& cb)
+  static std::unique_ptr<Res> create_response( const std::function<void(std::unique_ptr<Res>)>& cb)
   {
     if ( cb != nullptr )
       return std::make_unique<Res>();
@@ -478,11 +478,12 @@ public:
   }
   
   template<typename Res>
-  void send_response(std::unique_ptr<Res>&& res, const std::function< void(std::unique_ptr<Res>) >& cb)
+  static void send_response(std::unique_ptr<Res>&& res, const std::function< void(std::unique_ptr<Res>) >& cb)
   {
     if (res!=nullptr && cb!=nullptr)
       cb( std::move(res) );
   }
+  
 private:
   bool is_configured_() const
   {

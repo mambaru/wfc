@@ -10,7 +10,7 @@ class statistics::impl
   : public ::wrtstat::wrtstat
 {
 public:
-  impl(const ::wrtstat::wrtstat_options& opt )
+  explicit impl(const ::wrtstat::wrtstat_options& opt )
     : wrtstat( opt)
   {}
 };

@@ -50,13 +50,13 @@ public:
     return _config.shutdown_priority;
   }
   
-  void create( std::shared_ptr<wfcglobal> g) 
+  void create( const std::shared_ptr<wfcglobal>& g) 
   {
     std::lock_guard<mutex_type> lk(_mutex);
     _global = g;
   }
 
-  void create( std::string obj_name, std::shared_ptr<wfcglobal> g) 
+  void create( const std::string& obj_name, const std::shared_ptr<wfcglobal>& g) 
   {
     // для синглетонов
     std::lock_guard<mutex_type> lk(_mutex);

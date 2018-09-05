@@ -1,8 +1,8 @@
 #include <wfc/name.hpp>
 #include <wfc/module/component_list.hpp>
-#include "core_module.hpp"
-#include "core/core_singleton.hpp"
-#include "startup/startup_singleton.hpp"
+#include "example_module.hpp"
+#include "domain/example_multiton.hpp"
+
 
 namespace
 {
@@ -10,15 +10,13 @@ namespace
   struct impl: 
     wfc::component_list<
       module_name,
-      core_singleton,
-      startup_singleton
+      example_multiton
     >
   {};
 }
 
-core_module::core_module()
+example_module::example_module()
   : wfc::module(std::make_shared<impl>())
 {
   
 }
-

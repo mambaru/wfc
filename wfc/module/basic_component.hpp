@@ -120,7 +120,7 @@ public:
     typename component_json::serializer serializer;
     std::string result;
     serializer( opt, std::back_inserter( result ) );
-    return std::move(result);
+    return result;
   }
 
   virtual bool parse(const std::string& stropt, json::json_error* err) override
@@ -174,7 +174,7 @@ private:
     return str;
   }
 
-  bool unserialize_( component_config& opt,  const std::string& str, json::json_error* err )
+  static bool unserialize_( component_config& opt,  const std::string& str, json::json_error* err )
   {
     typename component_json::serializer serializer;
     auto beg = str.begin();
@@ -201,7 +201,7 @@ private:
     */
   }
 
-  void create_(fas::false_) { }
+  static void create_(fas::false_) { }
 
   bool configure_(const std::string& stropt, fas::true_, json::json_error* err)
   {
@@ -328,7 +328,7 @@ private:
     }
   }
   
-  void generate_config_(component_config& opt, const std::string& type, fas::true_) 
+  static void generate_config_(component_config& opt, const std::string& type, fas::true_) 
   {
     instance_type().generate( opt, type);
   }

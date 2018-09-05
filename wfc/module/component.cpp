@@ -7,7 +7,7 @@ component::~component()
 {
 }
 
-component::component(std::shared_ptr<icomponent> p)
+component::component(const std::shared_ptr<icomponent>& p)
   : _impl(p)
 {
 }

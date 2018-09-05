@@ -64,7 +64,7 @@ public:
 
 private:
 
-  void create_(fas::empty_list) {}
+  static void create_(fas::empty_list) {}
   
   template<typename H, typename L>
   void create_( fas::type_list< H, L > ) 

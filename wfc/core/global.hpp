@@ -20,6 +20,9 @@ namespace wfc{
 struct wfcglobal
 {
   typedef std::shared_ptr<wfcglobal> ptr;
+  typedef std::function<bool()> fire_handler;
+  typedef fire_list< fire_handler > fakir;
+  typedef ::iow::asio::io_service io_service_type;
 
   std::string program_name;
   std::string instance_name;
@@ -28,8 +31,6 @@ struct wfcglobal
 
   extended_args args;
 
-  typedef std::function<bool()> fire_handler;
-  typedef fire_list< fire_handler > fakir;
   fakir idle;
   fakir after_start;
   fakir before_stop;
@@ -45,14 +46,13 @@ struct wfcglobal
   cpuset cpu;
   object_registry registry;
 
-  typedef ::iow::asio::io_service io_service_type;
+  
   io_service_type& io_service;
   std::shared_ptr< workflow > common_workflow;
-  
   static ptr static_global;
   std::atomic<bool> stop_signal_flag;
 
-  wfcglobal( io_service_type& io_service);
+  explicit wfcglobal( io_service_type& io_service);
 };
 
 }

@@ -16,11 +16,11 @@ class instance_args
 public:
   typedef std::map<std::string, std::string> args_map;
   
-  instance_args( std::string name );
+  explicit instance_args( const std::string& nm );
     
-  instance_args( std::string name, args_map args );
+  instance_args( const std::string& nm, const args_map& rgm );
   
-  void insert( args_map args );
+  void insert( const args_map& rgm );
 
   const std::string& name() const;
   
@@ -28,7 +28,7 @@ public:
   
   bool has(const std::string& key) const;
   
-  args_map args() const;
+  const args_map& args() const;
   
 private:
   std::string _name;

@@ -52,6 +52,7 @@ int main()
   t.start();
   t.configure_domain(opt);
   t.initialize();
+  t.reconfigure();
 
   if ( t.options().test != true )
     return 3;

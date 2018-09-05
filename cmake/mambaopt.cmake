@@ -31,15 +31,14 @@ if ( ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 
   if ( PARANOID_WARNING )
   
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.3)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wstringop-overflow=0")
-    elseif( CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wstringop-overflow=2")
+    if ( CMAKE_COMPILER_IS_GNUCXX )
+      #-Wredundant-move -Wmissing-noreturn -Wno-pragma-once-outside-header
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wlogical-op  -Wnoexcept -Wstrict-null-sentinel ")
+      if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9)
+       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wstack-protector")
+      endif()
     endif()
   
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wstack-protector")
-    endif()
 
   
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra -ftemplate-depth=1400 -Wcast-align -Winvalid-pch -pedantic-errors  -Wformat-nonliteral")
@@ -57,7 +56,6 @@ if ( ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wswitch -Wswitch-default -Wundef -Werror")
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wlogical-op  -Wnoexcept -Wstrict-null-sentinel ")
-      #-Wredundant-move -Wmissing-noreturn -Wno-pragma-once-outside-header
     endif()
   endif(PARANOID_WARNING)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")

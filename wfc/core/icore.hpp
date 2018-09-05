@@ -17,11 +17,10 @@ struct wfcglobal;
 struct icore: iinterface
 {
   virtual ~icore() {}
-  virtual int run( /*std::shared_ptr<wfcglobal> g*/ ) = 0;
+  virtual int run() = 0;
   virtual void core_reconfigure() = 0;
   virtual void core_stop() = 0;
   virtual void core_abort( std::string message ) = 0;
-
 };
 
 }

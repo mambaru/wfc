@@ -10,9 +10,8 @@ class package
   : public ipackage
 {
 public:
-
   virtual ~package();
-  package(std::shared_ptr<ipackage>);
+  explicit package(const std::shared_ptr<ipackage>& p);
   virtual std::shared_ptr<ibuild_info> build_info()  override;
   virtual std::string name() const override;
   virtual std::string description() const override;

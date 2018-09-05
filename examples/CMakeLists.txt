@@ -1,3 +1,5 @@
+include(BuildInfo)
+
 add_executable(example01 example01.cpp)
 target_link_libraries(example01 wfc)
 
@@ -16,6 +18,8 @@ target_link_libraries(example05 wfc)
 add_executable(example06 example06.cpp)
 target_link_libraries(example06 wfc)
 
-add_subdirectory(core_package)
+add_subdirectory(example_package)
 add_executable(example07 example07.cpp)
-target_link_libraries(example07 core_package wfc )
+target_link_libraries(example07 example_package wfc )
+
+build_info(example07 example07)

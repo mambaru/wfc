@@ -1,8 +1,8 @@
 #include <wfc/module/package.hpp>
 
-class core_package
+class example_package
   : public wfc::package
 {
 public:
-  core_package();
+  example_package();
 };

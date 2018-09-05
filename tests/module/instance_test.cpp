@@ -25,7 +25,7 @@ public:
     testval = true;
   }
   
-  virtual bool testtest() 
+  virtual bool testtest() override
   {
     return testval; 
   }

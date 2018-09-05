@@ -8,9 +8,9 @@
 using namespace ::wfc;
 
 struct number: iinterface {
-  int count;
+  int count = 0;
   number() {}
-  number(int c): count(c) {}
+  explicit number(int c): count(c) {}
 };
 
 struct number_greater
@@ -21,11 +21,8 @@ struct number_greater
   }
 };
 
-
-
 int main()
 {
-  
   object_registry reg;
   std::shared_ptr<number> i0 = std::make_shared<number>(0);
   std::shared_ptr<number> i1 = std::make_shared<number>(1);

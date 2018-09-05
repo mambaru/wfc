@@ -14,6 +14,7 @@
 #include <iostream>
 namespace wfc{
 
+  /*
 int error_code()
 {
   return errno;
@@ -27,6 +28,7 @@ std::string strerror(int lasterror)
 system_error::system_error(const std::string& msg)
   : std::runtime_error(msg + strerror(error_code()))
 {}
+*/
 
 
 
@@ -159,16 +161,19 @@ int dumpable()
 #ifdef HAVE_SYS_PRCTL_H
   rlimit core = { RLIM_INFINITY, RLIM_INFINITY };
   return ::prctl(PR_SET_DUMPABLE, 1) || ::setrlimit(RLIMIT_CORE, &core) ? -1 : 0;
-#endif
+#else
   return -1;
+#endif
 }
 
-bool change_user(std::string username)
+bool change_user(std::string username, std::string* err)
 {
   struct passwd *pwd = ::getpwnam(username.c_str() ); /* don't free, see getpwnam() for details */
   if( pwd == NULL )
   {
-    std::cerr << strerror(errno) << std::endl;
+    //std::cerr << strerror(errno) << std::endl;
+    if (err!=nullptr)
+      *err = strerror(errno);
     return false; 
   }
   uid_t uid = pwd->pw_uid;
@@ -181,11 +186,13 @@ bool change_user(std::string username)
   return true;
 }
 
-bool change_working_directory(std::string working_directory)
+bool change_working_directory(std::string working_directory, std::string* err)
 {
   if ( 0 != ::chdir( working_directory.c_str() ) )
   {
-    std::cerr << strerror(errno) << std::endl;
+    //std::cerr << strerror(errno) << std::endl;
+    if (err!=nullptr)
+      *err = strerror(errno);
     return false; 
   }
   return true;

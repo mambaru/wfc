@@ -13,6 +13,7 @@
 
 namespace wfc{
 
+  /*
 int error_code();
 
 std::string strerror(int lasterror);
@@ -22,7 +23,7 @@ struct system_error
 {
   explicit system_error(const std::string& msg);
 };
-
+*/
 
 int is_atty(int fd);
 
@@ -34,9 +35,9 @@ void sleep( int millisec );
 
 std::function<void()> daemonize(bool wait = false);
 
-bool change_user(std::string username);
+bool change_user(std::string username, std::string* err);
 
-bool change_working_directory(std::string working_directory);
+bool change_working_directory(std::string working_directory, std::string* err);
 
 void autoup(
   time_t timeout,
