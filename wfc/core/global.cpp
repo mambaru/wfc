@@ -5,7 +5,7 @@
 //
 
 
-#include <wfc/core/global.hpp>
+#include <wfc/core/wfcglobal.hpp>
 #include <wfc/core/icore.hpp>
 #include <iow/memory.hpp>
 

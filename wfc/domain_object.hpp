@@ -1,6 +1,6 @@
 #pragma once
 
-#include <wfc/core/global.hpp>
+#include <wfc/core/wfcglobal.hpp>
 #include <iow/owner/owner.hpp>
 #include <iow/io/io_id.hpp>
 #include <wfc/json.hpp>

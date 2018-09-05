@@ -14,6 +14,7 @@ SET(
   core/cpuset.cpp
   core/instance_args.cpp
   core/extended_args.cpp
+  core/object_registry.cpp
   statistics/statistics.cpp
   module/component.cpp
   module/module.cpp

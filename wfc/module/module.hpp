@@ -2,7 +2,6 @@
 
 #include <wfc/module/imodule.hpp>
 #include <wfc/module/icomponent.hpp>
-#include <wfc/core/global.hpp>
 #include <memory>
 #include <string>
 

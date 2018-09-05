@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <wfc/core/registry.hpp>
+#include <wfc/core/object_registry.hpp>
 #include <wfc/core/fire_list.hpp>
 #include <wfc/core/extended_args.hpp>
 #include <wfc/core/ibuild_info.hpp>
@@ -42,10 +42,8 @@ struct wfcglobal
   std::atomic<bool> double_callback_abort;
   std::atomic<bool> double_callback_show;
   
-  //thread_manager threads;
   cpuset cpu;
   object_registry registry;
-
   
   io_service_type& io_service;
   std::shared_ptr< workflow > common_workflow;

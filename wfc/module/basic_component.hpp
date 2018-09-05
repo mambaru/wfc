@@ -4,7 +4,7 @@
 #include <wfc/module/instance_options_json.hpp>
 #include <wfc/module/icomponent.hpp>
 #include <wfc/module/component_features.hpp>
-#include <wfc/core/global.hpp>
+#include <wfc/core/wfcglobal.hpp>
 
 #include <wfc/json.hpp>
 

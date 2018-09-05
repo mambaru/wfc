@@ -9,7 +9,7 @@
 #include <wfc/core/icore.hpp>
 #include <wfc/core/istartup.hpp>
 #include <wfc/core/build_info.hpp>
-#include <wfc/core/global.hpp>
+#include <wfc/core/wfcglobal.hpp>
 #include <iostream>
 #include "wfc_build_info.h"
 

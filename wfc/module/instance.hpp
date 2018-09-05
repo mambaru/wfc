@@ -2,7 +2,7 @@
 
 #include <wfc/module/instance_options.hpp>
 #include <wfc/module/iinstance.hpp>
-#include <wfc/core/global.hpp>
+#include <wfc/core/wfcglobal.hpp>
 
 #include <memory>
 #include <string>

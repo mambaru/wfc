@@ -2,7 +2,7 @@
 
 #include <wfc/module/imodule.hpp>
 #include <wfc/module/icomponent.hpp>
-#include <wfc/core/global.hpp>
+#include <wfc/core/wfcglobal.hpp>
 
 #include <fas/type_list.hpp>
 #include <memory>
