@@ -10,7 +10,7 @@ SET(
   wfc.cpp
   wfc_exit.cpp
   system/system.cpp
-  core/global.cpp
+  core/wfcglobal.cpp
   core/cpuset.cpp
   core/instance_args.cpp
   core/extended_args.cpp
