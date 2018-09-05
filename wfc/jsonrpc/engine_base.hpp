@@ -156,9 +156,9 @@ private:
         if ( sopt.interval_ms != 0 )
         {
           auto name = this->name();
-          auto handler_map  = stat->create_value_factory(name + sopt.handler_map);
-          auto result_map   = stat->create_value_factory(name + sopt.result_map);
-          auto result_queue = stat->create_value_factory(name + sopt.result_queue);
+          auto handler_map  = stat->create_value_meter(name + sopt.handler_map);
+          auto result_map   = stat->create_value_meter(name + sopt.result_map);
+          auto result_queue = stat->create_value_meter(name + sopt.result_queue);
           _stat_timer_id = wf->create_timer( 
             std::chrono::milliseconds(sopt.interval_ms), 
             [handler_map, result_map, result_queue, this]()->bool
