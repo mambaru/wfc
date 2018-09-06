@@ -44,7 +44,7 @@ MACRO(get_faslib)
     unset(FASLIB_DIR CACHE)
     execute_process(COMMAND bash -c "git remote -v | head -q -n 1" 
                     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" OUTPUT_VARIABLE remote_url )
-    if ( "${remote_url}" MATCHES "github\.lan" )
+    if ( "${remote_url}" MATCHES "\.lan" )
       message(STATUS "Clone from LAN repositary")
       clone_library(faslib "FASLIB_DIR" "git@github.lan:cpp/faslib.git" "")
     else()

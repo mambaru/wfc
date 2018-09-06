@@ -5,6 +5,11 @@ project(wfc)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")                                                     
 include(mambaru)
 
+if ( WFC_ENABLE_STAT )
+  add_definitions(-DWFC_ENABLE_STAT)
+endif()
+
+
 add_subdirectory(config)
 add_subdirectory(wfc)
 
