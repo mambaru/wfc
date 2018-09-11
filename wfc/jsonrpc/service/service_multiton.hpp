@@ -9,6 +9,12 @@
 
 namespace wfc{ namespace jsonrpc{
 
+/**
+ * @brief service_multiton
+ * @tparam Name
+ * @tparam MethodList
+ * @tparam Impl
+ **/
 template< typename Name, typename MethodList, template<typename> class Impl = interface_implementation >
 class service_multiton: public ::wfc::multiton<
   Name,

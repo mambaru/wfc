@@ -40,7 +40,8 @@ public:
   bool testval = false;
 };
 
-class test_impl: public ::wfc::instance<test> {};
+//class test_impl: public ::wfc::instance<test> {};
+typedef ::wfc::instance<test> test_impl;
 
 int main()
 {

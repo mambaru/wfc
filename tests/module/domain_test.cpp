@@ -1,6 +1,7 @@
 #define IOW_DISABLE_ALL_LOG
 
 #include <wfc/domain_object.hpp>
+#include <wfc/module/instance.hpp>
 
 using namespace wfc;
 
@@ -35,37 +36,34 @@ public:
 
 int main()
 {
-  test t;
   
-  if ( t.options().test != false )
+  wfc::instance<test> t;
+    
+  if ( t.object()!=nullptr )
     return 1;
 
-  
-  if ( !t.name().empty() )
-    return 2;
-  
   test::config_type opt;
   opt.test = true;
   opt.name = "name";
   
-  t.create_domain("name", nullptr);
-  t.start();
-  t.configure_domain(opt);
+  t.create("name", nullptr);
+  t.start("");
+  t.configure(opt);
   t.initialize();
-  t.reconfigure();
+  t.reconfigure(opt);
 
-  if ( t.options().test != true )
+  if ( t.object()->options().test != true )
     return 3;
 
   //std::cout << t.name() << std::endl;
-  if ( t.name() != "name" )
+  if ( t.object()->name() != "name" )
     return 5;
 
-  if ( t.testval != true )
+  if ( t.object()->testval != true )
     return 6;
   
   options opt2; 
-  opt2 = t.generate("");
+  opt2 = t.object()->generate("");
   if ( opt2.test != false )
     return 7;
   

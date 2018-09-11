@@ -17,6 +17,7 @@ class instance
 public:
   typedef std::recursive_mutex mutex_type;
   typedef DomainObject object_type;
+  typedef typename object_type::instance_handler instance_handler;
   typedef typename object_type::domain_interface domain_interface;
   typedef typename object_type::config_type config_type;
   typedef typename object_type::basic_options basic_options;
@@ -62,7 +63,7 @@ public:
     std::lock_guard<mutex_type> lk(_mutex);
     _global = g;
     _object = std::make_shared<object_type>();
-    _object->create_domain(obj_name, _global);
+    get_()->create_domain(obj_name, _global);
     if ( _global != nullptr )
       _global->registry.set(obj_name, _object);
   }
@@ -73,7 +74,7 @@ public:
     _instance_reconfigured = true;
     _config = opt;
     if ( auto obj = this->create_or_stop_if_() ) 
-      obj->configure_domain(_config);
+      get_(obj)->configure_domain(_config);
   }
 
   virtual void reconfigure_basic( const basic_options& opt )
@@ -82,7 +83,7 @@ public:
     static_cast<basic_options&>( _config ) = opt;
     _startup = _startup && !( _object==nullptr && _config.enabled );
     if ( auto obj = this->create_or_stop_if_() ) 
-      obj->reconfigure_domain_basic( _config );
+      get_(obj)->reconfigure_domain_basic( _config );
   }
 
   virtual void reconfigure(const config_type& opt)  
@@ -96,7 +97,7 @@ public:
 
     if ( auto obj = this->create_or_stop_if_() ) 
     {
-      obj->reconfigure_domain(_config);
+      get_(obj)->reconfigure_domain(_config);
     }
   }
 
@@ -105,7 +106,7 @@ public:
     std::lock_guard<mutex_type> lk(_mutex);
     if (auto obj = _object )
     {
-      obj->initialize_domain( );
+      get_(obj)->initialize_domain( );
     }
   }
 
@@ -142,7 +143,7 @@ public:
   void generate(config_type& opt, const std::string& type) const 
   {
     auto obj = std::make_shared<object_type>();
-    obj->domain_generate( opt, type );
+    get_(obj)->domain_generate( opt, type );
   }
 
 // -------------------------------------------------
@@ -170,7 +171,7 @@ private:
       if ( _object == nullptr )
       {
         _object = std::make_shared<object_type>();
-        _object->create_domain(_config.name, _global);
+        get_()->create_domain(_config.name, _global);
       }
 
       if (_global)
@@ -207,7 +208,7 @@ private:
     _config.enabled = true;
     if ( auto obj = this->create_or_stop_if_() )
     {
-      obj->initialize_domain();
+      get_(obj)->initialize_domain();
       obj->start();
     }
   }
@@ -220,7 +221,7 @@ private:
     }
     else if ( _object != nullptr )
     {
-      _object->ready_domain();
+      get_()->ready_domain();
     }
     else
     {
@@ -239,6 +240,16 @@ private:
     _ready_for_stop = false;
   }
 
+  instance_handler* get_()
+  {
+    return get_(_object);
+  }
+
+  instance_handler* get_(object_ptr& obj) const
+  {
+    return obj->inst_handler_();
+  }
+
 private:
   // Разрешает запуск. После запуска, последующие попытки вызова start игнорируються. Сбрасываеться при переконфигурации
   bool         _instance_reconfigured = true;
@@ -248,7 +259,6 @@ private:
   global_ptr   _global;
   config_type  _config;
   object_ptr   _object;
-
   mutable mutex_type _mutex;
 };
 

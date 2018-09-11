@@ -9,7 +9,7 @@
 #include <memory>
 
 namespace wfc{ namespace jsonrpc{
-  
+
 template<typename Config, typename StatConfig>
 class domain_proxy
   : public ::wfc::domain_object< ijsonrpc, Config, StatConfig>

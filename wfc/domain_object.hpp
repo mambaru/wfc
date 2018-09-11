@@ -17,46 +17,269 @@
 
 
 namespace wfc{
+ 
+/**
+ * @brief Интерфейс управления wfc::domain_object.
+ * @details Методы этого интерфейса могут быть в прикладном объекте (с родительским wfc::domain_object) для 
+ * того чтобы уточнить его поведения, на этапах конфигурирования, инициализации и запуска 
+ */
+struct idomain
+{
+  virtual ~idomain() {}
+  
+  /**
+    * @brief create
+    * @details create
+    */
+  virtual void create() {}
 
+  /**
+    * @brief create
+    * @details create
+    */
+  virtual void configure() { this->reconfigure(); }
+
+  /**
+    * @brief create
+    * @details create
+    */
+  virtual void initialize() {}
+
+  /**
+    * @brief create
+    * @details create
+    */
+  virtual void start() { this->ready(); }
+
+  /**
+    * @brief create
+    * @details create
+    */
+  virtual void ready() {};
+  
+  /**
+    * @brief create
+    * @details create
+    */
+  virtual void stop( )  {}
+
+  /**
+    * @brief create
+    * @details create
+    */
+  virtual void reconfigure() { }
+
+  /**
+    * @brief create
+    * @details create
+    */
+  virtual void reconfigure_basic() {}
+};
+
+
+template<typename Opt, typename StatOpt>
+struct instance_handler_t
+{
+  typedef Opt options_type;
+  typedef StatOpt statoptions_type;
+  typedef instance_options<Opt, StatOpt> config_type;
+  typedef typename config_type::basic_options basic_options;
+  
+  virtual void domain_generate(config_type& conf, const std::string& type) = 0;
+  virtual void create_domain(const std::string& objname, std::shared_ptr<wfcglobal> g ) = 0;
+  virtual void configure_domain(const config_type& opt) = 0;
+  virtual void initialize_domain() = 0;
+  virtual void reconfigure_domain_basic(const basic_options& opt) = 0;
+  virtual void reconfigure_domain(const config_type& conf) = 0;
+  virtual void ready_domain() = 0;
+  virtual void start_domain() = 0;
+  virtual void stop_domain() = 0;
+};
+
+template<typename DomainObject>
+class instance;
+
+template<typename H, typename H2>
+struct wrap_result
+{
+    using type = ::iow::owner_handler<typename std::remove_reference<H>::type, typename std::remove_reference<H2>::type>;
+};
+
+/**
+ * @brief Класс для реализации прикладного объекта WFC
+ * @tparam Itf тип интерфейса объекта ( на базе wfc::iinterface )
+ * @tparam Opt произвольная структура с пользовательскими опциями 
+ * @tparam StatOpt[=nostat]
+ */
 template<
   typename Itf,
   typename Opt,
   typename StatOpt = nostat
 >
 class domain_object
-  : public Itf
+  : instance_handler_t<Opt, StatOpt>
+  , public idomain
+  , public Itf
+  
 {
 public:
+  /** @brief Пользовательские опции */
   typedef Opt options_type;
+  
+  /** @brief Пользовательские опции для сбора статистики */
   typedef StatOpt statoptions_type;
+  
+  /** @brief Конфигурация инстанса прикладного объекта (пользовательские опции, опции статистики и опции wfc::instance) */
   typedef instance_options<Opt, StatOpt> config_type;
+  
+  /** @brief Только опции wfc::instance, без пользовательских */
   typedef typename config_type::basic_options basic_options;
-
+  
+  /** @brief Тип интерфейса объекта ( на базе wfc::iinterface ) */
   typedef Itf domain_interface;
+  
+  /** @brief Указатель на wfc::wfcglobal */
   typedef std::shared_ptr<wfcglobal> global_ptr;
+  
+  /** @brief Создает обертки для callback обработчиков */
   typedef ::iow::owner owner_type;
+  
+  /** @brief Ошибка JSON-десериализации  */
   typedef ::wfc::json::json_error json_error;
   
-  typedef typename domain_interface::data_type data_type;
-  typedef typename domain_interface::data_ptr  data_ptr;
+  /** @brief Уникальный идентификатор объекта */
   typedef typename domain_interface::io_id_t   io_id_t;
-
-  typedef typename domain_interface::output_handler_t output_handler_t;
-  typedef typename domain_interface::input_handler_t input_handler_t;
   
+  /** @brief Очередь задач*/
   typedef ::wfc::workflow workflow_type;
+  
+  /** @brief std::shared_ptr<workflow_type> */
   typedef std::shared_ptr<workflow_type> workflow_ptr;
-  typedef workflow_type::timer_id_t timer_id_t;
-
+  
+  /** @brief Для сбора статистики */
   typedef ::wfc::statistics::statistics statistics_type;
+  
+  /** @brief std::shared_ptr<statistics_type> */
   typedef std::shared_ptr<statistics_type> statistics_ptr;
 
+  /** @brief Деструктор */
   virtual ~domain_object(){}
   
+  /** @brief Конструктор */
   domain_object()
     : _io_id( ::iow::io::create_id<io_id_t>() )
   {}
 
+  /**
+   * @brief Возвращает имя объекта
+   * @return имя объекта
+   * @details Имя объекта задается при создании объекта из конфигурации. Изменить имя после создания объекта нельзя.
+   */
+  const std::string& name() const
+  {
+    return _name;
+  }
+
+  /**
+   * @brief Возвращает указатель на wfc::wfcglobal
+   * @return указатель на wfc::wfcglobal
+   * @details по возможности следует использовать методы этого класса, а не обращаться к wfc::wfcglobal напрямую
+   */
+  global_ptr global() const 
+  {
+    if ( _global!=nullptr)
+      return _global;
+    else
+      return wfcglobal::static_global;
+  }
+  
+  /**
+   * @brief Пользовательские настройки
+   * @return ссылку на пользовательские настройки
+   * @details Если доступна динамическая реконфигурация, то безопасно получить доступ 
+   * к настройкам можно только в методах wfc::idomain, которые всегда вызываются фреймворком 
+   * в основном потоке. В реализациях методах wfc::idomain::configure или wfc::idomain::reconfigure можно 
+   * скопировать необходимые данные 
+   */
+  const options_type& options() const 
+  {
+    return _config;
+  }
+  
+  /**
+   * @brief Пользовательские настройки статистики
+   * @return ссылку на опции статистики
+   * @details Если доступна динамическая реконфигурация, то безопасно получить доступ 
+   * к настройкам можно только в методах wfc::idomain, которые всегда вызываются фреймворком 
+   * в основном потоке. В реализациях методах wfc::idomain::configure или wfc::idomain::reconfigure можно 
+   * скопировать необходимые данные 
+   */
+  const statoptions_type& statistics_options() const
+  {
+    return _config.statistics;
+  }
+
+  /**
+   * @brief Общая конфигурация объекта
+   * @return ссылку на конфигурация объекта
+   * @details Если доступна динамическая реконфигурация, то безопасно получить доступ 
+   * к настройкам можно только в методах wfc::idomain, которые всегда вызываются фреймворком 
+   * в основном потоке. В реализациях методах wfc::idomain::configure или wfc::idomain::reconfigure можно 
+   * скопировать необходимые данные 
+   */
+  const config_type& config() const 
+  {
+    return _config;
+  }
+
+  
+  /**
+   * @brief Возвращает уникальный идентификатор объекта
+   * @return уникальный идентификатор объекта
+   * @details уникален для любого объекта в рамках процесса
+   */
+  constexpr io_id_t get_id() const
+  {
+    return _io_id;
+  }
+  
+  
+  /**
+   * @brief Создает обертку над обработчиком обратного вызова 
+   * @tparam H тип обработчика
+   * @tparam H2 альтернативный тип обработчика  
+   * @param h исходный обработчик
+   * @param h2 альтернативный обработчик (м.б. nullptr)
+   * @details Если обработчик обратного взаимодействует с объектом, то может быть ситуация, что он будет вызван после уничтожения объекта.
+   * Эта обертка распознает такую ситуацию и вызовет альтернативный обработчик, если задан, в противном случае просто не вызовет исходный.
+   * Может использоватся для отправки сообщений в wfc::workflow
+   */
+  template<typename H, typename H2>
+  auto wrap(H&& h, H2&& h2) const
+    -> typename wrap_result<H, H2>::type
+  {
+    return _owner.wrap( std::forward<H>(h), std::forward<H2>(h2));
+  }
+
+  /**
+   * @brief Создает обертку над обработчиком обратного вызова RPC
+   * @tparam H тип обработчика
+   * @param h исходный обработчик
+   * @details Обработчики обратного вызова RPC, должны быть вызванные и вызванны только один раз. Эта обертка следит за выполнением этих условий,
+   * и, всучае не выполнения, запускает 
+   * 
+   * Если обработчик обратного взаимодействует с объектом, то может быть ситуация, что он будет вызван после уничтожения объекта.
+   * Эта обертка распознает такую ситуацию и вызовет альтернативный обработчик, если задан, в противном случае просто не вызовет исходный.
+   * Может использоватся для отправки сообщений в wfc::workflow
+   */
+  template<typename H>
+  auto callback(H&& h) const
+    -> ::iow::callback_handler<typename std::remove_reference<H>::type>
+  {
+    return _owner.callback( std::forward<H>(h) );
+  }
+
+  
   virtual config_type generate(const std::string& arg) 
   {
     config_type conf =config_type();
@@ -68,153 +291,8 @@ public:
     }
     return conf;
   }
-  
-  virtual void create() {}
 
-  virtual void configure() { this->reconfigure(); }
 
-  virtual void initialize() {}
-
-  // Только при первом запуске
-  virtual void start() { this->ready(); }
-
-  // Каждый раз при реконфигурации или переинициализации
-  virtual void ready() {};
-  
-  virtual void stop( )  {}
-
-  virtual void reconfigure() { }
-
-  virtual void reconfigure_basic() {}
-
-  ///
-  /// -----------------------------------------------------------------
-  /// 
-  
-  virtual void domain_generate(config_type& conf, const std::string& type) final
-  {
-    conf = this->generate(type);
-  }
-
-  virtual void create_domain(const std::string& objname, global_ptr g ) final
-  {
-    _name = objname;
-    _global = g;
-    this->create();
-  }
-
-  // вызываеться один раз между create_domain и initialize_domain
-  virtual void configure_domain(const config_type& opt) final
-  {
-    _config = opt;
-    _workflow = nullptr; // Ибо нефиг. До инициализации ничем пользоватся нельзя
-    _conf_flag = false;
-    if (auto g = this->global() )
-      g->cpu.set_cpu(_name, opt.cpu);
-    this->configure();
-  }
-
-  // первый раз после configure_domain, последующие после reconfigure_domain или reconfigure_basic
-  virtual void initialize_domain() final
-  {
-    if ( auto g = this->global() )
-    {
-      auto pname = std::make_shared<std::string>( this->name() );
-      _owner.set_double_call_handler([g, pname]()
-      {
-        if ( g->stop_signal_flag )
-          return;
-        
-        if ( g->double_callback_abort )
-        {
-          DOMAIN_LOG_FATAL("Double call callback functions for '" << *pname << "'")
-        }
-        else if ( g->double_callback_show )
-        {
-          DOMAIN_LOG_ERROR("Double call callback functions for '" << *pname << "'")
-        }
-      });
-
-      _owner.set_no_call_handler([g, pname]()
-      {
-        if ( g->stop_signal_flag )
-          return;
-
-        if ( g->nocall_callback_abort )
-        {
-          DOMAIN_LOG_FATAL("Lost call callback for '" << *pname << "'")
-        }
-        else if ( g->nocall_callback_show )
-        {
-          DOMAIN_LOG_ERROR("Lost callback for '" << *pname << "'")
-        }
-      });
-
-      _workflow = _config.workflow.empty()
-                  ? this->global()->common_workflow
-                  : this->global()->registry.template get<workflow >("workflow", _config.workflow)
-                  ;
-
-      _statistics = ! _config.statistics.disabled 
-                    ? this->global()->registry.template get<statistics::statistics>("statistics", _config.statistics.target)
-                    : nullptr
-                    ;
-
-      _conf_flag = true;
-    }
-    this->initialize();
-  }
-
-  virtual void reconfigure_domain_basic(const basic_options& opt) final
-  {
-    _conf_flag = false;
-    static_cast<basic_options&>(_config) = opt;
-    if (auto g = this->global() )
-      g->cpu.set_cpu(_name, opt.cpu);
-    this->reconfigure_basic();
-  }
-
-  virtual void reconfigure_domain(const config_type& conf) final
-  {
-    _conf_flag = true;
-    _config = conf;
-    if (auto g = this->global() )
-      g->cpu.set_cpu(_name, static_cast<basic_options&>(_config).cpu);
-    this->reconfigure();
-  }
-  
-  // только после реконфигурации и инициализации
-  virtual void ready_domain() final
-  {
-    if ( _conf_flag )
-      this->ready();
-    _conf_flag = false;
-  }
-
-  // только один раз после конфигурации и инициализации
-  virtual void start_domain() final
-  {
-    this->start();
-  }
-  
-
-  virtual void stop_domain() final
-  {
-    this->stop();
-  }
-
-  const std::string& name() const
-  {
-    return _name;
-  }
-
-  global_ptr global() const 
-  {
-    if ( _global!=nullptr)
-      return _global;
-    else
-      return wfcglobal::static_global;
-  }
   
   bool system_is_stopped() const
   {
@@ -223,40 +301,12 @@ public:
     return false;
   }
   
-  const options_type& options() const 
-  {
-    return _config;
-  }
-
-  const config_type& config() const 
-  {
-    return _config;
-  }
-  
-  const statoptions_type& statistics_options() const
-  {
-    return _config.statistics;
-  }
 
   owner_type& owner()
   {
     return _owner;
   }
 
-  template<typename H, typename H2>
-  auto wrap(H&& h, H2&& h2) const
-    -> ::iow::owner_handler<typename std::remove_reference<H>::type, typename std::remove_reference<H2>::type>
-  {
-    return _owner.wrap( std::forward<H>(h), std::forward<H2>(h2));
-  }
-
-
-  template<typename H>
-  auto callback(H&& h) const
-    -> ::iow::callback_handler<typename std::remove_reference<H>::type>
-  {
-    return _owner.callback( std::forward<H>(h) );
-  }
 
   template<typename I>
   std::shared_ptr<I> get_target(const std::string& prefix, const std::string& tg_name, bool disabort = false) const
@@ -335,24 +385,6 @@ public:
     return this->global()->registry.template get<workflow_type>("workflow", wf_name, disabort);
   }
 
-  virtual void reg_io(io_id_t , std::weak_ptr<iinterface> ) override
-  {
-  }
-
-  virtual void perform_io(data_ptr , io_id_t, output_handler_t handler) override
-  {
-    if ( handler!=nullptr )
-      handler(nullptr);
-  }
-
-  virtual void unreg_io(io_id_t ) override
-  {
-  }
-
-  constexpr io_id_t get_id() const
-  {
-    return _io_id;
-  }
   
   std::string get_arg(const std::string& arg) const
   {
@@ -484,6 +516,20 @@ public:
       cb( std::move(res) );
   }
   
+
+  typedef instance_handler_t<Opt, StatOpt> instance_handler;
+  instance_handler* inst_handler_() { return static_cast<instance_handler*>(this); }
+private:
+  virtual void domain_generate(config_type& conf, const std::string& type) final;
+  virtual void create_domain(const std::string& objname, global_ptr g ) final;
+  virtual void configure_domain(const config_type& opt) final;
+  virtual void initialize_domain() final;
+  virtual void reconfigure_domain_basic(const basic_options& opt) final;
+  virtual void reconfigure_domain(const config_type& conf) final;
+  virtual void ready_domain() final;
+  virtual void start_domain() final;
+  virtual void stop_domain() final;
+
 private:
   bool is_configured_() const
   {
@@ -503,4 +549,126 @@ private:
   statistics_ptr _statistics;
 };
   
+
+
+template<typename Itf, typename Opt, typename StatOpt>
+void domain_object<Itf, Opt, StatOpt>::domain_generate(config_type& conf, const std::string& type) 
+  {
+    conf = this->generate(type);
+  }
+
+template<typename Itf, typename Opt, typename StatOpt>
+void domain_object<Itf, Opt, StatOpt>::create_domain(const std::string& objname, global_ptr g ) 
+  {
+    _name = objname;
+    _global = g;
+    this->create();
+  }
+
+template<typename Itf, typename Opt, typename StatOpt>
+void domain_object<Itf, Opt, StatOpt>::configure_domain(const config_type& opt)
+  {
+    _config = opt;
+    _workflow = nullptr; // Ибо нефиг. До инициализации ничем пользоватся нельзя
+    _conf_flag = false;
+    if (auto g = this->global() )
+      g->cpu.set_cpu(_name, opt.cpu);
+    this->configure();
+  }
+
+template<typename Itf, typename Opt, typename StatOpt>
+void domain_object<Itf, Opt, StatOpt>::initialize_domain() 
+{
+  if ( auto g = this->global() )
+  {
+    auto pname = std::make_shared<std::string>( this->name() );
+    _owner.set_double_call_handler([g, pname]()
+    {
+      if ( g->stop_signal_flag )
+        return;
+        
+      if ( g->double_callback_abort )
+      {
+        DOMAIN_LOG_FATAL("Double call callback functions for '" << *pname << "'")
+      }
+      else if ( g->double_callback_show )
+      {
+        DOMAIN_LOG_ERROR("Double call callback functions for '" << *pname << "'")
+      }
+    });
+
+    _owner.set_no_call_handler([g, pname]()
+    {
+      if ( g->stop_signal_flag )
+        return;
+
+      if ( g->nocall_callback_abort )
+      {
+        DOMAIN_LOG_FATAL("Lost call callback for '" << *pname << "'")
+      }
+      else if ( g->nocall_callback_show )
+      {
+        DOMAIN_LOG_ERROR("Lost callback for '" << *pname << "'")
+      }
+    });
+
+    _workflow = _config.workflow.empty()
+                ? this->global()->common_workflow
+                : this->global()->registry.template get<workflow >("workflow", _config.workflow)
+                ;
+
+    _statistics = ! _config.statistics.disabled 
+                  ? this->global()->registry.template get<statistics::statistics>("statistics", _config.statistics.target)
+                  : nullptr
+                  ;
+
+    _conf_flag = true;
+  }
+  this->initialize();
 }
+
+template<typename Itf, typename Opt, typename StatOpt>
+void domain_object<Itf, Opt, StatOpt>::reconfigure_domain_basic(const basic_options& opt)
+  {
+    _conf_flag = false;
+    static_cast<basic_options&>(_config) = opt;
+    if (auto g = this->global() )
+      g->cpu.set_cpu(_name, opt.cpu);
+    this->reconfigure_basic();
+  }
+
+template<typename Itf, typename Opt, typename StatOpt>
+void domain_object<Itf, Opt, StatOpt>::reconfigure_domain(const config_type& conf)
+  {
+    _conf_flag = true;
+    _config = conf;
+    if (auto g = this->global() )
+      g->cpu.set_cpu(_name, static_cast<basic_options&>(_config).cpu);
+    this->reconfigure();
+  }
+  
+template<typename Itf, typename Opt, typename StatOpt>
+void domain_object<Itf, Opt, StatOpt>::ready_domain() 
+  {
+    if ( _conf_flag )
+      this->ready();
+    _conf_flag = false;
+  }
+
+
+template<typename Itf, typename Opt, typename StatOpt>
+void domain_object<Itf, Opt, StatOpt>::start_domain()
+  {
+    this->start();
+  }
+  
+
+template<typename Itf, typename Opt, typename StatOpt>
+void domain_object<Itf, Opt, StatOpt>::stop_domain()
+  {
+    this->stop();
+  }
+
+
+}
+
