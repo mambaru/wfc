@@ -29,8 +29,8 @@ public:
   typedef typename super::data_type data_type;
   //typedef typename super::rpc_outgoing_handler_t outgoing_handler_t;
   typedef typename super::output_handler_t output_handler_t;
-  typedef typename super::timer_id_t timer_id_t;
   typedef wflow::workflow workflow_type;
+  typedef workflow_type::timer_id_t timer_id_t;
 
 public:
 
