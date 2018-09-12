@@ -23,7 +23,8 @@ struct wfcglobal
   typedef std::function<bool()> fire_handler;
   typedef fire_list< fire_handler > fakir;
   typedef ::iow::asio::io_service io_service_type;
-
+ typedef std::function<void(const std::string&)> callback_handler_t;
+ 
   std::string program_name;
   std::string instance_name;
   std::shared_ptr<ibuild_info> program_build_info;
@@ -37,11 +38,10 @@ struct wfcglobal
   fakir after_stop;
   
   std::atomic<bool> disable_statistics;
-  std::atomic<bool> nocall_callback_abort;
-  std::atomic<bool> nocall_callback_show;
-  std::atomic<bool> double_callback_abort;
-  std::atomic<bool> double_callback_show;
   
+  callback_handler_t nocall_handler;
+  callback_handler_t doublecall_handler;
+ 
   cpuset cpu;
   object_registry registry;
   

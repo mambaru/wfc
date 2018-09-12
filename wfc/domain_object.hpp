@@ -8,6 +8,8 @@
 #include <wfc/iinterface.hpp>
 #include <wfc/workflow.hpp>
 #include <wfc/module/instance_options.hpp>
+#include <wfc/module/idomain.hpp>
+#include <wfc/module/instance_handler_.hpp>
 #include <wfc/wfc_exit.hpp>
 
 #include <memory>
@@ -17,93 +19,6 @@
 
 
 namespace wfc{
- 
-/**
- * @brief Интерфейс управления wfc::domain_object.
- * @details Методы этого интерфейса могут быть в прикладном объекте (с родительским wfc::domain_object) для 
- * того чтобы уточнить его поведения, на этапах конфигурирования, инициализации и запуска 
- */
-struct idomain
-{
-  virtual ~idomain() {}
-  
-  /**
-    * @brief create
-    * @details create
-    */
-  virtual void create() {}
-
-  /**
-    * @brief create
-    * @details create
-    */
-  virtual void configure() { this->reconfigure(); }
-
-  /**
-    * @brief create
-    * @details create
-    */
-  virtual void initialize() {}
-
-  /**
-    * @brief create
-    * @details create
-    */
-  virtual void start() { this->ready(); }
-
-  /**
-    * @brief create
-    * @details create
-    */
-  virtual void ready() {};
-  
-  /**
-    * @brief create
-    * @details create
-    */
-  virtual void stop( )  {}
-
-  /**
-    * @brief create
-    * @details create
-    */
-  virtual void reconfigure() { }
-
-  /**
-    * @brief create
-    * @details create
-    */
-  virtual void reconfigure_basic() {}
-};
-
-
-template<typename Opt, typename StatOpt>
-struct instance_handler_t
-{
-  typedef Opt options_type;
-  typedef StatOpt statoptions_type;
-  typedef instance_options<Opt, StatOpt> config_type;
-  typedef typename config_type::basic_options basic_options;
-  
-  virtual void domain_generate(config_type& conf, const std::string& type) = 0;
-  virtual void create_domain(const std::string& objname, std::shared_ptr<wfcglobal> g ) = 0;
-  virtual void configure_domain(const config_type& opt) = 0;
-  virtual void initialize_domain() = 0;
-  virtual void reconfigure_domain_basic(const basic_options& opt) = 0;
-  virtual void reconfigure_domain(const config_type& conf) = 0;
-  virtual void ready_domain() = 0;
-  virtual void start_domain() = 0;
-  virtual void stop_domain() = 0;
-};
-
-template<typename DomainObject>
-class instance;
-
-template<typename H, typename H2>
-struct wrap_result
-{
-    using type = ::iow::owner_handler<typename std::remove_reference<H>::type, typename std::remove_reference<H2>::type>;
-};
 
 /**
  * @brief Класс для реализации прикладного объекта WFC
@@ -117,7 +32,7 @@ template<
   typename StatOpt = nostat
 >
 class domain_object
-  : instance_handler_t<Opt, StatOpt>
+  : instance_handler_<Opt, StatOpt>
   , public idomain
   , public Itf
   
@@ -246,35 +161,33 @@ public:
   
   /**
    * @brief Создает обертку над обработчиком обратного вызова 
-   * @tparam H тип обработчика
-   * @tparam H2 альтернативный тип обработчика  
-   * @param h исходный обработчик
+   * @tparam H1 основной обработчик
+   * @tparam H2 альтернативный обработчика
+   * @param h1 исходный обработчик
    * @param h2 альтернативный обработчик (м.б. nullptr)
    * @details Если обработчик обратного взаимодействует с объектом, то может быть ситуация, что он будет вызван после уничтожения объекта.
    * Эта обертка распознает такую ситуацию и вызовет альтернативный обработчик, если задан, в противном случае просто не вызовет исходный.
-   * Может использоватся для отправки сообщений в wfc::workflow
+   * Может использоватся для отправки сообщений в wfc::workflow::post
    */
-  template<typename H, typename H2>
-  auto wrap(H&& h, H2&& h2) const
-    -> typename wrap_result<H, H2>::type
+  template<typename H1, typename H2>
+  auto wrap(H1&& h1, H2&& h2) const
+    -> typename wrap_result_<H1, H2>::type
   {
-    return _owner.wrap( std::forward<H>(h), std::forward<H2>(h2));
+    return _owner.wrap( std::forward<H1>(h1), std::forward<H2>(h2));
   }
 
   /**
    * @brief Создает обертку над обработчиком обратного вызова RPC
    * @tparam H тип обработчика
    * @param h исходный обработчик
-   * @details Обработчики обратного вызова RPC, должны быть вызванные и вызванны только один раз. Эта обертка следит за выполнением этих условий,
-   * и, всучае не выполнения, запускает 
-   * 
-   * Если обработчик обратного взаимодействует с объектом, то может быть ситуация, что он будет вызван после уничтожения объекта.
-   * Эта обертка распознает такую ситуацию и вызовет альтернативный обработчик, если задан, в противном случае просто не вызовет исходный.
-   * Может использоватся для отправки сообщений в wfc::workflow
+   * @details Обработчик обратного вызова RPC, должны быть гарантировано вызван только один раз. Если обработчик не вызывается, 
+   * то клиентская сторона может ждать вечно ответе, также не должно быть повторных вызовов - это может привести к неопределенному 
+   * поведению клиентского кода. Эта обертка детектирует оба случая и вызывает соответствующий обработчик, которые настраиваются  
+   * глобально в модуле ядра.
    */
   template<typename H>
   auto callback(H&& h) const
-    -> ::iow::callback_handler<typename std::remove_reference<H>::type>
+    -> typename callback_result_<H>::type
   {
     return _owner.callback( std::forward<H>(h) );
   }
@@ -516,9 +429,9 @@ public:
       cb( std::move(res) );
   }
   
-
-  typedef instance_handler_t<Opt, StatOpt> instance_handler;
-  instance_handler* inst_handler_() { return static_cast<instance_handler*>(this); }
+  typedef instance_handler_<Opt, StatOpt> instance_handler_t;
+  instance_handler_t* inst_handler_() 
+  { return static_cast<instance_handler_<Opt, StatOpt>*>(this); }
 private:
   virtual void domain_generate(config_type& conf, const std::string& type) final;
   virtual void create_domain(const std::string& objname, global_ptr g ) final;
@@ -582,6 +495,10 @@ void domain_object<Itf, Opt, StatOpt>::initialize_domain()
   if ( auto g = this->global() )
   {
     auto pname = std::make_shared<std::string>( this->name() );
+    
+    _owner.set_double_call_handler(std::bind(g->doublecall_handler, this->name()));
+    _owner.set_no_call_handler(std::bind(g->nocall_handler, this->name()));
+    /*
     _owner.set_double_call_handler([g, pname]()
     {
       if ( g->stop_signal_flag )
@@ -611,6 +528,7 @@ void domain_object<Itf, Opt, StatOpt>::initialize_domain()
         DOMAIN_LOG_ERROR("Lost callback for '" << *pname << "'")
       }
     });
+    */
 
     _workflow = _config.workflow.empty()
                 ? this->global()->common_workflow
