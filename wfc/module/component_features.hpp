@@ -12,7 +12,8 @@ struct component_features
     DisabledPriority = 4,   // Extraordinary. нет полей приоритета
     DisabledSuspend  = 8,   // DisableSuspend
     DisabledWorkflow  = 16, // CommonWorkflow
-    EnableCPU = 32          // Распределение потоков по ядрам CPU
+    EnableCPU = 32,         // Распределение потоков по ядрам CPU
+    IgnoreReconfigure  = 64    // Запретить реконфигурацию 
     /*DisabledStatistics  = 32 // CommonWorkflow*/
   } type;
 };

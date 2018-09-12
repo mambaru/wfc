@@ -17,7 +17,7 @@ class instance
 public:
   typedef std::recursive_mutex mutex_type;
   typedef DomainObject object_type;
-  typedef typename object_type::instance_handler instance_handler;
+  typedef typename object_type::instance_handler_t instance_handler_t;
   typedef typename object_type::domain_interface domain_interface;
   typedef typename object_type::config_type config_type;
   typedef typename object_type::basic_options basic_options;
@@ -240,12 +240,12 @@ private:
     _ready_for_stop = false;
   }
 
-  instance_handler* get_()
+  instance_handler_t* get_()
   {
     return get_(_object);
   }
 
-  instance_handler* get_(object_ptr& obj) const
+  instance_handler_t* get_(object_ptr& obj) const
   {
     return obj->inst_handler_();
   }

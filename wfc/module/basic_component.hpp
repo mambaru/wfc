@@ -26,7 +26,11 @@ class basic_component
   : public icomponent
 {
 public:
-  enum { is_singleton = ( Features & int(component_features::Singleton) )!=0 };
+   enum 
+   {
+     is_singleton       = ( Features & int(component_features::Singleton) )!=0,
+     ignore_reconfigure = ( Features & int(component_features::IgnoreReconfigure) )!=0
+   };
 
   typedef Name        component_name;
   typedef Instance    instance_type;
@@ -57,7 +61,6 @@ public:
     instance_config_map,
     std::vector<instance_config_map>
   >::type component_map_config;
-
   
   typedef typename std::conditional<
     is_singleton,
@@ -191,14 +194,15 @@ private:
     _instances = std::make_shared<instance_type>();
     instance_config opt;
     if ( _global != nullptr )
+    {
       _global->registry.set("instance", this->name(), _instances);
+    }
+    json::json_error err;
     _instances->create(this->name(), _global);
-    /*
-    opt.name = this->name();
-    opt.enabled = true;
-    _instances->reconfigure(opt);
-    _instances->initialize();
-    */
+    if ( !this->configure_("{}", fas::true_(), &err) )
+    {
+      SYSTEM_LOG_FATAL("Singleton '" << this->name() << "' default initialize: " << json::strerror::message(err) )
+    }
   }
 
   static void create_(fas::false_) { }
@@ -217,7 +221,8 @@ private:
     if ( _config.instance.empty() )
     {
       _instances->configure(opt);
-      SYSTEM_LOG_MESSAGE("Singleton '" << opt.name << "' is initial configured ")
+      // Не выводим, чтобы не мусорить в stdout. Это дефолтная конфигурация синглетона при создании объекта
+      // SYSTEM_LOG_MESSAGE("Singleton '" << opt.name << "' is initial configured ")
     }
     else if ( _config.domain != op.domain )        
     {
@@ -235,6 +240,17 @@ private:
     }
     _config = op;
     return true;
+  }
+
+  void reconfigure_fully_(instance_ptr obj, const instance_config& opt, fas::false_)
+  {
+    obj->reconfigure(opt);
+    SYSTEM_LOG_MESSAGE("Instance '" << opt.name << "' is reconfigured (fully) -1-")
+  }
+
+  void reconfigure_fully_(instance_ptr , const instance_config& opt, fas::true_)
+  {
+    SYSTEM_LOG_WARNING("Instance '" << opt.name << "' not reconfigured (is forbidden by the developer)")
   }
 
   bool configure_(const std::string& stropt, fas::false_, json::json_error* err)
@@ -272,8 +288,10 @@ private:
       
         if ( oitr->second.domain != op.domain )
         {
-          itr->second->reconfigure(opt);
-          SYSTEM_LOG_MESSAGE("Instance '" << opt.name << "' is reconfigured (fully)")
+          reconfigure_fully_(itr->second, opt, fas::bool_<ignore_reconfigure!=0>() );
+          /*itr->second->reconfigure(opt);
+          SYSTEM_LOG_MESSAGE("Instance '" << opt.name << "' is reconfigured (fully)")*/
+          
         }
         else if ( oitr->second.instance != op.instance )
         {
