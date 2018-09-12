@@ -110,12 +110,12 @@ struct basic_instance_options_json
 
   enum 
   {
-    has_name       =  ( Features & component_features::Singleton        ) == 0,
-    has_enabled    =  ( Features & component_features::DisabledEnabled  ) == 0,
-    has_suspend    =  ( Features & component_features::DisabledSuspend  ) == 0,
-    has_priority   =  ( Features & component_features::DisabledPriority ) == 0,
-    has_workflow   =  ( Features & component_features::DisabledWorkflow ) == 0,
-    has_cpu        =  ( Features & component_features::EnableCPU        ) != 0,
+    has_name       =  ( Features & static_cast<int>(component_features::Singleton)        ) == 0,
+    has_enabled    =  ( Features & static_cast<int>(component_features::DisabledEnabled)  ) == 0,
+    has_suspend    =  ( Features & static_cast<int>(component_features::DisabledSuspend)  ) == 0,
+    has_priority   =  ( Features & static_cast<int>(component_features::DisabledPriority) ) == 0,
+    has_workflow   =  ( Features & static_cast<int>(component_features::DisabledWorkflow) ) == 0,
+    has_cpu        =  ( Features & static_cast<int>(component_features::EnableCPU)        ) != 0,
     has_statistics =  options_type::statistics_enabled
   };
   

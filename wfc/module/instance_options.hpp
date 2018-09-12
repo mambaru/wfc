@@ -30,6 +30,9 @@ struct statistics_options: StatOpt
   std::string target;
 };
 
+/**
+ * @brief basic_instance_options
+ */
 template<typename StatOpt /*= nostat*/>
 struct basic_instance_options
 {
@@ -45,6 +48,9 @@ struct basic_instance_options
   stat_options statistics;
 };
 
+/**
+ * @brief basic_instance_options
+ */
 template<typename DomainOptions, typename StatOpt /*=nostat */>
 struct instance_options
   : basic_instance_options<StatOpt>

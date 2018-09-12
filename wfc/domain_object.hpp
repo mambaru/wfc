@@ -24,7 +24,7 @@ namespace wfc{
  * @brief Класс для реализации прикладного объекта WFC
  * @tparam Itf тип интерфейса объекта ( на базе wfc::iinterface )
  * @tparam Opt произвольная структура с пользовательскими опциями 
- * @tparam StatOpt[=nostat]
+ * @tparam StatOpt [=nostat] произвольная структура с пользовательскими опциями статистики
  */
 template<
   typename Itf,
@@ -98,7 +98,7 @@ public:
   /**
    * @brief Возвращает указатель на wfc::wfcglobal
    * @return указатель на wfc::wfcglobal
-   * @details по возможности следует использовать методы этого класса, а не обращаться к wfc::wfcglobal напрямую
+   * @details по возможности следует использовать методы этого класса, а не обращатся к wfc::wfcglobal напрямую
    */
   global_ptr global() const 
   {
@@ -165,6 +165,7 @@ public:
    * @tparam H2 альтернативный обработчика
    * @param h1 исходный обработчик
    * @param h2 альтернативный обработчик (м.б. nullptr)
+   * @return обертка над обработчиком обратного вызова 
    * @details Если обработчик обратного взаимодействует с объектом, то может быть ситуация, что он будет вызван после уничтожения объекта.
    * Эта обертка распознает такую ситуацию и вызовет альтернативный обработчик, если задан, в противном случае просто не вызовет исходный.
    * Может использоватся для отправки сообщений в wfc::workflow::post
@@ -180,6 +181,7 @@ public:
    * @brief Создает обертку над обработчиком обратного вызова RPC
    * @tparam H тип обработчика
    * @param h исходный обработчик
+   * @return обертка над обработчиком обратного вызова RPC
    * @details Обработчик обратного вызова RPC, должны быть гарантировано вызван только один раз. Если обработчик не вызывается, 
    * то клиентская сторона может ждать вечно ответе, также не должно быть повторных вызовов - это может привести к неопределенному 
    * поведению клиентского кода. Эта обертка детектирует оба случая и вызывает соответствующий обработчик, которые настраиваются  
@@ -192,57 +194,86 @@ public:
     return _owner.callback( std::forward<H>(h) );
   }
 
-  
-  virtual config_type generate(const std::string& arg) 
-  {
-    config_type conf =config_type();
-    if ( arg=="example" )
-    {
-      conf.cpu.insert(0);
-      conf.cpu.insert(1);
-      conf.cpu.insert(2);
-    }
-    return conf;
-  }
-
-
-  
-  bool system_is_stopped() const
-  {
-    if (auto g = this->global() )
-      return g->stop_signal_flag;
-    return false;
-  }
-  
-
+  /**
+   * @brief Возвращает сылку на объект owner
+   * @return сылка на объект owner
+   * @details вы можете сбрость ```owner().reset()```, тогда запросы обурнутыe ```wrap(...)``` решат, что объект уничтожен, 
+   * либо переинициализировать обработчики для ```callback(...)``` обертки 
+   */
   owner_type& owner()
   {
     return _owner;
   }
 
-
-  template<typename I>
-  std::shared_ptr<I> get_target(const std::string& prefix, const std::string& tg_name, bool disabort = false) const
-  {
-    if (!is_configured_())
-      return nullptr;
-
-    if ( auto g = this->global() )
-      return g->registry.template get<I>(prefix, tg_name, disabort);
-    return nullptr;
-  }
   
+  /**
+   * @brief Возвращает объект по имени в глобальном реестре
+   * @tparam I интерфейс объекта (должен быть на базе iinerface)
+   * @param target имя объекта
+   * @param disabort [=false] отключить аварийное завершение, если объект не найден
+   * @return указатель на объект из глобального реестра или nullptr
+   * @details Осуществляет поиск в реестре без префикса - это как правило объекты прикладного уровня заданные 
+   * в конфигурационном файле системы. Имена объектов и целей определяются пользователем в конфигурационном файле.
+   * Двух объектов в системе с одинаковыми именами быть не может. 
+   */
   template<typename I>
-  std::shared_ptr<I> get_target(const std::string& tg_name, bool disabort = false) const
+  std::shared_ptr<I> get_target(const std::string& target, bool disabort = false) const
   {
     if (!this->is_configured_())
       return nullptr;
 
     if ( auto g = this->global() )
-      return g->registry.template get<I>(tg_name, disabort);
+      return g->registry.template get<I>(target, disabort);
     return nullptr;
   }
 
+  /**
+   * @brief Возвращает объект по имени и префиксу в глобальном реестре
+   * @tparam I интерфейс объекта (должен быть на базе iinerface)
+   * @param prefix префикс объекта (aka пространсто имен)
+   * @param target имя объекта
+   * @param disabort [=false] отключить аварийное завершение, если объект не найден
+   * @return указатель на объект из глобального реестра или nullptr
+   * @details Осуществляет поиск в реестре по префиксу и имени - это все прочие объекты, которые зарегистрированы 
+   * объектами прикладного уровня. Такие объекты размещаются с определенным префиксом. Двух объектов в системе 
+   * с одинаковыми именами под одним префиксом быть не может.
+   */
+  template<typename I>
+  std::shared_ptr<I> get_target(const std::string& prefix, const std::string& target, bool disabort = false) const
+  {
+    if (!is_configured_())
+      return nullptr;
+
+    if ( auto g = this->global() )
+      return g->registry.template get<I>(prefix, target, disabort);
+    return nullptr;
+  }
+  
+  /**
+   * @brief регистрирует объект в глобальном реестре
+   * @param prefix префикс объекта (aka пространсто имен)
+   * @param tg_name имя объекта
+   * @param pobj указатель на объект
+   * @param nomark [=false] не отмечать в реестрке, что были внесены изменения 
+   * @details прикладные объекты могут регистрировать произвольное число объектов под разными префиксами для собственных нужд. Пустой префикс 
+   * зарезервирован для прикладных объектов. Если объект является наследником этого класса и включен в список модулей пакета WFC то 
+   * регистрировать его не нужно. Если зарегестрированные объекты используются только в контексте данного прикладного объекта, 
+   * то можно задать ```cpp nomark=true``` чтобы избежать повторной инициализации всей системы
+   * @see idomain
+   */
+  void set_target(const std::string& prefix, const std::string& tg_name, std::shared_ptr<iinterface> pobj, bool nomark = false)
+  {
+    if ( auto g = this->global() )
+    {
+      g->registry.set(prefix, tg_name, pobj, nomark);
+    }
+  }
+
+  /**
+   * @brief возвращает указатели на все объектов заданного префикса
+   * @param prefix префикс объекта (aka пространсто имен)
+   * @return указатели на все объектов заданного префикса
+   */
   template<typename I>
   std::map<std::string, std::shared_ptr<I> > select_targets(const std::string& prefix) const
   {
@@ -254,29 +285,14 @@ public:
     }
     return result;
   }
-  
-  void set_target(const std::string& prefix, const std::string& tg_name, std::shared_ptr<iinterface> p, bool nomark = false)
-  {
-    if ( auto g = this->global() )
-    {
-      g->registry.set(prefix, tg_name, p, nomark);
-    }
-  }
-  
-  statistics_ptr get_statistics() const 
-  {
-    if ( auto g = this->global() )
-    {
-      if ( g->disable_statistics )
-        return nullptr;
-    }
-
-    if (!is_configured_())
-      return nullptr;
-
-    return _statistics;
-  }
-
+    
+    
+  /**
+   * @brief Возвращает указатель на [workflow](https://mambaru.github.io/wflow/)
+   * @return указатель на [workflow](https://mambaru.github.io/wflow/) или nullptr если система еще не сконфигурирована 
+   * @details если задан [workflow](https://mambaru.github.io/wflow/) в конфигурации то этот указатель на этот workflow и возвращается, 
+   * в противном случае возвращается общий workflow по умочанию. Гарантированно результат не будет nullptr, после этапа конфигурации
+   */
   std::shared_ptr<workflow_type> get_workflow() const 
   {
     if (!is_configured_())
@@ -284,21 +300,62 @@ public:
     return _workflow;
   }
 
+  /**
+   * @brief Возвращает указатель на [workflow](https://mambaru.github.io/wflow/)
+   * @param target имя объекта [workflow](https://mambaru.github.io/wflow/)
+   * @param disabort [=false] отключить аварийное завершение, если объект не найден
+   * @return указатель на [workflow](https://mambaru.github.io/wflow/) или nullptr
+   * @details в базовой конфигурации для пригладного объекта всегда доступен [workflow](https://mambaru.github.io/wflow/), 
+   * используйте этот метод если вам нужно более одного [workflow](https://mambaru.github.io/wflow/). Задайте disabort=true
+   * если допустимо отсутствие объекта в реестре 
+   */
+  std::shared_ptr<workflow_type> get_workflow(const std::string& target, bool disabort = false) const 
+  {
+    if (!is_configured_())
+      return nullptr;
+    return this->global()->registry.template get<workflow_type>("workflow", target, disabort);
+  }
+
+  /**
+   * @brief Возвращает указатель на общий [workflow](https://mambaru.github.io/wflow/) системы
+   * @return указатель на [workflow](https://mambaru.github.io/wflow/) или nullptr если система еще не сконфигурирована 
+   * @details возвращается общий workflow системы. Гарантированно результат не будет nullptr, после этапа конфигурации.
+   * Если в конфигурации объекта не задан workflow, то результат тот же что и get_workflow()
+   */
   std::shared_ptr<workflow_type> get_common_workflow() const 
   {
     if (!is_configured_())
       return nullptr;
     return this->global()->workflow;
   }
-
-  std::shared_ptr<workflow_type> get_workflow(const std::string& wf_name, bool disabort = false) const 
+  
+  /**
+   * @brief Определяет наличие дополнительного агрумента переданного этому объекту через командную строку
+   * @param arg имя аргумент
+   * @return true если есть аргумент с именем arg
+   * @details
+   */
+  bool has_arg(const std::string& arg) const
   {
-    if (!is_configured_())
-      return nullptr;
-    return this->global()->registry.template get<workflow_type>("workflow", wf_name, disabort);
+    if (auto g = this->global() )
+    {
+      if ( !g->args.has(_name) )
+        return false;
+      
+      auto args = g->args.get(_name);
+      return args.has(arg);
+    }
+    return false;
   }
 
   
+  /**
+   * @brief Возращает значение дополнительного агрумента переданного этому объекту через командную строку
+   * @param arg имя аргумент
+   * @return значение агрумента в виде строки
+   * @details если агрумент arg отсутствует или не имеет значения, то возвращается пустая строка. Для определения 
+   * наличия агумента без значений используете has_arg()
+   */
   std::string get_arg(const std::string& arg) const
   {
     if (auto g = this->global() )
@@ -315,8 +372,17 @@ public:
     return std::string();
   }
 
+  /**
+   * @brief Возращает значение дополнительного агрумента переданного этому объекту через командную строку
+   * @tparam T тип значения
+   * @param arg имя аргумент
+   * @param err сообщение об ошибке
+   * @return значение агрумента или T()
+   * @details если агрумент arg отсутствует или не имеет значения, то возвращается T().
+   * Для определения наличия агумента без значений используете has_arg()
+   */
   template<typename T>
-  T get_arg_t(const std::string& arg, json_error* e = nullptr) const
+  T get_arg_t(const std::string& arg, std::string* err = nullptr) const
   {
     T val = T();
     std::string str = this->get_arg(arg);
@@ -324,41 +390,55 @@ public:
       return val;
     
     typedef typename json::value<T>::serializer serializer;
-    serializer()(val, str.begin(), str.end(), e );
-    
+    json_error e;
+    serializer()(val, str.begin(), str.end(), &e );
+    if ( e && err!=nullptr )
+      *err = json::strerror::message(e);
     return val;
   }
 
-  bool has_arg(const std::string& arg) const
-  {
-    if (auto g = this->global() )
-    {
-      if ( !g->args.has(_name) )
-        return false;
-      
-      auto args = g->args.get(_name);
-      return args.has(arg);
-    }
-    return false;
-  }
-  
+  /**
+   * @brief Регистрация пользовательского потока (thread)
+   * @details Регистрация пользовательского потока нужна для того чтобы система могла более гибко распределять их по ядрам CPU.
+   * Для того чтобы управлять распределением потоков для этого объекта нужно влючить wfc::component_features::EnableCPU. Вызывать
+   * этот метод нужно непоредственно из запущенного потока
+   */
   void reg_thread()
   {
     if (auto g = this->global() )
       g->cpu.set_current_thread(_name);
   }
 
+  /**
+   * @brief Снять регистрацию пользовательского потока (thread)
+   * @details Вызыватьэтот метод нужно непоредственно из запущенного потока перед его завершением 
+   */
   void unreg_thread()
   {
     if (auto g = this->global() )
       g->cpu.del_current_thread();
   }
 
+  /**
+   * @brief Возвращает true если объект в режиме suspend
+   * @return true если объект в режиме suspend
+   * @details В режиме suspend объект не обрабатывает запросы, а просто отвечает значением по умочанию. Это помогает
+   * при поисках проблемных мест с точки зрения производительности. 
+   */
   bool suspended() const 
   {
     return _config.suspend;
   }
 
+  /**
+   * @brief Если объект в режиме suspend, вызывает callback со значением по умолчанию и возвращает true 
+   * @tparam Res тип результата (параметр callback-функции)
+   * @param cb callback-функция будет вызвана только если объект в режиме suspend (может быть nullptr)
+   * @return true если объект в режиме suspend
+   * @details callback-функция должна быть вызвана всегда, поэтому вы не можете просто проигнорировать входящий запрос. Этот метод позволяет 
+   * упростить проверку на режим suspend и nullptr. На самом деле вам скорее понядобятся методы bad_request() и notify_ban() которые делают 
+   * больше проверок
+   */
   template<typename Res>
   bool suspended(const std::function< void(std::unique_ptr<Res>) > & cb) const
   {
@@ -369,6 +449,11 @@ public:
     return true;
   }
 
+  /**
+   * @brief Создает и отправляет ответ по умолчанию если функция не nullptr
+   * @tparam Res тип результата (параметр callback-функции)
+   * @param cb callback-функция (может быть nullptr)
+   */
   template<typename Res>
   void default_response(const std::function< void(std::unique_ptr<Res>) >& cb) const
   {
@@ -376,8 +461,30 @@ public:
       cb( std::make_unique<Res>() );
   }
 
+  /**
+   * @brief Проверяет на валидность входящий запрос, а также на режим suspend
+   * @tparam Req тип запроса 
+   * @tparam Res тип результата (параметр callback-функции)
+   * @param req входящий запрос
+   * @param cb callback-функция (может быть nullptr)
+   * @return true если дальнейшая обработка не требуется, false можно обрабатывать запрос
+   * @details Реализует большинство необходимых проверок при обработке запроса:
+   * - на режим suspend, с отправкой ответ 
+   * - на останов системы
+   * - на req==nullptr c отправкой cb(nullptr)
+   * Если это метод вернул true это значит, что вызов cb уже произведен
+   * ```cpp
+   *  void foo_domain::bar(request::bar::ptr req, response::bar::handler cb )
+   *  {
+   *    if ( this->bad_request(req, cb) )
+   *      return;
+   *    ... обработка запроса или уведомления ...
+   *  }
+   * ```
+   * 
+   */
   template<typename Req, typename Res>
-  bool bad_request(const Req& req, const std::function< void(std::unique_ptr<Res>) >& cb) const
+  bool bad_request(const std::unique_ptr<Req>& req, const std::function< void(std::unique_ptr<Res>) >& cb) const
   {
     if ( this->suspended(cb) ) 
       return true;
@@ -394,14 +501,35 @@ public:
     return true;
   }
   
+  /**
+   * @brief Запрещает уведомления, проверяет на валидность входящий запрос, а также на режим suspend
+   * @tparam Req тип запроса 
+   * @tparam Res тип результата (параметр callback-функции)
+   * @param req входящий запрос
+   * @param cb callback-функция (может быть nullptr)
+   * @return true если дальнейшая обработка не требуется, false можно обрабатывать запрос
+   * @details Все тоже самое, что и bad_request(), но запрещает также уведомления (это когда cb==nullptr). Это значит, 
+   * что после вызова этой функции, если она вернула false, cb на nullptr можно не проверять. 
+   */
   template<typename Req, typename Res>
-  bool notify_ban(const Req& req, const std::function< void(std::unique_ptr<Res>) >& cb) const
+  bool notify_ban(const std::unique_ptr<Req>& req, const std::function< void(std::unique_ptr<Res>) >& cb) const
   {
     return cb==nullptr || this->bad_request(req, cb);
   }
   
+  /**
+   * @brief Разрешает только уведомления, проверяет на валидность входящий запрос, а также на режим suspend
+   * @tparam Req тип запроса 
+   * @tparam Res тип результата (параметр callback-функции)
+   * @param req входящий запрос
+   * @param cb callback-функция (может быть nullptr)
+   * @return true если дальнейшая обработка не требуется, false можно обрабатывать запрос
+   * @details Все тоже самое, что и bad_request(), но разрешает только уведомления (это когда cb==nullptr). Это значит, 
+   * что после вызова этой функции, если она вернула false, cb == nullptr. На запрос вызывает cb(nullptr), что означет 
+   * сервис недоступен.
+   */
   template<typename Req, typename Res>
-  bool request_ban(const Req& req, const std::function< void(std::unique_ptr<Res>) >& cb) const
+  bool request_ban(const std::unique_ptr<Req>& req, const std::function< void(std::unique_ptr<Res>) >& cb) const
   {
     if ( this->bad_request(req, cb) )
       return true;
@@ -414,6 +542,27 @@ public:
     return true;
   }
   
+  /**
+   * @brief вспомогательная функция для обработчиков, которые можут обрабатывать как запросы так и уведомления
+   * @tparam Res тип результата (параметр callback-функции)
+   * @param cb callback-функция (может быть nullptr)
+   * @return nullptr если это уведомление (cb==nullptr) и объект запроса в противном случае  
+   * ```cpp
+   *  void foo_domain::bar(request::bar::ptr req, response::bar::handler cb )
+   *  {
+   *    if ( this->bad_request(req, cb) )
+   *      return;
+   * 
+   *    ... обработка запроса или уведомления ...
+   * 
+   *    if (auto res = this->create_response(cb) )
+   *    {
+   *       ... инициализация res ...   
+   *       cb( std::move(res) )
+   *    }
+   *  }
+   * ```
+   */
   template<typename Res>
   static std::unique_ptr<Res> create_response( const std::function<void(std::unique_ptr<Res>)>& cb)
   {
@@ -421,17 +570,94 @@ public:
       return std::make_unique<Res>();
     return nullptr;
   }
-  
+
+  /**
+   * @brief вспомогательная функция для обработчиков, которые можут обрабатывать как запросы так и уведомления
+   * @tparam Res тип результата (параметр callback-функции)
+   * @param res объект результата для отправки (может быть nullptr)
+   * @param cb callback-функция (может быть nullptr)
+   * @details С помощью create_response() создается объект ответа для запроса и nullptr для уведомлений,
+   * чтобы избавится от лишних проверок cb, можно воспользоватся этой функцией. Удобно использовать если 
+   * для ответов не требующих инициализации (пустые структуры исключительно для подтверждения )
+   * ```cpp
+   *  void foo_domain::set(request::set::ptr req, response::set::handler cb )
+   *  {
+   *    if ( this->bad_request(req, cb) )
+   *      return;
+   *
+   *    ... обработка ...
+   * 
+   *    auto res = this->create_response(cb);
+   *    this->send_response( std::move(res), cb)
+   *  }
+   * ```
+   */
   template<typename Res>
   static void send_response(std::unique_ptr<Res>&& res, const std::function< void(std::unique_ptr<Res>) >& cb)
   {
     if (res!=nullptr && cb!=nullptr)
       cb( std::move(res) );
   }
+
+  /**
+   * @brief Возвращает объект для сбора, аггрегации и отправки статистики
+   * @return объект для сбора, аггрегации и отправки статистики или nullptr если статистика отключена или не поддерживается
+   * @details На данный момент поддержка сбора статистики по умолчанию отключена. Для ее ключения требуется перекомпиляция с 
+   * флагом -DWFC_ENABLE_STAT=ON
+   */
+  statistics_ptr get_statistics() const 
+  {
+    if ( auto g = this->global() )
+    {
+      if ( g->disable_statistics )
+        return nullptr;
+    }
+
+    if (!is_configured_())
+      return nullptr;
+
+    return _statistics;
+  }
+
+  /**
+   * @brief Проверка системы на сигнал останова
+   * @return true если получен сигнал прекращения работы
+   * @details Может быть использования при длительных процедурах инициализации (например загрузка БД), 
+   * чтобы завершить работу, а недожится завершения инициализации
+   */
+  bool system_is_stopped() const
+  {
+    if (auto g = this->global() )
+      return g->stop_signal_flag;
+    return false;
+  }
   
+  /**
+   * @brief Генератор конфигурации
+   * @param arg параметр конфигурации 
+   * @return объект для сериализации config_type()
+   * @details Вы можете переопределить этот метод для генерации демонстрационных конфигураций для различных arg, но для arg=="" 
+   * ответ должен быть всегда config_type(). В текущей реализации для arg=="example" заполняется массив cpu. Если arg=="" это значит
+   * что метод используется для генерации конфигурации всей системы, которыя получается сериализацией объектов, которые возвращает 
+   * этот метод. В этом случае допустимы только значения по умолчанию в конфигурационных структурах, чтобы пользователь мог удалить 
+   * поля из json-конфигурации если его устраивают значения по умолчанию, для упрощения 
+   */
+  virtual config_type generate(const std::string& arg) 
+  {
+    config_type conf =config_type();
+    if ( arg=="example" )
+    {
+      conf.cpu.insert(0);
+      conf.cpu.insert(1);
+      conf.cpu.insert(2);
+    }
+    return conf;
+  }
+
   typedef instance_handler_<Opt, StatOpt> instance_handler_t;
   instance_handler_t* inst_handler_() 
   { return static_cast<instance_handler_<Opt, StatOpt>*>(this); }
+  
 private:
   virtual void domain_generate(config_type& conf, const std::string& type) final;
   virtual void create_domain(const std::string& objname, global_ptr g ) final;
@@ -498,37 +724,6 @@ void domain_object<Itf, Opt, StatOpt>::initialize_domain()
     
     _owner.set_double_call_handler(std::bind(g->doublecall_handler, this->name()));
     _owner.set_no_call_handler(std::bind(g->nocall_handler, this->name()));
-    /*
-    _owner.set_double_call_handler([g, pname]()
-    {
-      if ( g->stop_signal_flag )
-        return;
-        
-      if ( g->double_callback_abort )
-      {
-        DOMAIN_LOG_FATAL("Double call callback functions for '" << *pname << "'")
-      }
-      else if ( g->double_callback_show )
-      {
-        DOMAIN_LOG_ERROR("Double call callback functions for '" << *pname << "'")
-      }
-    });
-
-    _owner.set_no_call_handler([g, pname]()
-    {
-      if ( g->stop_signal_flag )
-        return;
-
-      if ( g->nocall_callback_abort )
-      {
-        DOMAIN_LOG_FATAL("Lost call callback for '" << *pname << "'")
-      }
-      else if ( g->nocall_callback_show )
-      {
-        DOMAIN_LOG_ERROR("Lost callback for '" << *pname << "'")
-      }
-    });
-    */
 
     _workflow = _config.workflow.empty()
                 ? this->global()->common_workflow
