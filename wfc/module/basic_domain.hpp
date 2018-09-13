@@ -7,9 +7,10 @@ namespace wfc{
  * @details Методы этого интерфейса могут быть в прикладном объекте (с родительским wfc::domain_object) для 
  * того чтобы уточнить его поведения, на этапах конфигурирования, инициализации и запуска 
  */
-struct idomain
+class basic_domain
 {
-  virtual ~idomain() {}
+public:
+  virtual ~basic_domain() {}
   
   /**
     * @brief create

@@ -10,6 +10,9 @@
 
 namespace wfc{
 
+/**
+ * @brief iinterface
+ */
 struct iinterface
 {
   typedef ::iow::io::data_type data_type;
