@@ -19,8 +19,8 @@ public:
   typedef DomainObject object_type;
   typedef typename object_type::instance_handler_t instance_handler_t;
   typedef typename object_type::domain_interface domain_interface;
-  typedef typename object_type::config_type config_type;
-  typedef typename object_type::basic_options basic_options;
+  typedef typename object_type::domain_config domain_config;
+  typedef typename object_type::domain_options domain_options;
   typedef typename object_type::statoptions_type statistics_options;
   /*
   typedef typename object_type::options_type domain_options_type;
@@ -68,7 +68,7 @@ public:
       _global->registry.set(obj_name, _object);
   }
 
-  virtual void configure(const config_type& opt)
+  virtual void configure(const domain_config& opt)
   {
     std::lock_guard<mutex_type> lk(_mutex);
     _instance_reconfigured = true;
@@ -77,16 +77,16 @@ public:
       get_(obj)->configure_domain(_config);
   }
 
-  virtual void reconfigure_basic( const basic_options& opt )
+  virtual void reconfigure_basic( const domain_options& opt )
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    static_cast<basic_options&>( _config ) = opt;
+    static_cast<domain_options&>( _config ) = opt;
     _startup = _startup && !( _object==nullptr && _config.enabled );
     if ( auto obj = this->create_or_stop_if_() ) 
       get_(obj)->reconfigure_domain_basic( _config );
   }
 
-  virtual void reconfigure(const config_type& opt)  
+  virtual void reconfigure(const domain_config& opt)  
   {
     std::lock_guard<mutex_type> lk(_mutex);
     _instance_reconfigured = true;
@@ -140,7 +140,7 @@ public:
 
 // iinterface
 
-  void generate(config_type& opt, const std::string& type) const 
+  void generate(domain_config& opt, const std::string& type) const 
   {
     auto obj = std::make_shared<object_type>();
     get_(obj)->domain_generate( opt, type );
@@ -257,7 +257,7 @@ private:
   // Объект запущен (вызван метод старт)
   bool         _startup = false;
   global_ptr   _global;
-  config_type  _config;
+  domain_config  _config;
   object_ptr   _object;
   mutable mutex_type _mutex;
 };

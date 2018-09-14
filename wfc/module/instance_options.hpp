@@ -8,10 +8,10 @@ struct nostat{};
 struct defstat{};
 
 template<typename StatOpt /*= nostat*/ >
-struct statistics_options;
+struct statistics_options_t;
 
 template<>
-struct statistics_options<nostat>: nostat
+struct statistics_options_t<nostat>: nostat
 {
   static constexpr bool enabled = false; 
   bool disabled = true;
@@ -19,7 +19,7 @@ struct statistics_options<nostat>: nostat
 };
 
 template<typename StatOpt>
-struct statistics_options: StatOpt
+struct statistics_options_t: StatOpt
 {
 #ifdef WFC_ENABLE_STAT
   static constexpr bool enabled = true;
@@ -34,9 +34,9 @@ struct statistics_options: StatOpt
  * @brief basic_instance_options
  */
 template<typename StatOpt /*= nostat*/>
-struct basic_instance_options
+struct domain_options_t
 {
-  typedef statistics_options<StatOpt> stat_options;
+  typedef statistics_options_t<StatOpt> stat_options;
   static constexpr bool statistics_enabled = stat_options::enabled;
   bool enabled = true;
   bool suspend = false;
@@ -49,16 +49,16 @@ struct basic_instance_options
 };
 
 /**
- * @brief basic_instance_options
+ * @brief domain_config
  */
-template<typename DomainOptions, typename StatOpt /*=nostat */>
-struct instance_options
-  : basic_instance_options<StatOpt>
-  , DomainOptions
+template<typename CustomOptions, typename StatOpt /*=nostat */>
+struct domain_config_t
+  : domain_options_t<StatOpt>
+  , CustomOptions
 {
-  typedef basic_instance_options<StatOpt> basic_options;
-  typedef DomainOptions domain_options;
-  typedef typename basic_options::stat_options stat_options;
+  typedef domain_options_t<StatOpt> domain_options;
+  typedef CustomOptions custom_options;
+  typedef typename domain_options::stat_options stat_options;
 };
 
 

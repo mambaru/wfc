@@ -18,7 +18,7 @@ namespace wfc{
 template< 
   typename Name,
   typename Instance,
-  typename DomainJson,
+  typename CustomJson,
   int Features /*= component_features::Multiton*/, 
   typename StatJson /*= defstat_json*/
 >
@@ -35,25 +35,25 @@ public:
   typedef Name        component_name;
   typedef Instance    instance_type;
   
-  typedef DomainJson  domain_json;
+  typedef CustomJson  custom_json;
   typedef typename std::conditional< 
-    instance_type::basic_options::statistics_enabled,
+    instance_type::domain_options::statistics_enabled,
     StatJson,
     empty_stat_json_t<typename StatJson::target>
   >::type stat_json;
  
-  typedef instance_options_json<domain_json, Features, stat_json> instance_json;
-  typedef typename instance_json::basic_json basic_json;
+  typedef domain_config_json_t<custom_json, Features, stat_json> domain_config_json;
+  typedef typename domain_config_json::domain_options_json domain_options_json;
 
   typedef std::shared_ptr<wfcglobal> global_ptr;
-  typedef typename instance_type::config_type instance_config;
+  typedef typename instance_type::domain_config domain_config;
   typedef std::map<std::string, std::string> instance_config_map;
   typedef typename instance_type::domain_interface domain_interface;
   typedef json::dict_map< json::value<std::string> > instance_map_json;
   typedef typename std::conditional<
     is_singleton,
-    instance_config,
-    std::vector<instance_config>
+    domain_config,
+    std::vector<domain_config>
   >::type component_config;
 
   typedef typename std::conditional<
@@ -64,8 +64,8 @@ public:
   
   typedef typename std::conditional<
     is_singleton,
-    instance_json,
-    ::wfc::json::array< std::vector< instance_json> >
+    domain_config_json,
+    ::wfc::json::array< std::vector< domain_config_json> >
   >::type component_json;
 
   typedef typename std::conditional<
@@ -161,17 +161,17 @@ public:
 
 private:
 
-  std::string serialize_base_instance_( const instance_config& opt )
+  std::string serialize_base_instance_( const domain_config& opt )
   {
-    typedef typename basic_json::serializer serializer;
+    typedef typename domain_options_json::serializer serializer;
     std::string str;
     serializer()( opt, std::back_inserter(str) );
     return str;
   }
 
-  std::string serialize_domain_( const instance_config& opt )
+  std::string serialize_domain_( const domain_config& opt )
   {
-    typedef typename domain_json::serializer serializer;
+    typedef typename domain_options_json::serializer serializer;
     std::string str;
     serializer()( opt, std::back_inserter(str) );
     return str;
@@ -192,7 +192,7 @@ private:
   void create_(fas::true_)
   {
     _instances = std::make_shared<instance_type>();
-    instance_config opt;
+    domain_config opt;
     if ( _global != nullptr )
     {
       _global->registry.set("instance", this->name(), _instances);
@@ -242,13 +242,13 @@ private:
     return true;
   }
 
-  void reconfigure_fully_(instance_ptr obj, const instance_config& opt, fas::false_)
+  void reconfigure_fully_(instance_ptr obj, const domain_config& opt, fas::false_)
   {
     obj->reconfigure(opt);
     SYSTEM_LOG_MESSAGE("Instance '" << opt.name << "' is reconfigured (fully) -1-")
   }
 
-  void reconfigure_fully_(instance_ptr , const instance_config& opt, fas::true_)
+  void reconfigure_fully_(instance_ptr , const domain_config& opt, fas::true_)
   {
     SYSTEM_LOG_WARNING("Instance '" << opt.name << "' not reconfigured (is forbidden by the developer)")
   }
@@ -353,7 +353,7 @@ private:
 
   void generate_config_(component_config& opt, const std::string& type, fas::false_) 
   {
-    instance_config inst;
+    domain_config inst;
     instance_type().generate( inst, type);
     if ( inst.name.empty() )
       inst.name = this->name() + "1";

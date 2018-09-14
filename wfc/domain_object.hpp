@@ -91,16 +91,16 @@ class domain_object
 {
 public:
   /** @brief Пользовательские опции */
-  typedef Opt options_type;
+  typedef Opt custom_options_type;
   
   /** @brief Пользовательские опции для сбора статистики */
   typedef StatOpt statoptions_type;
   
-  /** @brief Конфигурация инстанса прикладного объекта (пользовательские опции, опции статистики и опции wfc::instance) */
-  typedef instance_options<Opt, StatOpt> config_type;
+  /** @brief Конфигурация прикладного объекта (пользовательские опции, опции статистики и опции wfc::instance) */
+  typedef domain_config_t<Opt, StatOpt> domain_config;
   
   /** @brief Только опции wfc::instance, без пользовательских */
-  typedef typename config_type::basic_options basic_options;
+  typedef typename domain_config::domain_options domain_options;
   
   /** @brief Тип интерфейса объекта ( на базе wfc::iinterface ) */
   typedef Itf domain_interface;
@@ -168,7 +168,7 @@ public:
    * в основном потоке. В реализациях методах wfc::idomain::configure или wfc::idomain::reconfigure можно 
    * скопировать необходимые данные 
    */
-  const options_type& options() const 
+  const custom_options_type& options() const 
   {
     return _config;
   }
@@ -194,7 +194,7 @@ public:
    * в основном потоке. В реализациях методах wfc::idomain::configure или wfc::idomain::reconfigure можно 
    * скопировать необходимые данные 
    */
-  const config_type& config() const 
+  const domain_config& config() const 
   {
     return _config;
   }
@@ -694,9 +694,9 @@ public:
    * этот метод. В этом случае допустимы только значения по умолчанию в конфигурационных структурах, чтобы пользователь мог удалить 
    * поля из json-конфигурации если его устраивают значения по умолчанию, для упрощения 
    */
-  virtual config_type generate(const std::string& arg) 
+  virtual domain_config generate(const std::string& arg) 
   {
-    config_type conf =config_type();
+    domain_config conf = domain_config();
     if ( arg=="example" )
     {
       conf.cpu.insert(0);
@@ -711,12 +711,12 @@ public:
   { return static_cast<instance_handler_<Opt, StatOpt>*>(this); }
   
 private:
-  virtual void domain_generate(config_type& conf, const std::string& type) final;
+  virtual void domain_generate(domain_config& conf, const std::string& type) final;
   virtual void create_domain(const std::string& objname, global_ptr g ) final;
-  virtual void configure_domain(const config_type& opt) final;
+  virtual void configure_domain(const domain_config& opt) final;
   virtual void initialize_domain() final;
-  virtual void reconfigure_domain_basic(const basic_options& opt) final;
-  virtual void reconfigure_domain(const config_type& conf) final;
+  virtual void reconfigure_domain_basic(const domain_options& opt) final;
+  virtual void reconfigure_domain(const domain_config& conf) final;
   virtual void ready_domain() final;
   virtual void start_domain() final;
   virtual void stop_domain() final;
@@ -734,7 +734,7 @@ private:
   const io_id_t  _io_id;
   std::string    _name;
   global_ptr     _global;
-  config_type    _config;
+  domain_config    _config;
   owner_type     _owner;
   workflow_ptr   _workflow;
   statistics_ptr _statistics;
@@ -743,7 +743,7 @@ private:
 
 
 template<typename Itf, typename Opt, typename StatOpt>
-void domain_object<Itf, Opt, StatOpt>::domain_generate(config_type& conf, const std::string& type) 
+void domain_object<Itf, Opt, StatOpt>::domain_generate(domain_config& conf, const std::string& type) 
   {
     conf = this->generate(type);
   }
@@ -757,7 +757,7 @@ void domain_object<Itf, Opt, StatOpt>::create_domain(const std::string& objname,
   }
 
 template<typename Itf, typename Opt, typename StatOpt>
-void domain_object<Itf, Opt, StatOpt>::configure_domain(const config_type& opt)
+void domain_object<Itf, Opt, StatOpt>::configure_domain(const domain_config& opt)
   {
     _config = opt;
     _workflow = nullptr; // Ибо нефиг. До инициализации ничем пользоватся нельзя
@@ -793,22 +793,22 @@ void domain_object<Itf, Opt, StatOpt>::initialize_domain()
 }
 
 template<typename Itf, typename Opt, typename StatOpt>
-void domain_object<Itf, Opt, StatOpt>::reconfigure_domain_basic(const basic_options& opt)
+void domain_object<Itf, Opt, StatOpt>::reconfigure_domain_basic(const domain_options& opt)
   {
     _conf_flag = false;
-    static_cast<basic_options&>(_config) = opt;
+    static_cast<domain_options&>(_config) = opt;
     if (auto g = this->global() )
       g->cpu.set_cpu(_name, opt.cpu);
     this->reconfigure_basic();
   }
 
 template<typename Itf, typename Opt, typename StatOpt>
-void domain_object<Itf, Opt, StatOpt>::reconfigure_domain(const config_type& conf)
+void domain_object<Itf, Opt, StatOpt>::reconfigure_domain(const domain_config& conf)
   {
     _conf_flag = true;
     _config = conf;
     if (auto g = this->global() )
-      g->cpu.set_cpu(_name, static_cast<basic_options&>(_config).cpu);
+      g->cpu.set_cpu(_name, static_cast<domain_options&>(_config).cpu);
     this->reconfigure();
   }
   

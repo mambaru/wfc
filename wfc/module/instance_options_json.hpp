@@ -4,19 +4,18 @@
 
 #include <wfc/module/instance_options.hpp>
 #include <wfc/module/component_features.hpp>
+#include <wfc/json.hpp>
 
-#include <wjson/json.hpp>
-#include <wjson/name.hpp>
 
 namespace wfc{
   
-template<bool, typename N, typename V, typename M, M V::* m, typename W = ::wjson::value<M> >
+template<bool, typename N, typename V, typename M, M V::* m, typename W = json::value<M> >
 struct optional_member;
 
 template<typename N, typename V, typename M, M V::* m, typename W >
 struct optional_member<true, N, V, M, m, W>
 {
-  typedef ::wjson::member<N, V, M, m, W> type;
+  typedef json::member<N, V, M, m, W> type;
 };
 
 template<typename N, typename V, typename M, M V::* m, typename W >
@@ -28,9 +27,9 @@ struct optional_member<false, N, V, M, m, W>
 template<typename T>
 struct empty_stat_json_t
 {
-  typedef ::wjson::object<
+  typedef json::object<
     T,
-    ::wjson::member_list<
+    json::member_list<
     >
   > type;
 
@@ -44,15 +43,15 @@ struct nostat_json: empty_stat_json_t<nostat> {};
 struct defstat_json: empty_stat_json_t<defstat> {};
 
 template<typename StatOptJson = nostat_json >
-struct statistics_options_json;
+struct statistics_options_json_t;
 
 template<>
-struct statistics_options_json<nostat_json>
+struct statistics_options_json_t<nostat_json>
 {
-  typedef ::wjson::object<
-    statistics_options<nostat>,
-    ::wjson::member_list<
-      ::wjson::base<nostat_json>
+  typedef json::object<
+    statistics_options_t<nostat>,
+    json::member_list<
+      json::base<nostat_json>
     >
   > type;
 
@@ -62,21 +61,21 @@ struct statistics_options_json<nostat_json>
 };
 
 template<typename StatOptJson>
-struct statistics_options_json
+struct statistics_options_json_t
 {
   typedef typename StatOptJson::target base_options;
-  typedef statistics_options<base_options> statistics_type;
+  typedef statistics_options_t<base_options> statistics_type;
   JSON_NAME(disabled)
   JSON_NAME(target)
 
-  typedef ::wjson::object<
+  typedef json::object<
     statistics_type,
-    ::wjson::member_list<
-      ::wjson::member<n_disabled, statistics_type, bool, &statistics_type::disabled>,
-      ::wjson::member<n_target, statistics_type, std::string, &statistics_type::target>,
-      ::wjson::base<StatOptJson>
+    json::member_list<
+      json::member<n_disabled, statistics_type, bool, &statistics_type::disabled>,
+      json::member<n_target, statistics_type, std::string, &statistics_type::target>,
+      json::base<StatOptJson>
     >, 
-    ::wjson::strict_mode
+    json::strict_mode
   > type;
 
   typedef typename type::target      target;
@@ -87,16 +86,12 @@ struct statistics_options_json
 
 
 template<int Features, typename StatOptJson /*= nostat_json*/ >
-struct basic_instance_options_json
+struct domain_options_json_t
 {
-  /*
-  typedef base_statistics_options_json<DomainStatOptJson> stat_json;
-  typedef typename stat_json::target domain_stat;
-  */
   typedef StatOptJson base_stat_json;
   typedef typename base_stat_json::target base_stat_type;
-  typedef basic_instance_options<base_stat_type> options_type;
-  typedef statistics_options_json<base_stat_json> stat_json;
+  typedef domain_options_t<base_stat_type> domain_options_type;
+  typedef statistics_options_json_t<base_stat_json> stat_json;
   typedef typename stat_json::target statistics_options;
   
   JSON_NAME(name)
@@ -116,72 +111,72 @@ struct basic_instance_options_json
     has_priority   =  ( Features & static_cast<int>(component_features::DisabledPriority) ) == 0,
     has_workflow   =  ( Features & static_cast<int>(component_features::DisabledWorkflow) ) == 0,
     has_cpu        =  ( Features & static_cast<int>(component_features::EnableCPU)        ) != 0,
-    has_statistics =  options_type::statistics_enabled
+    has_statistics =  domain_options_type::statistics_enabled
   };
   
-  typedef ::wjson::object<
-    options_type,
-    ::wjson::member_list<
+  typedef json::object<
+    domain_options_type,
+    json::member_list<
       typename optional_member<
         has_name,
         n_name,
-        options_type, 
+        domain_options_type, 
         std::string, 
-        &options_type::name
+        &domain_options_type::name
       >::type,
       typename optional_member<
         has_enabled,
         n_enabled,
-        options_type,
+        domain_options_type,
         bool,
-        &options_type::enabled
+        &domain_options_type::enabled
       >::type,
       typename optional_member<
         has_suspend,
         n_suspend,
-        options_type,
+        domain_options_type,
         bool,
-        &options_type::suspend
+        &domain_options_type::suspend
       >::type,
       typename optional_member<
         has_priority,
         n_startup_priority,
-        options_type,
+        domain_options_type,
         int,
-        &options_type::startup_priority
+        &domain_options_type::startup_priority
       >::type,
       typename optional_member<
         has_priority,
         n_shutdown_priority,
-        options_type,
+        domain_options_type,
         int,
-        &options_type::shutdown_priority
+        &domain_options_type::shutdown_priority
       >::type,
       typename optional_member<
         has_workflow,
         n_workflow,
-        options_type,
+        domain_options_type,
         std::string,
-        &options_type::workflow
+        &domain_options_type::workflow
       >::type,
       typename optional_member<
         has_cpu,
         n_cpu,
-        options_type,
+        domain_options_type,
         std::set<int>,
-        &options_type::cpu,
-        ::wjson::array< std::set< ::wjson::value<int> >  >
+        &domain_options_type::cpu,
+        json::array< std::set< json::value<int> >  >
       >::type,
       typename optional_member<
         has_statistics,
         n_statistics,
-        options_type,
+        domain_options_type,
         statistics_options,
-        &options_type::statistics,
+        &domain_options_type::statistics,
         stat_json
       >::type
     >,
-    ::wjson::strict_mode
+    json::strict_mode
   > type;
 
   typedef typename type::target      target;
@@ -189,23 +184,23 @@ struct basic_instance_options_json
   typedef typename type::serializer  serializer;
 };
 
-template<typename DomainJson, int Features /*= 0*/, typename StatOptJson /*= nostat_json*/ >
-struct instance_options_json
+template<typename CustomJson, int Features /*= 0*/, typename StatOptJson /*= nostat_json*/ >
+struct domain_config_json_t
 {
   typedef StatOptJson stat_json;
-  typedef basic_instance_options_json<Features, stat_json> basic_json;
-  typedef DomainJson domain_json;
-  typedef typename domain_json::target domain_options;
+  typedef domain_options_json_t<Features, stat_json> domain_options_json;
+  typedef CustomJson custom_json;
+  typedef typename custom_json::target custom_options;
   typedef typename stat_json::target stat_options;
-  typedef instance_options<domain_options, stat_options> options_type;
+  typedef domain_config_t<custom_options, stat_options> config_type;
 
-  typedef ::wjson::object<
-    options_type,
-    ::wjson::member_list<
-      ::wjson::base< basic_json >,
-      ::wjson::base< domain_json >
+  typedef json::object<
+    config_type,
+    json::member_list<
+      json::base< domain_options_json >,
+      json::base< custom_json >
     >,
-    ::wjson::strict_mode
+    json::strict_mode
   > type;
 
   typedef typename type::target      target;
