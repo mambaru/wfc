@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <wfc/module/instance_options_json.hpp>
+#include <wfc/module/domain_config_json.hpp>
 #include <wfc/module/icomponent.hpp>
 #include <wfc/module/component_features.hpp>
 #include <wfc/core/wfcglobal.hpp>

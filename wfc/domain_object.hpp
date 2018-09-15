@@ -7,7 +7,7 @@
 #include <wfc/statistics/statistics.hpp>
 #include <wfc/iinterface.hpp>
 #include <wfc/workflow.hpp>
-#include <wfc/module/instance_options.hpp>
+#include <wfc/module/domain_config.hpp>
 #include <wfc/module/basic_domain.hpp>
 #include <wfc/module/instance_handler_.hpp>
 #include <wfc/wfc_exit.hpp>

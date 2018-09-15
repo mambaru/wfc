@@ -1,9 +1,7 @@
 #pragma once
 
-#include <wfc/module/instance_options.hpp>
 #include <wfc/module/iinstance.hpp>
 #include <wfc/core/wfcglobal.hpp>
-
 #include <memory>
 #include <string>
 #include <stdexcept>
@@ -22,10 +20,6 @@ public:
   typedef typename object_type::domain_config domain_config;
   typedef typename object_type::domain_options domain_options;
   typedef typename object_type::statoptions_type statistics_options;
-  /*
-  typedef typename object_type::options_type domain_options_type;
-  typedef domain_instance_options<domain_options_type> options_type;
-  */
 
   typedef std::shared_ptr<object_type> object_ptr;
   typedef std::shared_ptr<wfcglobal> global_ptr;
