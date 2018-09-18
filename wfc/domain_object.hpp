@@ -378,7 +378,9 @@ public:
   {
     if (!is_configured_())
       return nullptr;
-    return this->global()->workflow;
+    if (auto g = this->global() )
+      return g->common_workflow;
+    return nullptr;
   }
   
   /**
