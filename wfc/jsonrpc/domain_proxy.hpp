@@ -26,9 +26,9 @@ public:
   
   domain_proxy() {}
   
-  target_adapter get_adapter(  const std::string& name ) const
+  target_adapter get_adapter(  const std::string& name, bool disabort = false ) const
   {
-    auto itf = this->template get_target< iinterface >( name );
+    auto itf = this->template get_target< iinterface >( name, disabort );
     auto jrpc = this->template get_target< ijsonrpc >( name, true );
     return target_adapter(itf, jrpc);
   }
