@@ -90,11 +90,14 @@ class domain_object
   
 {
 public:
-  /** @brief Пользовательские опции */
-  typedef Opt custom_options_type;
+  /** @brief Пользовательские опции (синоним options_type) */
+  typedef Opt custom_options;
+  
+  /** @brief Пользовательские опции (синоним custom_options) */
+  typedef custom_options options_type;
   
   /** @brief Пользовательские опции для сбора статистики */
-  typedef StatOpt statoptions_type;
+  typedef StatOpt customstat_options;
   
   /** @brief Конфигурация прикладного объекта (пользовательские опции, опции статистики и опции wfc::instance) */
   typedef domain_config_t<Opt, StatOpt> domain_config;
@@ -168,7 +171,7 @@ public:
    * в основном потоке. В реализациях методах wfc::idomain::configure или wfc::idomain::reconfigure можно 
    * скопировать необходимые данные 
    */
-  const custom_options_type& options() const 
+  const custom_options& options() const 
   {
     return _config;
   }
@@ -181,7 +184,7 @@ public:
    * в основном потоке. В реализациях методах wfc::idomain::configure или wfc::idomain::reconfigure можно 
    * скопировать необходимые данные 
    */
-  const statoptions_type& statistics_options() const
+  const customstat_options& statistics_options() const
   {
     return _config.statistics;
   }

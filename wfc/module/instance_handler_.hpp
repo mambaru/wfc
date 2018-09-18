@@ -9,8 +9,8 @@ namespace wfc{
 template<typename Opt, typename StatOpt>
 struct instance_handler_
 {
-  typedef Opt options_type;
-  typedef StatOpt statoptions_type;
+  /*typedef Opt options_type;
+  typedef StatOpt statoptions_type;*/
   typedef domain_config_t<Opt, StatOpt> domain_config;
   typedef typename domain_config::domain_options domain_options;
   

@@ -19,7 +19,7 @@ public:
   typedef typename object_type::domain_interface domain_interface;
   typedef typename object_type::domain_config domain_config;
   typedef typename object_type::domain_options domain_options;
-  typedef typename object_type::statoptions_type statistics_options;
+  typedef typename object_type::customstat_options customstat_options;
 
   typedef std::shared_ptr<object_type> object_ptr;
   typedef std::shared_ptr<wfcglobal> global_ptr;
