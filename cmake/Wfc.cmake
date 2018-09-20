@@ -33,7 +33,7 @@ if ( WFC_ENABLE_STAT )
   add_definitions(-DWFC_ENABLE_STAT)
 endif()
 
-find_package(Boost COMPONENTS system program_options filesystem date_time REQUIRED)
+find_package(Boost COMPONENTS system program_options filesystem date_time regex REQUIRED)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/lib")
