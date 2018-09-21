@@ -2,7 +2,7 @@ include(BuildInfo)
 include(mambaopt)
 
 include(FindThreads)
-find_package(Boost COMPONENTS system program_options filesystem date_time REQUIRED)
+find_package(Boost COMPONENTS system program_options filesystem date_time regex REQUIRED)
 
 
 SET(
