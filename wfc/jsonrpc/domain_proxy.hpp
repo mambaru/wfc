@@ -94,7 +94,7 @@ public:
   }
   
   template<typename Err>
-  void send_error(incoming_holder holder, outgoing_handler_t handler)
+  static void send_error(incoming_holder holder, outgoing_handler_t handler)
   {
     ::wjrpc::aux::send_error(std::move(holder), std::make_unique< Err > (), std::move(handler));
   }
