@@ -82,7 +82,12 @@ public:
     std::map< std::string, instance_ptr>
   >::type instance_map;
 
-  struct config_pair { std::string instance, domain;};
+  struct config_pair 
+  { 
+    std::string instance;
+    std::string  domain;
+  };
+  
   typedef typename std::conditional<
     is_singleton,
     config_pair,
@@ -161,7 +166,7 @@ public:
 
 private:
 
-  std::string serialize_base_instance_( const domain_config& opt )
+  std::string serialize_domain_options_( const domain_config& opt )
   {
     typedef typename domain_options_json::serializer serializer;
     std::string str;
@@ -169,9 +174,9 @@ private:
     return str;
   }
 
-  std::string serialize_domain_( const domain_config& opt )
+  std::string serialize_domain_config_( const domain_config& opt )
   {
-    typedef typename domain_options_json::serializer serializer;
+    typedef typename domain_config_json::serializer serializer;
     std::string str;
     serializer()( opt, std::back_inserter(str) );
     return str;
@@ -215,8 +220,8 @@ private:
     opt.name = this->name();
     
     config_pair op;
-    op.instance = this->serialize_base_instance_(opt);
-    op.domain = this->serialize_domain_(opt);
+    op.instance = this->serialize_domain_options_(opt);
+    op.domain = this->serialize_domain_config_(opt);
     
     if ( _config.instance.empty() )
     {
@@ -267,8 +272,8 @@ private:
     {
       stop_list.erase(opt.name);
       config_pair op;
-      op.domain = this->serialize_domain_(opt);
-      op.instance = this->serialize_base_instance_(opt);
+      op.domain = this->serialize_domain_config_(opt);
+      op.instance = this->serialize_domain_options_(opt);
       
       auto itr = _instances.find(opt.name);
       if ( itr == _instances.end() )

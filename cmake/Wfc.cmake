@@ -33,11 +33,18 @@ if ( WFC_ENABLE_STAT )
   add_definitions(-DWFC_ENABLE_STAT)
 endif()
 
-find_package(Boost COMPONENTS system program_options filesystem date_time REQUIRED)
+find_package(Boost COMPONENTS system program_options filesystem date_time regex REQUIRED)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+
+set(FASLIB_DIR "${CMAKE_SOURCE_DIR}/wfcroot/faslib")
+set(IOWLIB_DIR "${CMAKE_SOURCE_DIR}/wfcroot/iow")
+set(FAS_TESTING_CPP "${FASLIB_DIR}/fas/testing/testing.cpp")
+set(WFC_TEST_DIR "${CMAKE_BINARY_DIR}/tests/${CMAKE_CURRENT_PROJECT_NAME}")
+
+include(mambaopt)
 
 include_directories(wfcroot/wfc)
 include_directories(wfcroot/iow)
