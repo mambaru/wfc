@@ -48,7 +48,7 @@ class example_core
   : public wfc::domain_object< wfc::icore, core_options >
 {
 public:
-  typedef wfc::domain_object< wfc::icore, core_options >::config_type config_type;
+  typedef wfc::domain_object< wfc::icore, core_options >::domain_config config_type;
   
   virtual int run( ) override
   {

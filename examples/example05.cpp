@@ -30,7 +30,7 @@ class example_core
   : public wfc::domain_object< wfc::icore, empty_conf >
 {
 public:
-  typedef wfc::domain_object< wfc::icore, empty_conf >::config_type config_type;
+  typedef wfc::domain_object< wfc::icore, empty_conf >::domain_config config_type;
   
   virtual int run( ) override
   {

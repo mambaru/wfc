@@ -19,7 +19,7 @@ class test
   : public wfc::domain_object<itest, options1>
 {
 public:
-  typedef domain_object::config_type config_type;
+  typedef domain_object::domain_config config_type;
   virtual void initialize() override
   {
     testval = true;
@@ -49,7 +49,7 @@ int main()
   ::iow::asio::io_service io;
   auto g = std::make_shared<wfc::wfcglobal>(io);
   t.create(g);
-  test_impl::config_type opt;
+  test_impl::domain_config opt;
   t.generate(opt, "true");
   
   if ( !opt.test || !opt.enabled || !opt.name.empty() 

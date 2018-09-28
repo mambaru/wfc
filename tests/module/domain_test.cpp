@@ -60,7 +60,7 @@ int main()
   if ( t.object()!=nullptr )
     return 1;
 
-  test::config_type opt;
+  test::domain_config opt;
   opt.test = true;
   opt.name = "name";
   
