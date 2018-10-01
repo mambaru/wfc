@@ -9,6 +9,7 @@ SET(
   wfc_source_list
   wfc.cpp
   wfc_exit.cpp
+  iinterface.cpp
   system/system.cpp
   core/wfcglobal.cpp
   core/cpuset.cpp

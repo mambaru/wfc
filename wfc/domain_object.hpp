@@ -1,3 +1,9 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2018
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #pragma once
 
 #include <wfc/core/wfcglobal.hpp>
@@ -19,7 +25,7 @@
 
 
 namespace wfc{
-
+  
 /**
  * @brief Базовый класс для реализации прикладного объекта WFC
  * @tparam Itf тип интерфейса объекта ( на базе wfc::iinterface )
@@ -507,7 +513,7 @@ public:
   }
 
   /**
-   * @brief Создает и отправляет ответ по умолчанию если функция не nullptr
+   * @brief Создает и отправляет ответ по умолчанию если функция cb!=nullptr
    * @tparam Res тип результата (параметр callback-функции)
    * @param cb callback-функция (может быть nullptr)
    */
