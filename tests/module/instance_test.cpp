@@ -37,6 +37,17 @@ public:
     return opt;
   }
   
+  // restart
+  virtual void restart() override
+  {
+    std::cout << "RESTART!!!!!!" << std::endl;
+  }
+
+  // start
+  virtual void start() override
+  {
+    std::cout << "START!!!!!!" << std::endl;
+  }
   bool testval = false;
 };
 

@@ -9,8 +9,6 @@ namespace wfc{
 template<typename Opt, typename StatOpt>
 struct instance_handler_
 {
-  /*typedef Opt options_type;
-  typedef StatOpt statoptions_type;*/
   typedef domain_config_t<Opt, StatOpt> domain_config;
   typedef typename domain_config::domain_options domain_options;
   
@@ -20,7 +18,7 @@ struct instance_handler_
   virtual void initialize_domain() = 0;
   virtual void reconfigure_domain_basic(const domain_options& opt) = 0;
   virtual void reconfigure_domain(const domain_config& conf) = 0;
-  virtual void ready_domain() = 0;
+  virtual void restart_domain() = 0;
   virtual void start_domain() = 0;
   virtual void stop_domain() = 0;
 };

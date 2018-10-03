@@ -34,13 +34,13 @@ public:
     * @brief create
     * @details create
     */
-  virtual void start() { this->ready(); }
+  virtual void start() { this->restart(); }
 
   /**
     * @brief create
     * @details create
     */
-  virtual void ready() {};
+  virtual void restart() {};
   
   /**
     * @brief create

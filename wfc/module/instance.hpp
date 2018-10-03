@@ -177,7 +177,7 @@ private:
     {
       if ( _object != nullptr )
       {
-        _object->stop();
+        get_()->stop_domain();
         if ( _global )
         {
           _global->registry.erase(_config.name);
@@ -190,10 +190,7 @@ private:
 
   void startup_(const std::string& ) 
   {
-    if ( _object != nullptr )
-    {
-      _object->start();
-    }
+    get_()->start_domain();
     _startup = true;
   }
 
@@ -203,7 +200,7 @@ private:
     if ( auto obj = this->create_or_stop_if_() )
     {
       get_(obj)->initialize_domain();
-      obj->start();
+      get_(obj)->start_domain();
     }
   }
 
@@ -215,7 +212,7 @@ private:
     }
     else if ( _object != nullptr )
     {
-      get_()->ready_domain();
+      get_()->restart_domain();
     }
     else
     {
@@ -228,7 +225,7 @@ private:
     if ( _object != nullptr )
     {
       if ( _ready_for_stop )
-        _object->stop();
+        get_()->stop_domain();
       _object = nullptr;
     }
     _ready_for_stop = false;

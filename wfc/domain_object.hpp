@@ -392,6 +392,17 @@ public:
     return nullptr;
   }
   
+  void idle(std::function<void()> fun)
+  {
+#error Сделать доступным только в start или configure, но не restart, reconfigure, initialize 
+    this->common_workflow()->create_timer(std::chrono::seconds(1), fun);
+  }
+
+  void idle(workflow_type::duration_t duration, std::function<void()> fun)
+  {
+    this->common_workflow()->create_timer(duration, fun);
+  }
+
   /**
    * @brief Определяет наличие дополнительного аргумента переданного этому объекту через командную строку
    * @param arg имя аргумент
@@ -728,7 +739,7 @@ private:
   virtual void initialize_domain() final;
   virtual void reconfigure_domain_basic(const domain_options& opt) final;
   virtual void reconfigure_domain(const domain_config& conf) final;
-  virtual void ready_domain() final;
+  virtual void restart_domain() final;
   virtual void start_domain() final;
   virtual void stop_domain() final;
 
@@ -745,7 +756,7 @@ private:
   const io_id_t  _io_id;
   std::string    _name;
   global_ptr     _global;
-  domain_config    _config;
+  domain_config  _config;
   owner_type     _owner;
   workflow_ptr   _workflow;
   statistics_ptr _statistics;
@@ -755,28 +766,28 @@ private:
 
 template<typename Itf, typename Opt, typename StatOpt>
 void domain_object<Itf, Opt, StatOpt>::domain_generate(domain_config& conf, const std::string& type) 
-  {
-    conf = this->generate(type);
-  }
+{
+  conf = this->generate(type);
+}
 
 template<typename Itf, typename Opt, typename StatOpt>
 void domain_object<Itf, Opt, StatOpt>::create_domain(const std::string& objname, global_ptr g ) 
-  {
-    _name = objname;
-    _global = g;
-    this->create();
-  }
+{
+  _name = objname;
+  _global = g;
+  this->create();
+}
 
 template<typename Itf, typename Opt, typename StatOpt>
 void domain_object<Itf, Opt, StatOpt>::configure_domain(const domain_config& opt)
-  {
-    _config = opt;
-    _workflow = nullptr; // Ибо нефиг. До инициализации ничем пользоватся нельзя
-    _conf_flag = false;
-    if (auto g = this->global() )
-      g->cpu.set_cpu(_name, opt.cpu);
-    this->configure();
-  }
+{
+  _config = opt;
+  _workflow = nullptr; // Ибо нефиг. До инициализации ничем пользоваться нельзя
+  _conf_flag = false;
+  if (auto g = this->global() )
+    g->cpu.set_cpu(_name, opt.cpu);
+  this->configure();
+}
 
 template<typename Itf, typename Opt, typename StatOpt>
 void domain_object<Itf, Opt, StatOpt>::initialize_domain() 
@@ -805,46 +816,43 @@ void domain_object<Itf, Opt, StatOpt>::initialize_domain()
 
 template<typename Itf, typename Opt, typename StatOpt>
 void domain_object<Itf, Opt, StatOpt>::reconfigure_domain_basic(const domain_options& opt)
-  {
-    _conf_flag = false;
-    static_cast<domain_options&>(_config) = opt;
-    if (auto g = this->global() )
-      g->cpu.set_cpu(_name, opt.cpu);
-    this->reconfigure_basic();
-  }
+{
+  _conf_flag = false;
+  static_cast<domain_options&>(_config) = opt;
+  if (auto g = this->global() )
+    g->cpu.set_cpu(_name, opt.cpu);
+  this->reconfigure_basic();
+}
 
 template<typename Itf, typename Opt, typename StatOpt>
 void domain_object<Itf, Opt, StatOpt>::reconfigure_domain(const domain_config& conf)
-  {
-    _conf_flag = true;
-    _config = conf;
-    if (auto g = this->global() )
-      g->cpu.set_cpu(_name, static_cast<domain_options&>(_config).cpu);
-    this->reconfigure();
-  }
+{
+  _conf_flag = true;
+  _config = conf;
+  if (auto g = this->global() )
+    g->cpu.set_cpu(_name, static_cast<domain_options&>(_config).cpu);
+  this->reconfigure();
+}
   
 template<typename Itf, typename Opt, typename StatOpt>
-void domain_object<Itf, Opt, StatOpt>::ready_domain() 
-  {
-    if ( _conf_flag )
-      this->ready();
-    _conf_flag = false;
-  }
-
+void domain_object<Itf, Opt, StatOpt>::restart_domain() 
+{
+  if ( _conf_flag )
+    this->restart();
+  _conf_flag = false;
+}
 
 template<typename Itf, typename Opt, typename StatOpt>
 void domain_object<Itf, Opt, StatOpt>::start_domain()
-  {
-    this->start();
-  }
+{
+  this->start();
+}
   
-
 template<typename Itf, typename Opt, typename StatOpt>
 void domain_object<Itf, Opt, StatOpt>::stop_domain()
-  {
-    this->stop();
-  }
-
+{
+  this->stop();
+}
 
 }
 
