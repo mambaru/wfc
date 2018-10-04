@@ -394,13 +394,19 @@ public:
   
   void idle(std::function<void()> fun)
   {
-#error Сделать доступным только в start или configure, но не restart, reconfigure, initialize 
-    this->common_workflow()->create_timer(std::chrono::seconds(1), fun);
+    this->idle(std::chrono::seconds(1), fun);
   }
 
   void idle(workflow_type::duration_t duration, std::function<void()> fun)
   {
-    this->common_workflow()->create_timer(duration, fun);
+    if ( _idle_flag )
+    {
+      this->common_workflow()->create_timer(duration, fun);
+    }
+    else
+    {
+      SYSTEM_LOG_FATAL("Idle timer can be set only in 'start' method")
+    }
   }
 
   /**
@@ -753,6 +759,7 @@ private:
   }
 private:
   bool _conf_flag = false;
+  bool _idle_flag = false;
   const io_id_t  _io_id;
   std::string    _name;
   global_ptr     _global;
@@ -845,7 +852,9 @@ void domain_object<Itf, Opt, StatOpt>::restart_domain()
 template<typename Itf, typename Opt, typename StatOpt>
 void domain_object<Itf, Opt, StatOpt>::start_domain()
 {
+  _idle_flag = true;
   this->start();
+  _idle_flag = false;
 }
   
 template<typename Itf, typename Opt, typename StatOpt>
