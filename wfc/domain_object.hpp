@@ -464,6 +464,13 @@ public:
   template<typename T>
   T get_arg_t(const std::string& arg, std::string* err = nullptr) const
   {
+    //static_assert( std::is_integral<T>::value, "Only for integral types. For std::string use get_arg()." );
+    return this->get_arg_t_<T>(arg, err, fas::bool_<std::is_integral<T>::value>());
+  }
+
+  template<typename T>
+  T get_arg_t_(const std::string& arg, std::string* err, fas::true_) const
+  {
     T val = T();
     std::string str = this->get_arg(arg);
     if ( str.empty() )
@@ -477,6 +484,28 @@ public:
     return val;
   }
 
+  template<typename T>
+  T get_arg_t_(const std::string& arg, std::string* err, fas::false_) const
+  {
+    static_assert( std::is_same<T, std::string>::value, "Only for integral types or std::string." );
+    std::string val;
+    std::string str = this->get_arg(arg);
+    if ( str.empty() )
+      return val;
+    
+    if ( str[0]!='\'' && str[0]!='\"' )
+      return str;
+    
+    std::replace(str.begin(), str.end(), '\'', '\"');
+    
+    typedef typename json::value< std::string >::serializer serializer;
+    json_error e;
+    serializer()(val, str.begin(), str.end(), &e );
+    if ( e && err!=nullptr )
+      *err = json::strerror::message(e);
+    return val;
+  }
+  
   /**
    * @brief Регистрация пользовательского потока (thread)
    * @details Регистрация пользовательского потока нужна для того чтобы система могла более гибко распределять их по ядрам CPU.
