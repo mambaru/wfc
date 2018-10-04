@@ -57,7 +57,7 @@ public:
     std::lock_guard<mutex_type> lk(_mutex);
     _global = g;
     _object = std::make_shared<object_type>();
-    get_()->create_domain(obj_name, _global);
+    get_(_object)->create_domain(obj_name, _global);
     if ( _global != nullptr )
       _global->registry.set(obj_name, _object);
   }
@@ -165,7 +165,7 @@ private:
       if ( _object == nullptr )
       {
         _object = std::make_shared<object_type>();
-        get_()->create_domain(_config.name, _global);
+        get_(_object)->create_domain(_config.name, _global);
       }
 
       if (_global)
@@ -177,7 +177,7 @@ private:
     {
       if ( _object != nullptr )
       {
-        get_()->stop_domain();
+        get_(_object)->stop_domain();
         if ( _global )
         {
           _global->registry.erase(_config.name);
@@ -190,7 +190,10 @@ private:
 
   void startup_(const std::string& ) 
   {
-    get_()->start_domain();
+    if ( auto obj = get_() )
+    {  
+      obj->start_domain(); 
+    }
     _startup = true;
   }
 
@@ -210,9 +213,9 @@ private:
     {
       this->startup_(arg);
     }
-    else if ( _object != nullptr )
+    else if ( auto obj = get_() )
     {
-      get_()->restart_domain();
+      obj->restart_domain();
     }
     else
     {
@@ -222,10 +225,12 @@ private:
 
   void stop_(const std::string& /*arg*/)
   {
-    if ( _object != nullptr )
+    if ( auto obj = get_() )
     {
       if ( _ready_for_stop )
-        get_()->stop_domain();
+      {
+        obj->stop_domain();
+      }
       _object = nullptr;
     }
     _ready_for_stop = false;
