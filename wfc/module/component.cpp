@@ -22,6 +22,11 @@ std::string component::description() const
   return _impl->description();
 }
 
+std::string component::help() const
+{
+  return _impl->help();
+}
+
 std::string component::interface_name() const
 {
   return _impl->interface_name();

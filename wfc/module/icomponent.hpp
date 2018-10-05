@@ -23,6 +23,7 @@ struct icomponent: iinterface
 
   virtual std::string name() const  = 0;
   virtual std::string description() const = 0;
+  virtual std::string help() const = 0;
   virtual std::string interface_name() const = 0;
 
   virtual std::string generate(const std::string& type)  = 0;

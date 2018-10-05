@@ -29,6 +29,40 @@ public:
   {
     return "ijsonrpc";
   }
+  
+  std::list<std::string> get_method_list() const
+  {
+    std::list<std::string> result;
+    typedef typename MethodList::aspect::template select_group< wjrpc::_method_ >::type tag_list;
+    this->get_method_list_(result, tag_list() );
+    return result;
+  }
+  
+  virtual std::string help() const override
+  {
+    std::stringstream ss;
+    ss << "Allowed methods for '" << this->name() << "':" << std::endl;
+    std::list<std::string> method_list = this->get_method_list();
+    for (auto n : method_list)
+    {
+      ss << "  " << n << std::endl;
+    }
+    return ss.str();
+  }
+
+private:
+  
+  static void get_method_list_(std::list<std::string>& , fas::empty_list) { }
+ 
+  template<typename L>
+  void get_method_list_(std::list<std::string>& res, L) const
+  {
+    typedef typename fas::head<L>::type tag;
+    res.push_back( tag()() );
+    this->get_method_list_( res, typename fas::tail<L>::type() );
+  }
+
+  
 };
 
 }}

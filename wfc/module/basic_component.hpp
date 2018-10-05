@@ -116,6 +116,11 @@ public:
     return "no description";
   }
 
+  virtual std::string help() const override
+  {
+    return std::string("Sorry, no help for '") + this->name() + "'.";
+  }
+
   virtual std::string interface_name() const override
   {
     return typeid( domain_interface ).name();

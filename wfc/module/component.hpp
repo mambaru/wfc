@@ -15,6 +15,7 @@ public:
   
   // icomponent
   virtual std::string name() const override;
+  virtual std::string help() const override;
   virtual std::string description() const override;
   virtual std::string interface_name() const override;
 

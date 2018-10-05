@@ -13,14 +13,14 @@ struct statistics_options_json
   JSON_NAME(result_map)
   JSON_NAME(result_queue)
 
-  typedef wfc::json::object<
+  typedef json::object<
     statistics_options,
-    wfc::json::member_list<
-      wfc::json::member<n_interval_ms, statistics_options, time_t, &statistics_options::interval_ms>,
-      wfc::json::member<n_handler_map, statistics_options, std::string, &statistics_options::handler_map>,
-      wfc::json::member<n_result_queue, statistics_options, std::string, &statistics_options::result_queue>
+    json::member_list<
+      json::member<n_interval_ms, statistics_options, time_t, &statistics_options::interval_ms>,
+      json::member<n_handler_map, statistics_options, std::string, &statistics_options::handler_map>,
+      json::member<n_result_queue, statistics_options, std::string, &statistics_options::result_queue>
     >,
-    ::wjson::strict_mode
+    json::strict_mode
   > type;
   typedef typename type::target      target;
   typedef typename type::member_list member_list;
