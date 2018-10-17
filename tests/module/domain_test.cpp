@@ -94,5 +94,4 @@ int main()
     return itst->testtest();
   else
     return 8;
-  return 0;
 }

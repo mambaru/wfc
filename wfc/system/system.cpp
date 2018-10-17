@@ -104,7 +104,6 @@ std::function<void()> daemonize(bool wait)
     int status = EXIT_SUCCESS;
     if (wait) ::wait(&status);
     ::exit(status);
-    return nullptr;
   }
   
   pid_t ppid = ::getppid();
