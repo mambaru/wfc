@@ -9,7 +9,7 @@ package::~package()
   
 }
   
-package::package(std::shared_ptr<ipackage> p)
+package::package(const std::shared_ptr<ipackage>& p)
   : _impl(p)
 {
   
@@ -22,7 +22,7 @@ std::shared_ptr<ibuild_info> package::build_info()
 
 std::string package::name() const
 {
-  return _impl->build_info()->name();
+  return _impl->name();
 }
 
 std::string package::description() const

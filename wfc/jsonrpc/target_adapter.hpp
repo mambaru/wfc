@@ -15,14 +15,6 @@ struct target_adapter: ijsonrpc
   typedef std::weak_ptr<ijsonrpc> jsonrpc_ptr_t;
   
   target_adapter() {};
-  /*
-  target_adapter(const target_adapter&) = default;
-  target_adapter(target_adapter&&) = default;
-
-  target_adapter& operator=(const target_adapter&) = default;
-  target_adapter& operator=(target_adapter&&) = default;
-  */
-
   target_adapter(itf_ptr_t itf, jsonrpc_ptr_t jsonrpc)
     : _itf(itf), _jsonrpc(jsonrpc)
   {};
@@ -80,29 +72,27 @@ struct target_adapter: ijsonrpc
     }
     else if ( handler != nullptr )
     {
-      COMMON_LOG_ERROR("jsonrpc taraget: service_unavailable")
       ::wjrpc::aux::send_error(std::move(holder), std::make_unique< ::wjrpc::service_unavailable > (), std::move(handler));
     }
     else
     {
-      COMMON_LOG_ERROR("jsonrpc taraget: service_unavailable")
     }
   }
   
   template<typename Error>
   incoming_holder create_error_holder_(call_id_t call_id)
   {
-        ::wfc::jsonrpc::outgoing_error< ::wfc::jsonrpc::error > err;
-        err.error = std::make_unique<Error>();
-        err.id = std::make_unique<data_type>();
-        ::wjson::value<call_id_t>::serializer()( call_id,  std::back_inserter(*(err.id)) );
+    jsonrpc::outgoing_error< ::wfc::jsonrpc::error > err;
+    err.error = std::make_unique<Error>();
+    err.id = std::make_unique<data_type>();
+    json::value<call_id_t>::serializer()( call_id,  std::back_inserter(*(err.id)) );
 
-        auto d = std::make_unique<data_type>();
-        d->reserve(100);
-        ::wfc::jsonrpc::outgoing_error_json< ::wfc::jsonrpc::error_json >::serializer()(err, std::back_inserter(*d));
-        incoming_holder holder( std::move(d) );
-        holder.parse(nullptr);
-        return std::move(holder);
+    auto d = std::make_unique<data_type>();
+    d->reserve(100);
+    jsonrpc::outgoing_error_json< ::wfc::jsonrpc::error_json >::serializer()(err, std::back_inserter(*d));
+    incoming_holder holder( std::move(d) );
+    holder.parse(nullptr);
+    return std::move(holder);
   }
 
   virtual void perform_outgoing(outgoing_holder holder, io_id_t io_id) override
@@ -137,39 +127,13 @@ struct target_adapter: ijsonrpc
             
             aux::send_error(std::move(holder), std::make_unique<parse_error>(), err_handler );
           }
-
         }
-        /*
-        while ( d!=nullptr )
-        {
-          incoming_holder holder( std::move(d) );
-          d = holder.parse([handler](outgoing_holder holder)
-          {
-            auto d = holder.detach();
-            handler( incoming_holder( std::move(d)));
-          });
-          if ( holder )
-            handler( std::move(holder) );
-        }
-        */
       });
     }
     else if ( auto handler = holder.result_handler() )
     {
       if ( auto call_id = holder.call_id() )
       {
-        /*
-        ::wfc::jsonrpc::outgoing_error< ::wfc::jsonrpc::error > err;
-        err.error = std::make_unique<service_unavailable>();
-        err.id = std::make_unique<data_type>();
-        ::iow::json::value<call_id_t>::serializer()( call_id,  std::back_inserter(*(err.id)) );
-
-        auto d = std::make_unique<data_type>();
-        d->reserve(100);
-        ::wfc::jsonrpc::outgoing_error_json< ::wfc::jsonrpc::error_json >::serializer()(err, std::back_inserter(*d));
-        incoming_holder holder( std::move(d) );
-        holder.parse();
-        */
         auto holder = create_error_holder_<service_unavailable>(call_id);
         handler( std::move(holder) );
       }

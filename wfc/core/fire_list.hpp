@@ -45,7 +45,7 @@ public:
     return _fire_list.size();
   }
   
-  void fire(Args... args)
+  void fire(Args... args) const
   {
     list_type lst;
     {

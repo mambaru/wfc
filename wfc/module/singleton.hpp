@@ -4,11 +4,14 @@
 
 namespace wfc{
 
+/**
+ * @brief singleton
+ */
 template<
   typename Name,
   typename Instance,
   typename DomainJson,
-  int Features = 0,
+  int Features = component_features::Defaults,
   typename StatJson = nostat_json
 >
 class singleton

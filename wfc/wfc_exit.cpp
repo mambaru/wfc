@@ -5,7 +5,7 @@
 //
 
 
-#include <wfc/core/global.hpp>
+#include <wfc/core/wfcglobal.hpp>
 #include <wfc/core/icore.hpp>
 #include <iow/memory.hpp>
 
@@ -18,7 +18,7 @@ void wfc_exit()
   }
 }
 
-void wfc_exit_with_error(std::string message)
+void wfc_exit_with_error(const std::string& message)
 {
   if ( auto g = ::wfc::wfcglobal::static_global )
   {
@@ -32,7 +32,7 @@ void wfc_restart()
   wfc_exit();
 }
 
-void wfc_restart_with_error(std::string message)
+void wfc_restart_with_error(const std::string& message)
 {
   wfc_exit_with_error(message);
 }

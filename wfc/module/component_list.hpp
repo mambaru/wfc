@@ -2,7 +2,7 @@
 
 #include <wfc/module/imodule.hpp>
 #include <wfc/module/icomponent.hpp>
-#include <wfc/core/global.hpp>
+#include <wfc/core/wfcglobal.hpp>
 
 #include <fas/type_list.hpp>
 #include <memory>
@@ -64,7 +64,7 @@ public:
 
 private:
 
-  void create_(fas::empty_list) {}
+  static void create_(fas::empty_list) {}
   
   template<typename H, typename L>
   void create_( fas::type_list< H, L > ) 

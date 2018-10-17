@@ -11,19 +11,19 @@
 
 namespace wfc{
 
-instance_args::instance_args( std::string name )
-  : _name(name)
+instance_args::instance_args( const std::string& nm)
+  : _name(nm)
 {}
     
-instance_args::instance_args( std::string name, args_map args )
-  : _name( std::move(name) )
-  , _args( std::move(args) )
+instance_args::instance_args( const std::string& nm, const args_map& rgm )
+  : _name( std::move(nm) )
+  , _args( std::move(rgm) )
 {
 }
   
-void instance_args::insert( args_map args )
+void instance_args::insert( const args_map& rgm )
 {
-  for (const auto& i : args )
+  for (const auto& i : rgm )
   {
     _args[i.first] = i.second;
   }
@@ -53,7 +53,7 @@ bool instance_args::has(const std::string& key) const
   return _args.count(key) != 0;
 }
   
-instance_args::args_map instance_args::args() const
+const instance_args::args_map& instance_args::args() const
 {
   return _args;
 }

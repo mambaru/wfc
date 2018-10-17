@@ -33,44 +33,18 @@ if ( WFC_ENABLE_STAT )
   add_definitions(-DWFC_ENABLE_STAT)
 endif()
 
-find_package(Boost COMPONENTS system program_options filesystem date_time REQUIRED)
+find_package(Boost COMPONENTS system program_options filesystem date_time regex REQUIRED)
 
-IF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
-    execute_process(
-      COMMAND ${CMAKE_CXX_COMPILER} -dumpversion
-      OUTPUT_VARIABLE gcc_compiler_version
-    )
-
-    STRING(REGEX REPLACE "^([0-9]+)\\..*" "\\1" gcc_major_version "${gcc_compiler_version}")
-    STRING(REGEX REPLACE "^[0-9]+\\.([0-9]+).*" "\\1" gcc_minor_version "${gcc_compiler_version}")
-    MATH(EXPR gcc_version_number "${gcc_major_version} * 1000 + ${gcc_minor_version}" )
-
-    message(STATUS "C++ compiler version: ${gcc_compiler_version} major: ${gcc_major_version} minor: ${gcc_minor_version} number: ${gcc_version_number} [${CMAKE_CXX_COMPILER}]")
-
-    SET(WFC_CXX_STANDARD    "-std=c++11")
-    SET(WFC_CXX_WARN_FLAGS  "-W -Wall -pedantic -Wextra")
-    if ( NOT ${gcc_version_number} LESS 4008 )
-      SET(WFC_CXX_WARN_FLAGS    "${WFC_CXX_WARN_FLAGS} -ftemplate-backtrace-limit=0 ")
-    endif()
-
-    SET(WFC_CXX_DEFINES     "-D_THREAD_SAFE -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -DBOOST_SYSTEM_NO_DEPRECATED -D_GLIBCXX_USE_NANOSLEEP")
-    SET(WFC_CXX_ARCH_FLAGS  "-mfpmath=sse -msse2")
-    SET(CMAKE_CXX_FLAGS       "${CXX_FLAGS} ${WFC_CXX_STANDARD} ${WFC_CXX_WARN_FLAGS} ${WFC_CXX_DEFINES} ${WFC_CXX_ARCH_FLAGS}")
-    SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb ")
-    SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -ggdb -DNDEBUG -march=core2 ") 
-    SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -ggdb -DNDEBUG -march=core2 ") 
-    SET(CMAKE_C_FLAGS_DEBUG "-O0 -ggdb ")
-    SET(CMAKE_C_FLAGS_RELEASE "-O2 -ggdb -march=core2 -DNDEBUG")
-ENDIF("${CMAKE_COMPILER_IS_GNUCXX}" MATCHES "1")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/lib")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/lib")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 set(FASLIB_DIR "${CMAKE_SOURCE_DIR}/wfcroot/faslib")
 set(IOWLIB_DIR "${CMAKE_SOURCE_DIR}/wfcroot/iow")
 set(FAS_TESTING_CPP "${FASLIB_DIR}/fas/testing/testing.cpp")
-set(WFC_TEST_DIR "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}-tests")
+set(WFC_TEST_DIR "${CMAKE_BINARY_DIR}/tests/${CMAKE_CURRENT_PROJECT_NAME}")
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
+include(mambaopt)
 
 include_directories(wfcroot/wfc)
 include_directories(wfcroot/iow)

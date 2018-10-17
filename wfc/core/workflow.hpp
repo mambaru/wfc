@@ -6,6 +6,24 @@
 
 namespace wfc{
 
-using ::wflow::workflow;
+/** 
+ * @brief workflow  
+ * @details Описание workflow   
+ */
+class workflow
+  : public ::wflow::workflow
+{
+  typedef ::wflow::workflow super;
+public:
+  workflow(io_service_type& io )
+    : super(io)
+  {};
+
+  workflow(io_service_type& io, const workflow_options& opt )
+    : super(io, opt)
+  {};
+};
+
+/*using ::wflow::workflow;*/
 
 }

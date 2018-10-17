@@ -10,17 +10,18 @@ class component
   : public icomponent
 {
 public:
-  component(std::shared_ptr<icomponent>);
+  explicit component(const std::shared_ptr<icomponent>& p);
   virtual ~component();
   
   // icomponent
   virtual std::string name() const override;
+  virtual std::string help() const override;
   virtual std::string description() const override;
   virtual std::string interface_name() const override;
 
   virtual std::string generate(const std::string& type) override;
-  virtual bool parse(const std::string& conf, json::json_error* err) override;
-  virtual bool configure(const std::string& conf, json::json_error* err) override;
+  virtual bool parse(const std::string& strjson, json::json_error* err) override;
+  virtual bool configure(const std::string& strjson, json::json_error* err) override;
   virtual void create( std::shared_ptr<wfcglobal>) override;
 
 // only for external control

@@ -1,20 +1,21 @@
+include(BuildInfo)
+include(mambaopt)
 
-if ( WFC_READY )
-  include(BuildInfo)
-  include(Wfc)
-else()
-  find_package(Boost COMPONENTS system program_options filesystem date_time REQUIRED)
-endif()
+include(FindThreads)
+find_package(Boost COMPONENTS system program_options filesystem date_time regex REQUIRED)
+
 
 SET(
   wfc_source_list
   wfc.cpp
   wfc_exit.cpp
+  iinterface.cpp
   system/system.cpp
-  core/global.cpp
+  core/wfcglobal.cpp
   core/cpuset.cpp
   core/instance_args.cpp
   core/extended_args.cpp
+  core/object_registry.cpp
   statistics/statistics.cpp
   module/component.cpp
   module/module.cpp
@@ -26,10 +27,17 @@ add_library(
   ${wfc_source_list}
 )
 
-target_link_libraries(wfc ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+set(
+  liblst
+  ${WRTSTAT_LIB}
+  ${WLOG_LIB}
+  ${WFLOW_LIB}
+  ${Boost_LIBRARIES} 
+  ${CMAKE_THREAD_LIBS_INIT} 
+)
 
-if ( WFC_READY )
-  build_info(wfc wfc)
-endif()
+target_link_libraries(wfc ${liblst})
+
+build_info(wfc wfc)
 
 install(TARGETS wfc DESTINATION ${CMAKE_INSTALL_PREFIX})

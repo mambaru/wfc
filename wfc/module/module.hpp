@@ -2,7 +2,6 @@
 
 #include <wfc/module/imodule.hpp>
 #include <wfc/module/icomponent.hpp>
-#include <wfc/core/global.hpp>
 #include <memory>
 #include <string>
 
@@ -12,7 +11,7 @@ class module
   : public imodule
 {
 public:
-  module(std::shared_ptr<imodule>);
+  explicit module(const std::shared_ptr<imodule>& p);
   virtual ~module();
   virtual std::string name() const override;
   virtual std::string description() const override;

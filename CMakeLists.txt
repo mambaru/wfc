@@ -1,23 +1,21 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 
 project(wfc)
 
-include_directories(.)
-include_directories(../faslib)
-include_directories(../iow)
-include_directories(../wjson)
-include_directories(../wrtstat)
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")                                                     
+include(mambaru)
 
-if ( NOT WFC_READY )
-  link_directories( "${CMAKE_CURRENT_SOURCE_DIR}/../iow/build/" )
+if ( WFC_ENABLE_STAT )
+  add_definitions(-DWFC_ENABLE_STAT)
 endif()
 
 
 add_subdirectory(config)
 add_subdirectory(wfc)
 
-
 if ( BUILD_TESTING )
+  enable_testing()
   add_subdirectory(tests)
+  add_subdirectory(examples)
 endif()
 

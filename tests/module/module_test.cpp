@@ -55,6 +55,8 @@ struct helper
     {
       ++doit_count;
     }
+    
+    test() {  this->doit();  } //cppcheck
   };
   
   class object: public ::wfc::basic_component< Name, wfc::instance<test>, options_json, Singleton, wfc::nostat_json > {};

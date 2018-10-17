@@ -7,7 +7,7 @@ component::~component()
 {
 }
 
-component::component(std::shared_ptr<icomponent> p)
+component::component(const std::shared_ptr<icomponent>& p)
   : _impl(p)
 {
 }
@@ -20,6 +20,11 @@ std::string component::name() const
 std::string component::description() const
 {
   return _impl->description();
+}
+
+std::string component::help() const
+{
+  return _impl->help();
 }
 
 std::string component::interface_name() const

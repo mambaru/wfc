@@ -16,16 +16,16 @@ public:
   typedef wrtstat::aggregated_data::ptr aggregated_ptr;
 
   virtual ~statistics();
-  statistics(options_type opt);
+  explicit statistics(options_type opt);
   void enable(bool val);
   size_t aggregators_count() const;
   std::string get_name(size_t i) const;
   aggregated_ptr pop(size_t i);
   
-  value_factory create_value_factory(const std::string& name);
-  size_factory create_size_factory(const std::string& name);
-  time_factory create_time_factory(const std::string& name);
-  composite_factory create_composite_factory(const std::string& time, const 
+  value_meter create_value_meter(const std::string& name);
+  size_meter create_size_meter(const std::string& name);
+  time_meter create_time_meter(const std::string& name);
+  composite_meter create_composite_meter(const std::string& time, const 
     std::string& read, const std::string& write, bool summary_size);
 private:
   std::shared_ptr<impl> _impl;

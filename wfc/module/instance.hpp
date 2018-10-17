@@ -1,15 +1,16 @@
 #pragma once
 
-#include <wfc/module/instance_options.hpp>
 #include <wfc/module/iinstance.hpp>
-#include <wfc/core/global.hpp>
-
+#include <wfc/core/wfcglobal.hpp>
 #include <memory>
 #include <string>
 #include <stdexcept>
 
 namespace wfc{
 
+/**
+ * @brief multiton
+ */
 template<typename DomainObject>
 class instance
   : public iinstance
@@ -17,14 +18,11 @@ class instance
 public:
   typedef std::recursive_mutex mutex_type;
   typedef DomainObject object_type;
+  typedef typename object_type::instance_handler_t instance_handler_t;
   typedef typename object_type::domain_interface domain_interface;
-  typedef typename object_type::config_type config_type;
-  typedef typename object_type::basic_options basic_options;
-  typedef typename object_type::statoptions_type statistics_options;
-  /*
-  typedef typename object_type::options_type domain_options_type;
-  typedef domain_instance_options<domain_options_type> options_type;
-  */
+  typedef typename object_type::domain_config domain_config;
+  typedef typename object_type::domain_options domain_options;
+  typedef typename object_type::customstat_options customstat_options;
 
   typedef std::shared_ptr<object_type> object_ptr;
   typedef std::shared_ptr<wfcglobal> global_ptr;
@@ -50,42 +48,42 @@ public:
     return _config.shutdown_priority;
   }
   
-  void create( std::shared_ptr<wfcglobal> g) 
+  void create( const std::shared_ptr<wfcglobal>& g) 
   {
     std::lock_guard<mutex_type> lk(_mutex);
     _global = g;
   }
 
-  void create( std::string name, std::shared_ptr<wfcglobal> g) 
+  void create( const std::string& obj_name, const std::shared_ptr<wfcglobal>& g) 
   {
     // для синглетонов
     std::lock_guard<mutex_type> lk(_mutex);
     _global = g;
     _object = std::make_shared<object_type>();
-    _object->create_domain(name, _global);
+    get_(_object)->create_domain(obj_name, _global);
     if ( _global != nullptr )
-      _global->registry.set(name, _object);
+      _global->registry.set(obj_name, _object);
   }
 
-  virtual void configure(const config_type& opt)
+  virtual void configure(const domain_config& opt)
   {
     std::lock_guard<mutex_type> lk(_mutex);
     _instance_reconfigured = true;
     _config = opt;
     if ( auto obj = this->create_or_stop_if_() ) 
-      obj->configure_domain(_config);
+      get_(obj)->configure_domain(_config);
   }
 
-  virtual void reconfigure_basic( const basic_options& opt )
+  virtual void reconfigure_basic( const domain_options& opt )
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    static_cast<basic_options&>( _config ) = opt;
+    static_cast<domain_options&>( _config ) = opt;
     _startup = _startup && !( _object==nullptr && _config.enabled );
     if ( auto obj = this->create_or_stop_if_() ) 
-      obj->reconfigure_domain_basic( _config );
+      get_(obj)->reconfigure_domain_basic( _config );
   }
 
-  virtual void reconfigure(const config_type& opt)  
+  virtual void reconfigure(const domain_config& opt)  
   {
     std::lock_guard<mutex_type> lk(_mutex);
     _instance_reconfigured = true;
@@ -96,7 +94,7 @@ public:
 
     if ( auto obj = this->create_or_stop_if_() ) 
     {
-      obj->reconfigure_domain(_config);
+      get_(obj)->reconfigure_domain(_config);
     }
   }
 
@@ -105,7 +103,7 @@ public:
     std::lock_guard<mutex_type> lk(_mutex);
     if (auto obj = _object )
     {
-      obj->initialize_domain( );
+      get_(obj)->initialize_domain( );
     }
   }
 
@@ -139,10 +137,10 @@ public:
 
 // iinterface
 
-  void generate(config_type& opt, const std::string& type) const 
+  void generate(domain_config& opt, const std::string& type) const 
   {
     auto obj = std::make_shared<object_type>();
-    obj->domain_generate( opt, type );
+    get_(obj)->domain_generate( opt, type );
   }
 
 // -------------------------------------------------
@@ -170,7 +168,7 @@ private:
       if ( _object == nullptr )
       {
         _object = std::make_shared<object_type>();
-        _object->create_domain(_config.name, _global);
+        get_(_object)->create_domain(_config.name, _global);
       }
 
       if (_global)
@@ -182,7 +180,7 @@ private:
     {
       if ( _object != nullptr )
       {
-        _object->stop();
+        get_(_object)->stop_domain();
         if ( _global )
         {
           _global->registry.erase(_config.name);
@@ -195,9 +193,9 @@ private:
 
   void startup_(const std::string& ) 
   {
-    if ( _object != nullptr )
-    {
-      _object->start();
+    if ( auto obj = get_() )
+    {  
+      obj->start_domain(); 
     }
     _startup = true;
   }
@@ -207,8 +205,8 @@ private:
     _config.enabled = true;
     if ( auto obj = this->create_or_stop_if_() )
     {
-      obj->initialize_domain();
-      obj->start();
+      get_(obj)->initialize_domain();
+      get_(obj)->start_domain();
     }
   }
 
@@ -218,9 +216,9 @@ private:
     {
       this->startup_(arg);
     }
-    else if ( _object != nullptr )
+    else if ( auto obj = get_() )
     {
-      _object->ready_domain();
+      obj->restart_domain();
     }
     else
     {
@@ -230,13 +228,25 @@ private:
 
   void stop_(const std::string& /*arg*/)
   {
-    if ( _object != nullptr )
+    if ( auto obj = get_() )
     {
       if ( _ready_for_stop )
-        _object->stop();
+      {
+        obj->stop_domain();
+      }
       _object = nullptr;
     }
     _ready_for_stop = false;
+  }
+
+  instance_handler_t* get_()
+  {
+    return get_(_object);
+  }
+
+  instance_handler_t* get_(object_ptr& obj) const
+  {
+    return obj->inst_handler_();
   }
 
 private:
@@ -246,9 +256,8 @@ private:
   // Объект запущен (вызван метод старт)
   bool         _startup = false;
   global_ptr   _global;
-  config_type  _config;
+  domain_config  _config;
   object_ptr   _object;
-
   mutable mutex_type _mutex;
 };
 

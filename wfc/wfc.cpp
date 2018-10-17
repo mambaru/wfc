@@ -9,13 +9,13 @@
 #include <wfc/core/icore.hpp>
 #include <wfc/core/istartup.hpp>
 #include <wfc/core/build_info.hpp>
-#include <wfc/core/global.hpp>
+#include <wfc/core/wfcglobal.hpp>
 #include <iostream>
 #include "wfc_build_info.h"
 
 namespace wfc{
 
-basic_wfc::basic_wfc(std::shared_ptr<ibuild_info> bi, package_list packages )
+basic_wfc::basic_wfc(std::shared_ptr<ibuild_info> bi, const package_list& packages )
   : _packages(packages)
 {
   _global = std::make_shared<wfcglobal>(_io_service);
@@ -24,7 +24,7 @@ basic_wfc::basic_wfc(std::shared_ptr<ibuild_info> bi, package_list packages )
 
   for (const auto& p: packages)
   {
-    _global->registry.set("package", p->build_info()->name(), p);
+    _global->registry.set("package", p->name(), p);
   }
 
   for (const auto& p: packages)
@@ -46,11 +46,6 @@ int basic_wfc::run(int argc, char* argv[], std::string helpstring)
     if ( !startup->ready_for_run() )
       return 0;
   }
-  else
-  {
-    return 1;
-  }
-
 
   int status = 0;
 
@@ -63,7 +58,7 @@ int basic_wfc::run(int argc, char* argv[], std::string helpstring)
     return 2;
   }
 
-  std::clog << "wfc::run finalize ... " << std::endl;
+  std::clog << "wfc::run finalize with status=" << status << "..." << std::endl;
 
   _global->registry.clear();
 

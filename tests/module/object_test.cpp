@@ -49,7 +49,7 @@ class test_multiton
 {};
 
 template<typename T>
-void test_gen()
+int test_gen()
 {
   T t;
   t.create(nullptr);
@@ -57,10 +57,18 @@ void test_gen()
   std::string genstr = t.generate("");
   std::cout << genstr << std::endl;
   t.configure(genstr, nullptr);
+  if (t.name()!="test")
+    return 1;
+  
+  return 0;
 }
 
 int main()
 {
-  test_gen<test_singleton>();
-  test_gen<test_multiton>();
+  options opt;
+  opt.test=0;
+  
+  int res = test_gen<test_singleton>();
+  res += test_gen<test_multiton>();
+  return res;
 }

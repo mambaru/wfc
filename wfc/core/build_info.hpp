@@ -22,17 +22,17 @@ public:
 
   virtual bool enabled() override
   {
-    return BuildInfo().enabled();
+    return _bi.enabled();
   }
 
   virtual std::string name() override
   {
-    return BuildInfo().name();
+    return _bi.name();
   }
 
   virtual std::string version_tag() override
   {
-    return BuildInfo().version_tag();
+    return _bi.version_tag();
   }
   
   virtual std::string version() override
@@ -47,68 +47,70 @@ public:
   
   virtual std::string compiler_version() override
   {
-    return BuildInfo().compiler_version();
+    return _bi.compiler_version();
   }
   
   virtual std::string version_ex() override
   {
-    return BuildInfo().version_ex();
+    return _bi.version_ex();
   }
 
   virtual std::string build_type() override
   {
-    return BuildInfo().build_type();
+    return _bi.build_type();
   }
 
   virtual std::string build_date() override
   {
-    return BuildInfo().build_date();
+    return _bi.build_date();
   }
 
   virtual std::string build_flags() override
   {
-    return BuildInfo().build_flags();
+    return _bi.build_flags();
   }
 
   virtual std::string build_count() override
   {
-    return BuildInfo().build_count();
+    return _bi.build_count();
   }
 
   virtual std::string branch() override
   {
-    return BuildInfo().branch();
+    return _bi.branch();
   }
 
   virtual std::string commit() override
   {
-    return BuildInfo().commit();
+    return _bi.commit();
   }
 
   virtual std::string commit_date() override
   {
-    return BuildInfo().commit_date();
+    return _bi.commit_date();
   }
 
   virtual std::string commit_author() override
   {
-    return BuildInfo().commit_author();
+    return _bi.commit_author();
   }
 
   virtual std::string initial_author() override
   {
-    return BuildInfo().initial_author();
+    return _bi.initial_author();
   }
 
   virtual std::string commit_message() override
   {
-    return BuildInfo().commit_message();
+    return _bi.commit_message();
   }
 
   virtual std::string all_authors() override
   {
-    return BuildInfo().all_authors();
+    return _bi.all_authors();
   }
+private:
+  BuildInfo _bi;
 };
 
 template<typename BuildInfo>
@@ -120,89 +122,87 @@ make_build_info()
 
 struct empty_build_info
 {
-
-  bool enabled()
+  static bool enabled()
   {
     return true;
   }
 
-   std::string name() 
+  static std::string name() 
   {
     return std::string();
   }
 
-   std::string version_tag() 
+  static std::string version_tag() 
   {
     return std::string();
   }
   
-   std::string version() 
+  static std::string version() 
   {
     return std::string();
   }
 
-   std::string compiler_version() 
+  static std::string compiler_version() 
   {
     return std::string();
   }
   
-  std::string version_ex() 
+  static std::string version_ex() 
   {
     return std::string();
   }
 
-
-   std::string build_type() 
+  static std::string build_type() 
   {
     return std::string();
   }
 
-   std::string build_date() 
+  static std::string build_date() 
   {
     return std::string();
   }
 
-   std::string build_flags() 
+  static std::string build_flags() 
   {
     return std::string();
   }
 
-   std::string build_count() 
+  static std::string build_count() 
   {
     return std::string();
   }
 
-   std::string branch() 
+  static std::string branch() 
   {
     return std::string();
   }
 
-   std::string commit() 
+  static std::string commit() 
   {
     return std::string();
   }
 
-   std::string commit_date() 
+  static std::string commit_date() 
   {
     return std::string();
   }
 
-   std::string commit_author() 
+  static std::string commit_author() 
   {
     return std::string();
   }
 
-   std::string initial_author() 
+  static std::string initial_author() 
   {
     return std::string();
   }
 
-   std::string commit_message() 
+  static std::string commit_message() 
   {
     return std::string();
   }
 
-   std::string all_authors() 
+  static std::string all_authors() 
   {
     return std::string();
   }

@@ -21,9 +21,10 @@ public:
   
   extended_args();
   
-  extended_args(const extended_args_map& po);
+  explicit extended_args(const extended_args_map& po);
   
   void insert(const std::string& name, instance_args args);
+  
   void insert( std::map<std::string, std::map<std::string, std::string> > args);
   
   instance_args get(const std::string& name, bool required = false) const;

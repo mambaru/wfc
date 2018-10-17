@@ -19,13 +19,13 @@ class test
   : public wfc::domain_object<itest, options1>
 {
 public:
-  typedef domain_object::config_type config_type;
+  typedef domain_object::domain_config config_type;
   virtual void initialize() override
   {
     testval = true;
   }
   
-  virtual bool testtest() 
+  virtual bool testtest() override
   {
     return testval; 
   }
@@ -37,10 +37,22 @@ public:
     return opt;
   }
   
+  // restart
+  virtual void restart() override
+  {
+    std::cout << "RESTART!!!!!!" << std::endl;
+  }
+
+  // start
+  virtual void start() override
+  {
+    std::cout << "START!!!!!!" << std::endl;
+  }
   bool testval = false;
 };
 
-class test_impl: public ::wfc::instance<test> {};
+//class test_impl: public ::wfc::instance<test> {};
+typedef ::wfc::instance<test> test_impl;
 
 int main()
 {
@@ -48,7 +60,7 @@ int main()
   ::iow::asio::io_service io;
   auto g = std::make_shared<wfc::wfcglobal>(io);
   t.create(g);
-  test_impl::config_type opt;
+  test_impl::domain_config opt;
   t.generate(opt, "true");
   
   if ( !opt.test || !opt.enabled || !opt.name.empty() 

@@ -9,7 +9,7 @@
 #include <memory>
 
 namespace wfc{ namespace jsonrpc{
-  
+
 template<typename Config, typename StatConfig>
 class domain_proxy
   : public ::wfc::domain_object< ijsonrpc, Config, StatConfig>
@@ -25,14 +25,7 @@ public:
   typedef typename super::outgoing_holder outgoing_holder;
   
   domain_proxy() {}
-  
-  target_adapter get_adapter(  const std::string& name ) const
-  {
-    auto itf = this->template get_target< iinterface >( name );
-    auto jrpc = this->template get_target< ijsonrpc >( name, true );
-    return target_adapter(itf, jrpc);
-  }
-  
+
   virtual void initialize() override
   {
     _adapter = this->get_adapter( this->options().target );
@@ -74,9 +67,8 @@ public:
       }
       else 
       {
-        //aux::send_error( std::move(holder), std::make_unique<parse_error>(), jsonrpc_handler );
         JSONRPC_LOG_ERROR( "domain_proxy: Parse error: " << holder.str() )
-        aux::send_error( std::move(holder), std::make_unique<parse_error>(), [handler](outgoing_holder holder)
+        this->send_error<parse_error>( std::move(holder), [handler](outgoing_holder holder)
         {
           auto d = holder.detach();
           if ( d!=nullptr )
@@ -101,9 +93,22 @@ public:
     _adapter.perform_outgoing( std::move(holder), io_id);
   }
   
+  template<typename Err>
+  static void send_error(incoming_holder holder, outgoing_handler_t handler)
+  {
+    ::wjrpc::aux::send_error(std::move(holder), std::make_unique< Err > (), std::move(handler));
+  }
+  
   using super::get_target;
   target_adapter get_target() const { return _adapter;}
-  
+ 
+  target_adapter get_adapter(  const std::string& name, bool disabort = false ) const
+  {
+    auto itf = this->template get_target< iinterface >( name, disabort );
+    auto jrpc = this->template get_target< ijsonrpc >( name, true );
+    return target_adapter(itf, jrpc);
+  }
+
 public:
   target_adapter _adapter;
 };

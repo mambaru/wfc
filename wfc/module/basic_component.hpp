@@ -1,10 +1,10 @@
 #pragma once
 
 
-#include <wfc/module/instance_options_json.hpp>
+#include <wfc/module/domain_config_json.hpp>
 #include <wfc/module/icomponent.hpp>
 #include <wfc/module/component_features.hpp>
-#include <wfc/core/global.hpp>
+#include <wfc/core/wfcglobal.hpp>
 
 #include <wfc/json.hpp>
 
@@ -18,7 +18,7 @@ namespace wfc{
 template< 
   typename Name,
   typename Instance,
-  typename DomainJson,
+  typename CustomJson,
   int Features /*= component_features::Multiton*/, 
   typename StatJson /*= defstat_json*/
 >
@@ -26,30 +26,34 @@ class basic_component
   : public icomponent
 {
 public:
-  enum { is_singleton = ( Features & int(component_features::Singleton) )!=0 };
+   enum 
+   {
+     is_singleton       = ( Features & int(component_features::Singleton) )!=0,
+     ignore_reconfigure = ( Features & int(component_features::IgnoreReconfigure) )!=0
+   };
 
   typedef Name        component_name;
   typedef Instance    instance_type;
   
-  typedef DomainJson  domain_json;
+  typedef CustomJson  custom_json;
   typedef typename std::conditional< 
-    instance_type::basic_options::statistics_enabled,
+    instance_type::domain_options::statistics_enabled,
     StatJson,
     empty_stat_json_t<typename StatJson::target>
   >::type stat_json;
  
-  typedef instance_options_json<domain_json, Features, stat_json> instance_json;
-  typedef typename instance_json::basic_json basic_json;
+  typedef domain_config_json_t<custom_json, Features, stat_json> domain_config_json;
+  typedef typename domain_config_json::domain_options_json domain_options_json;
 
   typedef std::shared_ptr<wfcglobal> global_ptr;
-  typedef typename instance_type::config_type instance_config;
+  typedef typename instance_type::domain_config domain_config;
   typedef std::map<std::string, std::string> instance_config_map;
   typedef typename instance_type::domain_interface domain_interface;
   typedef json::dict_map< json::value<std::string> > instance_map_json;
   typedef typename std::conditional<
     is_singleton,
-    instance_config,
-    std::vector<instance_config>
+    domain_config,
+    std::vector<domain_config>
   >::type component_config;
 
   typedef typename std::conditional<
@@ -57,12 +61,11 @@ public:
     instance_config_map,
     std::vector<instance_config_map>
   >::type component_map_config;
-
   
   typedef typename std::conditional<
     is_singleton,
-    instance_json,
-    ::wfc::json::array< std::vector< instance_json> >
+    domain_config_json,
+    ::wfc::json::array< std::vector< domain_config_json> >
   >::type component_json;
 
   typedef typename std::conditional<
@@ -79,7 +82,12 @@ public:
     std::map< std::string, instance_ptr>
   >::type instance_map;
 
-  struct config_pair { std::string instance, domain;};
+  struct config_pair 
+  { 
+    std::string instance;
+    std::string  domain;
+  };
+  
   typedef typename std::conditional<
     is_singleton,
     config_pair,
@@ -108,6 +116,11 @@ public:
     return "no description";
   }
 
+  virtual std::string help() const override
+  {
+    return std::string("Sorry, no help for '") + this->name() + "'.";
+  }
+
   virtual std::string interface_name() const override
   {
     return typeid( domain_interface ).name();
@@ -120,7 +133,7 @@ public:
     typename component_json::serializer serializer;
     std::string result;
     serializer( opt, std::back_inserter( result ) );
-    return std::move(result);
+    return result;
   }
 
   virtual bool parse(const std::string& stropt, json::json_error* err) override
@@ -158,23 +171,23 @@ public:
 
 private:
 
-  std::string serialize_base_instance_( const instance_config& opt )
+  std::string serialize_domain_options_( const domain_config& opt )
   {
-    typedef typename basic_json::serializer serializer;
+    typedef typename domain_options_json::serializer serializer;
     std::string str;
     serializer()( opt, std::back_inserter(str) );
     return str;
   }
 
-  std::string serialize_domain_( const instance_config& opt )
+  std::string serialize_domain_config_( const domain_config& opt )
   {
-    typedef typename domain_json::serializer serializer;
+    typedef typename domain_config_json::serializer serializer;
     std::string str;
     serializer()( opt, std::back_inserter(str) );
     return str;
   }
 
-  bool unserialize_( component_config& opt,  const std::string& str, json::json_error* err )
+  static bool unserialize_( component_config& opt,  const std::string& str, json::json_error* err )
   {
     typename component_json::serializer serializer;
     auto beg = str.begin();
@@ -189,19 +202,20 @@ private:
   void create_(fas::true_)
   {
     _instances = std::make_shared<instance_type>();
-    instance_config opt;
+    domain_config opt;
     if ( _global != nullptr )
+    {
       _global->registry.set("instance", this->name(), _instances);
+    }
+    json::json_error err;
     _instances->create(this->name(), _global);
-    /*
-    opt.name = this->name();
-    opt.enabled = true;
-    _instances->reconfigure(opt);
-    _instances->initialize();
-    */
+    if ( !this->configure_("{}", fas::true_(), &err) )
+    {
+      SYSTEM_LOG_FATAL("Singleton '" << this->name() << "' default initialize: " << json::strerror::message(err) )
+    }
   }
 
-  void create_(fas::false_) { }
+  static void create_(fas::false_) { }
 
   bool configure_(const std::string& stropt, fas::true_, json::json_error* err)
   {
@@ -211,13 +225,14 @@ private:
     opt.name = this->name();
     
     config_pair op;
-    op.instance = this->serialize_base_instance_(opt);
-    op.domain = this->serialize_domain_(opt);
+    op.instance = this->serialize_domain_options_(opt);
+    op.domain = this->serialize_domain_config_(opt);
     
     if ( _config.instance.empty() )
     {
       _instances->configure(opt);
-      SYSTEM_LOG_MESSAGE("Singleton '" << opt.name << "' is initial configured ")
+      // Не выводим, чтобы не мусорить в stdout. Это дефолтная конфигурация синглетона при создании объекта
+      // SYSTEM_LOG_MESSAGE("Singleton '" << opt.name << "' is initial configured ")
     }
     else if ( _config.domain != op.domain )        
     {
@@ -237,6 +252,17 @@ private:
     return true;
   }
 
+  void reconfigure_fully_(instance_ptr obj, const domain_config& opt, fas::false_)
+  {
+    obj->reconfigure(opt);
+    SYSTEM_LOG_MESSAGE("Instance '" << opt.name << "' is reconfigured (fully) -1-")
+  }
+
+  void reconfigure_fully_(instance_ptr , const domain_config& opt, fas::true_)
+  {
+    SYSTEM_LOG_WARNING("Instance '" << opt.name << "' not reconfigured (is forbidden by the developer)")
+  }
+
   bool configure_(const std::string& stropt, fas::false_, json::json_error* err)
   {
     std::set<std::string> stop_list;
@@ -251,8 +277,8 @@ private:
     {
       stop_list.erase(opt.name);
       config_pair op;
-      op.domain = this->serialize_domain_(opt);
-      op.instance = this->serialize_base_instance_(opt);
+      op.domain = this->serialize_domain_config_(opt);
+      op.instance = this->serialize_domain_options_(opt);
       
       auto itr = _instances.find(opt.name);
       if ( itr == _instances.end() )
@@ -272,8 +298,10 @@ private:
       
         if ( oitr->second.domain != op.domain )
         {
-          itr->second->reconfigure(opt);
-          SYSTEM_LOG_MESSAGE("Instance '" << opt.name << "' is reconfigured (fully)")
+          reconfigure_fully_(itr->second, opt, fas::bool_<ignore_reconfigure!=0>() );
+          /*itr->second->reconfigure(opt);
+          SYSTEM_LOG_MESSAGE("Instance '" << opt.name << "' is reconfigured (fully)")*/
+          
         }
         else if ( oitr->second.instance != op.instance )
         {
@@ -288,15 +316,15 @@ private:
       }
     } // for optlist
 
-    for ( const auto& name: stop_list )
+    for ( const auto& n: stop_list )
     {
-      auto itr = _instances.find(name);
+      auto itr = _instances.find(n);
       if ( itr == _instances.end() )
       {
-        if ( _global ) _global->registry.erase("instance", name);
+        if ( _global ) _global->registry.erase("instance", n);
         itr->second->stop("");
         _instances.erase(itr);
-        SYSTEM_LOG_MESSAGE("Instance '" << name << "' is deleted")
+        SYSTEM_LOG_MESSAGE("Instance '" << n << "' is deleted")
       }
     }
     return true;
@@ -328,14 +356,14 @@ private:
     }
   }
   
-  void generate_config_(component_config& opt, const std::string& type, fas::true_) 
+  static void generate_config_(component_config& opt, const std::string& type, fas::true_) 
   {
     instance_type().generate( opt, type);
   }
 
   void generate_config_(component_config& opt, const std::string& type, fas::false_) 
   {
-    instance_config inst;
+    domain_config inst;
     instance_type().generate( inst, type);
     if ( inst.name.empty() )
       inst.name = this->name() + "1";
