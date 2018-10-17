@@ -8,6 +8,9 @@
 
 namespace wfc{
 
+/**
+ * @brief multiton
+ */
 template<typename DomainObject>
 class instance
   : public iinstance

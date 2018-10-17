@@ -398,11 +398,22 @@ public:
     return nullptr;
   }
   
+  /**
+   * @brief Добавляет фоновый обработчик с периодичностью один раз в секунду 
+   * @param fun обработчик
+   * @details Может вызываться только в методе start и работает до завершения работы приложения. 
+   */
   void idle(std::function<void()> fun)
   {
     this->idle(std::chrono::seconds(1), fun);
   }
 
+  /**
+   * @brief Добавляет фоновый обработчик с заданной периодичностью 
+   * @param duration интервал запуска
+   * @param fun обработчик
+   * @details Может вызываться только в методе start и работает до завершения работы приложения. 
+   */
   void idle(workflow_type::duration_t duration, std::function<void()> fun)
   {
     if ( _idle_flag )
