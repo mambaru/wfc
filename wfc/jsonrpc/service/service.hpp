@@ -1,7 +1,10 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2018
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #pragma once 
-
-//#include <iow/jsonrpc/handler/ihandler.hpp> // убрать, подключить опции
-
 
 #include <wfc/jsonrpc/interface_implementation.hpp>
 #include <wfc/jsonrpc/basic_engine.hpp>
@@ -23,6 +26,12 @@ class service_base
   typedef ::wjrpc::output_handler_t output_handler_t;
 public:
   
+  virtual void reconfigure() override
+  {
+    super::reconfigure();
+    _allow_non_jsonrpc = this->options().allow_non_jsonrpc;
+  }
+  
   virtual void initialize() override
   {
     auto dopt = this->options();
@@ -31,9 +40,9 @@ public:
     target_type target = this->template get_target< interface_type >(dopt.target_name);
     dopt.target = target;
     dopt.peeper = target;
-    
+    _raw_target = target;
     this->initialize_engine(dopt);
-    _allow_non_jsonrpc = dopt.allow_non_jsonrpc;
+    
   }
   
   virtual void perform_io(data_ptr d, io_id_t io_id, output_handler_t handler) override
@@ -46,19 +55,26 @@ public:
       auto beg = ::wjson::parser::parse_space( d->begin(), d->end(), nullptr );
       if ( beg!=d->end() && *beg!='{' )
       {
+        if ( auto h = _raw_target.lock() )
+        {
+          h->perform_io(std::move(d), io_id, std::move(handler));
+          return;
+        }
+          /*
         if ( auto h = this->_engine->find(io_id) )
         {
           h->target()->perform_io(std::move(d), io_id, std::move(handler));
           return;
-        }
+        }*/
       }
     }
-
+    
     super::perform_io( std::move(d), io_id, std::move(handler) );
   }
 
 private:
   bool _allow_non_jsonrpc = false;
+  std::weak_ptr<iinterface> _raw_target;
 };
 
 template<typename MethodList, template<typename> class Impl = interface_implementation >

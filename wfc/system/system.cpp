@@ -9,27 +9,9 @@
 #include <stdexcept>
 #include <ctime>
 #include <cstring>
-//#include <unistd.h>
-
 #include <iostream>
+
 namespace wfc{
-
-  /*
-int error_code()
-{
-  return errno;
-}
-
-std::string strerror(int lasterror)
-{
-  return std::strerror(lasterror);
-}
-
-system_error::system_error(const std::string& msg)
-  : std::runtime_error(msg + strerror(error_code()))
-{}
-*/
-
 
 
 int is_atty(int fd)
