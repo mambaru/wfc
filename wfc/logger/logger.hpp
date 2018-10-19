@@ -1,3 +1,9 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2018
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #pragma once
 
 #include <wlog/logging.hpp>
@@ -8,7 +14,6 @@
 #define WFC_LOG_WARNING(NAME,X)   WLOG_LOG_WARNING( NAME, X )
 #define WFC_LOG_MESSAGE(NAME, X)  WLOG_LOG_MESSAGE( NAME, X )
 #define WFC_LOG_FATAL(NAME, X)    WLOG_LOG_FATAL( NAME, X ) 
-//#define WFC_LOG_FATAL(NAME, X)    {WLOG_LOG_FATAL( NAME, X ) std::stringstream _l_ss_; _l_ss_ << X;  wfc_exit_with_error(_l_ss_.str());}
 #define WFC_LOG_BEGIN(NAME, X)    WLOG_LOG_BEGIN( NAME, X )
 #define WFC_LOG_END(NAME, X)      WLOG_LOG_END( NAME, X )
 #define WFC_LOG_DEBUG(NAME, X)    WLOG_LOG_DEBUG( NAME, X )
@@ -45,7 +50,6 @@
 #define COMMON_LOG_TRACE(X)    WFC_LOG_TRACE( "COMMON", X )
 #define COMMON_LOG_PROGRESS(X) WFC_LOG_PROGRESS( "COMMON", X )
 
-// TODO: перенести в wjrpc
 #define JSONRPC_LOG_ERROR(X)    WLOG_LOG_ERROR( "JSONRPC", X )
 #define JSONRPC_LOG_WARNING(X)  WLOG_LOG_WARNING( "JSONRPC", X )
 #define JSONRPC_LOG_MESSAGE(X)  WLOG_LOG_MESSAGE( "JSONRPC", X )

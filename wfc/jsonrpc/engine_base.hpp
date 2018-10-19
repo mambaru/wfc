@@ -1,3 +1,9 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2018
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #pragma once 
 
 #include <wfc/domain_object.hpp>
@@ -27,7 +33,6 @@ public:
   typedef typename super::io_id_t io_id_t;
   typedef typename super::data_ptr data_ptr;
   typedef typename super::data_type data_type;
-  //typedef typename super::rpc_outgoing_handler_t outgoing_handler_t;
   typedef typename super::output_handler_t output_handler_t;
   typedef wflow::workflow workflow_type;
   typedef workflow_type::timer_id_t timer_id_t;
@@ -104,13 +109,6 @@ protected:
 
   void initialize_engine(options_type eopt)
   {
-    /*
-    eopt.log_error = [](const std::string& m) { JSONRPC_LOG_ERROR( m ); m.size();};
-    eopt.log_fatal = [](const std::string& m) { JSONRPC_LOG_FATAL( m ); m.size();};
-    eopt.log_debug = [](const std::string& m) { JSONRPC_LOG_DEBUG( m ); m.size();};
-    eopt.log_trace = [](const std::string& m) { JSONRPC_LOG_TRACE( m ); m.size(); };
-    */
-    
     if ( _engine == nullptr ) 
     {
       _engine = std::make_shared<engine_type>();

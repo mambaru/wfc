@@ -1,3 +1,9 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2018
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #pragma once
 
 #include <wrtstat/meters/multi_meter.hpp>
@@ -19,17 +25,5 @@ using composite_meter = wrtstat::multi_meter< wrtstat::composite_meter<statistic
 using time_meter = wrtstat::multi_meter< wrtstat::time_meter<statistics_duration> >;
 using value_meter = wrtstat::multi_meter< wrtstat::value_meter >;
 using size_meter = wrtstat::multi_meter< wrtstat::size_meter > ;
-
-/*
-using composite_meter = ::wrtstat::multi_meter< ::wrtstat::composite_meter<statistics_duration> >;
-using time_meter = ::wrtstat::multi_meter< ::wrtstat::time_meter<statistics_duration> >;
-using value_meter = ::wrtstat::multi_meter< ::wrtstat::value_meter >;
-using size_meter = ::wrtstat::multi_meter< ::wrtstat::size_meter > ;
-
-typedef std::shared_ptr<composite_meter> composite_meter_ptr;
-typedef std::shared_ptr<time_meter> time_meter_ptr;
-typedef std::shared_ptr<size_meter> size_meter_ptr;
-typedef std::shared_ptr<value_meter> value_meter_ptr;
-*/
 
 }

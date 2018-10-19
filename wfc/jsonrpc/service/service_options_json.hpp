@@ -1,6 +1,11 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2018
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #pragma once 
 
-// #include <wfc/jsonrpc/options.hpp>
 #include <wjrpc/engine/engine_options_json.hpp>
 #include <wfc/json.hpp>
 

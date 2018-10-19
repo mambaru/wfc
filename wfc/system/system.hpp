@@ -13,18 +13,6 @@
 
 namespace wfc{
 
-  /*
-int error_code();
-
-std::string strerror(int lasterror);
-
-struct system_error
-  : public std::runtime_error
-{
-  explicit system_error(const std::string& msg);
-};
-*/
-
 int is_atty(int fd);
 
 bool is_atty_stdout();
