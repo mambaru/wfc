@@ -1,5 +1,10 @@
-#pragma once
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2018
+//
+// Copyright: See COPYING file that comes with this distribution
+//
 
+#pragma once
 
 #include <wfc/module/domain_config_json.hpp>
 #include <wfc/module/icomponent.hpp>
@@ -84,8 +89,8 @@ public:
 
   struct config_pair 
   { 
-    std::string instance;
-    std::string  domain;
+    std::string basic;
+    std::string custom;
   };
   
   typedef typename std::conditional<
@@ -171,7 +176,7 @@ public:
 
 private:
 
-  std::string serialize_domain_options_( const domain_config& opt )
+  std::string serialize_basic_( const domain_config& opt )
   {
     typedef typename domain_options_json::serializer serializer;
     std::string str;
@@ -179,9 +184,9 @@ private:
     return str;
   }
 
-  std::string serialize_domain_config_( const domain_config& opt )
+  std::string serialize_custom_( const domain_config& opt )
   {
-    typedef typename domain_config_json::serializer serializer;
+    typedef typename domain_config_json::custom_json::serializer serializer;
     std::string str;
     serializer()( opt, std::back_inserter(str) );
     return str;
@@ -225,21 +230,20 @@ private:
     opt.name = this->name();
     
     config_pair op;
-    op.instance = this->serialize_domain_options_(opt);
-    op.domain = this->serialize_domain_config_(opt);
+    op.basic = this->serialize_basic_(opt);
+    op.custom = this->serialize_custom_(opt);
     
-    if ( _config.instance.empty() )
+    if ( _config.basic.empty() )
     {
+      // Это дефолтная конфигурация синглетона при создании объекта
       _instances->configure(opt);
-      // Не выводим, чтобы не мусорить в stdout. Это дефолтная конфигурация синглетона при создании объекта
-      // SYSTEM_LOG_MESSAGE("Singleton '" << opt.name << "' is initial configured ")
     }
-    else if ( _config.domain != op.domain )        
+    else if ( _config.custom != op.custom )        
     {
       _instances->reconfigure(opt);
       SYSTEM_LOG_MESSAGE("Singleton '" << opt.name << "' is reconfigured (fully)")
     }
-    else if ( _config.instance != op.instance ) 
+    else if ( _config.basic != op.basic ) 
     {
       _instances->reconfigure_basic(opt);
       SYSTEM_LOG_MESSAGE("Singleton '" << opt.name << "' is reconfigured (basic)")
@@ -255,7 +259,7 @@ private:
   void reconfigure_fully_(instance_ptr obj, const domain_config& opt, fas::false_)
   {
     obj->reconfigure(opt);
-    SYSTEM_LOG_MESSAGE("Instance '" << opt.name << "' is reconfigured (fully) -1-")
+    SYSTEM_LOG_MESSAGE("Instance '" << opt.name << "' is reconfigured (fully)")
   }
 
   void reconfigure_fully_(instance_ptr , const domain_config& opt, fas::true_)
@@ -277,8 +281,8 @@ private:
     {
       stop_list.erase(opt.name);
       config_pair op;
-      op.domain = this->serialize_domain_config_(opt);
-      op.instance = this->serialize_domain_options_(opt);
+      op.basic = this->serialize_basic_(opt);
+      op.custom = this->serialize_custom_(opt);
       
       auto itr = _instances.find(opt.name);
       if ( itr == _instances.end() )
@@ -296,14 +300,11 @@ private:
         auto oitr = _config.find(opt.name);
         if ( oitr == _config.end() ) abort();
       
-        if ( oitr->second.domain != op.domain )
+        if ( oitr->second.custom != op.custom )
         {
           reconfigure_fully_(itr->second, opt, fas::bool_<ignore_reconfigure!=0>() );
-          /*itr->second->reconfigure(opt);
-          SYSTEM_LOG_MESSAGE("Instance '" << opt.name << "' is reconfigured (fully)")*/
-          
         }
-        else if ( oitr->second.instance != op.instance )
+        else if ( oitr->second.basic != op.basic )
         {
           itr->second->reconfigure_basic(opt);
           SYSTEM_LOG_MESSAGE("Instance '" << opt.name << "' is reconfigured (basic)")

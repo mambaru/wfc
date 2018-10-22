@@ -1,3 +1,9 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2018
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #pragma once
 
 #include <wrtstat/wrtstat_options.hpp>
@@ -6,10 +12,4 @@
 
 namespace wfc{ namespace statistics{
 
-//typedef ::wrtstat::wrtstat_options stat_options;
-  /*
-struct stat_options: public ::wrtstat::wrtstat_options
-{
-};
-*/
 }}

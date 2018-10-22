@@ -1,3 +1,9 @@
+//
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2018
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+
 #include <wfc/statistics/statistics.hpp>
 #include <wfc/statistics/meters.hpp>
 #include <wrtstat/wrtstat.hpp>
