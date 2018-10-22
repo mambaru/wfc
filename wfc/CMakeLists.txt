@@ -17,6 +17,7 @@ SET(
   core/extended_args.cpp
   core/object_registry.cpp
   statistics/statistics.cpp
+  module/winterface.cpp
   module/component.cpp
   module/module.cpp
   module/package.cpp
