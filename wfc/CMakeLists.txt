@@ -10,6 +10,7 @@ SET(
   wfc.cpp
   wfc_exit.cpp
   iinterface.cpp
+  winterface.cpp
   system/system.cpp
   core/wfcglobal.cpp
   core/cpuset.cpp
@@ -17,7 +18,6 @@ SET(
   core/extended_args.cpp
   core/object_registry.cpp
   statistics/statistics.cpp
-  module/winterface.cpp
   module/component.cpp
   module/module.cpp
   module/package.cpp

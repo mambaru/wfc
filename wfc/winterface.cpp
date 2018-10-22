@@ -1,4 +1,4 @@
-#include <wfc/module/winterface.hpp>
+#include <wfc/winterface.hpp>
 
 namespace wfc{ 
 
