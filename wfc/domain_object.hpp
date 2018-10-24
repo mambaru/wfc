@@ -380,6 +380,8 @@ public:
   {
     if (!is_configured_())
       return nullptr;
+    if ( target.empty() )
+      return _workflow;
     return this->global()->registry.template get<workflow_type>("workflow", target, disabort);
   }
 
