@@ -23,7 +23,7 @@ class Client:
       self.cli = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     #self.cli.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     self.cli.connect( (self.addr, self.port) )
-    #self.cli.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    
     self.buff = ""
     
   def close(self):
