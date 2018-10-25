@@ -21,6 +21,7 @@ struct domain_options_t
   static constexpr bool statistics_enabled = stat_options::enabled;
   bool enabled = true;
   bool suspend = false;
+  bool tracking = false;
   int  startup_priority = 0;
   int  shutdown_priority = 0;
   std::string name;

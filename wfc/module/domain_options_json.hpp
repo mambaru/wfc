@@ -44,6 +44,7 @@ struct domain_options_json_t
   JSON_NAME(startup_priority)
   JSON_NAME(shutdown_priority)
   JSON_NAME(cpu)
+  JSON_NAME(tracking)
   JSON_NAME(workflow)
   JSON_NAME(statistics)
 
@@ -55,6 +56,7 @@ struct domain_options_json_t
     has_priority   =  ( Features & static_cast<int>(component_features::DisabledPriority) ) == 0,
     has_workflow   =  ( Features & static_cast<int>(component_features::DisabledWorkflow) ) == 0,
     has_cpu        =  ( Features & static_cast<int>(component_features::EnableCPU)        ) != 0,
+    has_tracking        =  ( Features & static_cast<int>(component_features::EnableTracking)   ) != 0,
     has_statistics =  domain_options_type::statistics_enabled
   };
   
@@ -81,6 +83,13 @@ struct domain_options_json_t
         domain_options_type,
         bool,
         &domain_options_type::suspend
+      >::type,
+      typename optional_member<
+        has_tracking,
+        n_tracking,
+        domain_options_type,
+        bool,
+        &domain_options_type::tracking
       >::type,
       typename optional_member<
         has_priority,

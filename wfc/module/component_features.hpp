@@ -36,7 +36,8 @@ struct component_features
     DisabledSuspend  = 8,   ///< Скрыть поле suspend в json-конфигурации 
     DisabledWorkflow  = 16, ///< Скрыть поле workflow в json-конфигурации 
     EnableCPU = 32,         ///< Включить поле cpu в json-конфигурации 
-    IgnoreReconfigure  = 64 ///< Игнорировать сигналы реконфигурацию 
+    IgnoreReconfigure  = 64,///< Игнорировать сигналы реконфигурацию 
+    EnableTracking = 128    ///< Включить дефолтную реализацию обертки iinterface для отслеживания источника
   };
 };
 

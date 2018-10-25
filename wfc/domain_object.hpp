@@ -26,6 +26,81 @@
 
 namespace wfc{
   
+// TODO перенести в owner
+class tracker
+{
+  typedef iinterface::io_id_t  io_id_t;
+  typedef std::mutex mutex_type;
+public:
+  
+  tracker(const std::string& name)
+    : _name(name)
+  {
+  }
+  
+  void enable(bool value)
+  {
+    if ( _tracking_flag == value )
+      return;
+  
+    _tracking_flag = value;
+    if (!value)
+    {
+      std::lock_guard<mutex_type> lk(_tracking_mutex);
+      _tracking_map.clear();
+    }
+  }
+  
+  void release(io_id_t io_id) 
+  {
+    if ( _tracking_flag )
+    {
+      std::lock_guard<mutex_type> lk(_tracking_mutex);
+      _tracking_map.erase(io_id);
+    }
+  }
+
+  std::function<void()> wrap(io_id_t io_id, std::function<void()> fun, std::function<void()> drop = nullptr)
+  {
+    if ( !_tracking_flag )
+      return fun;
+    
+    std::weak_ptr<size_t> wc;
+    std::lock_guard<mutex_type> lk(_tracking_mutex);
+    auto itr = _tracking_map.find(io_id);
+    if ( itr!=_tracking_map.end() )
+    {
+      ++*(itr->second);
+      wc=itr->second;
+    }
+    else
+    {
+      wc = _tracking_map.insert( std::make_pair(io_id, std::make_shared<size_t>(1)) ).first->second;
+    }
+    
+    return [fun, drop, wc, this]()
+    {
+      if ( wc.lock()!=nullptr )
+      {
+        fun();
+      }
+      else if (drop!=nullptr)
+      {
+        drop();
+      }
+      else
+      {
+        COMMON_LOG_WARNING("Tracking " << this->_name << ": handler drop by tracking.")
+      }
+    };
+  }
+private:
+  std::string _name;
+  std::atomic_bool _tracking_flag;
+  std::mutex _tracking_mutex;
+  std::map<io_id_t, std::shared_ptr<size_t> > _tracking_map;
+};
+  
 /**
  * @brief Базовый класс для реализации прикладного объекта WFC
  * @tparam Itf тип интерфейса объекта ( на базе wfc::iinterface )
@@ -233,7 +308,7 @@ public:
    * @param h1 исходный обработчик
    * @param h2 альтернативный обработчик (м.б. nullptr)
    * @return обертка над обработчиком обратного вызова 
-   * @details Если обработчик обратного взаимодействует с объектом, то может быть ситуация, что он будет вызван после уничтожения объекта.
+   * @details Если обработчик взаимодействует с этим объектом, то может быть ситуация, что он будет вызван после уничтожения объекта.
    * Эта обертка распознает такую ситуацию и вызовет альтернативный обработчик, если задан, в противном случае просто не вызовет исходный.
    * Может использоваться для отправки сообщений в wfc::workflow::post
    */
@@ -243,6 +318,15 @@ public:
   {
     return _owner.wrap( std::forward<H1>(h1), std::forward<H2>(h2));
   }
+  
+  /**
+   * @brief Создает обертку над обработчиком для постановки в очередь
+   * @param 
+   */
+  std::function<void()> tracking(io_id_t io_id, std::function<void()> handler, std::function<void()> drop = nullptr)
+  {
+    return _tracker->wrap(io_id, std::move(handler), std::move(drop));
+  }
 
   /**
    * @brief Создает обертку над обработчиком обратного вызова RPC
@@ -250,8 +334,8 @@ public:
    * @param h исходный обработчик
    * @return обертка над обработчиком обратного вызова RPC
    * @details Обработчик обратного вызова RPC, должны быть гарантировано вызван только один раз. Если обработчик не вызывается, 
-   * то клиентская сторона может ждать вечно ответе, также не должно быть повторных вызовов - это может привести к неопределенному 
-   * поведению клиентского кода. Эта обертка детектирует оба случая и вызывает соответствующий обработчик, которые настраиваются  
+   * то клиентская сторона может ждать вечно ответа, также не должно быть повторных вызовов - это может привести к неопределенному 
+   * поведению клиентского кода. Эта обертка детектирует оба случая и вызывает соответствующий обработчик, который настраиваются  
    * глобально в модуле ядра.
    */
   template<typename H>
@@ -261,6 +345,15 @@ public:
     return _owner.callback( std::forward<H>(h) );
   }
 
+  /**
+   * @details При включенной опции component_features::EnableTracking вызов этой функции обязателен
+   * в порожденном классе при ее переопределении, чтобы трекер корректно работал.  
+   */
+  virtual void unreg_io(io_id_t io_id) override
+  {
+    _tracker->release(io_id);
+  };
+  
   /**
    * @brief Возвращает ссылку на объект owner
    * @return ссылка на объект owner
@@ -708,6 +801,8 @@ public:
 
     return _statistics;
   }
+  
+
 
   /**
    * @brief Проверка системы на сигнал останова
@@ -817,6 +912,7 @@ private:
   owner_type     _owner;
   workflow_ptr   _workflow;
   statistics_ptr _statistics;
+  std::shared_ptr<tracker> _tracker;
 };
   
 
@@ -832,6 +928,7 @@ void domain_object<Itf, Opt, StatOpt>::create_domain(const std::string& objname,
 {
   _name = objname;
   _global = g;
+  _tracker = std::make_shared<tracker>(objname);
   this->create();
 }
 
@@ -841,6 +938,7 @@ void domain_object<Itf, Opt, StatOpt>::configure_domain(const domain_config& opt
   _config = opt;
   _workflow = nullptr; // Ибо нефиг. До инициализации ничем пользоваться нельзя
   _conf_flag = false;
+  _tracker->enable(opt.tracking);
   if (auto g = this->global() )
     g->cpu.set_cpu(_name, opt.cpu);
   this->configure();
@@ -878,6 +976,7 @@ void domain_object<Itf, Opt, StatOpt>::reconfigure_domain_basic(const domain_opt
   static_cast<domain_options&>(_config) = opt;
   if (auto g = this->global() )
     g->cpu.set_cpu(_name, opt.cpu);
+  _tracker->enable(opt.tracking);
   this->reconfigure_basic();
 }
 
@@ -888,6 +987,7 @@ void domain_object<Itf, Opt, StatOpt>::reconfigure_domain(const domain_config& c
   _config = conf;
   if (auto g = this->global() )
     g->cpu.set_cpu(_name, static_cast<domain_options&>(_config).cpu);
+  _tracker->enable(conf.tracking);
   this->reconfigure();
 }
   
