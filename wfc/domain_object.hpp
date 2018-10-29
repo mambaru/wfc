@@ -23,7 +23,6 @@
 #include <stdexcept>
 #include <type_traits>
 
-
 namespace wfc{
   
 // TODO перенести в owner
@@ -209,6 +208,8 @@ public:
   
   /** @brief Очередь задач*/
   typedef ::wfc::workflow workflow_type;
+  
+  typedef workflow_type::timer_id_t timer_id_t;
   
   /** @brief std::shared_ptr<workflow_type> */
   typedef std::shared_ptr<workflow_type> workflow_ptr;
@@ -801,8 +802,6 @@ public:
 
     return _statistics;
   }
-  
-
 
   /**
    * @brief Проверка системы на сигнал останова
