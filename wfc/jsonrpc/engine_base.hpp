@@ -67,11 +67,11 @@ public:
       return;
     if ( _engine != nullptr )
     {
-      _engine->reg_io( io_id, this->wrap([witf]( data_ptr d, io_id_t io_id, output_handler_t handler)
+      _engine->reg_io( io_id, this->wrap([witf]( data_ptr d, io_id_t io_id1, output_handler_t handler)
       {
         if (auto pitf = witf.lock() )
         {
-          pitf->perform_io( std::move(d), io_id, handler);
+          pitf->perform_io( std::move(d), io_id1, handler);
         }
       }, nullptr));
     }
@@ -124,13 +124,13 @@ protected:
       wf->release_timer( _timer_id );
       if ( eopt.remove_outdated_ms != 0 )
       {
-        auto engine = this->_engine;
+        auto pengine = this->_engine;
         _timer_id = wf->create_timer(
           std::chrono::milliseconds(eopt.remove_outdated_ms),
-          [engine]() -> bool 
+          [pengine]() -> bool 
           {
             JSONRPC_LOG_DEBUG( " JSON-RPC remove outdated...");
-            if ( size_t count = engine->remove_outdated() )
+            if ( size_t count = pengine->remove_outdated() )
             {
               JSONRPC_LOG_WARNING( "JSON-RPC: " << count << " calls is outdated.");
             }
@@ -161,7 +161,7 @@ private:
             std::chrono::milliseconds(sopt.interval_ms), 
             [handler_map, result_map, result_queue, this]()->bool
             {
-              if ( auto stat = this->get_statistics() )
+              if ( nullptr != this->get_statistics() )
               {
                 auto si = this->_engine->sizes();
                 handler_map.create(si.handler_map, 0);

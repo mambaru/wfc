@@ -57,25 +57,25 @@ public:
       io_id_t io_id = _target_id;
       this->engine()->reg_jsonrpc( _target_id, [witf, io_id]( ::wjrpc::outgoing_holder holder)
       {
-        if ( auto pitf = witf.lock() )
+        if ( auto pitf1 = witf.lock() )
         {
-          pitf->perform_outgoing( std::move(holder), io_id );
+          pitf1->perform_outgoing( std::move(holder), io_id );
         }
       });
     }
-    else if ( auto pitf = this->template get_target<iinterface>(dopt.outgoing_target_name, false) )
+    else if ( auto pitf2 = this->template get_target<iinterface>(dopt.outgoing_target_name, false) )
     {
       _no_outgoing_target = false;
       if ( dopt.outgoing_reg )
-        pitf->reg_io( this->engine()->get_id(), this->shared_from_this() );
+        pitf2->reg_io( this->engine()->get_id(), this->shared_from_this() );
       
-      std::weak_ptr<iinterface> witf = pitf;
+      std::weak_ptr<iinterface> witf2 = pitf2;
       io_id_t io_id = _target_id;
-      this->engine()->reg_io( _target_id, [witf, io_id]( data_ptr d, io_id_t /*io_id*/, ::wjrpc::output_handler_t handler )
+      this->engine()->reg_io( _target_id, [witf2, io_id]( data_ptr d, io_id_t /*io_id*/, ::wjrpc::output_handler_t handler )
       {
-        if ( auto pitf = witf.lock() )
+        if ( auto pitf3 = witf2.lock() )
         {
-          pitf->perform_io( std::move(d), io_id, std::move(handler) );
+          pitf3->perform_io( std::move(d), io_id, std::move(handler) );
         }
 
       });

@@ -21,22 +21,22 @@ public:
   {
   }
 
-  target_depr(const std::string& name, std::shared_ptr<wfcglobal> g)
+  target_depr(const std::string& name1, std::shared_ptr<wfcglobal> g)
   {
     if (!g) return;
 
-    if ( auto t = g->registry.get<ijsonrpc>(name, true) )
+    if ( auto t1 = g->registry.get<ijsonrpc>(name1, true) )
     {
-      _target_jsonrpc = t;
-      _target_io = t;
+      _target_jsonrpc = t1;
+      _target_io = t1;
     }
-    else if ( auto t = g->registry.get<iinterface>(name) )
+    else if ( auto t2 = g->registry.get<iinterface>(name1) )
     {
-      _target_io = t;
+      _target_io = t2;
     }
   }
 
-  virtual void reg_io(io_id_t io_id, std::weak_ptr<iinterface> itf)
+  virtual void reg_io(io_id_t io_id, std::weak_ptr<iinterface> itf) override
   {
     if ( _target_io!=nullptr )
     {
@@ -44,7 +44,7 @@ public:
     }
   }
 
-  virtual void unreg_io(io_id_t io_id)
+  virtual void unreg_io(io_id_t io_id) override
   {
     if ( _target_io!=nullptr )
     {
@@ -52,7 +52,7 @@ public:
     }
   }
 
-  virtual void perform_io(data_ptr d, io_id_t io_id, output_handler_t handler)
+  virtual void perform_io(data_ptr d, io_id_t io_id, output_handler_t handler) override
   {
     if ( _target_io!=nullptr )
     {
@@ -76,9 +76,9 @@ public:
       {
         if ( handler!=nullptr )
         {
-          _target_io->perform_io( std::move(d), io_id, [handler](data_ptr d)
+          _target_io->perform_io( std::move(d), io_id, [handler](data_ptr d2)
           {
-            handler( outgoing_holder( std::move(d) ) );
+            handler( outgoing_holder( std::move(d2) ) );
           });
         }
         else
@@ -109,23 +109,23 @@ public:
       {
         if ( auto rh = holder.result_handler() )
         {
-          _target_io->perform_io( std::move(d), io_id, [rh](data_ptr d)
+          _target_io->perform_io( std::move(d), io_id, [rh](data_ptr d2)
           {
-            incoming_holder holder( std::move(d) );
+            incoming_holder iholder( std::move(d2) );
             ::wjson::json_error e;
-            holder.parse(&e);
-            if ( !e && holder )
+            iholder.parse(&e);
+            if ( !e && iholder )
             {
-              rh( std::move(holder) );
+              rh( std::move(iholder) );
             }
             else
             {
-              ijsonrpc::outgoing_handler_t error_handler = [rh](outgoing_holder holder) 
+              ijsonrpc::outgoing_handler_t error_handler = [rh](outgoing_holder holder2) 
               {
-                auto d = holder.detach();
-                rh( incoming_holder( std::move(d) ) );
+                auto d3 = holder2.detach();
+                rh( incoming_holder( std::move(d3) ) );
               };
-              aux::send_error( std::move(holder), std::make_unique<parse_error>(), error_handler );
+              aux::send_error( std::move(iholder), std::make_unique<parse_error>(), error_handler );
             }
           });
         }

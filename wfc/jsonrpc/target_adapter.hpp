@@ -59,17 +59,17 @@ struct target_adapter: ijsonrpc
   
   virtual void perform_incoming(incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) override
   {
-    if ( auto p = _jsonrpc.lock() )
+    if ( auto p1 = _jsonrpc.lock() )
     {
-      p->perform_incoming( std::move(holder), io_id, handler);
+      p1->perform_incoming( std::move(holder), io_id, handler);
     }
-    else if ( auto p = _itf.lock() )
+    else if ( auto p2 = _itf.lock() )
     {
       if ( handler!=nullptr )
       {
         this->perform_io( holder.detach(), io_id, [handler](data_ptr d)
         { 
-          outgoing_holder holder;
+          //outgoing_holder holder;
           handler( outgoing_holder( std::move(d) ) );
         });
       }
@@ -98,40 +98,40 @@ struct target_adapter: ijsonrpc
     jsonrpc::outgoing_error_json< ::wfc::jsonrpc::error_json >::serializer()(err, std::back_inserter(*d));
     incoming_holder holder( std::move(d) );
     holder.parse(nullptr);
-    return std::move(holder);
+    return holder;
   }
 
   virtual void perform_outgoing(outgoing_holder holder, io_id_t io_id) override
   {
-    if ( auto p = _jsonrpc.lock() )
+    if ( auto p1 = _jsonrpc.lock() )
     {
-      p->perform_outgoing( std::move(holder), io_id);
+      p1->perform_outgoing( std::move(holder), io_id);
     }
-    else if ( auto p = _itf.lock() )
+    else if ( auto p2 = _itf.lock() )
     {
       auto handler = holder.result_handler();
       auto d = holder.detach();
 
-      p->perform_io( std::move(d), io_id, [handler, io_id](data_ptr d) 
+      p2->perform_io( std::move(d), io_id, [handler, io_id](data_ptr d2) 
       {
-        while ( d!=nullptr )
+        while ( d2!=nullptr )
         {
-          incoming_holder holder( std::move(d) );
+          incoming_holder iholder( std::move(d2) );
           ::wjson::json_error e;
-          d = holder.parse(&e);
-          if ( !e && holder )
+          d2 = iholder.parse(&e);
+          if ( !e && iholder )
           {
-            handler( std::move(holder) );
+            handler( std::move(iholder) );
           }
           else
           {
             ijsonrpc::outgoing_handler_t err_handler = [handler](outgoing_holder err)
             {
-              auto d = err.detach();
-              handler( incoming_holder( std::move(d)));
+              auto d3 = err.detach();
+              handler( incoming_holder( std::move(d3)));
             };
             
-            aux::send_error(std::move(holder), std::make_unique<parse_error>(), err_handler );
+            aux::send_error(std::move(iholder), std::make_unique<parse_error>(), err_handler );
           }
         }
       });
@@ -140,8 +140,8 @@ struct target_adapter: ijsonrpc
     {
       if ( auto call_id = holder.call_id() )
       {
-        auto holder = create_error_holder_<service_unavailable>(call_id);
-        handler( std::move(holder) );
+        auto eholder = create_error_holder_<service_unavailable>(call_id);
+        handler( std::move(eholder) );
       }
       else
       {

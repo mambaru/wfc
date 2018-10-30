@@ -62,9 +62,9 @@ public:
     while ( d != nullptr )
     {
       incoming_holder holder( std::move(d));
-      outgoing_handler_t jsonrpc_handler = [handler](outgoing_holder holder)
+      outgoing_handler_t jsonrpc_handler = [handler](outgoing_holder holder2)
       {
-        handler( holder.detach() );
+        handler( holder2.detach() );
       };
 
       wjson::json_error e;
@@ -76,14 +76,14 @@ public:
       else 
       {
         JSONRPC_LOG_ERROR( "domain_proxy: Parse error: " << holder.str() )
-        this->send_error<parse_error>( std::move(holder), [handler](outgoing_holder holder)
+        this->send_error<parse_error>( std::move(holder), [handler](outgoing_holder oholder)
         {
-          auto d = holder.detach();
-          if ( d!=nullptr )
+          auto d2 = oholder.detach();
+          if ( d2!=nullptr )
           {
-            JSONRPC_LOG_ERROR( d )
+            JSONRPC_LOG_ERROR( d2 )
           }
-          handler( std::move(d) );
+          handler( std::move(d2) );
         });
  
       }
@@ -110,10 +110,10 @@ public:
   using super::get_target;
   target_adapter get_target() const { return _adapter;}
  
-  target_adapter get_adapter(  const std::string& name, bool disabort = false ) const
+  target_adapter get_adapter(  const std::string& aname, bool disabort = false ) const
   {
-    auto itf = this->template get_target< iinterface >( name, disabort );
-    auto jrpc = this->template get_target< ijsonrpc >( name, true );
+    auto itf = this->template get_target< iinterface >( aname, disabort );
+    auto jrpc = this->template get_target< ijsonrpc >( aname, true );
     return target_adapter(itf, jrpc);
   }
 

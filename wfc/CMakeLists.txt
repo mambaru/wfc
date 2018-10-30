@@ -33,6 +33,7 @@ set(
   ${WRTSTAT_LIB}
   ${WLOG_LIB}
   ${WFLOW_LIB}
+  ${WJRPC_LIB}
   ${Boost_LIBRARIES} 
   ${CMAKE_THREAD_LIBS_INIT} 
 )
