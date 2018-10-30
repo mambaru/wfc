@@ -40,11 +40,13 @@ public:
 // iinterface
   virtual void reg_io( io_id_t io_id, std::weak_ptr<iinterface> itf) override
   {
+    super::reg_io(io_id, itf);
     _adapter.reg_io( io_id, itf );
   }
   
   virtual void unreg_io(io_id_t io_id) override
   {
+    super::unreg_io(io_id);
     _adapter.unreg_io( io_id);
   }
   

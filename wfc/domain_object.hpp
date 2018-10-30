@@ -26,6 +26,7 @@
 namespace wfc{
   
 // TODO перенести в owner
+  /*
 class tracker
 {
   typedef iinterface::io_id_t  io_id_t;
@@ -99,7 +100,8 @@ private:
   std::mutex _tracking_mutex;
   std::map<io_id_t, std::shared_ptr<size_t> > _tracking_map;
 };
-  
+*/
+
 /**
  * @brief Базовый класс для реализации прикладного объекта WFC
  * @tparam Itf тип интерфейса объекта ( на базе wfc::iinterface )
@@ -324,9 +326,11 @@ public:
    * @brief Создает обертку над обработчиком для постановки в очередь
    * @param 
    */
-  std::function<void()> tracking(io_id_t io_id, std::function<void()> handler, std::function<void()> drop = nullptr)
+  template<typename H1, typename H2>
+  auto tracking(io_id_t io_id, H1&& h1, H2&& h2)
+    -> typename wrap_result_<H1, H2>::type
   {
-    return _tracker->wrap(io_id, std::move(handler), std::move(drop));
+    return _owner.tracking(io_id, std::forward<H1>(h1), std::forward<H2>(h2));
   }
 
   /**
@@ -352,7 +356,7 @@ public:
    */
   virtual void unreg_io(io_id_t io_id) override
   {
-    _tracker->release(io_id);
+    _owner.release(io_id);
   };
   
   /**
@@ -911,7 +915,6 @@ private:
   owner_type     _owner;
   workflow_ptr   _workflow;
   statistics_ptr _statistics;
-  std::shared_ptr<tracker> _tracker;
 };
   
 
@@ -927,7 +930,6 @@ void domain_object<Itf, Opt, StatOpt>::create_domain(const std::string& objname,
 {
   _name = objname;
   _global = g;
-  _tracker = std::make_shared<tracker>(objname);
   this->create();
 }
 
@@ -937,7 +939,7 @@ void domain_object<Itf, Opt, StatOpt>::configure_domain(const domain_config& opt
   _config = opt;
   _workflow = nullptr; // Ибо нефиг. До инициализации ничем пользоваться нельзя
   _conf_flag = false;
-  _tracker->enable(opt.tracking);
+  _owner.enable_tracking(opt.tracking);
   if (auto g = this->global() )
     g->cpu.set_cpu(_name, opt.cpu);
   this->configure();
@@ -975,7 +977,7 @@ void domain_object<Itf, Opt, StatOpt>::reconfigure_domain_basic(const domain_opt
   static_cast<domain_options&>(_config) = opt;
   if (auto g = this->global() )
     g->cpu.set_cpu(_name, opt.cpu);
-  _tracker->enable(opt.tracking);
+  _owner.enable_tracking(opt.tracking);
   this->reconfigure_basic();
 }
 
@@ -986,7 +988,7 @@ void domain_object<Itf, Opt, StatOpt>::reconfigure_domain(const domain_config& c
   _config = conf;
   if (auto g = this->global() )
     g->cpu.set_cpu(_name, static_cast<domain_options&>(_config).cpu);
-  _tracker->enable(conf.tracking);
+  _owner.enable_tracking(conf.tracking);
   this->reconfigure();
 }
   
