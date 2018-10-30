@@ -10,7 +10,7 @@ before_install:
   - sudo apt-get update -qq
 
 install: 
-  - sudo apt-get install -y libc++-dev libboost-dev libboost-system-dev libboost-program_options-dev libboost-filesystem-dev libboost-date_time-dev libboost-regex-dev valgrind doxygen
+  - sudo apt-get install -y libc++-dev libboost-dev libboost-system-dev libboost-program-options-dev libboost-filesystem-dev libboost-date-time-dev libboost-regex-dev valgrind doxygen
 
 compiler:
   - g++
