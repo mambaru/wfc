@@ -9,19 +9,21 @@ if ( WFC_ENABLE_STAT )
   add_definitions(-DWFC_ENABLE_STAT)
 endif()
 
-include(cmake/ci.cmake)
-set(liblist faslib wjson wlog wflow iow wjrpc wrtstat)
-getlibs(liblist)
+include(ci)
+if ( STANDALONE )
+  set(liblist faslib wjson wlog wflow iow wjrpc wrtstat)
+  getlibs(liblist)
+endif()
 
 add_subdirectory(config)
 add_subdirectory(wfc)
 
-exit_if_not_root()
-
-if ( BUILD_TESTING )
-  enable_testing()
-  add_subdirectory(tests)
-  add_subdirectory(examples)
+if ( STANDALONE )
+  if ( BUILD_TESTING )
+    enable_testing()
+    add_subdirectory(tests)
+    add_subdirectory(examples)
+  endif()
 endif()
 
 

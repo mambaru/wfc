@@ -32,15 +32,15 @@ build_info(wfc wfc)
 
 install(TARGETS wfc DESTINATION ${CMAKE_INSTALL_PREFIX})
 
-exit_if_not_root()
-message("==========-----------=============")
-set(
-  liblst
-  wrtstat
-  wlog
-  wflow
-  wjrpc
-  ${Boost_LIBRARIES} 
-  ${CMAKE_THREAD_LIBS_INIT} 
-)
-target_link_libraries(wfc ${liblst})
+if ( STANDALONE )
+  set(
+    liblst
+    wrtstat
+    wlog
+    wflow
+    wjrpc
+    ${Boost_LIBRARIES} 
+    ${CMAKE_THREAD_LIBS_INIT} 
+  )
+  target_link_libraries(wfc ${liblst})
+endif()
