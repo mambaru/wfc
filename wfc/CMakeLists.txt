@@ -28,18 +28,19 @@ add_library(
   ${wfc_source_list}
 )
 
-set(
-  liblst
-  ${WRTSTAT_LIB}
-  ${WLOG_LIB}
-  ${WFLOW_LIB}
-  ${WJRPC_LIB}
-  ${Boost_LIBRARIES} 
-  ${CMAKE_THREAD_LIBS_INIT} 
-)
-
-target_link_libraries(wfc ${liblst})
-
 build_info(wfc wfc)
 
 install(TARGETS wfc DESTINATION ${CMAKE_INSTALL_PREFIX})
+
+exit_if_not_root()
+message("==========-----------=============")
+set(
+  liblst
+  wrtstat
+  wlog
+  wflow
+  wjrpc
+  ${Boost_LIBRARIES} 
+  ${CMAKE_THREAD_LIBS_INIT} 
+)
+target_link_libraries(wfc ${liblst})
