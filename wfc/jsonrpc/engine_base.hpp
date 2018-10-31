@@ -153,10 +153,10 @@ private:
         wf->release_timer(_stat_timer_id);
         if ( sopt.interval_ms != 0 )
         {
-          auto name = this->name();
-          auto handler_map  = stat->create_value_meter(name + sopt.handler_map);
-          auto result_map   = stat->create_value_meter(name + sopt.result_map);
-          auto result_queue = stat->create_value_meter(name + sopt.result_queue);
+          auto sname = this->name();
+          auto handler_map  = stat->create_value_meter(sname + sopt.handler_map);
+          auto result_map   = stat->create_value_meter(sname + sopt.result_map);
+          auto result_queue = stat->create_value_meter(sname + sopt.result_queue);
           _stat_timer_id = wf->create_timer( 
             std::chrono::milliseconds(sopt.interval_ms), 
             [handler_map, result_map, result_queue, this]()->bool
@@ -164,9 +164,9 @@ private:
               if ( nullptr != this->get_statistics() )
               {
                 auto si = this->_engine->sizes();
-                handler_map.create(si.handler_map, 0);
-                result_map.create(si.result_map, 0);
-                result_queue.create(si.result_queue, 0);
+                handler_map.create( static_cast<wrtstat::value_type>(si.handler_map), static_cast<wrtstat::size_type>(0));
+                result_map.create(  static_cast<wrtstat::value_type>(si.result_map), static_cast<wrtstat::size_type>(0));
+                result_queue.create(static_cast<wrtstat::value_type>(si.result_queue), static_cast<wrtstat::size_type>(0));
                 return true;
               }
               return false;
