@@ -7,7 +7,7 @@ date
 echo "$prj_dir"
 rm --force ./cppcheck.cppcheck.log
 #-I $prj_dir/wfc -I $prj_dir/examples -I $prj_dir/tests
-$script_dir/cppcheck-exec.sh $@ $prj_dir/wfc $prj_dir/tests $prj_dir/examples  |& tee ./cppcheck.cppcheck.log
+$script_dir/cppcheck-exec.sh $@ $prj_dir |& tee ./cppcheck.cppcheck.log
 sh -c "! grep '\[' ./cppcheck.cppcheck.log"
 res=$?
 rm --force ./cppcheck.cppcheck.log
