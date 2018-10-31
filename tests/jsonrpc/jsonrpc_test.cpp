@@ -14,12 +14,6 @@ struct options
   std::string target;
 };
 
-struct itest: ijsonrpc
-{
-  virtual ~itest(){}
-  virtual int testtest() = 0;
-};
-
 class test
   : public jsonrpc::domain_proxy<options, nostat>
 {
@@ -106,8 +100,8 @@ int main()
   args["param2"]="100";
   args["param3"]="";
   g->args.insert("name", wfc::instance_args("name", args) );
-  if ( auto itst = g->registry.get<itest>("name") )
-    return itst->testtest();
+  if ( auto itst = g->registry.get<ijsonrpc>("name") )
+    return 0;
   else
     return 8;
 }
