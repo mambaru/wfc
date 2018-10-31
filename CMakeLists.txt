@@ -10,7 +10,8 @@ if ( WFC_ENABLE_STAT )
 endif()
 
 include(cmake/ci.cmake)
-get_libs(faslib wjson wlog wflow iow wjrpc wrtstat)
+set(liblist faslib wjson wlog wflow iow wjrpc wrtstat)
+get_libs(${liblist})
 
 add_subdirectory(config)
 add_subdirectory(wfc)
