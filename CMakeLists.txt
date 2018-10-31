@@ -9,6 +9,8 @@ if ( WFC_ENABLE_STAT )
   add_definitions(-DWFC_ENABLE_STAT)
 endif()
 
+include(cmake/ci.cmake)
+get_libs(faslib wjson wlog wflow iow wjrpc wrtstat)
 
 add_subdirectory(config)
 add_subdirectory(wfc)
