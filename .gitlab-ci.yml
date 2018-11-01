@@ -21,6 +21,7 @@ base-build:
     - devel
     - tags
     - /^build.*$/
+    - /^devel.*$/
 
 build-g++11:
   stage: build
