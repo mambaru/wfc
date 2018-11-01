@@ -3,6 +3,9 @@ variables:
   PROJECT_SSH: "git@github.lan:${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}.git"
   REMOTE_SSH:  "git@github.com:mambaru/${CI_PROJECT_NAME}.git"
 
+before_script:
+  - git submodule update --init
+
 stages:
   - build
   - check
