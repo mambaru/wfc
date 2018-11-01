@@ -14,11 +14,12 @@ if ( STANDALONE )
   getlibs(liblist)
 endif()
 
+include_directories(.)
 add_subdirectory(config)
 add_subdirectory(wfc)
 
 if ( STANDALONE )
-  if ( BUILD_TESTING )
+    if ( BUILD_TESTING )
     enable_testing()
     add_subdirectory(tests)
     add_subdirectory(examples)
