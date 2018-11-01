@@ -1,10 +1,6 @@
 include(BuildInfo)
 include(mambaopt)
 
-include(FindThreads)
-find_package(Boost COMPONENTS system program_options filesystem date_time regex REQUIRED)
-
-
 SET(
   wfc_source_list
   wfc.cpp
@@ -30,9 +26,10 @@ add_library(
 
 build_info(wfc wfc)
 
-install(TARGETS wfc DESTINATION ${CMAKE_INSTALL_PREFIX})
-
 if ( STANDALONE )
+  include(FindThreads)
+  find_package(Boost COMPONENTS system program_options filesystem date_time regex REQUIRED)
+
   set(
     liblst
     wrtstat

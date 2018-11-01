@@ -57,8 +57,8 @@ build-clang++14:
 cppcheck:
   stage: check
   script:
-    - ./.ci/cppcheck.sh --std=c++11
-    - ./.ci/cppcheck.sh --std=c++14
+    - ./.ci/cppcheck-ci.sh --std=c++11
+    - ./.ci/cppcheck-ci.sh --std=c++14
   only:
     - tags
     - /^check.*$/
