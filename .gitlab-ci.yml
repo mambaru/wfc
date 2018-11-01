@@ -21,7 +21,7 @@ base-build:
     - devel
     - tags
     - /^build.*$/
-    - /^devel.*$/
+    - /^devel-.*$/
 
 build-g++11:
   stage: build
@@ -75,13 +75,20 @@ release-branch:
   only:
     - tags
 
-make-merge-request:
+master-merge-request:
   stage: release
   script:
     - if [ "${RELEASE_BRANCH}" != "${CI_COMMIT_REF_NAME}" ]; then exit 1; fi
-    - HOST=${CI_PROJECT_URL}  CI_PROJECT_ID=${CI_PROJECT_ID} GITLAB_USER_ID=${GITLAB_USER_ID} PRIVATE_TOKEN=${PRIVATE_TOKEN} ./.ci/automr.sh
+    - HOST=${CI_PROJECT_URL}  CI_PROJECT_ID=${CI_PROJECT_ID} GITLAB_USER_ID=${GITLAB_USER_ID} PRIVATE_TOKEN=${PRIVATE_TOKEN} ./.ci/automr.sh master
   only:
     - /^release.*$/
+
+devel-merge-request:
+  stage: release
+  script:
+    - HOST=${CI_PROJECT_URL}  CI_PROJECT_ID=${CI_PROJECT_ID} GITLAB_USER_ID=${GITLAB_USER_ID} PRIVATE_TOKEN=${PRIVATE_TOKEN} ./.ci/automr.sh devel true
+  only:
+    - /^devel-.*$/
 
 delete-branches:
   stage: clean
