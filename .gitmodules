@@ -22,6 +22,3 @@
 [submodule "external/wrtstat"]
 	path = external/wrtstat
 	url = git@github.lan:cpp/wrtstat.git
-[submodule "external/wio"]
-	path = external/wio
-	url = git@github.lan:cpp/iow.git

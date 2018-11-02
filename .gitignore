@@ -17,7 +17,7 @@ CMakeCache.txt
 *.kate-swp
 *build_info.h
 config.h
-Makefile
 *_build.counter
 docs
 Testing
+
