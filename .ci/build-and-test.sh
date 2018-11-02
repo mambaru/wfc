@@ -1,1 +1,1 @@
-../external/cmake-ci/ci/build-and-test.sh
+/home/migashko/prj/github.lan/wfc/external/cmake-ci/ci/build-and-test.sh
