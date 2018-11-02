@@ -1,1 +1,1 @@
-/home/migashko/prj/github.lan/wfc/external/cmake-ci/ci/cppcheck-ci.sh
+../external/cmake-ci/ci/cppcheck-ci.sh
