@@ -9,10 +9,10 @@ before_script:
 stages:
   - build
   - check
-  - clean
-  - release
+  - merge
   - publish
-
+  - clean
+  
 base-build:
   stage: build
   script:
@@ -73,32 +73,31 @@ cppcheck:
     - /^check.*$/
     - /^RC.*$/
 
-release-branch:
-  stage: release
+tagged-release:
+  stage: merge
   script:
     - echo git push -f ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:refs/heads/${RELEASE_BRANCH}
     - git push -f ${PROJECT_SSH} ${CI_COMMIT_REF_NAME}:refs/heads/${RELEASE_BRANCH}
   only:
     - tags
 
-master-merge-request:
-  stage: release
+master-MR-R:
+  stage: merge
   script:
     - if [ "${RELEASE_BRANCH}" != "${CI_COMMIT_REF_NAME}" ]; then exit 1; fi
     - HOST=${CI_PROJECT_URL}  CI_PROJECT_ID=${CI_PROJECT_ID} GITLAB_USER_ID=${GITLAB_USER_ID} PRIVATE_TOKEN=${PRIVATE_TOKEN} ./.ci/automr.sh master
   only:
     - /^release.*$/
 
-master-merge-request-rc:
-  stage: release
+master-MR-RC:
+  stage: merge
   script:
-    - if [ "${RELEASE_BRANCH}" != "${CI_COMMIT_REF_NAME}" ]; then exit 1; fi
     - HOST=${CI_PROJECT_URL}  CI_PROJECT_ID=${CI_PROJECT_ID} GITLAB_USER_ID=${GITLAB_USER_ID} PRIVATE_TOKEN=${PRIVATE_TOKEN} ./.ci/automr.sh master true
   only:
     - /^RC.*$/
 
-devel-merge-request:
-  stage: release
+devel-MR:
+  stage: merge
   script:
     - HOST=${CI_PROJECT_URL}  CI_PROJECT_ID=${CI_PROJECT_ID} GITLAB_USER_ID=${GITLAB_USER_ID} PRIVATE_TOKEN=${PRIVATE_TOKEN} ./.ci/automr.sh devel true
   only:
