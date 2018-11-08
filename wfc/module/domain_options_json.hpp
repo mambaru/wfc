@@ -56,7 +56,7 @@ struct domain_options_json_t
     has_priority   =  ( Features & static_cast<int>(component_features::DisabledPriority) ) == 0,
     has_workflow   =  ( Features & static_cast<int>(component_features::DisabledWorkflow) ) == 0,
     has_cpu        =  ( Features & static_cast<int>(component_features::EnableCPU)        ) != 0,
-    has_tracking        =  ( Features & static_cast<int>(component_features::EnableTracking)   ) != 0,
+    has_tracking   =  ( Features & static_cast<int>(component_features::EnableTracking)   ) != 0,
     has_statistics =  domain_options_type::statistics_enabled
   };
   

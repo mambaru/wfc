@@ -332,7 +332,7 @@ public:
   {
     return _owner.tracking(io_id, std::forward<H1>(h1), std::forward<H2>(h2));
   }
-
+  
   /**
    * @brief Создает обертку над обработчиком обратного вызова RPC
    * @tparam H тип обработчика
