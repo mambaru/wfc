@@ -10,8 +10,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(ci)
 
 if ( STANDALONE )
-  set(liblist faslib wjson wlog wflow iow wjrpc wrtstat)
-  getlibs(liblist)
+  getlibs(faslib wjson wlog wflow iow wjrpc wrtstat)
 endif()
 
 include_directories(.)
