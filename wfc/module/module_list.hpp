@@ -89,7 +89,6 @@ private:
   void create_(global_ptr g, fas::type_list< H, L > ) 
   {
     auto obj = std::make_shared<H>();
-    //_modules[ obj->name() ] = obj;
     _modules.push_back( obj );
     if ( g!=nullptr )
       g->registry.set("module", obj->name(), obj);
