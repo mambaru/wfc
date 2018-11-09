@@ -68,7 +68,7 @@ public:
     _object = std::make_shared<object_type>();
     get_(_object)->create_domain(obj_name, _global);
     if ( _global != nullptr )
-      _global->registry.set(obj_name, _object);
+      _global->registry.set_target(obj_name, _object);
   }
 
   virtual void configure(const domain_config& opt)
@@ -179,7 +179,7 @@ private:
 
       if (_global)
       {
-        _global->registry.set(_config.name, _object);
+        _global->registry.set_target(_config.name, _object);
       }
     }
     else

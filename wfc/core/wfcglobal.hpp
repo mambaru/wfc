@@ -23,7 +23,7 @@ struct wfcglobal
   typedef std::function<bool()> fire_handler;
   typedef fire_list< fire_handler > fakir;
   typedef ::iow::asio::io_service io_service_type;
- typedef std::function<void(const std::string&)> callback_handler_t;
+  typedef std::function<void(const std::string&)> callback_handler_t;
  
   std::string program_name;
   std::string instance_name;

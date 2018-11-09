@@ -210,7 +210,7 @@ private:
     domain_config opt;
     if ( _global != nullptr )
     {
-      _global->registry.set("instance", this->name(), _instances);
+      _global->registry.set_object("instance", this->name(), _instances);
     }
     json::json_error err;
     _instances->create(this->name(), _global);
@@ -289,7 +289,7 @@ private:
       {
         auto inst =  std::make_shared<instance_type>();
         itr = _instances.insert( std::make_pair( opt.name, inst) ).first;
-        if ( _global ) _global->registry.set("instance", opt.name, inst);
+        if ( _global ) _global->registry.set_object("instance", opt.name, inst);
         inst->create( _global );
         itr->second->configure(opt);
         SYSTEM_LOG_MESSAGE("Instance '" << opt.name << "' is initial configured")

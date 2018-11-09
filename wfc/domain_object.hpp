@@ -388,7 +388,7 @@ public:
       return nullptr;
 
     if ( auto g = this->global() )
-      return g->registry.template get<I>(target, disabort);
+      return g->registry.template get_target<I>(target, disabort);
     return nullptr;
   }
 
@@ -404,13 +404,13 @@ public:
    * с одинаковыми именами под одним префиксом быть не может.
    */
   template<typename I>
-  std::shared_ptr<I> get_target(const std::string& prefix, const std::string& target, bool disabort = false) const
+  std::shared_ptr<I> get_object(const std::string& prefix, const std::string& target, bool disabort = false) const
   {
     if (!is_configured_())
       return nullptr;
 
     if ( auto g = this->global() )
-      return g->registry.template get<I>(prefix, target, disabort);
+      return g->registry.template get_object<I>(prefix, target, disabort);
     return nullptr;
   }
   
@@ -426,21 +426,21 @@ public:
    * то можно задать ```cpp nomark=true``` чтобы избежать повторной инициализации всей системы
    * @see idomain
    */
-  void set_target(const std::string& prefix, const std::string& tg_name, std::shared_ptr<iinterface> pobj, bool nomark = false)
+  void reg_object(const std::string& prefix, const std::string& tg_name, std::shared_ptr<iinterface> pobj, bool nomark = false)
   {
     if ( auto g = this->global() )
     {
-      g->registry.set(prefix, tg_name, pobj, nomark);
+      g->registry.set_object(prefix, tg_name, pobj, nomark);
     }
   }
 
   /**
-   * @brief возвращает указатели на все объектов заданного префикса
+   * @brief возвращает указатели на все объектов заданного префикса из глобального реестра
    * @param prefix префикс объекта (aka пространство имен)
    * @return указатели на все объектов заданного префикса
    */
   template<typename I>
-  std::map<std::string, std::shared_ptr<I> > select_targets(const std::string& prefix) const
+  std::map<std::string, std::shared_ptr<I> > select_objects(const std::string& prefix) const
   {
     std::map<std::string, std::shared_ptr<I> > result;
     if ( this->is_configured_() )
@@ -480,7 +480,7 @@ public:
       return nullptr;
     if ( target.empty() )
       return _workflow;
-    return this->global()->registry.template get<workflow_type>("workflow", target, disabort);
+    return this->global()->registry.template get_object<workflow_type>("workflow", target, disabort);
   }
 
   /**
@@ -957,11 +957,11 @@ void domain_object<Itf, Opt, StatOpt>::initialize_domain()
 
     _workflow = _config.workflow.empty()
                 ? this->global()->common_workflow
-                : this->global()->registry.template get<workflow >("workflow", _config.workflow)
+                : this->global()->registry.template get_object<workflow >("workflow", _config.workflow, false)
                 ;
 
     _statistics = ! _config.statistics.disabled 
-                  ? this->global()->registry.template get<statistics::statistics>("statistics", _config.statistics.target)
+                  ? this->global()->registry.template get_object<statistics::statistics>("statistics", _config.statistics.target, false)
                   : nullptr
                   ;
 

@@ -9,7 +9,7 @@
 
 namespace wfc{
 
-void object_registry::set(const std::string& prefix, const std::string& name, std::shared_ptr<iinterface> item, bool nomark )
+void object_registry::set_object(const std::string& prefix, const std::string& name, std::shared_ptr<iinterface> item, bool nomark )
 {
   if (name.empty() )
   {
@@ -35,9 +35,9 @@ void object_registry::set(const std::string& prefix, const std::string& name, st
   }
 }
   
-void object_registry::set(const std::string& name, std::shared_ptr<iinterface> item, bool nomark )
+void object_registry::set_target(const std::string& name, std::shared_ptr<iinterface> item, bool nomark )
 {
-  this->set("", name, item, nomark);
+  this->set_object("", name, item, nomark);
 }
 
 void object_registry::erase(const std::string& prefix, const std::string& name)

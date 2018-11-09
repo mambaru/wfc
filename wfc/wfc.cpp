@@ -24,7 +24,7 @@ basic_wfc::basic_wfc(std::shared_ptr<ibuild_info> bi, const package_list& packag
 
   for (const auto& p: packages)
   {
-    _global->registry.set("package", p->name(), p);
+    _global->registry.set_object("package", p->name(), p);
   }
 
   for (const auto& p: packages)
@@ -38,7 +38,7 @@ int basic_wfc::run(int argc, char* argv[], std::string helpstring)
 {
   wfcglobal::static_global = _global;
 
-  if ( auto startup = _global->registry.get<istartup>("startup", true) )
+  if ( auto startup = _global->registry.get_target<istartup>("startup", true) )
   {
     if ( int err = startup->startup(argc, argv, helpstring) )
       return err;
@@ -49,7 +49,7 @@ int basic_wfc::run(int argc, char* argv[], std::string helpstring)
 
   int status = 0;
 
-  if ( auto core = _global->registry.get<icore>("core", true) )
+  if ( auto core = _global->registry.get_target<icore>("core", true) )
   {
     status = core->run();
   }

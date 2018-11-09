@@ -91,7 +91,7 @@ private:
     auto obj = std::make_shared<H>();
     _modules.push_back( obj );
     if ( g!=nullptr )
-      g->registry.set("module", obj->name(), obj);
+      g->registry.set_object("module", obj->name(), obj);
     obj->create(g);
     this->create_( g, L() );
   }

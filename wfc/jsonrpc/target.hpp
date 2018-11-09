@@ -11,6 +11,7 @@
 
 namespace wfc{ namespace jsonrpc{
 
+  /*
 class target_depr
   : public ijsonrpc
 {
@@ -25,12 +26,12 @@ public:
   {
     if (!g) return;
 
-    if ( auto t1 = g->registry.get<ijsonrpc>(name1, true) )
+    if ( auto t1 = g->registry.get_object<ijsonrpc>("", name1, true) )
     {
       _target_jsonrpc = t1;
       _target_io = t1;
     }
-    else if ( auto t2 = g->registry.get<iinterface>(name1) )
+    else if ( auto t2 = g->registry.get_object<iinterface>("",name1, false) )
     {
       _target_io = t2;
     }
@@ -150,5 +151,6 @@ private:
   std::shared_ptr<ijsonrpc>   _target_jsonrpc;
   std::shared_ptr<iinterface> _target_io;
 };
+  */
 
 }}

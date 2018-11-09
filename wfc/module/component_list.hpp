@@ -80,7 +80,7 @@ private:
     _components.push_back(obj);
     if ( _global )
     {
-      _global->registry.set("component", obj->name(), obj);
+      _global->registry.set_object("component", obj->name(), obj);
     }
     obj->create(_global);
     create_( L() );

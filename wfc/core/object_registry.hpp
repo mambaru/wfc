@@ -28,17 +28,17 @@ public:
   typedef std::map< key_type, interface_ptr > registry_map;
   
   template<typename I>
-  std::shared_ptr<I> get(const std::string& prefix, const std::string& name, bool disabort = false) const;
+  std::shared_ptr<I> get_object(const std::string& prefix, const std::string& name, bool disabort = false) const;
   
   template<typename I>
-  std::shared_ptr<I> get(const std::string& name, bool disabort = false) const;
+  std::shared_ptr<I> get_target(const std::string& name, bool disabort = false) const;
 
   template<typename I>
   std::map<std::string, std::shared_ptr<I> > select(const std::string& prefix) const;
   
-  void set(const std::string& prefix, const std::string& name, std::shared_ptr<iinterface> item, bool nomark = false );
+  void set_object(const std::string& prefix, const std::string& name, std::shared_ptr<iinterface> item, bool nomark = false );
   
-  void set(const std::string& name, std::shared_ptr<iinterface> item, bool nomark = false );
+  void set_target(const std::string& name, std::shared_ptr<iinterface> item, bool nomark = false );
 
   void erase(const std::string& prefix, const std::string& name);
 
@@ -73,7 +73,7 @@ private:
 
 
 template<typename I>
-std::shared_ptr<I> object_registry::get(const std::string& prefix, const std::string& name, bool disabort ) const
+std::shared_ptr<I> object_registry::get_object(const std::string& prefix, const std::string& name, bool disabort ) const
 {
   std::shared_ptr<I> result = nullptr;
   if ( auto p = this->get_(prefix, name, disabort) )
@@ -82,9 +82,9 @@ std::shared_ptr<I> object_registry::get(const std::string& prefix, const std::st
 }
 
 template<typename I>
-std::shared_ptr<I> object_registry::get(const std::string& name, bool disabort) const
+std::shared_ptr<I> object_registry::get_target(const std::string& name, bool disabort) const
 {
-  return this->get<I>("", name, disabort);
+  return this->get_object<I>("", name, disabort);
 }
 
 template<typename I>
