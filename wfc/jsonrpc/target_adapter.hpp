@@ -112,7 +112,7 @@ struct target_adapter: ijsonrpc
       auto handler = holder.result_handler();
       auto d = holder.detach();
 
-      p2->perform_io( std::move(d), io_id, [handler, io_id](data_ptr d2) 
+      p2->perform_io( std::move(d), io_id, [handler](data_ptr d2) 
       {
         while ( d2!=nullptr )
         {
