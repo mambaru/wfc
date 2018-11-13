@@ -17,21 +17,7 @@ include_directories(.)
 add_subdirectory(config)
 add_subdirectory(wfc)
 
-if ( STANDALONE AND BUILD_TESTING)
-  include(FindThreads)
-  find_package(Boost COMPONENTS system program_options filesystem date_time regex REQUIRED)
-
-  set(
-    wfc_liblist
-    wfc
-    wrtstat
-    wlog
-    wflow
-    wjrpc
-    ${Boost_LIBRARIES} 
-    ${CMAKE_THREAD_LIBS_INIT} 
-  )
-
+if ( BUILD_TESTING)
   enable_testing()
   add_subdirectory(tests)
   add_subdirectory(examples)

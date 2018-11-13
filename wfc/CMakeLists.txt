@@ -26,3 +26,18 @@ add_library(
 
 build_info(wfc wfc)
 
+if ( STANDALONE )
+
+  include(FindThreads)
+  find_package(Boost COMPONENTS system program_options filesystem date_time regex REQUIRED)
+
+  target_link_libraries(
+    wfc 
+      wrtstat
+      wlog
+      wflow
+      wjrpc
+      ${Boost_LIBRARIES} 
+      ${CMAKE_THREAD_LIBS_INIT}
+  )
+endif()
