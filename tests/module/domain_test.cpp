@@ -90,7 +90,7 @@ int main()
   args["param2"]="100";
   args["param3"]="";
   g->args.insert("name", wfc::instance_args("name", args) );
-  if ( auto itst = g->registry.get<itest>("name") )
+  if ( auto itst = g->registry.get_target<itest>("name") )
     return itst->testtest();
   else
     return 8;

@@ -28,10 +28,10 @@ int main()
   std::shared_ptr<number> i1 = std::make_shared<number>(1);
   std::shared_ptr<number> i2 = std::make_shared<number>(2);
   std::shared_ptr<number> i3 = std::make_shared<number>(3);
-  reg.set("i0", i0);
-  reg.set("i1", i1);
-  reg.set("i2", i2);
-  reg.set("i3", i3);
+  reg.set_target("i0", i0);
+  reg.set_target("i1", i1);
+  reg.set_target("i2", i2);
+  reg.set_target("i3", i3);
 
   reg.erase("i0");
   std::vector<number> v;
@@ -48,10 +48,10 @@ int main()
   if (v[1].count!=2) return -1;
   if (v[2].count!=1) return -1;
 
-  if ( reg.get<number>("i2")->count != 2 )
+  if ( reg.get_target<number>("i2")->count != 2 )
     return -1;
 
-  if ( auto x = reg.get<number>("i4") )
+  if ( auto x = reg.get_target<number>("i4") )
     return -1;
   
   return 0;

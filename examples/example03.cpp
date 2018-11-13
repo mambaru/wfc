@@ -75,8 +75,8 @@ public:
   
   virtual void create( std::shared_ptr<wfc::wfcglobal> g) override
   {
-    g->registry.set("core", std::make_shared<example_core>());
-    g->registry.set("startup", std::make_shared<example_startup>());
+    g->registry.set_target("core", std::make_shared<example_core>());
+    g->registry.set_target("startup", std::make_shared<example_startup>());
     std::cout << "example_package::create()" << std::endl;
   }
 

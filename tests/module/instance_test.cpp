@@ -69,7 +69,7 @@ int main()
 
   opt.name = "test";
   t.configure(opt);
-  auto tmp1 = g->registry.get<itest>("test");
+  auto tmp1 = g->registry.get_target<itest>("test");
   
   if ( tmp1 == nullptr )
     return 2;
@@ -84,33 +84,4 @@ int main()
   t.stop("");
   
   return 0;
-  /*
-  if ( t.options().test != false )
-    return -1;
-
-  if ( !t.name().empty() )
-    return -2;
-  
-  options opt;
-  opt.test = true;
-  
-  t.start();
-  t.initialize("name", nullptr, opt);
-
-  if ( t.options().test != true )
-    return -3;
-
-  if ( t.name() != "name" )
-    return -2;
-
-  if ( t.testval != true )
-    return -4;
-  
-  options opt2; 
-  test::generate(opt2, "");
-  if ( opt2.test != false )
-    return -5;
-  
-  return 0;
-  */
 }

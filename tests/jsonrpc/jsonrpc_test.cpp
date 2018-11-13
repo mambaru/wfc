@@ -100,7 +100,7 @@ int main()
   args["param2"]="100";
   args["param3"]="";
   g->args.insert("name", wfc::instance_args("name", args) );
-  if ( auto itst = g->registry.get<ijsonrpc>("name") )
+  if ( auto itst = g->registry.get_target<ijsonrpc>("name") )
     return 0;
   else
     return 8;
