@@ -62,7 +62,6 @@ class test_service
   
 int main()
 {
-  int a;
   wfc::asio::io_service ios;
   auto g = std::make_shared<wfc::wfcglobal>(ios);
   wfc::wfcglobal::static_global = g;
