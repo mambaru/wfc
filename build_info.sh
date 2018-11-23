@@ -58,8 +58,6 @@ fi
 untaged_commits=`expr $commits_head - $commits_tag`
 uncommited=`expr $(git status --porcelain 2>/dev/null | egrep "^(M| M)" | wc -l)`
 unpushed=$(git log --branches --not --remotes --simplify-by-decoration --decorate --oneline | wc -l)
-#lastmodifytime=$(stat -c %z `pwd`)
-#lastmodifytime=$(find . -exec stat -c %z '{}' ';' | sort -r | head -n 1)
 lastmodifytime=$(find . | grep -v "build\.counter" | xargs stat -c %z | sort -r | head -n 1)
 scriptmodifytime=$(stat -c %z $0)
 
@@ -178,9 +176,6 @@ else
   echo "create $h_file."
   mv "$h_file_blank" "$h_file"
 fi
-
-#if [[ ! -f "$h_file" ]]; then
-#fi
 
 # build
 g++ -c $c1_file -fPIC -o $o1_file
