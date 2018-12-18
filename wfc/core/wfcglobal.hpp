@@ -12,7 +12,7 @@
 #include <wfc/core/ibuild_info.hpp>
 #include <wfc/core/workflow.hpp>
 #include <wfc/core/cpuset.hpp>
-#include <iow/asio.hpp>
+#include <wfc/asio.hpp>
 #include <atomic>
 
 namespace wfc{
@@ -22,7 +22,7 @@ struct wfcglobal
   typedef std::shared_ptr<wfcglobal> ptr;
   typedef std::function<bool()> fire_handler;
   typedef fire_list< fire_handler > fakir;
-  typedef ::iow::asio::io_service io_service_type;
+  typedef asio::io_service io_service_type;
   typedef std::function<void(const std::string&)> callback_handler_t;
  
   std::string program_name;

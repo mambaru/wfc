@@ -108,15 +108,20 @@ std::shared_ptr<iinterface> object_registry::get_(const std::string& prefix, con
       result = itr->second;
   }
 
+  std::string preff = prefix;
+  if ( !preff.empty() )
+    preff+="::";
+    
+  
   if ( not_found )
   {
-    DOMAIN_LOG_FATAL("object_registry::get: object '" << prefix << "::" << name << "' not found" )
+    DOMAIN_LOG_FATAL("object_registry::get: object '" << preff << name << "' not found" )
     return nullptr;
   }
    
   if ( !disabort && result == nullptr)
   {
-    DOMAIN_LOG_FATAL("object_registry::get: invalid interface for " << prefix << "::" << name <<
+    DOMAIN_LOG_FATAL("object_registry::get: invalid interface for " << preff << name <<
                      " (cannot convert from " << typeid(itr->second.get()).name() << " to " << typeid(result.get()).name() << ")" )
     return nullptr;
   }
