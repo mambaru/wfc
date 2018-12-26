@@ -1,5 +1,5 @@
 //
-// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2018
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2018
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -11,13 +11,13 @@
 
 namespace wfc{
   
-class domain_test
+class testing_domain
 {
   typedef std::shared_ptr<iinstance> iinterface_ptr;
 
 public:
 
-  domain_test()
+  testing_domain()
   {
     _g = std::make_shared<wfcglobal>(_io);
     _g->common_workflow = std::make_shared<workflow>(_io);
