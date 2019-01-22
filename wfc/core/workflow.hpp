@@ -30,6 +30,4 @@ public:
   {};
 };
 
-/*using ::wflow::workflow;*/
-
 }
