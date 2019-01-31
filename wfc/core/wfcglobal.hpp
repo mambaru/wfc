@@ -37,7 +37,7 @@ struct wfcglobal
   fakir before_stop;
   fakir after_stop;
   
-  std::atomic<bool> disable_statistics;
+  std::atomic_bool disable_statistics;
   
   callback_handler_t nocall_handler;
   callback_handler_t doublecall_handler;
@@ -48,7 +48,7 @@ struct wfcglobal
   io_service_type& io_service;
   std::shared_ptr< workflow > common_workflow;
   static ptr static_global;
-  std::atomic<bool> stop_signal_flag;
+  std::atomic_bool stop_signal_flag;
 
   explicit wfcglobal( io_service_type& io_service);
 };
