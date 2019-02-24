@@ -42,7 +42,6 @@ public:
     dopt.peeper = target;
     _raw_target = target;
     this->initialize_engine(dopt);
-    
   }
   
   virtual void perform_io(data_ptr d, io_id_t io_id, output_handler_t handler) override
@@ -60,15 +59,8 @@ public:
           h->perform_io(std::move(d), io_id, std::move(handler));
           return;
         }
-          /*
-        if ( auto h = this->_engine->find(io_id) )
-        {
-          h->target()->perform_io(std::move(d), io_id, std::move(handler));
-          return;
-        }*/
       }
     }
-    
     super::perform_io( std::move(d), io_id, std::move(handler) );
   }
 
