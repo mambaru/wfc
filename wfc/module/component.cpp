@@ -27,9 +27,9 @@ std::string component::description() const
   return _impl->description();
 }
 
-std::string component::help() const
+std::string component::help(const std::string& args) const
 {
-  return _impl->help();
+  return _impl->help(args);
 }
 
 std::string component::interface_name() const

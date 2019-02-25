@@ -121,7 +121,7 @@ public:
     return "no description";
   }
 
-  virtual std::string help() const override
+  virtual std::string help(const std::string&) const override
   {
     return std::string("Sorry, no help for '") + this->name() + "'.";
   }

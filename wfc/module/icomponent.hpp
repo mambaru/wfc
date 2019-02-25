@@ -23,10 +23,10 @@ struct icomponent: iinterface
 
   virtual std::string name() const  = 0;
   virtual std::string description() const = 0;
-  virtual std::string help() const = 0;
+  virtual std::string help(const std::string& args) const = 0;
   virtual std::string interface_name() const = 0;
 
-  virtual std::string generate(const std::string& type)  = 0;
+  virtual std::string generate(const std::string& args)  = 0;
   virtual bool parse(const std::string& conf, json::json_error* err) = 0;
 
   virtual void create( std::shared_ptr<wfcglobal>) = 0;

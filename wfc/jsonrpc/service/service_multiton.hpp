@@ -44,14 +44,32 @@ public:
     return result;
   }
   
-  virtual std::string help() const override
+  virtual std::string help(const std::string& args) const override
   {
     std::stringstream ss;
-    ss << "Allowed methods for '" << this->name() << "':" << std::endl;
     std::list<std::string> method_list = this->get_method_list();
-    for (auto n : method_list)
+    if ( args.empty() )
     {
-      ss << "  " << n << std::endl;
+      ss << "Allowed methods for '" << this->name() << "':" << std::endl;
+      for (auto n : method_list)
+      {
+        ss << "  " << n << std::endl;
+      }
+      
+      if ( !method_list.empty() )
+      {
+        ss << "Get the JSON-RPC scheme:"<< std::endl;
+        ss << "\t--help " << this->name() << ":scheme" << std::endl;
+        ss << "\t--help " << this->name() << ":scheme:" << method_list.front() << std::endl;
+        ss << "\t--help " << this->name() << ":scheme:" << method_list.front() << ":params"<< std::endl;
+        ss << "\t--help " << this->name() << ":scheme:" << method_list.front() << ":result"<< std::endl;
+        ss << "\t--help " << this->name() << ":scheme:" << method_list.front() << ":request"<< std::endl;
+        ss << "\t--help " << this->name() << ":scheme:" << method_list.front() << ":response"<< std::endl;
+      }
+    }
+    else
+    {
+      ss << "TODO";
     }
     return ss.str();
   }
