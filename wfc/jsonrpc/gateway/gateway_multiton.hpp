@@ -24,6 +24,17 @@ class gateway_multiton: public ::wfc::multiton<
   statistics_options_json
 >
 {
+public:  
+  std::list<std::string> get_method_list() const
+  {
+    return gateway< MethodList, Impl >::get_method_list();
+  }
+  
+  virtual std::string help(const std::string& args) const override
+  {
+    return gateway< MethodList, Impl >::schema_help(this->name(), args);
+  }
+
 };
 
 }}
