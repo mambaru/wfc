@@ -3,6 +3,7 @@
 #include <wfc/domain_object.hpp>
 #include <wfc/module/instance.hpp>
 #include <wfc/jsonrpc/domain_proxy.hpp>
+#include <wfc/jsonrpc.hpp>
 #include <wfc/asio.hpp>
 #include <wfc/name.hpp>
 
