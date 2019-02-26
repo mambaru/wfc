@@ -6,9 +6,14 @@
 
 #pragma once
 
-#include <wfc/jsonrpc.hpp>
 #include <wfc/logger.hpp>
+#include <wfc/jsonrpc/ijsonrpc.hpp>
 #include <wjrpc/incoming/send_error.hpp>
+#include <wjrpc/outgoing/outgoing_error.hpp>
+#include <wjrpc/outgoing/outgoing_error_json.hpp>
+#include <wjrpc/errors/errors.hpp>
+#include <wjrpc/errors/error_json.hpp>
+#include <wjrpc/types.hpp>
 #include <wjson/json.hpp>
 #include <memory>
 
@@ -19,6 +24,7 @@ struct target_adapter: ijsonrpc
 {
   typedef std::weak_ptr<iinterface> itf_ptr_t;
   typedef std::weak_ptr<ijsonrpc> jsonrpc_ptr_t;
+  typedef ::wjrpc::call_id_t call_id_t;
   
   target_adapter() {};
   target_adapter(itf_ptr_t itf, jsonrpc_ptr_t jsonrpc)
@@ -88,14 +94,14 @@ struct target_adapter: ijsonrpc
   template<typename Error>
   incoming_holder create_error_holder_(call_id_t call_id)
   {
-    jsonrpc::outgoing_error< ::wfc::jsonrpc::error > err;
+    wjrpc::outgoing_error< wjrpc::error > err;
     err.error = std::make_unique<Error>();
     err.id = std::make_unique<data_type>();
-    json::value<call_id_t>::serializer()( call_id,  std::back_inserter(*(err.id)) );
+    wjson::value<call_id_t>::serializer()( call_id,  std::back_inserter(*(err.id)) );
 
     auto d = std::make_unique<data_type>();
     d->reserve(100);
-    jsonrpc::outgoing_error_json< ::wfc::jsonrpc::error_json >::serializer()(err, std::back_inserter(*d));
+    wjrpc::outgoing_error_json< wjrpc::error_json >::serializer()(err, std::back_inserter(*d));
     incoming_holder holder( std::move(d) );
     holder.parse(nullptr);
     return holder;
@@ -117,7 +123,7 @@ struct target_adapter: ijsonrpc
         while ( d2!=nullptr )
         {
           incoming_holder iholder( std::move(d2) );
-          ::wjson::json_error e;
+          wjson::json_error e;
           d2 = iholder.parse(&e);
           if ( !e && iholder )
           {
@@ -131,7 +137,7 @@ struct target_adapter: ijsonrpc
               handler( incoming_holder( std::move(d3)));
             };
             
-            aux::send_error(std::move(iholder), std::make_unique<parse_error>(), err_handler );
+            wjrpc::aux::send_error(std::move(iholder), std::make_unique< wjrpc::parse_error>(), err_handler );
           }
         }
       });
@@ -140,7 +146,7 @@ struct target_adapter: ijsonrpc
     {
       if ( auto call_id = holder.call_id() )
       {
-        auto eholder = create_error_holder_<service_unavailable>(call_id);
+        auto eholder = create_error_holder_< wjrpc::service_unavailable >(call_id);
         handler( std::move(eholder) );
       }
       else

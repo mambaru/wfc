@@ -76,7 +76,7 @@ public:
       else 
       {
         JSONRPC_LOG_ERROR( "domain_proxy: Parse error: " << holder.str() )
-        this->send_error<parse_error>( std::move(holder), [handler](outgoing_holder oholder)
+        this->send_error< wjrpc::parse_error >( std::move(holder), [handler](outgoing_holder oholder)
         {
           auto d2 = oholder.detach();
           if ( d2!=nullptr )
