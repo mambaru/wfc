@@ -9,9 +9,7 @@ endif()
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(ci)
 
-if ( STANDALONE )
-  getlibs(faslib wjson wlog wflow iow wjrpc wrtstat)
-endif()
+rootlibs(faslib wjson wlog wflow iow wjrpc wrtstat)
 
 include_directories(.)
 add_subdirectory(config)
@@ -19,7 +17,6 @@ add_subdirectory(wfc)
 
 if ( BUILD_TESTING)
   enable_testing()
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${UNIT_TEST_BIN_OUTPUT_DIR})                                                                                                                 
   add_subdirectory(tests)
   add_subdirectory(examples)
 endif()
