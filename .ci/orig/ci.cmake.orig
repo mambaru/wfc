@@ -18,6 +18,7 @@ if ( STANDALONE )
   endif()
   list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/external/cmake-ci/cmake)
   include(opt)
+  include(repos)
   include(getlibs)
 
 endif()
