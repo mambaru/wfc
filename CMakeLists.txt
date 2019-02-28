@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1)
 
 project(wfc)
 
-if ( WFC_ENABLE_STAT )
+if ( WFC_ENABLE_STAT OR BUILD_TESTING)
   add_definitions(-DWFC_ENABLE_STAT)
 endif()
 
