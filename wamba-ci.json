@@ -1,7 +1,8 @@
 {
   /* Open source проект (публикация на github.com) */
   "public":true,
-  "tag":"0.8",
+  
+  "tag":"0.8.0",
   /* Текущий релиз бранч  */
   "release":"release-0.8",
   
