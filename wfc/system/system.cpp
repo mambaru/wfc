@@ -12,6 +12,9 @@
 #include <iostream>
 
 namespace wfc{
+  
+template<typename Args>
+inline void unused_params(const Args& ...) {}
 
 
 int is_atty(int fd)
@@ -19,6 +22,7 @@ int is_atty(int fd)
 #ifdef HAVE_ISATTY_FUNC
   return ::isatty(fd);
 #else
+  unused_params(fd);
   return false;
 #endif
 }
