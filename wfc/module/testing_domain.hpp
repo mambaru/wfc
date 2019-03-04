@@ -37,6 +37,7 @@ public:
     return inst->object();
   }
   
+  std::shared_ptr<wfcglobal> global() const { return _g; }
 private:
   std::shared_ptr<wfcglobal> _g;
   asio::io_service _io;
