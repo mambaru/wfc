@@ -6,9 +6,7 @@ if ( WFC_ENABLE_STAT OR BUILD_TESTING)
   add_definitions(-DWFC_ENABLE_STAT)
 endif()
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-include(ci)
-
+include(cmake/ci.cmake)
 rootlibs(faslib wjson wlog wflow iow wjrpc wrtstat)
 
 include_directories(.)
@@ -18,7 +16,9 @@ add_subdirectory(wfc)
 if ( BUILD_TESTING )
   enable_testing()
   add_subdirectory(tests)
-  add_subdirectory(examples)
+  if ( WITH_SAMPLES )
+    add_subdirectory(examples)
+  endif()
 endif()
 
 
