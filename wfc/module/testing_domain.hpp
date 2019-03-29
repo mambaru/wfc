@@ -17,7 +17,16 @@ class testing_domain
 
 public:
 
+  virtual ~testing_domain()
+  {
+    _inst_list.clear();
+    _g->common_workflow->stop();
+    _g->common_workflow = nullptr;
+    _g = nullptr;
+  }
+
   testing_domain()
+    : _io()
   {
     _g = std::make_shared<wfcglobal>(_io);
     _g->common_workflow = std::make_shared<workflow>(_io);
@@ -27,7 +36,7 @@ public:
   std::shared_ptr<D> create(const typename D::domain_config& opt)
   {
     auto inst = std::make_shared< instance<D> >();
-    inst->create(opt.name, _g);
+    inst->create(_g);
     inst->configure(opt);
     _inst_list.push_back(inst);
     return inst->object();
@@ -56,6 +65,7 @@ public:
     auto li = shutdown_sorted_();
     for (auto pobj: li)
       pobj->stop(args);
+    _g->common_workflow->stop();
     started = false;
     initialized = false;
   }
@@ -81,8 +91,8 @@ private:
 private:
   bool initialized = false;
   bool started = false;
-  std::shared_ptr<wfcglobal> _g;
   asio::io_service _io;
+  std::shared_ptr<wfcglobal> _g;
   std::list<iinterface_ptr> _inst_list;
 };
 

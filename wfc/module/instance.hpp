@@ -33,7 +33,10 @@ public:
   typedef std::shared_ptr<object_type> object_ptr;
   typedef std::shared_ptr<wfcglobal> global_ptr;
 
-  virtual ~instance() {}
+  virtual ~instance() 
+  {
+    _global = nullptr;
+  }
 
 // iinstance interface
   virtual std::string name() const override
@@ -171,6 +174,7 @@ private:
     // Создание объекта
     if ( _config.enabled )
     {
+      
       if ( _object == nullptr )
       {
         _object = std::make_shared<object_type>();
@@ -240,6 +244,7 @@ private:
       {
         obj->stop_domain();
       }
+      _global->registry.erase(_config.name);
       _object = nullptr;
     }
     _ready_for_stop = false;
