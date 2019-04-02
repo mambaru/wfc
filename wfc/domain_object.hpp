@@ -399,14 +399,46 @@ public:
    * @details в базовой конфигурации для прикладного объекта всегда доступен [workflow](https://mambaru.github.io/wflow/), 
    * используйте этот метод если вам нужно более одного [workflow](https://mambaru.github.io/wflow/). Задайте disabort=true
    * если допустимо отсутствие объекта в реестре 
+   * @warning последнее обновление. В таргет можно передавать JSON-объект с конфигурацией workflow, тогда будет создан 
+   * незарегистрированный workflow, который можно удалить после использования. Может использоваться для многопоточной инициализации 
+   * или начальной загрузки из БД или файла. Для этого в json-конфигурации объекта для имени вместо string следует использовать raw_value.
+   * После этого в конфиге можно использовать как имя так и сразу сконфигурировать workflow. Для основного workflow все по прежнему, 
+   * можно использовать только имя. 
    */
   std::shared_ptr<workflow_type> get_workflow(const std::string& target, bool disabort = false) const 
   {
     if (!is_configured_())
       return nullptr;
-    if ( target.empty() )
+
+    auto beg = target.begin();
+    auto end = target.end();
+    beg = wjson::parser::parse_space(beg, end, nullptr);
+    if ( beg==end )
       return _workflow;
-    return this->global()->registry.template get_object<workflow_type>("workflow", target, disabort);
+   
+    std::string starget;
+    if ( *beg=='{' )
+    {
+      wflow::workflow_options wopt;
+      wjson::json_error je;
+      wflow::workflow_options_json::serializer()(wopt, beg, end, &je);
+      if ( je )
+      {
+        SYSTEM_LOG_FATAL("Inline workflow configuration has an json error: " << wjson::strerror::message_trace(je, beg, end) )
+      }
+      workflow_ptr wptr = std::make_shared<workflow>(_global->io_service, wopt );
+      wptr->start();
+      return wptr;
+    }
+    else if ( *beg=='"' )
+    {
+      wjson::string<>::serializer()(starget, beg, end, nullptr);
+    }
+    else
+      starget=target;
+      
+    
+    return this->global()->registry.template get_object<workflow_type>("workflow", starget, disabort);
   }
 
   /**
@@ -827,7 +859,7 @@ private:
   {
     if ( _workflow!=nullptr )
       return true;
-    DOMAIN_LOG_FATAL("Attempting to use is not initialized object '" << _name <<"'")
+    SYSTEM_LOG_FATAL("Attempting to use is not initialized object '" << _name <<"'")
     return false;
   }
   
