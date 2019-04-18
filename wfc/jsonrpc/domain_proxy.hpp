@@ -58,34 +58,42 @@ public:
       return;
     }
     
-    //TODO: проверить исключения jsonrpc
     while ( d != nullptr )
     {
       incoming_holder holder( std::move(d));
-      outgoing_handler_t jsonrpc_handler = [handler](outgoing_holder holder2)
-      {
-        handler( holder2.detach() );
-      };
 
       wjson::json_error e;
       d = holder.parse(&e);
-      if ( !e && holder )
+      if ( holder.is_valid() )
       {
+        outgoing_handler_t jsonrpc_handler = nullptr;
+        if ( holder.is_request() )
+          jsonrpc_handler = [handler](outgoing_holder holder2) { handler( holder2.detach() ); };
         this->perform_incoming( std::move(holder), io_id,  jsonrpc_handler);
       }
       else 
       {
-        JSONRPC_LOG_ERROR( "domain_proxy: Parse error: " << holder.str() )
-        this->send_error< wjrpc::parse_error >( std::move(holder), [handler](outgoing_holder oholder)
+        outgoing_handler_t error_handler = nullptr;
+        if ( holder.has_id() )
         {
-          auto d2 = oholder.detach();
-          if ( d2!=nullptr )
+          error_handler = [handler](outgoing_holder oholder)
           {
-            JSONRPC_LOG_ERROR( d2 )
-          }
-          handler( std::move(d2) );
-        });
- 
+            auto d2 = oholder.detach();
+            if ( d2!=nullptr ) { JSONRPC_LOG_ERROR( d2 )}
+            handler( std::move(d2) );
+          };
+        }
+        
+        if ( e )
+        {
+          JSONRPC_LOG_ERROR( "domain_proxy: Parse error: " << holder.error_message(e) );
+          this->send_error< wjrpc::parse_error >( std::move(holder), error_handler);
+        }
+        else
+        {
+          JSONRPC_LOG_ERROR( "domain_proxy: Invalid JSON-RPC: " << holder.str() );
+          this->send_error< wjrpc::invalid_request >( std::move(holder), error_handler);
+        }
       }
     }
   }
