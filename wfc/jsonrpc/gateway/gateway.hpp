@@ -41,10 +41,18 @@ public:
     dopt.peeper = target;
     this->initialize_engine( dopt);
     
+  }
+  
+  virtual void start() override
+  {
+    auto dopt = this->options();
+    
+    typedef typename engine_type::target_type target_type;
+    typedef typename target_type::element_type target_interface;
+    target_type target = this->template get_target<target_interface>(dopt.incoming_target_name);
+    
     if ( target!=nullptr && dopt.incoming_reg)
       target->reg_io( this->engine()->get_id(), this->shared_from_this()  );
-
-    //const auto& registry = this->global()->registry;
 
     this->engine()->unreg_io(_target_id); // видимо какой-то грязный хак
     if ( auto pitf = this->template get_target<ijsonrpc>(dopt.outgoing_target_name, true) )
