@@ -65,7 +65,7 @@ class example_startup
   : public wfc::domain_object< wfc::istartup, startup_options >
 {
 public:
-  virtual int startup(int argc, char* argv[], std::string helpstring) 
+  virtual int startup(int argc, char* argv[], std::string helpstring) override
   {
     std::cout << "example_startup::startup: " << helpstring << std::endl;
     if ( argc > 1 )
@@ -78,7 +78,7 @@ public:
     return 0;
   }
   
-  virtual bool ready_for_run()
+  virtual bool ready_for_run() override
   {
     return _ready;
   }

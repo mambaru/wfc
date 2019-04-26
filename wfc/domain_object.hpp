@@ -399,14 +399,46 @@ public:
    * @details в базовой конфигурации для прикладного объекта всегда доступен [workflow](https://mambaru.github.io/wflow/), 
    * используйте этот метод если вам нужно более одного [workflow](https://mambaru.github.io/wflow/). Задайте disabort=true
    * если допустимо отсутствие объекта в реестре 
+   * @warning последнее обновление. В таргет можно передавать JSON-объект с конфигурацией workflow, тогда будет создан 
+   * незарегистрированный workflow, который можно удалить после использования. Может использоваться для многопоточной инициализации 
+   * или начальной загрузки из БД или файла. Для этого в json-конфигурации объекта для имени вместо string следует использовать raw_value.
+   * После этого в конфиге можно использовать как имя так и сразу сконфигурировать workflow. Для основного workflow все по прежнему, 
+   * можно использовать только имя. 
    */
   std::shared_ptr<workflow_type> get_workflow(const std::string& target, bool disabort = false) const 
   {
     if (!is_configured_())
       return nullptr;
-    if ( target.empty() )
+
+    auto beg = target.begin();
+    auto end = target.end();
+    beg = wjson::parser::parse_space(beg, end, nullptr);
+    if ( beg==end )
       return _workflow;
-    return this->global()->registry.template get_object<workflow_type>("workflow", target, disabort);
+   
+    std::string starget;
+    if ( *beg=='{' )
+    {
+      wflow::workflow_options wopt;
+      wjson::json_error je;
+      wflow::workflow_options_json::serializer()(wopt, beg, end, &je);
+      if ( je )
+      {
+        SYSTEM_LOG_FATAL("Inline workflow configuration has an json error: " << wjson::strerror::message_trace(je, beg, end) )
+      }
+      workflow_ptr wptr = std::make_shared<workflow>(_global->io_service, wopt );
+      wptr->start();
+      return wptr;
+    }
+    else if ( *beg=='"' )
+    {
+      wjson::string<>::serializer()(starget, beg, end, nullptr);
+    }
+    else
+      starget=target;
+      
+    
+    return this->global()->registry.template get_object<workflow_type>("workflow", starget, disabort);
   }
 
   /**
@@ -773,15 +805,15 @@ public:
   { return static_cast<instance_handler_<Opt, StatOpt>*>(this); }
   
 private:
-  virtual void domain_generate(domain_config& conf, const std::string& type) final;
-  virtual void create_domain(const std::string& objname, global_ptr g ) final;
-  virtual void configure_domain(const domain_config& opt) final;
-  virtual void initialize_domain() final;
-  virtual void reconfigure_domain_basic(const domain_options& opt) final;
-  virtual void reconfigure_domain(const domain_config& conf) final;
-  virtual void restart_domain() final;
-  virtual void start_domain() final;
-  virtual void stop_domain() final;
+  virtual void domain_generate(domain_config& conf, const std::string& type) override final;
+  virtual void create_domain(const std::string& objname, global_ptr g ) override final;
+  virtual void configure_domain(const domain_config& opt) override final;
+  virtual void initialize_domain() override final;
+  virtual void reconfigure_domain_basic(const domain_options& opt) override final;
+  virtual void reconfigure_domain(const domain_config& conf) override final;
+  virtual void restart_domain() override final;
+  virtual void start_domain() override final;
+  virtual void stop_domain() override final;
 
 private:
   
@@ -827,7 +859,7 @@ private:
   {
     if ( _workflow!=nullptr )
       return true;
-    DOMAIN_LOG_FATAL("Attempting to use is not initialized object '" << _name <<"'")
+    SYSTEM_LOG_FATAL("Attempting to use is not initialized object '" << _name <<"'")
     return false;
   }
   
@@ -846,7 +878,7 @@ private:
 
 
 template<typename Itf, typename Opt, typename StatOpt>
-void domain_object<Itf, Opt, StatOpt>::domain_generate(domain_config& conf, const std::string& type) 
+void domain_object<Itf, Opt, StatOpt>::domain_generate(domain_config& conf, const std::string& type)
 {
   conf = this->generate(type);
 }

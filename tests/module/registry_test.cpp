@@ -1,6 +1,6 @@
 
-#define IOW_DISABLE_ALL_LOG
-
+#define IOW_DISABLE_LOG
+#include <iow/logger.hpp>
 #include <wfc/core/object_registry.hpp>
 #include <vector>
 #include <algorithm>

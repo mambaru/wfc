@@ -71,13 +71,18 @@ private:
   int _dirty = 0;
 };
 
-
 template<typename I>
 std::shared_ptr<I> object_registry::get_object(const std::string& prefix, const std::string& name, bool disabort ) const
 {
   std::shared_ptr<I> result = nullptr;
   if ( auto p = this->get_(prefix, name, disabort) )
+  {
     result = std::dynamic_pointer_cast<I>(p);
+    if ( result==nullptr && !disabort )
+    {
+      DOMAIN_LOG_FATAL("object_registry::get_object: object '" << prefix << name << "' interface does not match " << typeid(I).name() )
+    }
+  }
   return result;
 }
 

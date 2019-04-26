@@ -108,7 +108,7 @@ void autoup(time_t timeout, bool success_autoup,
   time_t worktime = 0;
   for ( int i=0; true ; ++i )
   {
-    time_t t = std::time(0);
+    time_t t = std::time(nullptr);
     pid_t pid = ::fork();
     if (pid==0)
     {
@@ -130,7 +130,7 @@ void autoup(time_t timeout, bool success_autoup,
     
     status = 0;
     ::waitpid(pid, &status, 0);
-    worktime = std::time(0) - t;
+    worktime = std::time(nullptr) - t;
     bool restart = ( status!=0 || success_autoup) && ( worktime >= timeout );
     if ( restart && before!=nullptr )
       restart = before(i, status, worktime);

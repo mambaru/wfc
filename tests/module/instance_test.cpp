@@ -1,5 +1,5 @@
-#define IOW_DISABLE_ALL_LOG
-
+#define IOW_DISABLE_LOG
+#include <iow/logger.hpp>
 #include <wfc/domain_object.hpp>
 #include <wfc/module/instance.hpp>
 

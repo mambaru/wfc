@@ -1,5 +1,5 @@
-#define IOW_DISABLE_ALL_LOG
-
+#define IOW_DISABLE_LOG
+#include <iow/logger.hpp>
 #include <wfc/domain_object.hpp>
 #include <wfc/module/instance.hpp>
 #include <wfc/asio.hpp>
@@ -22,12 +22,12 @@ class test
 {
 public:
  
-  virtual void reconfigure()
+  virtual void reconfigure() override
   {
     testval = true;
   }
   
-  virtual int testtest() 
+  virtual int testtest() override
   {
     if ( !this->has_arg("param1") ) return 1001;
     if ( !this->has_arg("param2") ) return 1002;

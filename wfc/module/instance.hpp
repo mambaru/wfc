@@ -257,7 +257,9 @@ private:
 
   instance_handler_t* get_(object_ptr& obj) const
   {
-    return obj->inst_handler_();
+    if ( obj!=nullptr )
+      return obj->inst_handler_();
+    return nullptr;
   }
 
 private:
