@@ -17,7 +17,7 @@ struct instance_handler_
 {
   typedef domain_config_t<Opt, StatOpt> domain_config;
   typedef typename domain_config::domain_options domain_options;
-  
+  virtual ~instance_handler_() = default;
   virtual void domain_generate(domain_config& conf, const std::string& type) = 0;
   virtual void create_domain(const std::string& objname, std::shared_ptr<wfcglobal> g ) = 0;
   virtual void configure_domain(const domain_config& opt) = 0;

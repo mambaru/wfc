@@ -805,15 +805,15 @@ public:
   { return static_cast<instance_handler_<Opt, StatOpt>*>(this); }
   
 private:
-  virtual void domain_generate(domain_config& conf, const std::string& type) final;
-  virtual void create_domain(const std::string& objname, global_ptr g ) final;
-  virtual void configure_domain(const domain_config& opt) final;
-  virtual void initialize_domain() final;
-  virtual void reconfigure_domain_basic(const domain_options& opt) final;
-  virtual void reconfigure_domain(const domain_config& conf) final;
-  virtual void restart_domain() final;
-  virtual void start_domain() final;
-  virtual void stop_domain() final;
+  virtual void domain_generate(domain_config& conf, const std::string& type) override final;
+  virtual void create_domain(const std::string& objname, global_ptr g ) override final;
+  virtual void configure_domain(const domain_config& opt) override final;
+  virtual void initialize_domain() override final;
+  virtual void reconfigure_domain_basic(const domain_options& opt) override final;
+  virtual void reconfigure_domain(const domain_config& conf) override final;
+  virtual void restart_domain() override final;
+  virtual void start_domain() override final;
+  virtual void stop_domain() override final;
 
 private:
   
@@ -878,7 +878,7 @@ private:
 
 
 template<typename Itf, typename Opt, typename StatOpt>
-void domain_object<Itf, Opt, StatOpt>::domain_generate(domain_config& conf, const std::string& type) 
+void domain_object<Itf, Opt, StatOpt>::domain_generate(domain_config& conf, const std::string& type)
 {
   conf = this->generate(type);
 }
