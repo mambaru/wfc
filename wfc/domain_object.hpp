@@ -283,7 +283,7 @@ public:
   virtual void unreg_io(io_id_t io_id) override
   {
     _owner.release(io_id);
-  };
+  }
   
   /**
    * @brief Возвращает ссылку на объект owner

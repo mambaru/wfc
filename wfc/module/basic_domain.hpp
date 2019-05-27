@@ -46,7 +46,7 @@ public:
     * @brief create
     * @details create
     */
-  virtual void restart() {};
+  virtual void restart() {}
   
   /**
     * @brief create

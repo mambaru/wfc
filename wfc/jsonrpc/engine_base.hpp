@@ -102,7 +102,7 @@ public:
     _engine->perform_io( std::move(d), io_id, std::move(handler) );
   }
 
-  engine_ptr engine() const { return _engine; };
+  engine_ptr engine() const { return _engine; }
 
   static std::list<std::string> get_method_list()
   {

@@ -26,10 +26,10 @@ struct target_adapter: ijsonrpc
   typedef std::weak_ptr<ijsonrpc> jsonrpc_ptr_t;
   typedef ::wjrpc::call_id_t call_id_t;
   
-  target_adapter() {};
+  target_adapter() {}
   target_adapter(itf_ptr_t itf, jsonrpc_ptr_t jsonrpc)
     : _itf(itf), _jsonrpc(jsonrpc)
-  {};
+  {}
   
   operator bool () const
   {
