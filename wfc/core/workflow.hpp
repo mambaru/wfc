@@ -23,11 +23,11 @@ class workflow
 public:
   workflow(io_service_type& io )
     : super(io)
-  {};
+  {}
 
   workflow(io_service_type& io, const workflow_options& opt )
     : super(io, opt)
-  {};
+  {}
 };
 
 }
