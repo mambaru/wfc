@@ -9,8 +9,8 @@ using namespace ::wfc;
 
 struct number: iinterface {
   int count = 0;
-  number() {}
-  explicit number(int c): count(c) {}
+  number() = default;
+  explicit number(int c) noexcept: count(c) {}
 };
 
 struct number_greater
@@ -53,6 +53,6 @@ int main()
 
   if ( auto x = reg.get_target<number>("i4") )
     return -1;
-  
+
   return 0;
 }

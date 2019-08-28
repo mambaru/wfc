@@ -19,28 +19,28 @@
 
 
 namespace wfc{ namespace jsonrpc{
-  
+
 struct target_adapter: ijsonrpc
 {
   typedef std::weak_ptr<iinterface> itf_ptr_t;
   typedef std::weak_ptr<ijsonrpc> jsonrpc_ptr_t;
   typedef ::wjrpc::call_id_t call_id_t;
-  
-  target_adapter() {}
+
+  target_adapter() = default;
   target_adapter(itf_ptr_t itf, jsonrpc_ptr_t jsonrpc)
     : _itf(itf), _jsonrpc(jsonrpc)
   {}
-  
+
   operator bool () const
   {
     return _itf.lock()!=nullptr || _jsonrpc.lock()!=nullptr;
   }
-  
+
   virtual void reg_io(io_id_t io_id, std::weak_ptr<iinterface> itf) override
   {
     if ( auto p = _itf.lock() )
     {
-      p->reg_io(io_id, itf); 
+      p->reg_io(io_id, itf);
     }
   }
   virtual void unreg_io(io_id_t io_id) override
@@ -50,7 +50,7 @@ struct target_adapter: ijsonrpc
       p->unreg_io(io_id);
     }
   }
-  
+
   virtual void perform_io(data_ptr d, io_id_t io_id, output_handler_t handler) override
   {
     if ( auto p = _itf.lock() )
@@ -62,7 +62,7 @@ struct target_adapter: ijsonrpc
       handler(nullptr);
     }
   }
-  
+
   virtual void perform_incoming(incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) override
   {
     if ( auto p1 = _jsonrpc.lock() )
@@ -74,7 +74,7 @@ struct target_adapter: ijsonrpc
       if ( handler!=nullptr )
       {
         this->perform_io( holder.detach(), io_id, [handler](data_ptr d)
-        { 
+        {
           //outgoing_holder holder;
           handler( outgoing_holder( std::move(d) ) );
         });
@@ -90,7 +90,7 @@ struct target_adapter: ijsonrpc
     {
     }
   }
-  
+
   template<typename Error>
   incoming_holder create_error_holder_(call_id_t call_id)
   {
@@ -118,7 +118,7 @@ struct target_adapter: ijsonrpc
       auto handler = holder.result_handler();
       auto d = holder.detach();
 
-      p2->perform_io( std::move(d), io_id, [handler](data_ptr d2) 
+      p2->perform_io( std::move(d), io_id, [handler](data_ptr d2)
       {
         while ( d2!=nullptr )
         {
@@ -136,7 +136,7 @@ struct target_adapter: ijsonrpc
               auto d3 = err.detach();
               handler( incoming_holder( std::move(d3)));
             };
-            
+
             wjrpc::aux::send_error(std::move(iholder), std::make_unique< wjrpc::parse_error>(), err_handler );
           }
         }
@@ -155,9 +155,9 @@ struct target_adapter: ijsonrpc
       }
     }
   }
-  
+
 private:
-  
+
   itf_ptr_t _itf;
   jsonrpc_ptr_t _jsonrpc;
 };

@@ -19,11 +19,11 @@ struct ijsonrpc
 
   typedef iinterface::output_handler_t output_handler_t;
   typedef iinterface::input_handler_t input_handler_t;
-  
+
   typedef ::wjrpc::outgoing_handler_t outgoing_handler_t;
   typedef ::wjrpc::incoming_handler_t incoming_handler_t;
 
-  virtual ~ijsonrpc(){}
+  virtual ~ijsonrpc() = default;
   virtual void perform_incoming(incoming_holder, io_id_t, outgoing_handler_t handler) = 0;
   virtual void perform_outgoing(outgoing_holder, io_id_t /*id*/) = 0;
 };
