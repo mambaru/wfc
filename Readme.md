@@ -1,5 +1,3 @@
-[![pipeline status](http://github.lan/cpp/wfc/badges/wip-devel/pipeline.svg)](http://github.lan/cpp/wfc/commits/wip-devel)
-[![coverage report](http://github.lan/cpp/wfc/badges/wip-devel/coverage.svg)](http://github.lan/cpp/wfc/commits/wip-devel)
 
 WFC - это фреймворк для разработки высконагруженных JSON-RPC сервисов (демонов) под различные профили нагрузки. Данный проект является частью этого фреймворка, но не им самим. 
 Если вас интересует как быстро сделать свой первый проект на базе этого фреймворка обратитесь к документации [wfcroot](https://github.com/mambaru/wfcroot) или изучите 
