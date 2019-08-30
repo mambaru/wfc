@@ -15,13 +15,13 @@
     "g++":{
       "98":false,
       "11":true,
-      "14":true,
+      "14":false,
       "17":false
     },
     "clang++":{
       "98":false,
       "11":true,
-      "14":true,
+      "14":false,
       "17":false
     }
   }
