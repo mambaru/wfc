@@ -1,9 +1,20 @@
-[![pipeline status](http://github.lan/cpp/wfc/badges/wip-devel/pipeline.svg)](http://github.lan/cpp/wfc/commits/wip-devel)
-[![coverage report](http://github.lan/cpp/wfc/badges/wip-devel/coverage.svg)](http://github.lan/cpp/wfc/commits/wip-devel)
+![Pipeline Status](github.lan/cpp/wfc/badges/wip-devel/pipeline.svg)
 
-WFC - это фреймворк для разработки высконагруженных JSON-RPC сервисов (демонов) под различные профили нагрузки. Данный проект является частью этого фреймворка, но не им самим. 
-Если вас интересует как быстро сделать свой первый проект на базе этого фреймворка обратитесь к документации [wfcroot](https://github.com/mambaru/wfcroot) или изучите 
+
+
+WFC - это фреймворк для разработки высконагруженных JSON-RPC сервисов (демонов) под различные профили нагрузки. Данный проект является частью этого фреймворка, но не им самим.
+Если вас интересует как быстро сделать свой первый проект на базе этого фреймворка обратитесь к документации [wfcroot](https://github.com/mambaru/wfcroot) или изучите
 [Демо-проект](https://github.com/mambaru/demod).
+
+[![Build Status](https://travis-ci.com/mambaru/wfc.svg?branch=mambaru)](http://github.lan/cpp/wfc/commits/wip-devel)
+https://travis-ci.com/mambaru/wfc
+
+[![pipeline status](http://github.lan/cpp/wfc/badges/pre-release/pipeline.svg)](http://github.lan/cpp/wfc/commits/pre-release)
+  [![coverage report](http://github.lan/cpp/wfc/badges/wip-devel/coverage.svg)](http://github.lan/cpp/wfc/commits/wip-devel)
+[![coverage report](http://github.lan/cpp/wfc/badges/pre-release/coverage.svg)](http://github.lan/cpp/wfc/commits/pre-release)
+[![Build Status](https://travis-ci.com/mambaru/wfc.svg?branch=master)](https://travis-ci.com/mambaru/wfc)
+[![Build Status](https://travis-ci.com/mambaru/wfc.svg?branch=mambaru)](https://travis-ci.com/mambaru/wfc)
+[![Coverage Status](https://coveralls.io/repos/github/mambaru/wfc/badge.svg?branch=master)](https://coveralls.io/github/mambaru/wfc?branch=master)
 
 * Репозитарий на [github.com](https://github.com/mambaru/wfc).
 * Документация [doxygen](https://mambaru.github.io/wfc/index.html).
@@ -11,7 +22,7 @@ WFC - это фреймворк для разработки высконагру
 
 # Сборка и установка
 
-Для разработки собственных проектов вам нужен супермодуль [wfcroot](https://github.com/mambaru/wfcroot), который включает все необходимое, непосредственно скачивать и 
+Для разработки собственных проектов вам нужен супермодуль [wfcroot](https://github.com/mambaru/wfcroot), который включает все необходимое, непосредственно скачивать и
 компилировать из этого репозитария нет необходимости. Но это можно сделать:
 
 ```bash
@@ -21,14 +32,14 @@ mkdir build
 cd build
 cmake -DBUILD_TESTING=ON ..
 cmake --build .
-ctest 
+ctest
 ```
 
-Если система сборки автоматически загрузит в директорию сборки ( если не найдет их в системе или на том же уровне в директории) следующие библиотеки: 
+Если система сборки автоматически загрузит в директорию сборки ( если не найдет их в системе или на том же уровне в директории) следующие библиотеки:
 - [faslib](https://github.com/migashko/faslib) - метабиблиотека для работы со списками типов и АОП
 - [wjson](https://github.com/mambaru/wjson) - очень быстрый декларативный JSON-сериализатор на шаблонах
-- [wlog](https://github.com/mambaru/wlog) - логер с большими возможностями по кастомизации 
-- [wflow](https://github.com/mambaru/wflow) - очереди и потоки 
+- [wlog](https://github.com/mambaru/wlog) - логер с большими возможностями по кастомизации
+- [wflow](https://github.com/mambaru/wflow) - очереди и потоки
 - [iow](https://github.com/mambaru/iow) - сетевая библиотека
 - [wjrpc](https://github.com/mambaru/wjrpc) - библиотека поддержки JSON-RPC
 - [wrtstat](https://github.com/mambaru/wrtstat) - для сбора статистики
