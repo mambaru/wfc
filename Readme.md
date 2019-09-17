@@ -1,4 +1,3 @@
-![Pipeline Status](github.lan/cpp/wfc/badges/wip-devel/pipeline.svg)
 
 
 
@@ -6,12 +5,8 @@ WFC - это фреймворк для разработки высконагру
 Если вас интересует как быстро сделать свой первый проект на базе этого фреймворка обратитесь к документации [wfcroot](https://github.com/mambaru/wfcroot) или изучите
 [Демо-проект](https://github.com/mambaru/demod).
 
-[![Build Status](https://travis-ci.com/mambaru/wfc.svg?branch=mambaru)](http://github.lan/cpp/wfc/commits/wip-devel)
 https://travis-ci.com/mambaru/wfc
 
-[![pipeline status](http://github.lan/cpp/wfc/badges/pre-release/pipeline.svg)](http://github.lan/cpp/wfc/commits/pre-release)
-  [![coverage report](http://github.lan/cpp/wfc/badges/wip-devel/coverage.svg)](http://github.lan/cpp/wfc/commits/wip-devel)
-[![coverage report](http://github.lan/cpp/wfc/badges/pre-release/coverage.svg)](http://github.lan/cpp/wfc/commits/pre-release)
 [![Build Status](https://travis-ci.com/mambaru/wfc.svg?branch=master)](https://travis-ci.com/mambaru/wfc)
 [![Build Status](https://travis-ci.com/mambaru/wfc.svg?branch=mambaru)](https://travis-ci.com/mambaru/wfc)
 [![Coverage Status](https://coveralls.io/repos/github/mambaru/wfc/badge.svg?branch=master)](https://coveralls.io/github/mambaru/wfc?branch=master)
