@@ -964,13 +964,13 @@ private:
   wflow::workflow_options create_workflow_options_(const std::string& target) const
   {
     wflow::workflow_options opt;
-    std::string name;
-    if ( 0 == this->dual_target_deserialize_(target, &name, &opt) )
+    std::string target_name;
+    if ( 0 == this->dual_target_deserialize_(target, &target_name, &opt) )
     {
-      if ( auto wflow1 = this->get_workflow(name, true) )
+      if ( auto wflow1 = this->get_workflow(target_name, true) )
       {
         opt = wflow1->get_options();
-        opt.id = name;
+        opt.id = target_name;
       }
       else if ( auto wflow2 = this->get_common_workflow() )
       {
