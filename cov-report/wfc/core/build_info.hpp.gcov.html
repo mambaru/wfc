@@ -1,0 +1,288 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - wfc-coverage.info - wfc/core/build_info.hpp</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">wfc/core</a> - build_info.hpp<span style="font-size: 80%;"> (source / <a href="build_info.hpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">wfc-coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">75</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2019-09-17</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">78</td>
+            <td class="headerCovTableEntryLo">0.0 %</td>
+          </tr>
+          <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : //</a>
+<span class="lineNum">       2 </span>            : // Author: Vladimir Migashko &lt;migashko@gmail.com&gt;, (C) 2013-2018
+<span class="lineNum">       3 </span>            : //
+<span class="lineNum">       4 </span>            : // Copyright: See COPYING file that comes with this distribution
+<span class="lineNum">       5 </span>            : //
+<span class="lineNum">       6 </span>            : 
+<span class="lineNum">       7 </span>            : #pragma once
+<span class="lineNum">       8 </span>            : 
+<span class="lineNum">       9 </span>            : #include &lt;wfc/core/ibuild_info.hpp&gt;
+<span class="lineNum">      10 </span>            : #include &lt;string&gt;
+<span class="lineNum">      11 </span>            : #include &lt;sstream&gt;
+<span class="lineNum">      12 </span>            : #include &lt;memory&gt;
+<span class="lineNum">      13 </span>            : 
+<span class="lineNum">      14 </span>            : namespace wfc{
+<a name="15"><span class="lineNum">      15 </span>            : </a>
+<span class="lineNum">      16 </span>            : template&lt;typename BuildInfo&gt;
+<span class="lineNum">      17 </span><span class="lineNoCov">          0 : class build_info</span>
+<span class="lineNum">      18 </span>            :   : public ibuild_info
+<a name="19"><span class="lineNum">      19 </span>            : {</a>
+<span class="lineNum">      20 </span>            : public:
+<a name="21"><span class="lineNum">      21 </span><span class="lineNoCov">          0 :   virtual ~build_info(){}</span></a>
+<span class="lineNum">      22 </span>            : 
+<span class="lineNum">      23 </span><span class="lineNoCov">          0 :   virtual bool enabled() override</span>
+<span class="lineNum">      24 </span>            :   {
+<span class="lineNum">      25 </span><span class="lineNoCov">          0 :     return _bi.enabled();</span>
+<a name="26"><span class="lineNum">      26 </span>            :   }</a>
+<span class="lineNum">      27 </span>            : 
+<span class="lineNum">      28 </span><span class="lineNoCov">          0 :   virtual std::string name() override</span>
+<span class="lineNum">      29 </span>            :   {
+<span class="lineNum">      30 </span><span class="lineNoCov">          0 :     return _bi.name();</span>
+<a name="31"><span class="lineNum">      31 </span>            :   }</a>
+<span class="lineNum">      32 </span>            : 
+<span class="lineNum">      33 </span><span class="lineNoCov">          0 :   virtual std::string version_tag() override</span>
+<span class="lineNum">      34 </span>            :   {
+<span class="lineNum">      35 </span><span class="lineNoCov">          0 :     return _bi.version_tag();</span>
+<a name="36"><span class="lineNum">      36 </span>            :   }</a>
+<span class="lineNum">      37 </span>            :   
+<span class="lineNum">      38 </span><span class="lineNoCov">          0 :   virtual std::string version() override</span>
+<span class="lineNum">      39 </span>            :   {
+<span class="lineNum">      40 </span><span class="lineNoCov">          0 :     std::stringstream ss;</span>
+<span class="lineNum">      41 </span><span class="lineNoCov">          0 :     ss &lt;&lt; this-&gt;version_tag();</span>
+<span class="lineNum">      42 </span><span class="lineNoCov">          0 :     if ( !this-&gt;version_ex().empty() )</span>
+<span class="lineNum">      43 </span><span class="lineNoCov">          0 :       ss &lt;&lt; &quot;[&quot; &lt;&lt; this-&gt;version_ex() &lt;&lt; &quot;]&quot;;</span>
+<span class="lineNum">      44 </span><span class="lineNoCov">          0 :     ss &lt;&lt; &quot;-&quot; &lt;&lt; this-&gt;build_count();</span>
+<span class="lineNum">      45 </span><span class="lineNoCov">          0 :     return ss.str();</span>
+<a name="46"><span class="lineNum">      46 </span>            :   }</a>
+<span class="lineNum">      47 </span>            :   
+<span class="lineNum">      48 </span><span class="lineNoCov">          0 :   virtual std::string compiler_version() override</span>
+<span class="lineNum">      49 </span>            :   {
+<span class="lineNum">      50 </span><span class="lineNoCov">          0 :     return _bi.compiler_version();</span>
+<a name="51"><span class="lineNum">      51 </span>            :   }</a>
+<span class="lineNum">      52 </span>            :   
+<span class="lineNum">      53 </span><span class="lineNoCov">          0 :   virtual std::string version_ex() override</span>
+<span class="lineNum">      54 </span>            :   {
+<span class="lineNum">      55 </span><span class="lineNoCov">          0 :     return _bi.version_ex();</span>
+<a name="56"><span class="lineNum">      56 </span>            :   }</a>
+<span class="lineNum">      57 </span>            : 
+<span class="lineNum">      58 </span><span class="lineNoCov">          0 :   virtual std::string build_type() override</span>
+<span class="lineNum">      59 </span>            :   {
+<span class="lineNum">      60 </span><span class="lineNoCov">          0 :     return _bi.build_type();</span>
+<a name="61"><span class="lineNum">      61 </span>            :   }</a>
+<span class="lineNum">      62 </span>            : 
+<span class="lineNum">      63 </span><span class="lineNoCov">          0 :   virtual std::string build_date() override</span>
+<span class="lineNum">      64 </span>            :   {
+<span class="lineNum">      65 </span><span class="lineNoCov">          0 :     return _bi.build_date();</span>
+<a name="66"><span class="lineNum">      66 </span>            :   }</a>
+<span class="lineNum">      67 </span>            : 
+<span class="lineNum">      68 </span><span class="lineNoCov">          0 :   virtual std::string build_flags() override</span>
+<span class="lineNum">      69 </span>            :   {
+<span class="lineNum">      70 </span><span class="lineNoCov">          0 :     return _bi.build_flags();</span>
+<a name="71"><span class="lineNum">      71 </span>            :   }</a>
+<span class="lineNum">      72 </span>            : 
+<span class="lineNum">      73 </span><span class="lineNoCov">          0 :   virtual std::string build_count() override</span>
+<span class="lineNum">      74 </span>            :   {
+<span class="lineNum">      75 </span><span class="lineNoCov">          0 :     return _bi.build_count();</span>
+<a name="76"><span class="lineNum">      76 </span>            :   }</a>
+<span class="lineNum">      77 </span>            : 
+<span class="lineNum">      78 </span><span class="lineNoCov">          0 :   virtual std::string branch() override</span>
+<span class="lineNum">      79 </span>            :   {
+<span class="lineNum">      80 </span><span class="lineNoCov">          0 :     return _bi.branch();</span>
+<a name="81"><span class="lineNum">      81 </span>            :   }</a>
+<span class="lineNum">      82 </span>            : 
+<span class="lineNum">      83 </span><span class="lineNoCov">          0 :   virtual std::string commit() override</span>
+<span class="lineNum">      84 </span>            :   {
+<span class="lineNum">      85 </span><span class="lineNoCov">          0 :     return _bi.commit();</span>
+<a name="86"><span class="lineNum">      86 </span>            :   }</a>
+<span class="lineNum">      87 </span>            : 
+<span class="lineNum">      88 </span><span class="lineNoCov">          0 :   virtual std::string commit_date() override</span>
+<span class="lineNum">      89 </span>            :   {
+<span class="lineNum">      90 </span><span class="lineNoCov">          0 :     return _bi.commit_date();</span>
+<a name="91"><span class="lineNum">      91 </span>            :   }</a>
+<span class="lineNum">      92 </span>            : 
+<span class="lineNum">      93 </span><span class="lineNoCov">          0 :   virtual std::string commit_author() override</span>
+<span class="lineNum">      94 </span>            :   {
+<span class="lineNum">      95 </span><span class="lineNoCov">          0 :     return _bi.commit_author();</span>
+<a name="96"><span class="lineNum">      96 </span>            :   }</a>
+<span class="lineNum">      97 </span>            : 
+<span class="lineNum">      98 </span><span class="lineNoCov">          0 :   virtual std::string initial_author() override</span>
+<span class="lineNum">      99 </span>            :   {
+<span class="lineNum">     100 </span><span class="lineNoCov">          0 :     return _bi.initial_author();</span>
+<a name="101"><span class="lineNum">     101 </span>            :   }</a>
+<span class="lineNum">     102 </span>            : 
+<span class="lineNum">     103 </span><span class="lineNoCov">          0 :   virtual std::string commit_message() override</span>
+<span class="lineNum">     104 </span>            :   {
+<span class="lineNum">     105 </span><span class="lineNoCov">          0 :     return _bi.commit_message();</span>
+<a name="106"><span class="lineNum">     106 </span>            :   }</a>
+<span class="lineNum">     107 </span>            : 
+<span class="lineNum">     108 </span><span class="lineNoCov">          0 :   virtual std::string all_authors() override</span>
+<span class="lineNum">     109 </span>            :   {
+<span class="lineNum">     110 </span><span class="lineNoCov">          0 :     return _bi.all_authors();</span>
+<span class="lineNum">     111 </span>            :   }
+<span class="lineNum">     112 </span>            : private:
+<span class="lineNum">     113 </span>            :   BuildInfo _bi;
+<span class="lineNum">     114 </span>            : };
+<span class="lineNum">     115 </span>            : 
+<a name="116"><span class="lineNum">     116 </span>            : template&lt;typename BuildInfo&gt;</a>
+<span class="lineNum">     117 </span>            : inline std::shared_ptr&lt;ibuild_info&gt; 
+<span class="lineNum">     118 </span><span class="lineNoCov">          0 : make_build_info()</span>
+<span class="lineNum">     119 </span>            : {
+<span class="lineNum">     120 </span><span class="lineNoCov">          0 :   return std::make_shared&lt; build_info&lt;BuildInfo&gt; &gt;();</span>
+<span class="lineNum">     121 </span>            : }
+<span class="lineNum">     122 </span>            : 
+<a name="123"><span class="lineNum">     123 </span>            : struct empty_build_info</a>
+<span class="lineNum">     124 </span>            : {
+<span class="lineNum">     125 </span><span class="lineNoCov">          0 :   static bool enabled()</span>
+<span class="lineNum">     126 </span>            :   {
+<span class="lineNum">     127 </span><span class="lineNoCov">          0 :     return true;</span>
+<a name="128"><span class="lineNum">     128 </span>            :   }</a>
+<span class="lineNum">     129 </span>            : 
+<span class="lineNum">     130 </span><span class="lineNoCov">          0 :   static std::string name() </span>
+<span class="lineNum">     131 </span>            :   {
+<span class="lineNum">     132 </span><span class="lineNoCov">          0 :     return std::string();</span>
+<a name="133"><span class="lineNum">     133 </span>            :   }</a>
+<span class="lineNum">     134 </span>            : 
+<span class="lineNum">     135 </span><span class="lineNoCov">          0 :   static std::string version_tag() </span>
+<span class="lineNum">     136 </span>            :   {
+<span class="lineNum">     137 </span><span class="lineNoCov">          0 :     return std::string();</span>
+<span class="lineNum">     138 </span>            :   }
+<span class="lineNum">     139 </span>            :   
+<span class="lineNum">     140 </span>            :   static std::string version() 
+<span class="lineNum">     141 </span>            :   {
+<span class="lineNum">     142 </span>            :     return std::string();
+<a name="143"><span class="lineNum">     143 </span>            :   }</a>
+<span class="lineNum">     144 </span>            : 
+<span class="lineNum">     145 </span><span class="lineNoCov">          0 :   static std::string compiler_version() </span>
+<span class="lineNum">     146 </span>            :   {
+<span class="lineNum">     147 </span><span class="lineNoCov">          0 :     return std::string();</span>
+<a name="148"><span class="lineNum">     148 </span>            :   }</a>
+<span class="lineNum">     149 </span>            :   
+<span class="lineNum">     150 </span><span class="lineNoCov">          0 :   static std::string version_ex() </span>
+<span class="lineNum">     151 </span>            :   {
+<span class="lineNum">     152 </span><span class="lineNoCov">          0 :     return std::string();</span>
+<a name="153"><span class="lineNum">     153 </span>            :   }</a>
+<span class="lineNum">     154 </span>            : 
+<span class="lineNum">     155 </span><span class="lineNoCov">          0 :   static std::string build_type() </span>
+<span class="lineNum">     156 </span>            :   {
+<span class="lineNum">     157 </span><span class="lineNoCov">          0 :     return std::string();</span>
+<a name="158"><span class="lineNum">     158 </span>            :   }</a>
+<span class="lineNum">     159 </span>            : 
+<span class="lineNum">     160 </span><span class="lineNoCov">          0 :   static std::string build_date() </span>
+<span class="lineNum">     161 </span>            :   {
+<span class="lineNum">     162 </span><span class="lineNoCov">          0 :     return std::string();</span>
+<a name="163"><span class="lineNum">     163 </span>            :   }</a>
+<span class="lineNum">     164 </span>            : 
+<span class="lineNum">     165 </span><span class="lineNoCov">          0 :   static std::string build_flags() </span>
+<span class="lineNum">     166 </span>            :   {
+<span class="lineNum">     167 </span><span class="lineNoCov">          0 :     return std::string();</span>
+<a name="168"><span class="lineNum">     168 </span>            :   }</a>
+<span class="lineNum">     169 </span>            : 
+<span class="lineNum">     170 </span><span class="lineNoCov">          0 :   static std::string build_count() </span>
+<span class="lineNum">     171 </span>            :   {
+<span class="lineNum">     172 </span><span class="lineNoCov">          0 :     return std::string();</span>
+<a name="173"><span class="lineNum">     173 </span>            :   }</a>
+<span class="lineNum">     174 </span>            : 
+<span class="lineNum">     175 </span><span class="lineNoCov">          0 :   static std::string branch() </span>
+<span class="lineNum">     176 </span>            :   {
+<span class="lineNum">     177 </span><span class="lineNoCov">          0 :     return std::string();</span>
+<a name="178"><span class="lineNum">     178 </span>            :   }</a>
+<span class="lineNum">     179 </span>            : 
+<span class="lineNum">     180 </span><span class="lineNoCov">          0 :   static std::string commit() </span>
+<span class="lineNum">     181 </span>            :   {
+<span class="lineNum">     182 </span><span class="lineNoCov">          0 :     return std::string();</span>
+<a name="183"><span class="lineNum">     183 </span>            :   }</a>
+<span class="lineNum">     184 </span>            : 
+<span class="lineNum">     185 </span><span class="lineNoCov">          0 :   static std::string commit_date() </span>
+<span class="lineNum">     186 </span>            :   {
+<span class="lineNum">     187 </span><span class="lineNoCov">          0 :     return std::string();</span>
+<a name="188"><span class="lineNum">     188 </span>            :   }</a>
+<span class="lineNum">     189 </span>            : 
+<span class="lineNum">     190 </span><span class="lineNoCov">          0 :   static std::string commit_author() </span>
+<span class="lineNum">     191 </span>            :   {
+<span class="lineNum">     192 </span><span class="lineNoCov">          0 :     return std::string();</span>
+<a name="193"><span class="lineNum">     193 </span>            :   }</a>
+<span class="lineNum">     194 </span>            : 
+<span class="lineNum">     195 </span><span class="lineNoCov">          0 :   static std::string initial_author() </span>
+<span class="lineNum">     196 </span>            :   {
+<span class="lineNum">     197 </span><span class="lineNoCov">          0 :     return std::string();</span>
+<a name="198"><span class="lineNum">     198 </span>            :   }</a>
+<span class="lineNum">     199 </span>            : 
+<span class="lineNum">     200 </span><span class="lineNoCov">          0 :   static std::string commit_message() </span>
+<span class="lineNum">     201 </span>            :   {
+<span class="lineNum">     202 </span><span class="lineNoCov">          0 :     return std::string();</span>
+<a name="203"><span class="lineNum">     203 </span>            :   }</a>
+<span class="lineNum">     204 </span>            : 
+<span class="lineNum">     205 </span><span class="lineNoCov">          0 :   static std::string all_authors() </span>
+<span class="lineNum">     206 </span>            :   {
+<span class="lineNum">     207 </span><span class="lineNoCov">          0 :     return std::string();</span>
+<span class="lineNum">     208 </span>            :   }
+<span class="lineNum">     209 </span>            : };
+<span class="lineNum">     210 </span>            : 
+<span class="lineNum">     211 </span>            : 
+<span class="lineNum">     212 </span>            : }
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

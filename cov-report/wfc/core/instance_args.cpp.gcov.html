@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - wfc-coverage.info - wfc/core/instance_args.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">wfc/core</a> - instance_args.cpp<span style="font-size: 80%;"> (source / <a href="instance_args.cpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">wfc-coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">10</td>
+            <td class="headerCovTableEntry">26</td>
+            <td class="headerCovTableEntryLo">38.5 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2019-09-17</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">3</td>
+            <td class="headerCovTableEntry">7</td>
+            <td class="headerCovTableEntryLo">42.9 %</td>
+          </tr>
+          <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : //</a>
+<span class="lineNum">       2 </span>            : // Author: Vladimir Migashko &lt;migashko@gmail.com&gt;, (C) 2016
+<span class="lineNum">       3 </span>            : //
+<span class="lineNum">       4 </span>            : // Copyright: See COPYING file that comes with this distribution
+<span class="lineNum">       5 </span>            : //
+<span class="lineNum">       6 </span>            : 
+<span class="lineNum">       7 </span>            : #include &lt;wfc/wfc_exit.hpp&gt;
+<span class="lineNum">       8 </span>            : #include &lt;wfc/core/instance_args.hpp&gt;
+<span class="lineNum">       9 </span>            : #include &lt;sstream&gt;
+<span class="lineNum">      10 </span>            : #include &lt;memory&gt;
+<span class="lineNum">      11 </span>            : 
+<a name="12"><span class="lineNum">      12 </span>            : namespace wfc{</a>
+<span class="lineNum">      13 </span>            : 
+<span class="lineNum">      14 </span><span class="lineNoCov">          0 : instance_args::instance_args( const std::string&amp; nm)</span>
+<span class="lineNum">      15 </span><span class="lineNoCov">          0 :   : _name(nm)</span>
+<a name="16"><span class="lineNum">      16 </span><span class="lineNoCov">          0 : {}</span></a>
+<span class="lineNum">      17 </span>            :     
+<span class="lineNum">      18 </span><span class="lineCov">          2 : instance_args::instance_args( const std::string&amp; nm, const args_map&amp; rgm )</span>
+<span class="lineNum">      19 </span><span class="lineCov">          2 :   : _name( std::move(nm) )</span>
+<span class="lineNum">      20 </span><span class="lineCov">          2 :   , _args( std::move(rgm) )</span>
+<span class="lineNum">      21 </span>            : {
+<a name="22"><span class="lineNum">      22 </span><span class="lineCov">          2 : }</span></a>
+<span class="lineNum">      23 </span>            :   
+<span class="lineNum">      24 </span><span class="lineNoCov">          0 : void instance_args::insert( const args_map&amp; rgm )</span>
+<span class="lineNum">      25 </span>            : {
+<span class="lineNum">      26 </span><span class="lineNoCov">          0 :   for (const auto&amp; i : rgm )</span>
+<span class="lineNum">      27 </span>            :   {
+<span class="lineNum">      28 </span><span class="lineNoCov">          0 :     _args[i.first] = i.second;</span>
+<span class="lineNum">      29 </span>            :   }
+<a name="30"><span class="lineNum">      30 </span><span class="lineNoCov">          0 : }</span></a>
+<span class="lineNum">      31 </span>            : 
+<span class="lineNum">      32 </span><span class="lineNoCov">          0 : const std::string&amp; instance_args::name() const </span>
+<span class="lineNum">      33 </span>            : {
+<span class="lineNum">      34 </span><span class="lineNoCov">          0 :   return _name;</span>
+<a name="35"><span class="lineNum">      35 </span>            : }</a>
+<span class="lineNum">      36 </span>            :   
+<span class="lineNum">      37 </span><span class="lineCov">          6 : std::string instance_args::get(const std::string&amp; key, bool required) const</span>
+<span class="lineNum">      38 </span>            : {
+<span class="lineNum">      39 </span><span class="lineCov">          6 :   auto itr = _args.find(key);</span>
+<span class="lineNum">      40 </span><span class="lineCov">          6 :   if ( itr != _args.end() )</span>
+<span class="lineNum">      41 </span><span class="lineCov">          6 :     return itr-&gt;second;</span>
+<span class="lineNum">      42 </span><span class="lineNoCov">          0 :   if ( required )</span>
+<span class="lineNum">      43 </span>            :   {
+<span class="lineNum">      44 </span><span class="lineNoCov">          0 :     std::stringstream ss;</span>
+<span class="lineNum">      45 </span><span class="lineNoCov">          0 :     ss &lt;&lt; &quot;instance '&quot; &lt;&lt; _name &lt;&lt; &quot;' required arg '&quot; &lt;&lt; key &lt;&lt; &quot;'&quot;;</span>
+<span class="lineNum">      46 </span><span class="lineNoCov">          0 :     ::wfc_exit_with_error( ss.str() );</span>
+<span class="lineNum">      47 </span>            :   }
+<span class="lineNum">      48 </span><span class="lineNoCov">          0 :   return std::string();</span>
+<a name="49"><span class="lineNum">      49 </span>            : }</a>
+<span class="lineNum">      50 </span>            :   
+<span class="lineNum">      51 </span><span class="lineCov">         11 : bool instance_args::has(const std::string&amp; key) const</span>
+<span class="lineNum">      52 </span>            : {
+<span class="lineNum">      53 </span><span class="lineCov">         11 :   return _args.count(key) != 0;</span>
+<a name="54"><span class="lineNum">      54 </span>            : }</a>
+<span class="lineNum">      55 </span>            :   
+<span class="lineNum">      56 </span><span class="lineNoCov">          0 : const instance_args::args_map&amp; instance_args::args() const</span>
+<span class="lineNum">      57 </span>            : {
+<span class="lineNum">      58 </span><span class="lineNoCov">          0 :   return _args;</span>
+<span class="lineNum">      59 </span>            : }
+<span class="lineNum">      60 </span>            :   
+<span class="lineNum">      61 </span>            : }
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

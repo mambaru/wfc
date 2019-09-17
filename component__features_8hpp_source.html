@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.15"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>wfc: Исходный файл wfc/module/component_features.hpp</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="customdoxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">wfc
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Создано системой Doxygen 1.8.15 -->
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',false,false,'search.php','Поиск');
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+<div id="nav-path" class="navpath">
+  <ul>
+<li class="navelem"><a class="el" href="dir_37a5e240182493ca66bca850dac36143.html">wfc</a></li><li class="navelem"><a class="el" href="dir_9ee7da2c657939f936179373a122e346.html">module</a></li>  </ul>
+</div>
+</div><!-- top -->
+<div class="header">
+  <div class="headertitle">
+<div class="title">component_features.hpp</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">//</span></div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment">// Author: Vladimir Migashko &lt;migashko@gmail.com&gt;, (C) 2013-2018</span></div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment">//</span></div><div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment">// Copyright: See COPYING file that comes with this distribution</span></div><div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment">//</span></div><div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;</div><div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#pragma once</span></div><div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;</div><div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacewfc.html">wfc</a>{</div><div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;</div><div class="line"><a name="l00028"></a><span class="lineno"><a class="line" href="structwfc_1_1component__features.html">   28</a></span>&#160;<span class="keyword">struct </span><a class="code" href="structwfc_1_1component__features.html">component_features</a></div><div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;{</div><div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;  <span class="keyword">enum</span> {</div><div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20ca81c3316750bca1a328d559ed331c1a7e">   31</a></span>&#160;    <a class="code" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20ca81c3316750bca1a328d559ed331c1a7e">Defaults</a> = 0,           </div><div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20ca97e66bc6f499083053a82537bae4400b">   32</a></span>&#160;    <a class="code" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20ca97e66bc6f499083053a82537bae4400b">Multiton</a> = 0,           </div><div class="line"><a name="l00033"></a><span class="lineno"><a class="line" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20cace9b965be66504e0d135e138140d2bd5">   33</a></span>&#160;    <a class="code" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20cace9b965be66504e0d135e138140d2bd5">Singleton</a> = 1,          </div><div class="line"><a name="l00034"></a><span class="lineno"><a class="line" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20ca22304e08ef8843f4b676f63af726cefb">   34</a></span>&#160;    <a class="code" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20ca22304e08ef8843f4b676f63af726cefb">DisabledEnabled</a> = 2,    </div><div class="line"><a name="l00035"></a><span class="lineno"><a class="line" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20cac103a20a938bc386968e146d509835dd">   35</a></span>&#160;    <a class="code" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20cac103a20a938bc386968e146d509835dd">DisabledPriority</a> = 4,   </div><div class="line"><a name="l00036"></a><span class="lineno"><a class="line" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20ca7c70a511b0ad91ac9da3a633ea60669b">   36</a></span>&#160;    <a class="code" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20ca7c70a511b0ad91ac9da3a633ea60669b">DisabledSuspend</a>  = 8,   </div><div class="line"><a name="l00037"></a><span class="lineno"><a class="line" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20cae8cfa77a38365dcc1ff7c818c9d43028">   37</a></span>&#160;    <a class="code" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20cae8cfa77a38365dcc1ff7c818c9d43028">DisabledWorkflow</a>  = 16, </div><div class="line"><a name="l00038"></a><span class="lineno"><a class="line" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20ca31022f6179a2566be6bed20af7e43596">   38</a></span>&#160;    <a class="code" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20ca31022f6179a2566be6bed20af7e43596">EnableCPU</a> = 32,         </div><div class="line"><a name="l00039"></a><span class="lineno"><a class="line" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20ca652ec4acfb51f24331b1ef01153c7fd6">   39</a></span>&#160;    <a class="code" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20ca652ec4acfb51f24331b1ef01153c7fd6">IgnoreReconfigure</a>  = 64,</div><div class="line"><a name="l00040"></a><span class="lineno"><a class="line" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20cad94f8409ca80baa2b3193ebc8c326e1e">   40</a></span>&#160;    <a class="code" href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20cad94f8409ca80baa2b3193ebc8c326e1e">EnableTracking</a> = 128    </div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;  };</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;};</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;}</div><div class="ttc" id="structwfc_1_1component__features_html_a79979738fa1b8ba442150cfeee7ba20ca7c70a511b0ad91ac9da3a633ea60669b"><div class="ttname"><a href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20ca7c70a511b0ad91ac9da3a633ea60669b">wfc::component_features::DisabledSuspend</a></div><div class="ttdoc">Скрыть поле suspend в json-конфигурации </div><div class="ttdef"><b>Definition:</b> component_features.hpp:36</div></div>
+<div class="ttc" id="structwfc_1_1component__features_html_a79979738fa1b8ba442150cfeee7ba20ca81c3316750bca1a328d559ed331c1a7e"><div class="ttname"><a href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20ca81c3316750bca1a328d559ed331c1a7e">wfc::component_features::Defaults</a></div><div class="ttdoc">По умолчанию </div><div class="ttdef"><b>Definition:</b> component_features.hpp:31</div></div>
+<div class="ttc" id="structwfc_1_1component__features_html_a79979738fa1b8ba442150cfeee7ba20ca22304e08ef8843f4b676f63af726cefb"><div class="ttname"><a href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20ca22304e08ef8843f4b676f63af726cefb">wfc::component_features::DisabledEnabled</a></div><div class="ttdoc">Скрыть поле enabled в json-конфигурации </div><div class="ttdef"><b>Definition:</b> component_features.hpp:34</div></div>
+<div class="ttc" id="structwfc_1_1component__features_html_a79979738fa1b8ba442150cfeee7ba20cace9b965be66504e0d135e138140d2bd5"><div class="ttname"><a href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20cace9b965be66504e0d135e138140d2bd5">wfc::component_features::Singleton</a></div><div class="ttdoc">Выставляетяся в wfc::singleton. </div><div class="ttdef"><b>Definition:</b> component_features.hpp:33</div></div>
+<div class="ttc" id="structwfc_1_1component__features_html_a79979738fa1b8ba442150cfeee7ba20ca97e66bc6f499083053a82537bae4400b"><div class="ttname"><a href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20ca97e66bc6f499083053a82537bae4400b">wfc::component_features::Multiton</a></div><div class="ttdoc">Выставляетяся в wfc::multiton. </div><div class="ttdef"><b>Definition:</b> component_features.hpp:32</div></div>
+<div class="ttc" id="structwfc_1_1component__features_html_a79979738fa1b8ba442150cfeee7ba20cac103a20a938bc386968e146d509835dd"><div class="ttname"><a href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20cac103a20a938bc386968e146d509835dd">wfc::component_features::DisabledPriority</a></div><div class="ttdoc">Скрыть поля startup_priority и shutdown_priority в json-конфигурации </div><div class="ttdef"><b>Definition:</b> component_features.hpp:35</div></div>
+<div class="ttc" id="namespacewfc_html"><div class="ttname"><a href="namespacewfc.html">wfc</a></div><div class="ttdef"><b>Definition:</b> asio.hpp:12</div></div>
+<div class="ttc" id="structwfc_1_1component__features_html"><div class="ttname"><a href="structwfc_1_1component__features.html">wfc::component_features</a></div><div class="ttdoc">Дополнительные особенности компонента </div><div class="ttdef"><b>Definition:</b> component_features.hpp:28</div></div>
+<div class="ttc" id="structwfc_1_1component__features_html_a79979738fa1b8ba442150cfeee7ba20cad94f8409ca80baa2b3193ebc8c326e1e"><div class="ttname"><a href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20cad94f8409ca80baa2b3193ebc8c326e1e">wfc::component_features::EnableTracking</a></div><div class="ttdoc">Включить дефолтную реализацию обертки iinterface для отслеживания источника </div><div class="ttdef"><b>Definition:</b> component_features.hpp:40</div></div>
+<div class="ttc" id="structwfc_1_1component__features_html_a79979738fa1b8ba442150cfeee7ba20cae8cfa77a38365dcc1ff7c818c9d43028"><div class="ttname"><a href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20cae8cfa77a38365dcc1ff7c818c9d43028">wfc::component_features::DisabledWorkflow</a></div><div class="ttdoc">Скрыть поле workflow в json-конфигурации </div><div class="ttdef"><b>Definition:</b> component_features.hpp:37</div></div>
+<div class="ttc" id="structwfc_1_1component__features_html_a79979738fa1b8ba442150cfeee7ba20ca31022f6179a2566be6bed20af7e43596"><div class="ttname"><a href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20ca31022f6179a2566be6bed20af7e43596">wfc::component_features::EnableCPU</a></div><div class="ttdoc">Включить поле cpu в json-конфигурации </div><div class="ttdef"><b>Definition:</b> component_features.hpp:38</div></div>
+<div class="ttc" id="structwfc_1_1component__features_html_a79979738fa1b8ba442150cfeee7ba20ca652ec4acfb51f24331b1ef01153c7fd6"><div class="ttname"><a href="structwfc_1_1component__features.html#a79979738fa1b8ba442150cfeee7ba20ca652ec4acfb51f24331b1ef01153c7fd6">wfc::component_features::IgnoreReconfigure</a></div><div class="ttdoc">Игнорировать сигналы реконфигурацию </div><div class="ttdef"><b>Definition:</b> component_features.hpp:39</div></div>
+</div><!-- fragment --></div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+Создано системой &#160;<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/>
+</a> 1.8.15
+</small></address>
+</body>
+</html>

@@ -1,0 +1,1170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - wfc-coverage.info - wfc/domain_object.hpp</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">wfc</a> - domain_object.hpp<span style="font-size: 80%;"> (source / <a href="domain_object.hpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">wfc-coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">118</td>
+            <td class="headerCovTableEntry">184</td>
+            <td class="headerCovTableEntryLo">64.1 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2019-09-17</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">56</td>
+            <td class="headerCovTableEntry">140</td>
+            <td class="headerCovTableEntryLo">40.0 %</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : //</a>
+<span class="lineNum">       2 </span>            : // Author: Vladimir Migashko &lt;migashko@gmail.com&gt;, (C) 2013-2018
+<span class="lineNum">       3 </span>            : //
+<span class="lineNum">       4 </span>            : // Copyright: See COPYING file that comes with this distribution
+<span class="lineNum">       5 </span>            : //
+<span class="lineNum">       6 </span>            : 
+<span class="lineNum">       7 </span>            : #pragma once
+<span class="lineNum">       8 </span>            : 
+<span class="lineNum">       9 </span>            : #include &lt;wfc/core/wfcglobal.hpp&gt;
+<span class="lineNum">      10 </span>            : #include &lt;iow/owner/owner.hpp&gt;
+<span class="lineNum">      11 </span>            : #include &lt;iow/io/io_id.hpp&gt;
+<span class="lineNum">      12 </span>            : #include &lt;wfc/json.hpp&gt;
+<span class="lineNum">      13 </span>            : #include &lt;wfc/statistics/statistics.hpp&gt;
+<span class="lineNum">      14 </span>            : #include &lt;wfc/iinterface.hpp&gt;
+<span class="lineNum">      15 </span>            : #include &lt;wfc/workflow.hpp&gt;
+<span class="lineNum">      16 </span>            : #include &lt;wfc/module/domain_config.hpp&gt;
+<span class="lineNum">      17 </span>            : #include &lt;wfc/module/basic_domain.hpp&gt;
+<span class="lineNum">      18 </span>            : #include &lt;wfc/module/instance_handler_.hpp&gt;
+<span class="lineNum">      19 </span>            : #include &lt;wfc/wfc_exit.hpp&gt;
+<span class="lineNum">      20 </span>            : 
+<span class="lineNum">      21 </span>            : #include &lt;memory&gt;
+<span class="lineNum">      22 </span>            : #include &lt;string&gt;
+<span class="lineNum">      23 </span>            : #include &lt;stdexcept&gt;
+<span class="lineNum">      24 </span>            : #include &lt;type_traits&gt;
+<span class="lineNum">      25 </span>            : 
+<span class="lineNum">      26 </span>            : namespace wfc{
+<span class="lineNum">      27 </span>            : 
+<span class="lineNum">      28 </span>            : /**
+<span class="lineNum">      29 </span>            :  * @brief Базовый класс для реализации прикладного объекта WFC
+<span class="lineNum">      30 </span>            :  * @tparam Itf тип интерфейса объекта ( на базе wfc::iinterface )
+<span class="lineNum">      31 </span>            :  * @tparam Opt произвольная структура с пользовательскими опциями
+<span class="lineNum">      32 </span>            :  * @tparam StatOpt [=nostat] произвольная структура с пользовательскими опциями статистики
+<span class="lineNum">      33 </span>            :  * @details Прикладной объект в контексте WFC - это объект реализующий прикладную логику приложения.
+<span class="lineNum">      34 </span>            :  * Для облегчения интеграции в качестве базового используется этот класс (domain_object), который облегчает
+<span class="lineNum">      35 </span>            :  * разработку и обеспечивает доступ к основным ресурсам WFC. Далее рассмотрим основные концепции прикладных объектов и
+<span class="lineNum">      36 </span>            :  * возможности domain_object.
+<span class="lineNum">      37 </span>            :  *
+<span class="lineNum">      38 </span>            :  * Интерфейсы
+<span class="lineNum">      39 </span>            :  * ----------------
+<span class="lineNum">      40 </span>            :  * Любой прикладной объект должен реализовать API который описан в его интерфейсе - структура с набором чистых виртуальных
+<span class="lineNum">      41 </span>            :  * методов на базе iinterface, которая позволяет регистрировать его в глобальном реестре объектов и получать к нему доступ.
+<span class="lineNum">      42 </span>            :  * Эта структура передается в качестве первого шаблонного аргумента в domain_object. В общем случае других ограничений на интерфейсы,
+<span class="lineNum">      43 </span>            :  * кроме необходимости наследоваться от iinterface, нет. Однако, если предполагается удаленный вызов методов интерфейса прикладного
+<span class="lineNum">      44 </span>            :  * объекта, а это то, для чего собственно и разрабатывался данный фреймворк, то на него накладываются ограничения, описанные в следующем
+<span class="lineNum">      45 </span>            :  * разделе.
+<span class="lineNum">      46 </span>            :  *
+<span class="lineNum">      47 </span>            :  * API и асинхронные методы
+<span class="lineNum">      48 </span>            :  * ----------------
+<span class="lineNum">      49 </span>            :  * Рассматриваемые в данном разделе ограничения, следует воспринимать как требования, если вы хотите использовать реализованную во
+<span class="lineNum">      50 </span>            :  * фреймворке JSONRPC инфраструктуру. Или как набор рекомендаций, если вы захотите реализовать свой протокол взаимодействия,
+<span class="lineNum">      51 </span>            :  * без потери совместимости.
+<span class="lineNum">      52 </span>            :  * - Все входящие параметры должны быть объедены в одну структуру(struct). Т.е. на входе метода всегда один параметр типа struct,
+<span class="lineNum">      53 </span>            :  * в которой описываются все входящие переменные, даже если переменная одна или они отсутствуют (пустая структура).
+<span class="lineNum">      54 </span>            :  * Это позволяет:
+<span class="lineNum">      55 </span>            :  *    - Добавлять или удалять параметры вызова без необходимости внесение изменения в интерфейс и реализацию
+<span class="lineNum">      56 </span>            :  *    - Добавлять параметры и реализовать логику без необходимости внесения изменения в декларации протокола взаимодействия
+<span class="lineNum">      57 </span>            :  *      (например JSON-RPC). Т.е. сначала  реализовали, убедились что работает со значением по умолчанию, потом вносим
+<span class="lineNum">      58 </span>            :  *      изменения в протокол
+<span class="lineNum">      59 </span>            :  *    - Добавлять параметры в структуру и декларацию протокола взаимодействия (например JSON-RPC) без реализации (игнорируем).
+<span class="lineNum">      60 </span>            :  *      Т.е. объявляем клиенту, что появились новые параметры, убеждаемся что он правильно их использует, потом реализуем
+<span class="lineNum">      61 </span>            :  *      соответствующую логику.
+<span class="lineNum">      62 </span>            :  *    - Кроме того это требование JSON-RPC инфраструктуры WFC (на самом деле нет - эти ограничения можно обойти, но я вам не
+<span class="lineNum">      63 </span>            :  *      скажу как, так как это не имеет особого смысла и требует написания большего объема кода)
+<span class="lineNum">      64 </span>            :  * - Все исходящие параметры также должны быть объедены в одну структуру по тем же причинам что и в предыдущем пункте
+<span class="lineNum">      65 </span>            :  * - Структура с входящими параметрами передается как std::unique_ptr
+<span class="lineNum">      66 </span>            :  *    - Это гарантирует перемещаемость объекта и запрещает случайное копирование
+<span class="lineNum">      67 </span>            :  *    - Избавляет от необходимости накладывать ограничения на подобные структуры и/или использовать классы-обертки
+<span class="lineNum">      68 </span>            :  *    -
+<span class="lineNum">      69 </span>            :  * - Все методы должны быть асинхронными, т.е. возврат результата осуществляется через callback-функцию которая передается при вызове.
+<span class="lineNum">      70 </span>            :  *    - Однако это не означает, что реализация метода не может быть синхронный (вызов callback-функции сразу же после обработки
+<span class="lineNum">      71 </span>            :  *      запроса )
+<span class="lineNum">      72 </span>            :  *
+<span class="lineNum">      73 </span>            :  * Опции
+<span class="lineNum">      74 </span>            :  * ----------------
+<span class="lineNum">      75 </span>            :  * Конфигурация и запуск
+<span class="lineNum">      76 </span>            :  * ----------------
+<span class="lineNum">      77 </span>            :  * Взаимодействие прикладных объектов (цели)
+<span class="lineNum">      78 </span>            :  * ----------------
+<span class="lineNum">      79 </span>            :  * get_id() callback() рекурсивные мутексы
+<span class="lineNum">      80 </span>            :  *
+<span class="lineNum">      81 </span>            :  * Потоки и очереди (workflow)
+<span class="lineNum">      82 </span>            :  * ----------------
+<span class="lineNum">      83 </span>            :  * wrap()
+<span class="lineNum">      84 </span>            :  *
+<span class="lineNum">      85 </span>            :  * Обработка параметров командной строки
+<span class="lineNum">      86 </span>            :  * ----------------
+<span class="lineNum">      87 </span>            :  * wfcglobal
+<span class="lineNum">      88 </span>            :  * ----------------
+<span class="lineNum">      89 </span>            :  * Статистика
+<span class="lineNum">      90 </span>            :  * ----------------
+<span class="lineNum">      91 </span>            :  */
+<span class="lineNum">      92 </span>            : template&lt;
+<span class="lineNum">      93 </span>            :   typename Itf,
+<span class="lineNum">      94 </span>            :   typename Opt,
+<span class="lineNum">      95 </span>            :   typename StatOpt = nostat
+<span class="lineNum">      96 </span>            : &gt;
+<span class="lineNum">      97 </span>            : class domain_object
+<span class="lineNum">      98 </span>            :   : instance_handler_&lt;Opt, StatOpt&gt;
+<span class="lineNum">      99 </span>            :   , public basic_domain
+<span class="lineNum">     100 </span>            :   , public Itf
+<span class="lineNum">     101 </span>            : 
+<span class="lineNum">     102 </span>            : {
+<span class="lineNum">     103 </span>            : public:
+<span class="lineNum">     104 </span>            :   /** @brief Пользовательские опции (синоним options_type) */
+<span class="lineNum">     105 </span>            :   typedef Opt custom_options;
+<span class="lineNum">     106 </span>            : 
+<span class="lineNum">     107 </span>            :   /** @brief Пользовательские опции (синоним custom_options) */
+<span class="lineNum">     108 </span>            :   typedef custom_options options_type;
+<span class="lineNum">     109 </span>            : 
+<span class="lineNum">     110 </span>            :   /** @brief Пользовательские опции для сбора статистики */
+<span class="lineNum">     111 </span>            :   typedef StatOpt customstat_options;
+<span class="lineNum">     112 </span>            : 
+<span class="lineNum">     113 </span>            :   /** @brief Конфигурация прикладного объекта (пользовательские опции, опции статистики и опции wfc::instance) */
+<span class="lineNum">     114 </span>            :   typedef domain_config_t&lt;Opt, StatOpt&gt; domain_config;
+<span class="lineNum">     115 </span>            : 
+<span class="lineNum">     116 </span>            :   /** @brief Только опции wfc::instance, без пользовательских */
+<span class="lineNum">     117 </span>            :   typedef typename domain_config::domain_options domain_options;
+<span class="lineNum">     118 </span>            : 
+<span class="lineNum">     119 </span>            :   /** @brief Тип интерфейса объекта ( на базе wfc::iinterface ) */
+<span class="lineNum">     120 </span>            :   typedef Itf domain_interface;
+<span class="lineNum">     121 </span>            : 
+<span class="lineNum">     122 </span>            :   /** @brief Указатель на wfc::wfcglobal */
+<span class="lineNum">     123 </span>            :   typedef std::shared_ptr&lt;wfcglobal&gt; global_ptr;
+<span class="lineNum">     124 </span>            : 
+<span class="lineNum">     125 </span>            :   /** @brief Создает обертки для callback обработчиков */
+<span class="lineNum">     126 </span>            :   typedef ::iow::owner owner_type;
+<span class="lineNum">     127 </span>            : 
+<span class="lineNum">     128 </span>            :   /** @brief Ошибка JSON-десериализации  */
+<span class="lineNum">     129 </span>            :   typedef ::wfc::json::json_error json_error;
+<span class="lineNum">     130 </span>            : 
+<span class="lineNum">     131 </span>            :   /** @brief Уникальный идентификатор объекта */
+<span class="lineNum">     132 </span>            :   typedef typename domain_interface::io_id_t   io_id_t;
+<span class="lineNum">     133 </span>            : 
+<span class="lineNum">     134 </span>            :   /** @brief Очередь задач*/
+<span class="lineNum">     135 </span>            :   typedef ::wfc::workflow workflow_type;
+<span class="lineNum">     136 </span>            : 
+<span class="lineNum">     137 </span>            :   typedef workflow_type::timer_id_t timer_id_t;
+<span class="lineNum">     138 </span>            : 
+<span class="lineNum">     139 </span>            :   /** @brief std::shared_ptr&lt;workflow_type&gt; */
+<span class="lineNum">     140 </span>            :   typedef std::shared_ptr&lt;workflow_type&gt; workflow_ptr;
+<span class="lineNum">     141 </span>            : 
+<span class="lineNum">     142 </span>            :   /** @brief Для сбора статистики */
+<span class="lineNum">     143 </span>            :   typedef ::wfc::statistics::statistics statistics_type;
+<span class="lineNum">     144 </span>            : 
+<span class="lineNum">     145 </span>            :   /** @brief std::shared_ptr&lt;statistics_type&gt; */
+<span class="lineNum">     146 </span>            :   typedef std::shared_ptr&lt;statistics_type&gt; statistics_ptr;
+<a name="147"><span class="lineNum">     147 </span>            : </a>
+<span class="lineNum">     148 </span>            :   /** @brief Деструктор */
+<span class="lineNum">     149 </span><span class="lineCov">          6 :   virtual ~domain_object()</span>
+<span class="lineNum">     150 </span>            :   {
+<span class="lineNum">     151 </span><span class="lineCov">          6 :     _global = nullptr;</span>
+<span class="lineNum">     152 </span><span class="lineCov">         12 :   }</span>
+<a name="153"><span class="lineNum">     153 </span>            : </a>
+<span class="lineNum">     154 </span>            :   /** @brief Конструктор */
+<span class="lineNum">     155 </span><span class="lineCov">         10 :   domain_object()</span>
+<span class="lineNum">     156 </span><span class="lineCov">         10 :     : _io_id( ::iow::io::create_id&lt;io_id_t&gt;() )</span>
+<span class="lineNum">     157 </span><span class="lineCov">         10 :   {}</span>
+<span class="lineNum">     158 </span>            : 
+<span class="lineNum">     159 </span>            :   /**
+<span class="lineNum">     160 </span>            :    * @brief Возвращает имя объекта
+<span class="lineNum">     161 </span>            :    * @return имя объекта
+<a name="162"><span class="lineNum">     162 </span>            :    * @details Имя объекта задается при создании объекта из конфигурации. Изменить имя после создания объекта нельзя.</a>
+<span class="lineNum">     163 </span>            :    */
+<span class="lineNum">     164 </span><span class="lineCov">         15 :   const std::string&amp; name() const</span>
+<span class="lineNum">     165 </span>            :   {
+<span class="lineNum">     166 </span><span class="lineCov">         15 :     return _name;</span>
+<span class="lineNum">     167 </span>            :   }
+<span class="lineNum">     168 </span>            : 
+<span class="lineNum">     169 </span>            :   /**
+<span class="lineNum">     170 </span>            :    * @brief Возвращает указатель на wfc::wfcglobal
+<span class="lineNum">     171 </span>            :    * @return указатель на wfc::wfcglobal
+<a name="172"><span class="lineNum">     172 </span>            :    * @details по возможности следует использовать методы этого класса, а не обращаться к wfc::wfcglobal напрямую</a>
+<span class="lineNum">     173 </span>            :    */
+<span class="lineNum">     174 </span><span class="lineCov">         30 :   global_ptr global() const</span>
+<span class="lineNum">     175 </span>            :   {
+<span class="lineNum">     176 </span><span class="lineCov">         30 :     if ( _global!=nullptr)</span>
+<span class="lineNum">     177 </span><span class="lineCov">         28 :       return _global;</span>
+<span class="lineNum">     178 </span>            :     else
+<span class="lineNum">     179 </span><span class="lineCov">          2 :       return wfcglobal::static_global;</span>
+<span class="lineNum">     180 </span>            :   }
+<span class="lineNum">     181 </span>            : 
+<span class="lineNum">     182 </span>            :   /**
+<span class="lineNum">     183 </span>            :    * @brief Пользовательские настройки
+<span class="lineNum">     184 </span>            :    * @return ссылку на пользовательские настройки
+<span class="lineNum">     185 </span>            :    * @details Если доступна динамическая реконфигурация, то безопасно получить доступ
+<span class="lineNum">     186 </span>            :    * к настройкам можно только в методах wfc::idomain, которые всегда вызываются фреймворком
+<span class="lineNum">     187 </span>            :    * в основном потоке. В реализациях методах wfc::idomain::configure или wfc::idomain::reconfigure можно
+<a name="188"><span class="lineNum">     188 </span>            :    * скопировать необходимые данные</a>
+<span class="lineNum">     189 </span>            :    */
+<span class="lineNum">     190 </span><span class="lineCov">          3 :   const custom_options&amp; options() const</span>
+<span class="lineNum">     191 </span>            :   {
+<span class="lineNum">     192 </span><span class="lineCov">          3 :     return _config;</span>
+<span class="lineNum">     193 </span>            :   }
+<span class="lineNum">     194 </span>            : 
+<span class="lineNum">     195 </span>            :   /**
+<span class="lineNum">     196 </span>            :    * @brief Пользовательские настройки статистики
+<span class="lineNum">     197 </span>            :    * @return ссылку на опции статистики
+<span class="lineNum">     198 </span>            :    * @details Если доступна динамическая реконфигурация, то безопасно получить доступ
+<span class="lineNum">     199 </span>            :    * к настройкам можно только в методах wfc::idomain, которые всегда вызываются фреймворком
+<span class="lineNum">     200 </span>            :    * в основном потоке. В реализациях методах wfc::idomain::configure или wfc::idomain::reconfigure можно
+<span class="lineNum">     201 </span>            :    * скопировать необходимые данные
+<span class="lineNum">     202 </span>            :    */
+<span class="lineNum">     203 </span>            :   const customstat_options&amp; statistics_options() const
+<span class="lineNum">     204 </span>            :   {
+<span class="lineNum">     205 </span>            :     return _config.statistics;
+<span class="lineNum">     206 </span>            :   }
+<span class="lineNum">     207 </span>            : 
+<span class="lineNum">     208 </span>            :   /**
+<span class="lineNum">     209 </span>            :    * @brief Общая конфигурация объекта
+<span class="lineNum">     210 </span>            :    * @return ссылку на конфигурация объекта
+<span class="lineNum">     211 </span>            :    * @details Если доступна динамическая реконфигурация, то безопасно получить доступ
+<span class="lineNum">     212 </span>            :    * к настройкам можно только в методах wfc::idomain, которые всегда вызываются фреймворком
+<span class="lineNum">     213 </span>            :    * в основном потоке. В реализациях методах wfc::idomain::configure или wfc::idomain::reconfigure можно
+<span class="lineNum">     214 </span>            :    * скопировать необходимые данные
+<span class="lineNum">     215 </span>            :    */
+<span class="lineNum">     216 </span>            :   const domain_config&amp; config() const
+<span class="lineNum">     217 </span>            :   {
+<span class="lineNum">     218 </span>            :     return _config;
+<span class="lineNum">     219 </span>            :   }
+<span class="lineNum">     220 </span>            : 
+<span class="lineNum">     221 </span>            : 
+<span class="lineNum">     222 </span>            :   /**
+<span class="lineNum">     223 </span>            :    * @brief Возвращает уникальный идентификатор объекта
+<span class="lineNum">     224 </span>            :    * @return уникальный идентификатор объекта
+<span class="lineNum">     225 </span>            :    * @details уникален для любого объекта в рамках процесса
+<span class="lineNum">     226 </span>            :    */
+<span class="lineNum">     227 </span>            :   constexpr io_id_t get_id() const
+<span class="lineNum">     228 </span>            :   {
+<span class="lineNum">     229 </span>            :     return _io_id;
+<span class="lineNum">     230 </span>            :   }
+<span class="lineNum">     231 </span>            : 
+<span class="lineNum">     232 </span>            : 
+<span class="lineNum">     233 </span>            :   /**
+<span class="lineNum">     234 </span>            :    * @brief Создает обертку над обработчиком обратного вызова
+<span class="lineNum">     235 </span>            :    * @tparam H1 основной обработчик
+<span class="lineNum">     236 </span>            :    * @tparam H2 альтернативный обработчика
+<span class="lineNum">     237 </span>            :    * @param h1 исходный обработчик
+<span class="lineNum">     238 </span>            :    * @param h2 альтернативный обработчик (м.б. nullptr)
+<span class="lineNum">     239 </span>            :    * @return обертка над обработчиком обратного вызова
+<span class="lineNum">     240 </span>            :    * @details Если обработчик взаимодействует с этим объектом, то может быть ситуация, что он будет вызван после уничтожения объекта.
+<span class="lineNum">     241 </span>            :    * Эта обертка распознает такую ситуацию и вызовет альтернативный обработчик, если задан, в противном случае просто не вызовет исходный.
+<span class="lineNum">     242 </span>            :    * Может использоваться для отправки сообщений в wfc::workflow::post
+<span class="lineNum">     243 </span>            :    */
+<span class="lineNum">     244 </span>            :   template&lt;typename H1, typename H2&gt;
+<span class="lineNum">     245 </span>            :   auto wrap(H1&amp;&amp; h1, H2&amp;&amp; h2) const
+<span class="lineNum">     246 </span>            :     -&gt; typename wrap_result_&lt;H1, H2&gt;::type
+<span class="lineNum">     247 </span>            :   {
+<span class="lineNum">     248 </span>            :     return _owner.wrap( std::forward&lt;H1&gt;(h1), std::forward&lt;H2&gt;(h2));
+<span class="lineNum">     249 </span>            :   }
+<span class="lineNum">     250 </span>            : 
+<span class="lineNum">     251 </span>            :   /**
+<span class="lineNum">     252 </span>            :    * @brief Создает обертку над обработчиком для постановки в очередь
+<span class="lineNum">     253 </span>            :    * @tparam H1 основной обработчик
+<span class="lineNum">     254 </span>            :    * @tparam H2 альтернативный обработчика
+<span class="lineNum">     255 </span>            :    * @param io_id идентификатор трека (можно создать с помощю iow::create_id)
+<span class="lineNum">     256 </span>            :    * @param h1 исходный обработчик
+<span class="lineNum">     257 </span>            :    * @param h2 альтернативный обработчик (м.б. nullptr)
+<span class="lineNum">     258 </span>            :    * @details Данная обертка позволяет сбрасывать все сообщения трека с помощью release_tracking
+<span class="lineNum">     259 </span>            :    */
+<span class="lineNum">     260 </span>            :   template&lt;typename H1, typename H2&gt;
+<span class="lineNum">     261 </span>            :   auto tracking(io_id_t io_id, H1&amp;&amp; h1, H2&amp;&amp; h2)
+<span class="lineNum">     262 </span>            :     -&gt; typename wrap_result_&lt;H1, H2&gt;::type
+<span class="lineNum">     263 </span>            :   {
+<span class="lineNum">     264 </span>            :     return _owner.tracking(io_id, std::forward&lt;H1&gt;(h1), std::forward&lt;H2&gt;(h2));
+<span class="lineNum">     265 </span>            :   }
+<span class="lineNum">     266 </span>            : 
+<span class="lineNum">     267 </span>            :   /**
+<span class="lineNum">     268 </span>            :    * @brief Сбрасывает все обработчики трека
+<span class="lineNum">     269 </span>            :    * @param io_id идентификатор трека
+<span class="lineNum">     270 </span>            :    * @details для всех обработчиков для которых был использован tracking с заданым io_id, будет применен альтернативный метод при обращении к нему.
+<span class="lineNum">     271 </span>            :    * Может быть использован, чтобы выкинуть группу сообщений из очереди
+<span class="lineNum">     272 </span>            :    */
+<span class="lineNum">     273 </span>            :   void release_tracking(io_id_t io_id)
+<span class="lineNum">     274 </span>            :   {
+<span class="lineNum">     275 </span>            :     _owner.release_tracking(io_id);
+<span class="lineNum">     276 </span>            :   }
+<span class="lineNum">     277 </span>            : 
+<span class="lineNum">     278 </span>            :   /**
+<span class="lineNum">     279 </span>            :    * @brief Создает обертку над обработчиком обратного вызова RPC
+<span class="lineNum">     280 </span>            :    * @tparam H тип обработчика
+<span class="lineNum">     281 </span>            :    * @param h исходный обработчик
+<span class="lineNum">     282 </span>            :    * @return обертка над обработчиком обратного вызова RPC
+<span class="lineNum">     283 </span>            :    * @details Обработчик обратного вызова RPC, должны быть гарантировано вызван только один раз. Если обработчик не вызывается,
+<span class="lineNum">     284 </span>            :    * то клиентская сторона может ждать вечно ответа, также не должно быть повторных вызовов - это может привести к неопределенному
+<span class="lineNum">     285 </span>            :    * поведению клиентского кода. Эта обертка детектирует оба случая и вызывает соответствующий обработчик, который настраиваются
+<span class="lineNum">     286 </span>            :    * глобально в модуле ядра.
+<span class="lineNum">     287 </span>            :    */
+<span class="lineNum">     288 </span>            :   template&lt;typename H&gt;
+<span class="lineNum">     289 </span>            :   auto callback(H&amp;&amp; h) const
+<span class="lineNum">     290 </span>            :     -&gt; typename callback_result_&lt;H&gt;::type
+<span class="lineNum">     291 </span>            :   {
+<span class="lineNum">     292 </span>            :     return _owner.callback( std::forward&lt;H&gt;(h) );
+<span class="lineNum">     293 </span>            :   }
+<span class="lineNum">     294 </span>            : 
+<span class="lineNum">     295 </span>            :   /**
+<span class="lineNum">     296 </span>            :    * @details При включенной опции component_features::EnableTracking вызов этой функции обязателен
+<a name="297"><span class="lineNum">     297 </span>            :    * в порожденном классе при ее переопределении, чтобы трекер корректно работал.</a>
+<span class="lineNum">     298 </span>            :    */
+<span class="lineNum">     299 </span><span class="lineNoCov">          0 :   virtual void unreg_io(io_id_t io_id) override</span>
+<span class="lineNum">     300 </span>            :   {
+<span class="lineNum">     301 </span><span class="lineNoCov">          0 :     _owner.release_tracking(io_id);</span>
+<span class="lineNum">     302 </span><span class="lineNoCov">          0 :   }</span>
+<span class="lineNum">     303 </span>            : 
+<span class="lineNum">     304 </span>            :   /**
+<span class="lineNum">     305 </span>            :    * @brief Возвращает ссылку на объект owner
+<span class="lineNum">     306 </span>            :    * @return ссылка на объект owner
+<span class="lineNum">     307 </span>            :    * @details вы можете сбросить ```owner().reset()```, тогда запросы обернутые ```wrap(...)``` решат, что объект уничтожен,
+<span class="lineNum">     308 </span>            :    * либо повторно инициализировать обработчики для ```callback(...)``` обертки
+<span class="lineNum">     309 </span>            :    */
+<span class="lineNum">     310 </span>            :   owner_type&amp; owner()
+<span class="lineNum">     311 </span>            :   {
+<span class="lineNum">     312 </span>            :     return _owner;
+<span class="lineNum">     313 </span>            :   }
+<span class="lineNum">     314 </span>            : 
+<span class="lineNum">     315 </span>            : 
+<span class="lineNum">     316 </span>            :   /**
+<span class="lineNum">     317 </span>            :    * @brief Возвращает объект по имени в глобальном реестре
+<span class="lineNum">     318 </span>            :    * @tparam I интерфейс объекта (должен быть на базе iinerface)
+<span class="lineNum">     319 </span>            :    * @param target имя объекта
+<span class="lineNum">     320 </span>            :    * @param disabort [=false] отключить аварийное завершение, если объект не найден
+<span class="lineNum">     321 </span>            :    * @return указатель на объект из глобального реестра или nullptr
+<span class="lineNum">     322 </span>            :    * @details Осуществляет поиск в реестре без префикса - это как правило объекты прикладного уровня заданные
+<span class="lineNum">     323 </span>            :    * в конфигурационном файле системы. Имена объектов и целей определяются пользователем в конфигурационном файле.
+<span class="lineNum">     324 </span>            :    * Двух объектов в системе с одинаковыми именами быть не может.
+<a name="325"><span class="lineNum">     325 </span>            :    */</a>
+<span class="lineNum">     326 </span>            :   template&lt;typename I&gt;
+<span class="lineNum">     327 </span><span class="lineCov">          2 :   std::shared_ptr&lt;I&gt; get_target(const std::string&amp; target, bool disabort = false) const</span>
+<span class="lineNum">     328 </span>            :   {
+<span class="lineNum">     329 </span><span class="lineCov">          2 :     if (!this-&gt;is_configured_())</span>
+<span class="lineNum">     330 </span><span class="lineCov">          2 :       return nullptr;</span>
+<span class="lineNum">     331 </span>            : 
+<span class="lineNum">     332 </span><span class="lineNoCov">          0 :     if ( auto g = this-&gt;global() )</span>
+<span class="lineNum">     333 </span><span class="lineNoCov">          0 :       return g-&gt;registry.template get_target&lt;I&gt;(target, disabort);</span>
+<span class="lineNum">     334 </span><span class="lineNoCov">          0 :     return nullptr;</span>
+<span class="lineNum">     335 </span>            :   }
+<span class="lineNum">     336 </span>            : 
+<span class="lineNum">     337 </span>            :   /**
+<span class="lineNum">     338 </span>            :    * @brief Возвращает объект по имени и префиксу в глобальном реестре
+<span class="lineNum">     339 </span>            :    * @tparam I интерфейс объекта (должен быть на базе iinerface)
+<span class="lineNum">     340 </span>            :    * @param prefix префикс объекта (aka пространство имен)
+<span class="lineNum">     341 </span>            :    * @param target имя объекта
+<span class="lineNum">     342 </span>            :    * @param disabort [=false] отключить аварийное завершение, если объект не найден
+<span class="lineNum">     343 </span>            :    * @return указатель на объект из глобального реестра или nullptr
+<span class="lineNum">     344 </span>            :    * @details Осуществляет поиск в реестре по префиксу и имени - это все прочие объекты, которые зарегистрированы
+<span class="lineNum">     345 </span>            :    * объектами прикладного уровня. Такие объекты размещаются с определенным префиксом. Двух объектов в системе
+<span class="lineNum">     346 </span>            :    * с одинаковыми именами под одним префиксом быть не может.
+<span class="lineNum">     347 </span>            :    */
+<span class="lineNum">     348 </span>            :   template&lt;typename I&gt;
+<span class="lineNum">     349 </span>            :   std::shared_ptr&lt;I&gt; get_object(const std::string&amp; prefix, const std::string&amp; target, bool disabort = false) const
+<span class="lineNum">     350 </span>            :   {
+<span class="lineNum">     351 </span>            :     if (!is_configured_())
+<span class="lineNum">     352 </span>            :       return nullptr;
+<span class="lineNum">     353 </span>            : 
+<span class="lineNum">     354 </span>            :     if ( auto g = this-&gt;global() )
+<span class="lineNum">     355 </span>            :       return g-&gt;registry.template get_object&lt;I&gt;(prefix, target, disabort);
+<span class="lineNum">     356 </span>            :     return nullptr;
+<span class="lineNum">     357 </span>            :   }
+<span class="lineNum">     358 </span>            : 
+<span class="lineNum">     359 </span>            :   /**
+<span class="lineNum">     360 </span>            :    * @brief регистрирует объект в глобальном реестре
+<span class="lineNum">     361 </span>            :    * @param prefix префикс объекта (aka пространство имен)
+<span class="lineNum">     362 </span>            :    * @param tg_name имя объекта
+<span class="lineNum">     363 </span>            :    * @param pobj указатель на объект
+<span class="lineNum">     364 </span>            :    * @param nomark [=false] не отмечать в реестре, что были внесены изменения
+<span class="lineNum">     365 </span>            :    * @details прикладные объекты могут регистрировать произвольное число объектов под разными префиксами для собственных нужд. Пустой префикс
+<span class="lineNum">     366 </span>            :    * зарезервирован для прикладных объектов. Если объект является наследником этого класса и включен в список модулей пакета WFC то
+<span class="lineNum">     367 </span>            :    * регистрировать его не нужно. Если зарегистрированные объекты используются только в контексте данного прикладного объекта,
+<span class="lineNum">     368 </span>            :    * то можно задать ```cpp nomark=true``` чтобы избежать повторной инициализации всей системы
+<span class="lineNum">     369 </span>            :    * @see idomain
+<span class="lineNum">     370 </span>            :    */
+<span class="lineNum">     371 </span>            :   void reg_object(const std::string&amp; prefix, const std::string&amp; tg_name, std::shared_ptr&lt;iinterface&gt; pobj, bool nomark = false)
+<span class="lineNum">     372 </span>            :   {
+<span class="lineNum">     373 </span>            :     if ( auto g = this-&gt;global() )
+<span class="lineNum">     374 </span>            :     {
+<span class="lineNum">     375 </span>            :       g-&gt;registry.set_object(prefix, tg_name, pobj, nomark);
+<span class="lineNum">     376 </span>            :     }
+<span class="lineNum">     377 </span>            :   }
+<span class="lineNum">     378 </span>            : 
+<span class="lineNum">     379 </span>            :   /**
+<span class="lineNum">     380 </span>            :    * @brief возвращает указатели на все объектов заданного префикса из глобального реестра
+<span class="lineNum">     381 </span>            :    * @param prefix префикс объекта (aka пространство имен)
+<span class="lineNum">     382 </span>            :    * @return указатели на все объектов заданного префикса
+<span class="lineNum">     383 </span>            :    */
+<span class="lineNum">     384 </span>            :   template&lt;typename I&gt;
+<span class="lineNum">     385 </span>            :   std::map&lt;std::string, std::shared_ptr&lt;I&gt; &gt; select_objects(const std::string&amp; prefix) const
+<span class="lineNum">     386 </span>            :   {
+<span class="lineNum">     387 </span>            :     std::map&lt;std::string, std::shared_ptr&lt;I&gt; &gt; result;
+<span class="lineNum">     388 </span>            :     if ( this-&gt;is_configured_() )
+<span class="lineNum">     389 </span>            :     {
+<span class="lineNum">     390 </span>            :       if ( auto g = this-&gt;global() )
+<span class="lineNum">     391 </span>            :         result = g-&gt;registry.template select&lt;I&gt;(prefix);
+<span class="lineNum">     392 </span>            :     }
+<span class="lineNum">     393 </span>            :     return result;
+<span class="lineNum">     394 </span>            :   }
+<span class="lineNum">     395 </span>            : 
+<span class="lineNum">     396 </span>            :   /**
+<span class="lineNum">     397 </span>            :    * @brief Возвращает указатель на [workflow](https://mambaru.github.io/wflow/)
+<span class="lineNum">     398 </span>            :    * @return указатель на [workflow](https://mambaru.github.io/wflow/) или nullptr если система еще не сконфигурирована
+<span class="lineNum">     399 </span>            :    * @details если задан [workflow](https://mambaru.github.io/wflow/) в конфигурации то этот указатель на этот workflow и возвращается,
+<span class="lineNum">     400 </span>            :    * в противном случае возвращается общий workflow по умолчанию. Гарантированно результат не будет nullptr, после этапа конфигурации
+<span class="lineNum">     401 </span>            :    * @see wflow::workflow
+<span class="lineNum">     402 </span>            :    */
+<span class="lineNum">     403 </span>            :   std::shared_ptr&lt;workflow_type&gt; get_workflow() const
+<span class="lineNum">     404 </span>            :   {
+<span class="lineNum">     405 </span>            :     if (!is_configured_())
+<span class="lineNum">     406 </span>            :       return nullptr;
+<span class="lineNum">     407 </span>            :     return _workflow;
+<span class="lineNum">     408 </span>            :   }
+<span class="lineNum">     409 </span>            : 
+<span class="lineNum">     410 </span>            :   /**
+<span class="lineNum">     411 </span>            :    * @brief Возвращает указатель на [workflow](https://mambaru.github.io/wflow/)
+<span class="lineNum">     412 </span>            :    * @param target имя объекта [workflow](https://mambaru.github.io/wflow/)
+<span class="lineNum">     413 </span>            :    * @param disabort [=false] отключить аварийное завершение, если объект не найден
+<span class="lineNum">     414 </span>            :    * @return указатель на [workflow](https://mambaru.github.io/wflow/) или nullptr
+<span class="lineNum">     415 </span>            :    * @details в базовой конфигурации для прикладного объекта всегда доступен [workflow](https://mambaru.github.io/wflow/),
+<span class="lineNum">     416 </span>            :    * используйте этот метод если вам нужно более одного [workflow](https://mambaru.github.io/wflow/). Задайте disabort=true
+<span class="lineNum">     417 </span>            :    * если допустимо отсутствие объекта в реестре
+<span class="lineNum">     418 </span>            :    * @warning последнее обновление. В таргет можно передавать JSON-объект с конфигурацией workflow, тогда будет создан
+<span class="lineNum">     419 </span>            :    * незарегистрированный workflow, который можно удалить после использования. Может использоваться для многопоточной инициализации
+<span class="lineNum">     420 </span>            :    * или начальной загрузки из БД или файла. Для этого в json-конфигурации объекта для имени вместо string следует использовать raw_value.
+<span class="lineNum">     421 </span>            :    * После этого в конфиге можно использовать как имя так и сразу сконфигурировать workflow. Для основного workflow все по прежнему,
+<span class="lineNum">     422 </span>            :    * можно использовать только имя.
+<a name="423"><span class="lineNum">     423 </span>            :    * @see wflow::workflow</a>
+<span class="lineNum">     424 </span>            :    */
+<span class="lineNum">     425 </span><span class="lineNoCov">          0 :   std::shared_ptr&lt;workflow_type&gt; get_workflow(const std::string&amp; target, bool disabort = false) const</span>
+<span class="lineNum">     426 </span>            :   {
+<span class="lineNum">     427 </span><span class="lineNoCov">          0 :     if (!is_configured_())</span>
+<span class="lineNum">     428 </span><span class="lineNoCov">          0 :       return nullptr;</span>
+<span class="lineNum">     429 </span>            : 
+<span class="lineNum">     430 </span><span class="lineNoCov">          0 :     if ( target.empty() )</span>
+<span class="lineNum">     431 </span><span class="lineNoCov">          0 :       return _workflow;</span>
+<span class="lineNum">     432 </span>            : 
+<span class="lineNum">     433 </span><span class="lineNoCov">          0 :     auto beg = target.begin();</span>
+<span class="lineNum">     434 </span><span class="lineNoCov">          0 :     auto end = target.end();</span>
+<span class="lineNum">     435 </span>            : 
+<span class="lineNum">     436 </span><span class="lineNoCov">          0 :     if ( wjson::parser::is_object(beg, end) )</span>
+<span class="lineNum">     437 </span><span class="lineNoCov">          0 :       return this-&gt;create_workflow(&quot;&quot;, target);</span>
+<span class="lineNum">     438 </span>            : 
+<span class="lineNum">     439 </span><span class="lineNoCov">          0 :     std::string starget;</span>
+<span class="lineNum">     440 </span>            : 
+<span class="lineNum">     441 </span><span class="lineNoCov">          0 :     if ( wjson::parser::is_string(beg, end) )</span>
+<span class="lineNum">     442 </span><span class="lineNoCov">          0 :       wjson::string&lt;&gt;::serializer()(starget, beg, end, nullptr);</span>
+<span class="lineNum">     443 </span>            :     else
+<span class="lineNum">     444 </span><span class="lineNoCov">          0 :       starget=target;</span>
+<span class="lineNum">     445 </span>            : 
+<span class="lineNum">     446 </span><span class="lineNoCov">          0 :     return this-&gt;global()-&gt;registry.template get_object&lt;workflow_type&gt;(&quot;workflow&quot;, starget, disabort);</span>
+<span class="lineNum">     447 </span>            :   }
+<span class="lineNum">     448 </span>            : 
+<span class="lineNum">     449 </span>            :   /**
+<span class="lineNum">     450 </span>            :    * @brief Возвращает указатель на общий [workflow](https://mambaru.github.io/wflow/) системы
+<span class="lineNum">     451 </span>            :    * @return указатель на [workflow](https://mambaru.github.io/wflow/) или nullptr если система еще не сконфигурирована
+<span class="lineNum">     452 </span>            :    * @details возвращается общий workflow системы. Гарантированно результат не будет nullptr, после этапа конфигурации.
+<span class="lineNum">     453 </span>            :    * Если в конфигурации объекта не задан workflow, то результат тот же что и get_workflow()
+<a name="454"><span class="lineNum">     454 </span>            :    * @see wflow::workflow</a>
+<span class="lineNum">     455 </span>            :    */
+<span class="lineNum">     456 </span><span class="lineNoCov">          0 :   std::shared_ptr&lt;workflow_type&gt; get_common_workflow() const</span>
+<span class="lineNum">     457 </span>            :   {
+<span class="lineNum">     458 </span><span class="lineNoCov">          0 :     if (!is_configured_())</span>
+<span class="lineNum">     459 </span><span class="lineNoCov">          0 :       return nullptr;</span>
+<span class="lineNum">     460 </span><span class="lineNoCov">          0 :     if (auto g = this-&gt;global() )</span>
+<span class="lineNum">     461 </span><span class="lineNoCov">          0 :       return g-&gt;common_workflow;</span>
+<span class="lineNum">     462 </span><span class="lineNoCov">          0 :     return nullptr;</span>
+<span class="lineNum">     463 </span>            :   }
+<span class="lineNum">     464 </span>            : 
+<span class="lineNum">     465 </span>            :   /**
+<span class="lineNum">     466 </span>            :    * @brief Создает и запускает новый [workflow](https://mambaru.github.io/wflow/) с задаными опциями
+<span class="lineNum">     467 </span>            :    * @param opt опции для workflow
+<span class="lineNum">     468 </span>            :    * @return новый объект workflow
+<a name="469"><span class="lineNum">     469 </span>            :    * @see wflow::workflow</a>
+<span class="lineNum">     470 </span>            :    */
+<span class="lineNum">     471 </span><span class="lineCov">          1 :   std::shared_ptr&lt;workflow_type&gt; create_workflow(const wflow::workflow_options&amp; opt) const</span>
+<span class="lineNum">     472 </span>            :   {
+<span class="lineNum">     473 </span><span class="lineCov">          1 :     auto wflow = std::make_shared&lt;workflow_type&gt;(this-&gt;global()-&gt;io_service,  opt);</span>
+<span class="lineNum">     474 </span><span class="lineCov">          1 :     wflow-&gt;start();</span>
+<span class="lineNum">     475 </span><span class="lineCov">          1 :     return wflow;</span>
+<span class="lineNum">     476 </span>            :   }
+<span class="lineNum">     477 </span>            : 
+<span class="lineNum">     478 </span>            :   /**
+<span class="lineNum">     479 </span>            :    * @brief Создает и запускает новый workflow на основе конфигурации существующего объекта или json-конфигурации
+<span class="lineNum">     480 </span>            :    * @param newname Имя для отображения в логах и пр
+<span class="lineNum">     481 </span>            :    * @param target Имя существующего workflow (в конфигурации) или json-строка с новой конфигурацией
+<span class="lineNum">     482 </span>            :    * @details Основное назначение - это создание временных workflow, например для начальной загрузки из БД
+<a name="483"><span class="lineNum">     483 </span>            :    * @see wflow::workflow, wflow::workflow_options_json</a>
+<span class="lineNum">     484 </span>            :    */
+<span class="lineNum">     485 </span><span class="lineCov">          1 :   std::shared_ptr&lt;workflow_type&gt; create_workflow(const std::string&amp; newname, const std::string&amp; target) const</span>
+<span class="lineNum">     486 </span>            :   {
+<span class="lineNum">     487 </span><span class="lineCov">          1 :     auto opt = this-&gt;create_workflow_options_(target);</span>
+<span class="lineNum">     488 </span>            : 
+<span class="lineNum">     489 </span><span class="lineCov">          2 :     std::string newid = this-&gt;name() + &quot;:workflow&quot;;</span>
+<span class="lineNum">     490 </span><span class="lineCov">          1 :     if ( !opt.id.empty() ) newid += &quot;.&quot; + opt.id;</span>
+<span class="lineNum">     491 </span><span class="lineCov">          1 :     if ( !newname.empty() ) newid += &quot;.&quot; + newname;</span>
+<span class="lineNum">     492 </span><span class="lineCov">          1 :     opt.id = newid;</span>
+<span class="lineNum">     493 </span><span class="lineCov">          2 :     return this-&gt;create_workflow(opt);</span>
+<span class="lineNum">     494 </span>            :   }
+<span class="lineNum">     495 </span>            : 
+<span class="lineNum">     496 </span>            : 
+<span class="lineNum">     497 </span>            :   /**
+<span class="lineNum">     498 </span>            :    * @brief Создает и запускает новый workflow на основе конфигурации workflow по умолчанию ( workflow::workflow )
+<span class="lineNum">     499 </span>            :    * @param newname Имя для отображения в логах и пр
+<span class="lineNum">     500 </span>            :    * @details Основное назначение - это создание временных workflow, например для начальной загрузки из БД
+<span class="lineNum">     501 </span>            :    * @see wflow::workflow
+<span class="lineNum">     502 </span>            :    */
+<span class="lineNum">     503 </span>            :   std::shared_ptr&lt;workflow_type&gt; create_workflow(const std::string&amp; newname)
+<span class="lineNum">     504 </span>            :   {
+<span class="lineNum">     505 </span>            :     return this-&gt;create_workflow(newname, &quot;&quot;);
+<span class="lineNum">     506 </span>            :   }
+<span class="lineNum">     507 </span>            : 
+<span class="lineNum">     508 </span>            :   /**
+<span class="lineNum">     509 </span>            :    * @brief Создает и запускает новый workflow на основе конфигурации workflow по умолчанию ( workflow::workflow )
+<span class="lineNum">     510 </span>            :    * @details Основное назначение - это создание временных workflow, например для начальной загрузки из БД.
+<span class="lineNum">     511 </span>            :    * Идентификатор для отображения будет в формате `имя_объекта:workflow`
+<span class="lineNum">     512 </span>            :    * @see wflow::workflow
+<span class="lineNum">     513 </span>            :    */
+<span class="lineNum">     514 </span>            :   std::shared_ptr&lt;workflow_type&gt; create_workflow()
+<span class="lineNum">     515 </span>            :   {
+<span class="lineNum">     516 </span>            :     return this-&gt;create_workflow(&quot;&quot;, &quot;&quot;);
+<span class="lineNum">     517 </span>            :   }
+<span class="lineNum">     518 </span>            : 
+<span class="lineNum">     519 </span>            :   /**
+<span class="lineNum">     520 </span>            :    * @brief Добавляет фоновый обработчик с периодичностью один раз в секунду
+<span class="lineNum">     521 </span>            :    * @param fun обработчик
+<span class="lineNum">     522 </span>            :    * @details Может вызываться только в методе start и работает до завершения работы приложения.
+<span class="lineNum">     523 </span>            :    */
+<span class="lineNum">     524 </span>            :   void idle(std::function&lt;void()&gt; fun)
+<span class="lineNum">     525 </span>            :   {
+<span class="lineNum">     526 </span>            :     this-&gt;idle(std::chrono::seconds(1), fun);
+<span class="lineNum">     527 </span>            :   }
+<span class="lineNum">     528 </span>            : 
+<span class="lineNum">     529 </span>            :   /**
+<span class="lineNum">     530 </span>            :    * @brief Добавляет фоновый обработчик с заданной периодичностью
+<span class="lineNum">     531 </span>            :    * @param duration интервал запуска
+<span class="lineNum">     532 </span>            :    * @param fun обработчик
+<span class="lineNum">     533 </span>            :    * @details Может вызываться только в методе start и работает до завершения работы приложения.
+<span class="lineNum">     534 </span>            :    */
+<span class="lineNum">     535 </span>            :   void idle(workflow_type::duration_t duration, std::function&lt;void()&gt; fun)
+<span class="lineNum">     536 </span>            :   {
+<span class="lineNum">     537 </span>            :     if ( _idle_flag )
+<span class="lineNum">     538 </span>            :     {
+<span class="lineNum">     539 </span>            :       this-&gt;common_workflow()-&gt;create_timer(duration, fun);
+<span class="lineNum">     540 </span>            :     }
+<span class="lineNum">     541 </span>            :     else
+<span class="lineNum">     542 </span>            :     {
+<span class="lineNum">     543 </span>            :       SYSTEM_LOG_FATAL(&quot;Idle timer can be set only in 'start' method&quot;)
+<span class="lineNum">     544 </span>            :     }
+<span class="lineNum">     545 </span>            :   }
+<span class="lineNum">     546 </span>            : 
+<span class="lineNum">     547 </span>            :   /**
+<span class="lineNum">     548 </span>            :    * @brief Определяет наличие дополнительного аргумента переданного этому объекту через командную строку
+<span class="lineNum">     549 </span>            :    * @param arg имя аргумент
+<span class="lineNum">     550 </span>            :    * @return true если есть аргумент с именем arg
+<a name="551"><span class="lineNum">     551 </span>            :    * @details</a>
+<span class="lineNum">     552 </span>            :    */
+<span class="lineNum">     553 </span><span class="lineCov">          4 :   bool has_arg(const std::string&amp; arg) const</span>
+<span class="lineNum">     554 </span>            :   {
+<span class="lineNum">     555 </span><span class="lineCov">          4 :     if (auto g = this-&gt;global() )</span>
+<span class="lineNum">     556 </span>            :     {
+<span class="lineNum">     557 </span><span class="lineCov">          4 :       if ( !g-&gt;args.has(_name) )</span>
+<span class="lineNum">     558 </span><span class="lineNoCov">          0 :         return false;</span>
+<span class="lineNum">     559 </span>            : 
+<span class="lineNum">     560 </span><span class="lineCov">          4 :       auto args = g-&gt;args.get(_name);</span>
+<span class="lineNum">     561 </span><span class="lineCov">          4 :       return args.has(arg);</span>
+<span class="lineNum">     562 </span>            :     }
+<span class="lineNum">     563 </span><span class="lineNoCov">          0 :     return false;</span>
+<span class="lineNum">     564 </span>            :   }
+<span class="lineNum">     565 </span>            : 
+<span class="lineNum">     566 </span>            : 
+<span class="lineNum">     567 </span>            :   /**
+<span class="lineNum">     568 </span>            :    * @brief Возвращает значение дополнительного аргумента переданного этому объекту через командную строку
+<span class="lineNum">     569 </span>            :    * @param arg имя аргумент
+<span class="lineNum">     570 </span>            :    * @return значение аргумента в виде строки
+<span class="lineNum">     571 </span>            :    * @details если аргумент arg отсутствует или не имеет значения, то возвращается пустая строка. Для определения
+<a name="572"><span class="lineNum">     572 </span>            :    * наличия агумента без значений используете has_arg()</a>
+<span class="lineNum">     573 </span>            :    */
+<span class="lineNum">     574 </span><span class="lineCov">          7 :   std::string get_arg(const std::string&amp; arg) const</span>
+<span class="lineNum">     575 </span>            :   {
+<span class="lineNum">     576 </span><span class="lineCov">          7 :     if (auto g = this-&gt;global() )</span>
+<span class="lineNum">     577 </span>            :     {
+<span class="lineNum">     578 </span><span class="lineCov">          7 :       if ( !g-&gt;args.has(_name) )</span>
+<span class="lineNum">     579 </span><span class="lineNoCov">          0 :         return std::string();</span>
+<span class="lineNum">     580 </span>            : 
+<span class="lineNum">     581 </span><span class="lineCov">          7 :       auto args = g-&gt;args.get(_name);</span>
+<span class="lineNum">     582 </span><span class="lineCov">          7 :       if ( !args.has(arg) )</span>
+<span class="lineNum">     583 </span><span class="lineCov">          1 :         return std::string();</span>
+<span class="lineNum">     584 </span>            : 
+<span class="lineNum">     585 </span><span class="lineCov">          6 :       return args.get(arg);</span>
+<span class="lineNum">     586 </span>            :     }
+<span class="lineNum">     587 </span><span class="lineNoCov">          0 :     return std::string();</span>
+<span class="lineNum">     588 </span>            :   }
+<span class="lineNum">     589 </span>            : 
+<span class="lineNum">     590 </span>            :   /**
+<span class="lineNum">     591 </span>            :    * @brief Возращает значение дополнительного аргумента переданного этому объекту через командную строку
+<span class="lineNum">     592 </span>            :    * @tparam T тип значения
+<span class="lineNum">     593 </span>            :    * @param arg имя аргумент
+<span class="lineNum">     594 </span>            :    * @param err сообщение об ошибке
+<span class="lineNum">     595 </span>            :    * @return значение аргумента или T()
+<span class="lineNum">     596 </span>            :    * @details если аргумент arg отсутствует или не имеет значения, то возвращается T().
+<span class="lineNum">     597 </span>            :    * Для определения наличия аргумента без значений используете has_arg()
+<a name="598"><span class="lineNum">     598 </span>            :    */</a>
+<span class="lineNum">     599 </span>            :   template&lt;typename T&gt;
+<span class="lineNum">     600 </span><span class="lineCov">          3 :   T get_arg_t(const std::string&amp; arg, std::string* err = nullptr) const</span>
+<span class="lineNum">     601 </span>            :   {
+<span class="lineNum">     602 </span><span class="lineCov">          3 :     return this-&gt;get_arg_t_&lt;T&gt;(arg, err, fas::bool_&lt;std::is_integral&lt;T&gt;::value&gt;());</span>
+<span class="lineNum">     603 </span>            :   }
+<span class="lineNum">     604 </span>            : 
+<span class="lineNum">     605 </span>            : 
+<span class="lineNum">     606 </span>            :   /**
+<span class="lineNum">     607 </span>            :    * @brief Регистрация пользовательского потока (thread)
+<span class="lineNum">     608 </span>            :    * @details Регистрация пользовательского потока нужна для того чтобы система могла более гибко распределять их по ядрам CPU.
+<span class="lineNum">     609 </span>            :    * Для того чтобы управлять распределением потоков для этого объекта нужно влючить wfc::component_features::EnableCPU. Вызывать
+<span class="lineNum">     610 </span>            :    * этот метод нужно непосредственно из запущенного потока
+<span class="lineNum">     611 </span>            :    */
+<span class="lineNum">     612 </span>            :   void reg_thread()
+<span class="lineNum">     613 </span>            :   {
+<span class="lineNum">     614 </span>            :     if (auto g = this-&gt;global() )
+<span class="lineNum">     615 </span>            :       g-&gt;cpu.set_current_thread(_name);
+<span class="lineNum">     616 </span>            :   }
+<span class="lineNum">     617 </span>            : 
+<span class="lineNum">     618 </span>            :   /**
+<span class="lineNum">     619 </span>            :    * @brief Снять регистрацию пользовательского потока (thread)
+<span class="lineNum">     620 </span>            :    * @details Вызыватьэтот метод нужно непосредственно из запущенного потока перед его завершением
+<span class="lineNum">     621 </span>            :    */
+<span class="lineNum">     622 </span>            :   void unreg_thread()
+<span class="lineNum">     623 </span>            :   {
+<span class="lineNum">     624 </span>            :     if (auto g = this-&gt;global() )
+<span class="lineNum">     625 </span>            :       g-&gt;cpu.del_current_thread();
+<span class="lineNum">     626 </span>            :   }
+<span class="lineNum">     627 </span>            : 
+<span class="lineNum">     628 </span>            :   /**
+<span class="lineNum">     629 </span>            :    * @brief Возвращает true если объект в режиме suspend
+<span class="lineNum">     630 </span>            :    * @return true если объект в режиме suspend
+<span class="lineNum">     631 </span>            :    * @details В режиме suspend объект не обрабатывает запросы, а просто отвечает значением по умолчанию. Это помогает
+<a name="632"><span class="lineNum">     632 </span>            :    * при поисках проблемных мест с точки зрения производительности.</a>
+<span class="lineNum">     633 </span>            :    */
+<span class="lineNum">     634 </span><span class="lineNoCov">          0 :   bool suspended() const</span>
+<span class="lineNum">     635 </span>            :   {
+<span class="lineNum">     636 </span><span class="lineNoCov">          0 :     return _config.suspend;</span>
+<span class="lineNum">     637 </span>            :   }
+<span class="lineNum">     638 </span>            : 
+<span class="lineNum">     639 </span>            :   /**
+<span class="lineNum">     640 </span>            :    * @brief Если объект в режиме suspend, вызывает callback со значением по умолчанию и возвращает true
+<span class="lineNum">     641 </span>            :    * @tparam Res тип результата (параметр callback-функции)
+<span class="lineNum">     642 </span>            :    * @param cb callback-функция будет вызвана только если объект в режиме suspend (может быть nullptr)
+<span class="lineNum">     643 </span>            :    * @return true если объект в режиме suspend
+<span class="lineNum">     644 </span>            :    * @details callback-функция должна быть вызвана всегда, поэтому вы не можете просто проигнорировать входящий запрос. Этот метод позволяет
+<span class="lineNum">     645 </span>            :    * упростить проверку на режим suspend и nullptr. На самом деле вам скорее понадобятся методы bad_request() и notify_ban() которые делают
+<span class="lineNum">     646 </span>            :    * больше проверок
+<span class="lineNum">     647 </span>            :    */
+<span class="lineNum">     648 </span>            :   template&lt;typename Res&gt;
+<span class="lineNum">     649 </span>            :   bool suspended(const std::function&lt; void(std::unique_ptr&lt;Res&gt;) &gt; &amp; cb) const
+<span class="lineNum">     650 </span>            :   {
+<span class="lineNum">     651 </span>            :     if ( !this-&gt;_config.suspend )
+<span class="lineNum">     652 </span>            :       return false;
+<span class="lineNum">     653 </span>            : 
+<span class="lineNum">     654 </span>            :     this-&gt;default_response(cb);
+<span class="lineNum">     655 </span>            :     return true;
+<span class="lineNum">     656 </span>            :   }
+<span class="lineNum">     657 </span>            : 
+<span class="lineNum">     658 </span>            :   /**
+<span class="lineNum">     659 </span>            :    * @brief Создает и отправляет ответ по умолчанию если функция cb!=nullptr
+<span class="lineNum">     660 </span>            :    * @tparam Res тип результата (параметр callback-функции)
+<span class="lineNum">     661 </span>            :    * @param cb callback-функция (может быть nullptr)
+<span class="lineNum">     662 </span>            :    */
+<span class="lineNum">     663 </span>            :   template&lt;typename Res&gt;
+<span class="lineNum">     664 </span>            :   void default_response(const std::function&lt; void(std::unique_ptr&lt;Res&gt;) &gt;&amp; cb) const
+<span class="lineNum">     665 </span>            :   {
+<span class="lineNum">     666 </span>            :     if ( cb != nullptr )
+<span class="lineNum">     667 </span>            :       cb( std::make_unique&lt;Res&gt;() );
+<span class="lineNum">     668 </span>            :   }
+<span class="lineNum">     669 </span>            : 
+<span class="lineNum">     670 </span>            :   /**
+<span class="lineNum">     671 </span>            :    * @brief Проверяет на валидность входящий запрос, а также на режим suspend
+<span class="lineNum">     672 </span>            :    * @tparam Req тип запроса
+<span class="lineNum">     673 </span>            :    * @tparam Res тип результата (параметр callback-функции)
+<span class="lineNum">     674 </span>            :    * @param req входящий запрос
+<span class="lineNum">     675 </span>            :    * @param cb callback-функция (может быть nullptr)
+<span class="lineNum">     676 </span>            :    * @return true если дальнейшая обработка не требуется, false можно обрабатывать запрос
+<span class="lineNum">     677 </span>            :    * @details Реализует большинство необходимых проверок при обработке запроса:
+<span class="lineNum">     678 </span>            :    * - на режим suspend, с отправкой ответ
+<span class="lineNum">     679 </span>            :    * - на останов системы
+<span class="lineNum">     680 </span>            :    * - на req==nullptr c отправкой cb(nullptr)
+<span class="lineNum">     681 </span>            :    * Если это метод вернул true это значит, что вызов cb уже произведен
+<span class="lineNum">     682 </span>            :    * ```cpp
+<span class="lineNum">     683 </span>            :    *  void foo_domain::bar(request::bar::ptr req, response::bar::handler cb )
+<span class="lineNum">     684 </span>            :    *  {
+<span class="lineNum">     685 </span>            :    *    if ( this-&gt;bad_request(req, cb) )
+<span class="lineNum">     686 </span>            :    *      return;
+<span class="lineNum">     687 </span>            :    *    ... обработка запроса или уведомления ...
+<span class="lineNum">     688 </span>            :    *  }
+<span class="lineNum">     689 </span>            :    * ```
+<span class="lineNum">     690 </span>            :    *
+<span class="lineNum">     691 </span>            :    */
+<span class="lineNum">     692 </span>            :   template&lt;typename Req, typename Res&gt;
+<span class="lineNum">     693 </span>            :   bool bad_request(const std::unique_ptr&lt;Req&gt;&amp; req, const std::function&lt; void(std::unique_ptr&lt;Res&gt;) &gt;&amp; cb) const
+<span class="lineNum">     694 </span>            :   {
+<span class="lineNum">     695 </span>            :     if ( this-&gt;suspended(cb) )
+<span class="lineNum">     696 </span>            :       return true;
+<span class="lineNum">     697 </span>            : 
+<span class="lineNum">     698 </span>            :     if ( this-&gt;system_is_stopped() )
+<span class="lineNum">     699 </span>            :       return true;
+<span class="lineNum">     700 </span>            : 
+<span class="lineNum">     701 </span>            :     if ( req!=nullptr )
+<span class="lineNum">     702 </span>            :       return false;
+<span class="lineNum">     703 </span>            : 
+<span class="lineNum">     704 </span>            :     if ( cb!=nullptr )
+<span class="lineNum">     705 </span>            :       cb(nullptr);
+<span class="lineNum">     706 </span>            : 
+<span class="lineNum">     707 </span>            :     return true;
+<span class="lineNum">     708 </span>            :   }
+<span class="lineNum">     709 </span>            : 
+<span class="lineNum">     710 </span>            :   /**
+<span class="lineNum">     711 </span>            :    * @brief Запрещает уведомления, проверяет на валидность входящий запрос, а также на режим suspend
+<span class="lineNum">     712 </span>            :    * @tparam Req тип запроса
+<span class="lineNum">     713 </span>            :    * @tparam Res тип результата (параметр callback-функции)
+<span class="lineNum">     714 </span>            :    * @param req входящий запрос
+<span class="lineNum">     715 </span>            :    * @param cb callback-функция (может быть nullptr)
+<span class="lineNum">     716 </span>            :    * @return true если дальнейшая обработка не требуется, false можно обрабатывать запрос
+<span class="lineNum">     717 </span>            :    * @details Все тоже самое, что и bad_request(), но запрещает также уведомления (это когда cb==nullptr). Это значит,
+<span class="lineNum">     718 </span>            :    * что после вызова этой функции, если она вернула false, cb на nullptr можно не проверять.
+<span class="lineNum">     719 </span>            :    */
+<span class="lineNum">     720 </span>            :   template&lt;typename Req, typename Res&gt;
+<span class="lineNum">     721 </span>            :   bool notify_ban(const std::unique_ptr&lt;Req&gt;&amp; req, const std::function&lt; void(std::unique_ptr&lt;Res&gt;) &gt;&amp; cb) const
+<span class="lineNum">     722 </span>            :   {
+<span class="lineNum">     723 </span>            :     return cb==nullptr || this-&gt;bad_request(req, cb);
+<span class="lineNum">     724 </span>            :   }
+<span class="lineNum">     725 </span>            : 
+<span class="lineNum">     726 </span>            :   /**
+<span class="lineNum">     727 </span>            :    * @brief Разрешает только уведомления, проверяет на валидность входящий запрос, а также на режим suspend
+<span class="lineNum">     728 </span>            :    * @tparam Req тип запроса
+<span class="lineNum">     729 </span>            :    * @tparam Res тип результата (параметр callback-функции)
+<span class="lineNum">     730 </span>            :    * @param req входящий запрос
+<span class="lineNum">     731 </span>            :    * @param cb callback-функция (может быть nullptr)
+<span class="lineNum">     732 </span>            :    * @return true если дальнейшая обработка не требуется, false можно обрабатывать запрос
+<span class="lineNum">     733 </span>            :    * @details Все тоже самое, что и bad_request(), но разрешает только уведомления (это когда cb==nullptr). Это значит,
+<span class="lineNum">     734 </span>            :    * что после вызова этой функции, если она вернула false, cb == nullptr. На запрос вызывает cb(nullptr), что означает
+<span class="lineNum">     735 </span>            :    * сервис недоступен.
+<span class="lineNum">     736 </span>            :    */
+<span class="lineNum">     737 </span>            :   template&lt;typename Req, typename Res&gt;
+<span class="lineNum">     738 </span>            :   bool request_ban(const std::unique_ptr&lt;Req&gt;&amp; req, const std::function&lt; void(std::unique_ptr&lt;Res&gt;) &gt;&amp; cb) const
+<span class="lineNum">     739 </span>            :   {
+<span class="lineNum">     740 </span>            :     if ( this-&gt;bad_request(req, cb) )
+<span class="lineNum">     741 </span>            :       return true;
+<span class="lineNum">     742 </span>            : 
+<span class="lineNum">     743 </span>            :     if ( cb==nullptr )
+<span class="lineNum">     744 </span>            :       return false;
+<span class="lineNum">     745 </span>            : 
+<span class="lineNum">     746 </span>            :     cb(nullptr);
+<span class="lineNum">     747 </span>            : 
+<span class="lineNum">     748 </span>            :     return true;
+<span class="lineNum">     749 </span>            :   }
+<span class="lineNum">     750 </span>            : 
+<span class="lineNum">     751 </span>            :   /**
+<span class="lineNum">     752 </span>            :    * @brief вспомогательная функция для обработчиков, которые можут обрабатывать как запросы так и уведомления
+<span class="lineNum">     753 </span>            :    * @tparam Res тип результата (параметр callback-функции)
+<span class="lineNum">     754 </span>            :    * @param cb callback-функция (может быть nullptr)
+<span class="lineNum">     755 </span>            :    * @return nullptr если это уведомление (cb==nullptr) и объект запроса в противном случае
+<span class="lineNum">     756 </span>            :    * ```cpp
+<span class="lineNum">     757 </span>            :    *  void foo_domain::bar(request::bar::ptr req, response::bar::handler cb )
+<span class="lineNum">     758 </span>            :    *  {
+<span class="lineNum">     759 </span>            :    *    if ( this-&gt;bad_request(req, cb) )
+<span class="lineNum">     760 </span>            :    *      return;
+<span class="lineNum">     761 </span>            :    *
+<span class="lineNum">     762 </span>            :    *    ... обработка запроса или уведомления ...
+<span class="lineNum">     763 </span>            :    *
+<span class="lineNum">     764 </span>            :    *    if (auto res = this-&gt;create_response(cb) )
+<span class="lineNum">     765 </span>            :    *    {
+<span class="lineNum">     766 </span>            :    *       ... инициализация res ...
+<span class="lineNum">     767 </span>            :    *       cb( std::move(res) )
+<span class="lineNum">     768 </span>            :    *    }
+<span class="lineNum">     769 </span>            :    *  }
+<span class="lineNum">     770 </span>            :    * ```
+<span class="lineNum">     771 </span>            :    */
+<span class="lineNum">     772 </span>            :   template&lt;typename Res&gt;
+<span class="lineNum">     773 </span>            :   static std::unique_ptr&lt;Res&gt; create_response( const std::function&lt;void(std::unique_ptr&lt;Res&gt;)&gt;&amp; cb)
+<span class="lineNum">     774 </span>            :   {
+<span class="lineNum">     775 </span>            :     if ( cb != nullptr )
+<span class="lineNum">     776 </span>            :       return std::make_unique&lt;Res&gt;();
+<span class="lineNum">     777 </span>            :     return nullptr;
+<span class="lineNum">     778 </span>            :   }
+<span class="lineNum">     779 </span>            : 
+<span class="lineNum">     780 </span>            :   /**
+<span class="lineNum">     781 </span>            :    * @brief вспомогательная функция для обработчиков, которые можут обрабатывать как запросы так и уведомления
+<span class="lineNum">     782 </span>            :    * @tparam Res тип результата (параметр callback-функции)
+<span class="lineNum">     783 </span>            :    * @param res объект результата для отправки (может быть nullptr)
+<span class="lineNum">     784 </span>            :    * @param cb callback-функция (может быть nullptr)
+<span class="lineNum">     785 </span>            :    * @details С помощью create_response() создается объект ответа для запроса и nullptr для уведомлений,
+<span class="lineNum">     786 </span>            :    * чтобы избавится от лишних проверок cb, можно воспользоваться этой функцией. Удобно использовать если
+<span class="lineNum">     787 </span>            :    * для ответов не требующих инициализации (пустые структуры исключительно для подтверждения )
+<span class="lineNum">     788 </span>            :    * ```cpp
+<span class="lineNum">     789 </span>            :    *  void foo_domain::set(request::set::ptr req, response::set::handler cb )
+<span class="lineNum">     790 </span>            :    *  {
+<span class="lineNum">     791 </span>            :    *    if ( this-&gt;bad_request(req, cb) )
+<span class="lineNum">     792 </span>            :    *      return;
+<span class="lineNum">     793 </span>            :    *
+<span class="lineNum">     794 </span>            :    *    ... обработка ...
+<span class="lineNum">     795 </span>            :    *
+<span class="lineNum">     796 </span>            :    *    auto res = this-&gt;create_response(cb);
+<span class="lineNum">     797 </span>            :    *    this-&gt;send_response( std::move(res), cb)
+<span class="lineNum">     798 </span>            :    *  }
+<span class="lineNum">     799 </span>            :    * ```
+<span class="lineNum">     800 </span>            :    */
+<span class="lineNum">     801 </span>            :   template&lt;typename Res&gt;
+<span class="lineNum">     802 </span>            :   static void send_response(std::unique_ptr&lt;Res&gt;&amp;&amp; res, const std::function&lt; void(std::unique_ptr&lt;Res&gt;) &gt;&amp; cb)
+<span class="lineNum">     803 </span>            :   {
+<span class="lineNum">     804 </span>            :     if (res!=nullptr &amp;&amp; cb!=nullptr)
+<span class="lineNum">     805 </span>            :       cb( std::move(res) );
+<span class="lineNum">     806 </span>            :   }
+<span class="lineNum">     807 </span>            : 
+<span class="lineNum">     808 </span>            :   /**
+<span class="lineNum">     809 </span>            :    * @brief Возвращает объект для сбора, агрегации и отправки статистики
+<span class="lineNum">     810 </span>            :    * @return объект для сбора, агрегации и отправки статистики или nullptr если статистика отключена или не поддерживается
+<span class="lineNum">     811 </span>            :    * @details На данный момент поддержка сбора статистики по умолчанию отключена. Для ее включения требуется перекомпиляция с
+<span class="lineNum">     812 </span>            :    * флагом -DWFC_ENABLE_STAT=ON
+<span class="lineNum">     813 </span>            :    */
+<span class="lineNum">     814 </span>            :   statistics_ptr get_statistics() const
+<span class="lineNum">     815 </span>            :   {
+<span class="lineNum">     816 </span>            :     if ( auto g = this-&gt;global() )
+<span class="lineNum">     817 </span>            :     {
+<span class="lineNum">     818 </span>            :       if ( g-&gt;disable_statistics )
+<span class="lineNum">     819 </span>            :         return nullptr;
+<span class="lineNum">     820 </span>            :     }
+<span class="lineNum">     821 </span>            : 
+<span class="lineNum">     822 </span>            :     if (!is_configured_())
+<span class="lineNum">     823 </span>            :       return nullptr;
+<span class="lineNum">     824 </span>            : 
+<span class="lineNum">     825 </span>            :     return _statistics;
+<span class="lineNum">     826 </span>            :   }
+<span class="lineNum">     827 </span>            : 
+<span class="lineNum">     828 </span>            :   /**
+<span class="lineNum">     829 </span>            :    * @brief Проверка системы на сигнал останова
+<span class="lineNum">     830 </span>            :    * @return true если получен сигнал прекращения работы
+<span class="lineNum">     831 </span>            :    * @details Может быть использования при длительных процедурах инициализации (например загрузка БД),
+<span class="lineNum">     832 </span>            :    * чтобы завершить работу, а не дожидаться завершения инициализации
+<span class="lineNum">     833 </span>            :    */
+<span class="lineNum">     834 </span>            :   bool system_is_stopped() const
+<span class="lineNum">     835 </span>            :   {
+<span class="lineNum">     836 </span>            :     if (auto g = this-&gt;global() )
+<span class="lineNum">     837 </span>            :       return g-&gt;stop_signal_flag;
+<span class="lineNum">     838 </span>            :     return false;
+<span class="lineNum">     839 </span>            :   }
+<span class="lineNum">     840 </span>            : 
+<span class="lineNum">     841 </span>            :   /**
+<span class="lineNum">     842 </span>            :    * @brief Генератор конфигурации
+<span class="lineNum">     843 </span>            :    * @param arg параметр конфигурации
+<span class="lineNum">     844 </span>            :    * @return объект для сериализации config_type()
+<span class="lineNum">     845 </span>            :    * @details Вы можете переопределить этот метод для генерации демонстрационных конфигураций для различных arg, но для arg==&quot;&quot;
+<span class="lineNum">     846 </span>            :    * ответ должен быть всегда config_type(). В текущей реализации для arg==&quot;example&quot; заполняется массив cpu. Если arg==&quot;&quot; это значит
+<span class="lineNum">     847 </span>            :    * что метод используется для генерации конфигурации всей системы, которая получается сериализацией объектов, которые возвращает
+<span class="lineNum">     848 </span>            :    * этот метод. В этом случае допустимы только значения по умолчанию в конфигурационных структурах, чтобы пользователь мог удалить
+<a name="849"><span class="lineNum">     849 </span>            :    * поля из json-конфигурации если его устраивают значения по умолчанию, для упрощения</a>
+<span class="lineNum">     850 </span>            :    */
+<span class="lineNum">     851 </span><span class="lineCov">          4 :   virtual domain_config generate(const std::string&amp; arg)</span>
+<span class="lineNum">     852 </span>            :   {
+<span class="lineNum">     853 </span><span class="lineCov">          4 :     domain_config conf = domain_config();</span>
+<span class="lineNum">     854 </span><span class="lineCov">          4 :     if ( arg==&quot;example&quot; )</span>
+<span class="lineNum">     855 </span>            :     {
+<span class="lineNum">     856 </span><span class="lineNoCov">          0 :       conf.cpu.insert(0);</span>
+<span class="lineNum">     857 </span><span class="lineNoCov">          0 :       conf.cpu.insert(1);</span>
+<span class="lineNum">     858 </span><span class="lineNoCov">          0 :       conf.cpu.insert(2);</span>
+<span class="lineNum">     859 </span>            :     }
+<span class="lineNum">     860 </span><span class="lineCov">          4 :     return conf;</span>
+<span class="lineNum">     861 </span>            :   }
+<a name="862"><span class="lineNum">     862 </span>            : </a>
+<span class="lineNum">     863 </span>            :   typedef instance_handler_&lt;Opt, StatOpt&gt; instance_handler_t;
+<span class="lineNum">     864 </span><span class="lineCov">         28 :   instance_handler_t* inst_handler_()</span>
+<span class="lineNum">     865 </span><span class="lineCov">         28 :   { return static_cast&lt;instance_handler_&lt;Opt, StatOpt&gt;*&gt;(this); }</span>
+<span class="lineNum">     866 </span>            : 
+<span class="lineNum">     867 </span>            : private:
+<span class="lineNum">     868 </span>            :   virtual void domain_generate(domain_config&amp; conf, const std::string&amp; type) override final;
+<span class="lineNum">     869 </span>            :   virtual void create_domain(const std::string&amp; objname, global_ptr g ) override final;
+<span class="lineNum">     870 </span>            :   virtual void configure_domain(const domain_config&amp; opt) override final;
+<span class="lineNum">     871 </span>            :   virtual void initialize_domain() override final;
+<span class="lineNum">     872 </span>            :   virtual void reconfigure_domain_basic(const domain_options&amp; opt) override final;
+<span class="lineNum">     873 </span>            :   virtual void reconfigure_domain(const domain_config&amp; conf) override final;
+<span class="lineNum">     874 </span>            :   virtual void restart_domain() override final;
+<span class="lineNum">     875 </span>            :   virtual void start_domain() override final;
+<span class="lineNum">     876 </span>            :   virtual void stop_domain() override final;
+<span class="lineNum">     877 </span>            : 
+<span class="lineNum">     878 </span>            : private:
+<a name="879"><span class="lineNum">     879 </span>            : </a>
+<span class="lineNum">     880 </span>            :   template&lt;typename T&gt;
+<span class="lineNum">     881 </span><span class="lineCov">          3 :   T get_arg_t_(const std::string&amp; arg, std::string* err, fas::true_) const</span>
+<span class="lineNum">     882 </span>            :   {
+<span class="lineNum">     883 </span><span class="lineCov">          3 :     T val = T();</span>
+<span class="lineNum">     884 </span><span class="lineCov">          3 :     std::string str = this-&gt;get_arg(arg);</span>
+<span class="lineNum">     885 </span><span class="lineCov">          3 :     if ( str.empty() )</span>
+<span class="lineNum">     886 </span><span class="lineNoCov">          0 :       return val;</span>
+<span class="lineNum">     887 </span>            : 
+<span class="lineNum">     888 </span>            :     typedef typename json::value&lt;T&gt;::serializer serializer;
+<span class="lineNum">     889 </span><span class="lineCov">          3 :     json_error e;</span>
+<span class="lineNum">     890 </span><span class="lineCov">          3 :     serializer()(val, str.begin(), str.end(), &amp;e );</span>
+<span class="lineNum">     891 </span><span class="lineCov">          3 :     if ( e &amp;&amp; err!=nullptr )</span>
+<span class="lineNum">     892 </span><span class="lineCov">          1 :       *err = json::strerror::message(e);</span>
+<span class="lineNum">     893 </span><span class="lineCov">          3 :     return val;</span>
+<span class="lineNum">     894 </span>            :   }
+<span class="lineNum">     895 </span>            : 
+<span class="lineNum">     896 </span>            :   template&lt;typename T&gt;
+<span class="lineNum">     897 </span>            :   T get_arg_t_(const std::string&amp; arg, std::string* err, fas::false_) const
+<span class="lineNum">     898 </span>            :   {
+<span class="lineNum">     899 </span>            :     static_assert( std::is_same&lt;T, std::string&gt;::value, &quot;Only for integral types or std::string.&quot; );
+<span class="lineNum">     900 </span>            :     std::string val;
+<span class="lineNum">     901 </span>            :     std::string str = this-&gt;get_arg(arg);
+<span class="lineNum">     902 </span>            :     if ( str.empty() )
+<span class="lineNum">     903 </span>            :       return val;
+<span class="lineNum">     904 </span>            : 
+<span class="lineNum">     905 </span>            :     if ( str[0]!='\'' &amp;&amp; str[0]!='\&quot;' )
+<span class="lineNum">     906 </span>            :       return str;
+<span class="lineNum">     907 </span>            : 
+<span class="lineNum">     908 </span>            :     std::replace(str.begin(), str.end(), '\'', '\&quot;');
+<span class="lineNum">     909 </span>            : 
+<span class="lineNum">     910 </span>            :     typedef typename json::value&lt; std::string &gt;::serializer serializer;
+<span class="lineNum">     911 </span>            :     json_error e;
+<span class="lineNum">     912 </span>            :     serializer()(val, str.begin(), str.end(), &amp;e );
+<span class="lineNum">     913 </span>            :     if ( e &amp;&amp; err!=nullptr )
+<span class="lineNum">     914 </span>            :       *err = json::strerror::message(e);
+<span class="lineNum">     915 </span>            :     return val;
+<a name="916"><span class="lineNum">     916 </span>            :   }</a>
+<span class="lineNum">     917 </span>            : 
+<span class="lineNum">     918 </span><span class="lineCov">          2 :   bool is_configured_() const</span>
+<span class="lineNum">     919 </span>            :   {
+<span class="lineNum">     920 </span><span class="lineCov">          2 :     if ( _workflow!=nullptr )</span>
+<span class="lineNum">     921 </span><span class="lineNoCov">          0 :       return true;</span>
+<span class="lineNum">     922 </span><span class="lineCov">          2 :     SYSTEM_LOG_FATAL(&quot;Attempting to use is not initialized object '&quot; &lt;&lt; _name &lt;&lt;&quot;'&quot;)</span>
+<span class="lineNum">     923 </span><span class="lineCov">          2 :     return false;</span>
+<span class="lineNum">     924 </span>            :   }
+<span class="lineNum">     925 </span>            : 
+<a name="926"><span class="lineNum">     926 </span>            : </a>
+<span class="lineNum">     927 </span>            :   /* 0-строка, 1=опции */
+<span class="lineNum">     928 </span><span class="lineCov">          1 :   int dual_target_deserialize_(const std::string&amp; target, std::string* str, wflow::workflow_options* opt) const</span>
+<span class="lineNum">     929 </span>            :   {
+<span class="lineNum">     930 </span><span class="lineCov">          1 :     if ( target.empty() )</span>
+<span class="lineNum">     931 </span><span class="lineNoCov">          0 :       return 0;</span>
+<span class="lineNum">     932 </span>            : 
+<span class="lineNum">     933 </span><span class="lineCov">          1 :     wjson::json_error er;</span>
+<span class="lineNum">     934 </span>            :     int ret = wjson::multi_deserializer&lt;
+<span class="lineNum">     935 </span>            :       wjson::string&lt;&gt;,
+<span class="lineNum">     936 </span>            :       wflow::workflow_options_json
+<span class="lineNum">     937 </span><span class="lineCov">          1 :     &gt;( target.begin(), target.end(), *str, *opt, &amp;er );</span>
+<span class="lineNum">     938 </span>            : 
+<span class="lineNum">     939 </span><span class="lineCov">          1 :     if ( ret &gt; 1 )</span>
+<span class="lineNum">     940 </span>            :     {
+<span class="lineNum">     941 </span><span class="lineNoCov">          0 :       ret = 0;</span>
+<span class="lineNum">     942 </span>            : 
+<span class="lineNum">     943 </span><span class="lineNoCov">          0 :       if ( er )</span>
+<span class="lineNum">     944 </span>            :       {
+<span class="lineNum">     945 </span><span class="lineNoCov">          0 :         *str = target;</span>
+<span class="lineNum">     946 </span><span class="lineNoCov">          0 :         er.reset();</span>
+<span class="lineNum">     947 </span>            :       }
+<span class="lineNum">     948 </span><span class="lineNoCov">          0 :       else if ( !er )</span>
+<span class="lineNum">     949 </span>            :       {
+<span class="lineNum">     950 </span><span class="lineNoCov">          0 :         wflow::workflow_options tmp;</span>
+<span class="lineNum">     951 </span><span class="lineNoCov">          0 :         wflow::workflow_options_json::serializer()(tmp, target.begin(), target.end(), &amp;er);</span>
+<span class="lineNum">     952 </span><span class="lineNoCov">          0 :         str-&gt;clear();</span>
+<span class="lineNum">     953 </span>            :       }
+<span class="lineNum">     954 </span>            : 
+<span class="lineNum">     955 </span><span class="lineNoCov">          0 :       if ( er )</span>
+<span class="lineNum">     956 </span>            :       {
+<span class="lineNum">     957 </span><span class="lineNoCov">          0 :         SYSTEM_LOG_ERROR(&quot;Workflow configuration error. Default configuration will be used. Trace:&quot;</span>
+<span class="lineNum">     958 </span>            :           &lt;&lt; wjson::strerror::message_trace(er, target.begin(), target.end()));
+<span class="lineNum">     959 </span>            :       }
+<span class="lineNum">     960 </span>            :     }
+<span class="lineNum">     961 </span><span class="lineCov">          1 :     return ret;</span>
+<a name="962"><span class="lineNum">     962 </span>            :   }</a>
+<span class="lineNum">     963 </span>            : 
+<span class="lineNum">     964 </span><span class="lineCov">          1 :   wflow::workflow_options create_workflow_options_(const std::string&amp; target) const</span>
+<span class="lineNum">     965 </span>            :   {
+<span class="lineNum">     966 </span><span class="lineCov">          1 :     wflow::workflow_options opt;</span>
+<span class="lineNum">     967 </span><span class="lineCov">          2 :     std::string target_name;</span>
+<span class="lineNum">     968 </span><span class="lineCov">          1 :     if ( 0 == this-&gt;dual_target_deserialize_(target, &amp;target_name, &amp;opt) )</span>
+<span class="lineNum">     969 </span>            :     {
+<span class="lineNum">     970 </span><span class="lineNoCov">          0 :       if ( auto wflow1 = this-&gt;get_workflow(target_name, true) )</span>
+<span class="lineNum">     971 </span>            :       {
+<span class="lineNum">     972 </span><span class="lineNoCov">          0 :         opt = wflow1-&gt;get_options();</span>
+<span class="lineNum">     973 </span><span class="lineNoCov">          0 :         opt.id = target_name;</span>
+<span class="lineNum">     974 </span>            :       }
+<span class="lineNum">     975 </span><span class="lineNoCov">          0 :       else if ( auto wflow2 = this-&gt;get_common_workflow() )</span>
+<span class="lineNum">     976 </span>            :       {
+<span class="lineNum">     977 </span><span class="lineNoCov">          0 :         opt = wflow2-&gt;get_options();</span>
+<span class="lineNum">     978 </span>            :       }
+<span class="lineNum">     979 </span>            :     }
+<span class="lineNum">     980 </span>            : 
+<span class="lineNum">     981 </span><span class="lineCov">          2 :     return opt;</span>
+<span class="lineNum">     982 </span>            :   }
+<span class="lineNum">     983 </span>            : 
+<span class="lineNum">     984 </span>            : private:
+<span class="lineNum">     985 </span>            :   bool _conf_flag = false;
+<span class="lineNum">     986 </span>            :   bool _idle_flag = false;
+<span class="lineNum">     987 </span>            :   const io_id_t  _io_id;
+<span class="lineNum">     988 </span>            :   std::string    _name;
+<span class="lineNum">     989 </span>            :   global_ptr     _global;
+<span class="lineNum">     990 </span>            :   domain_config  _config;
+<span class="lineNum">     991 </span>            :   owner_type     _owner;
+<span class="lineNum">     992 </span>            :   workflow_ptr   _workflow;
+<span class="lineNum">     993 </span>            :   statistics_ptr _statistics;
+<span class="lineNum">     994 </span>            : };
+<span class="lineNum">     995 </span>            : 
+<span class="lineNum">     996 </span>            : 
+<a name="997"><span class="lineNum">     997 </span>            : </a>
+<span class="lineNum">     998 </span>            : template&lt;typename Itf, typename Opt, typename StatOpt&gt;
+<span class="lineNum">     999 </span><span class="lineCov">          3 : void domain_object&lt;Itf, Opt, StatOpt&gt;::domain_generate(domain_config&amp; conf, const std::string&amp; type)</span>
+<span class="lineNum">    1000 </span>            : {
+<span class="lineNum">    1001 </span><span class="lineCov">          3 :   conf = this-&gt;generate(type);</span>
+<span class="lineNum">    1002 </span><span class="lineCov">          3 : }</span>
+<a name="1003"><span class="lineNum">    1003 </span>            : </a>
+<span class="lineNum">    1004 </span>            : template&lt;typename Itf, typename Opt, typename StatOpt&gt;
+<span class="lineNum">    1005 </span><span class="lineCov">          7 : void domain_object&lt;Itf, Opt, StatOpt&gt;::create_domain(const std::string&amp; objname, global_ptr g )</span>
+<span class="lineNum">    1006 </span>            : {
+<span class="lineNum">    1007 </span><span class="lineCov">          7 :   _name = objname;</span>
+<span class="lineNum">    1008 </span><span class="lineCov">          7 :   _global = g;</span>
+<span class="lineNum">    1009 </span><span class="lineCov">          7 :   this-&gt;create();</span>
+<span class="lineNum">    1010 </span><span class="lineCov">          7 : }</span>
+<a name="1011"><span class="lineNum">    1011 </span>            : </a>
+<span class="lineNum">    1012 </span>            : template&lt;typename Itf, typename Opt, typename StatOpt&gt;
+<span class="lineNum">    1013 </span><span class="lineCov">          8 : void domain_object&lt;Itf, Opt, StatOpt&gt;::configure_domain(const domain_config&amp; opt)</span>
+<span class="lineNum">    1014 </span>            : {
+<span class="lineNum">    1015 </span><span class="lineCov">          8 :   _config = opt;</span>
+<span class="lineNum">    1016 </span><span class="lineCov">          8 :   _workflow = nullptr; // Ибо нефиг. До инициализации ничем пользоваться нельзя</span>
+<span class="lineNum">    1017 </span><span class="lineCov">          8 :   _conf_flag = false;</span>
+<span class="lineNum">    1018 </span><span class="lineCov">          8 :   _owner.enable_tracking(opt.tracking);</span>
+<span class="lineNum">    1019 </span><span class="lineCov">         16 :   if (auto g = this-&gt;global() )</span>
+<span class="lineNum">    1020 </span><span class="lineCov">          6 :     g-&gt;cpu.set_cpu(_name, opt.cpu);</span>
+<span class="lineNum">    1021 </span><span class="lineCov">          8 :   this-&gt;configure();</span>
+<span class="lineNum">    1022 </span><span class="lineCov">          8 : }</span>
+<a name="1023"><span class="lineNum">    1023 </span>            : </a>
+<span class="lineNum">    1024 </span>            : template&lt;typename Itf, typename Opt, typename StatOpt&gt;
+<span class="lineNum">    1025 </span><span class="lineCov">          4 : void domain_object&lt;Itf, Opt, StatOpt&gt;::initialize_domain()</span>
+<span class="lineNum">    1026 </span>            : {
+<span class="lineNum">    1027 </span><span class="lineCov">          8 :   if ( auto g = this-&gt;global() )</span>
+<span class="lineNum">    1028 </span>            :   {
+<span class="lineNum">    1029 </span><span class="lineCov">          4 :     auto pname = std::make_shared&lt;std::string&gt;( this-&gt;name() );</span>
+<span class="lineNum">    1030 </span>            : 
+<span class="lineNum">    1031 </span><span class="lineCov">          4 :     _owner.set_double_call_handler(std::bind(g-&gt;doublecall_handler, this-&gt;name()));</span>
+<span class="lineNum">    1032 </span><span class="lineCov">          4 :     _owner.set_no_call_handler(std::bind(g-&gt;nocall_handler, this-&gt;name()));</span>
+<span class="lineNum">    1033 </span>            : 
+<span class="lineNum">    1034 </span><span class="lineCov">         16 :     _workflow = _config.workflow.empty()</span>
+<span class="lineNum">    1035 </span><span class="lineCov">         20 :                 ? this-&gt;global()-&gt;common_workflow</span>
+<span class="lineNum">    1036 </span><span class="lineCov">          4 :                 : this-&gt;global()-&gt;registry.template get_object&lt;workflow &gt;(&quot;workflow&quot;, _config.workflow, false)</span>
+<span class="lineNum">    1037 </span>            :                 ;
+<span class="lineNum">    1038 </span>            : 
+<span class="lineNum">    1039 </span><span class="lineCov">          8 :     _statistics = ! _config.statistics.disabled</span>
+<span class="lineNum">    1040 </span><span class="lineCov">          4 :                   ? this-&gt;global()-&gt;registry.template get_object&lt;statistics::statistics&gt;(&quot;statistics&quot;, _config.statistics.target, false)</span>
+<span class="lineNum">    1041 </span>            :                   : nullptr
+<span class="lineNum">    1042 </span>            :                   ;
+<span class="lineNum">    1043 </span>            : 
+<span class="lineNum">    1044 </span><span class="lineCov">          4 :     _conf_flag = true;</span>
+<span class="lineNum">    1045 </span>            :   }
+<span class="lineNum">    1046 </span><span class="lineCov">          4 :   this-&gt;initialize();</span>
+<span class="lineNum">    1047 </span><span class="lineCov">          4 : }</span>
+<a name="1048"><span class="lineNum">    1048 </span>            : </a>
+<span class="lineNum">    1049 </span>            : template&lt;typename Itf, typename Opt, typename StatOpt&gt;
+<span class="lineNum">    1050 </span><span class="lineNoCov">          0 : void domain_object&lt;Itf, Opt, StatOpt&gt;::reconfigure_domain_basic(const domain_options&amp; opt)</span>
+<span class="lineNum">    1051 </span>            : {
+<span class="lineNum">    1052 </span><span class="lineNoCov">          0 :   _conf_flag = false;</span>
+<span class="lineNum">    1053 </span><span class="lineNoCov">          0 :   static_cast&lt;domain_options&amp;&gt;(_config) = opt;</span>
+<span class="lineNum">    1054 </span><span class="lineNoCov">          0 :   if (auto g = this-&gt;global() )</span>
+<span class="lineNum">    1055 </span><span class="lineNoCov">          0 :     g-&gt;cpu.set_cpu(_name, opt.cpu);</span>
+<span class="lineNum">    1056 </span><span class="lineNoCov">          0 :   _owner.enable_tracking(opt.tracking);</span>
+<span class="lineNum">    1057 </span><span class="lineNoCov">          0 :   this-&gt;reconfigure_basic();</span>
+<span class="lineNum">    1058 </span><span class="lineNoCov">          0 : }</span>
+<a name="1059"><span class="lineNum">    1059 </span>            : </a>
+<span class="lineNum">    1060 </span>            : template&lt;typename Itf, typename Opt, typename StatOpt&gt;
+<span class="lineNum">    1061 </span><span class="lineCov">          2 : void domain_object&lt;Itf, Opt, StatOpt&gt;::reconfigure_domain(const domain_config&amp; conf)</span>
+<span class="lineNum">    1062 </span>            : {
+<span class="lineNum">    1063 </span><span class="lineCov">          2 :   _conf_flag = true;</span>
+<span class="lineNum">    1064 </span><span class="lineCov">          2 :   _config = conf;</span>
+<span class="lineNum">    1065 </span><span class="lineCov">          4 :   if (auto g = this-&gt;global() )</span>
+<span class="lineNum">    1066 </span><span class="lineCov">          2 :     g-&gt;cpu.set_cpu(_name, static_cast&lt;domain_options&amp;&gt;(_config).cpu);</span>
+<span class="lineNum">    1067 </span><span class="lineCov">          2 :   _owner.enable_tracking(conf.tracking);</span>
+<span class="lineNum">    1068 </span><span class="lineCov">          2 :   this-&gt;reconfigure();</span>
+<span class="lineNum">    1069 </span><span class="lineCov">          2 : }</span>
+<a name="1070"><span class="lineNum">    1070 </span>            : </a>
+<span class="lineNum">    1071 </span>            : template&lt;typename Itf, typename Opt, typename StatOpt&gt;
+<span class="lineNum">    1072 </span><span class="lineNoCov">          0 : void domain_object&lt;Itf, Opt, StatOpt&gt;::restart_domain()</span>
+<span class="lineNum">    1073 </span>            : {
+<span class="lineNum">    1074 </span><span class="lineNoCov">          0 :   if ( _conf_flag )</span>
+<span class="lineNum">    1075 </span><span class="lineNoCov">          0 :     this-&gt;restart();</span>
+<span class="lineNum">    1076 </span><span class="lineNoCov">          0 :   _conf_flag = false;</span>
+<span class="lineNum">    1077 </span><span class="lineNoCov">          0 : }</span>
+<a name="1078"><span class="lineNum">    1078 </span>            : </a>
+<span class="lineNum">    1079 </span>            : template&lt;typename Itf, typename Opt, typename StatOpt&gt;
+<span class="lineNum">    1080 </span><span class="lineCov">          3 : void domain_object&lt;Itf, Opt, StatOpt&gt;::start_domain()</span>
+<span class="lineNum">    1081 </span>            : {
+<span class="lineNum">    1082 </span><span class="lineCov">          3 :   _idle_flag = true;</span>
+<span class="lineNum">    1083 </span><span class="lineCov">          3 :   this-&gt;start();</span>
+<span class="lineNum">    1084 </span><span class="lineCov">          3 :   _idle_flag = false;</span>
+<span class="lineNum">    1085 </span><span class="lineCov">          3 : }</span>
+<a name="1086"><span class="lineNum">    1086 </span>            : </a>
+<span class="lineNum">    1087 </span>            : template&lt;typename Itf, typename Opt, typename StatOpt&gt;
+<span class="lineNum">    1088 </span><span class="lineCov">          1 : void domain_object&lt;Itf, Opt, StatOpt&gt;::stop_domain()</span>
+<span class="lineNum">    1089 </span>            : {
+<span class="lineNum">    1090 </span><span class="lineCov">          1 :   this-&gt;stop();</span>
+<span class="lineNum">    1091 </span><span class="lineCov">          1 : }</span>
+<span class="lineNum">    1092 </span>            : 
+<span class="lineNum">    1093 </span>            : }
+<span class="lineNum">    1094 </span>            : 
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

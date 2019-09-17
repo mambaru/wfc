@@ -1,0 +1,187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - wfc-coverage.info - tests/module/domain_test.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">tests/module</a> - domain_test.cpp<span style="font-size: 80%;"> (source / <a href="domain_test.cpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">wfc-coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">55</td>
+            <td class="headerCovTableEntry">65</td>
+            <td class="headerCovTableEntryMed">84.6 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2019-09-17</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">8</td>
+            <td class="headerCovTableEntry">12</td>
+            <td class="headerCovTableEntryLo">66.7 %</td>
+          </tr>
+          <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : #define IOW_DISABLE_LOG</a>
+<span class="lineNum">       2 </span>            : #include &lt;iow/logger.hpp&gt;
+<span class="lineNum">       3 </span>            : #include &lt;wfc/domain_object.hpp&gt;
+<span class="lineNum">       4 </span>            : #include &lt;wfc/module/instance.hpp&gt;
+<span class="lineNum">       5 </span>            : #include &lt;wfc/asio.hpp&gt;
+<span class="lineNum">       6 </span>            : 
+<a name="7"><span class="lineNum">       7 </span>            : using namespace wfc;</a>
+<span class="lineNum">       8 </span>            : 
+<span class="lineNum">       9 </span><span class="lineCov">          4 : struct options</span>
+<span class="lineNum">      10 </span>            : {
+<span class="lineNum">      11 </span>            :   bool test = false;
+<a name="12"><span class="lineNum">      12 </span>            : };</a>
+<span class="lineNum">      13 </span>            : 
+<a name="14"><span class="lineNum">      14 </span><span class="lineCov">          1 : struct itest: iinterface</span></a>
+<span class="lineNum">      15 </span>            : {
+<span class="lineNum">      16 </span><span class="lineNoCov">          0 :   virtual ~itest(){}</span>
+<span class="lineNum">      17 </span>            :   virtual int testtest() = 0;
+<a name="18"><span class="lineNum">      18 </span>            : };</a>
+<span class="lineNum">      19 </span>            : 
+<span class="lineNum">      20 </span><span class="lineCov">          1 : class test</span>
+<span class="lineNum">      21 </span>            :   : public domain_object&lt;itest, options&gt;
+<span class="lineNum">      22 </span>            : {
+<a name="23"><span class="lineNum">      23 </span>            : public:</a>
+<span class="lineNum">      24 </span>            : 
+<span class="lineNum">      25 </span><span class="lineCov">          2 :   virtual void reconfigure() override</span>
+<span class="lineNum">      26 </span>            :   {
+<span class="lineNum">      27 </span><span class="lineCov">          2 :     testval = true;</span>
+<a name="28"><span class="lineNum">      28 </span><span class="lineCov">          2 :   }</span></a>
+<span class="lineNum">      29 </span>            : 
+<span class="lineNum">      30 </span><span class="lineCov">          1 :   virtual int testtest() override</span>
+<span class="lineNum">      31 </span>            :   {
+<span class="lineNum">      32 </span><span class="lineCov">          1 :     if ( !this-&gt;has_arg(&quot;param1&quot;) ) return 1001;</span>
+<span class="lineNum">      33 </span><span class="lineCov">          1 :     if ( !this-&gt;has_arg(&quot;param2&quot;) ) return 1002;</span>
+<span class="lineNum">      34 </span><span class="lineCov">          1 :     if ( !this-&gt;has_arg(&quot;param3&quot;) ) return 1003;</span>
+<span class="lineNum">      35 </span><span class="lineCov">          1 :     if (  this-&gt;has_arg(&quot;param4&quot;) ) return 1004;</span>
+<span class="lineNum">      36 </span><span class="lineCov">          1 :     if ( this-&gt;get_arg(&quot;param1&quot;)!=&quot;val1&quot; ) return 1005;</span>
+<span class="lineNum">      37 </span><span class="lineCov">          1 :     if ( this-&gt;get_arg(&quot;param2&quot;)!=&quot;100&quot; ) return 1006;</span>
+<span class="lineNum">      38 </span><span class="lineCov">          1 :     if ( this-&gt;get_arg(&quot;param3&quot;)!=&quot;&quot; ) return 1007;</span>
+<span class="lineNum">      39 </span><span class="lineCov">          1 :     if ( this-&gt;get_arg(&quot;param4&quot;)!=&quot;&quot; ) return 1008;</span>
+<span class="lineNum">      40 </span>            : 
+<span class="lineNum">      41 </span><span class="lineCov">          1 :     if ( this-&gt;get_arg_t&lt;int&gt;(&quot;param2&quot;)!=100 ) return 1007;</span>
+<span class="lineNum">      42 </span><span class="lineCov">          1 :     if ( this-&gt;get_arg_t&lt;int&gt;(&quot;param1&quot;)!=0 ) return 1008;</span>
+<span class="lineNum">      43 </span><span class="lineCov">          1 :     std::string err;</span>
+<span class="lineNum">      44 </span><span class="lineCov">          1 :     if ( this-&gt;get_arg_t&lt;int&gt;(&quot;param1&quot;, &amp;err)!=0 ) return 1008;</span>
+<span class="lineNum">      45 </span><span class="lineCov">          1 :     if ( err!=&quot;Invalid Number&quot; ) return 1009;</span>
+<span class="lineNum">      46 </span>            : 
+<span class="lineNum">      47 </span><span class="lineCov">          1 :     return 0;</span>
+<span class="lineNum">      48 </span>            :   }
+<span class="lineNum">      49 </span>            : 
+<span class="lineNum">      50 </span>            :   bool testval = false;
+<a name="51"><span class="lineNum">      51 </span>            : };</a>
+<span class="lineNum">      52 </span>            : 
+<span class="lineNum">      53 </span><span class="lineCov">          1 : int main()</span>
+<span class="lineNum">      54 </span>            : {
+<span class="lineNum">      55 </span><span class="lineCov">          1 :   wfc::asio::io_service ios;</span>
+<span class="lineNum">      56 </span><span class="lineCov">          2 :   auto g = std::make_shared&lt;wfc::wfcglobal&gt;(ios);</span>
+<span class="lineNum">      57 </span><span class="lineCov">          1 :   wfc::wfcglobal::static_global = g;</span>
+<span class="lineNum">      58 </span><span class="lineCov">          2 :   wfc::instance&lt;test&gt; t;</span>
+<span class="lineNum">      59 </span>            : 
+<span class="lineNum">      60 </span><span class="lineCov">          1 :   if ( t.object()!=nullptr )</span>
+<span class="lineNum">      61 </span><span class="lineNoCov">          0 :     return 1;</span>
+<span class="lineNum">      62 </span>            : 
+<span class="lineNum">      63 </span><span class="lineCov">          2 :   test::domain_config opt;</span>
+<span class="lineNum">      64 </span><span class="lineCov">          1 :   opt.test = true;</span>
+<span class="lineNum">      65 </span><span class="lineCov">          1 :   opt.name = &quot;name&quot;;</span>
+<span class="lineNum">      66 </span>            : 
+<span class="lineNum">      67 </span><span class="lineCov">          1 :   t.create(&quot;name&quot;, g);</span>
+<span class="lineNum">      68 </span><span class="lineCov">          1 :   t.start(&quot;&quot;);</span>
+<span class="lineNum">      69 </span><span class="lineCov">          1 :   t.configure(opt);</span>
+<span class="lineNum">      70 </span><span class="lineCov">          1 :   t.initialize();</span>
+<span class="lineNum">      71 </span><span class="lineCov">          1 :   t.reconfigure(opt);</span>
+<span class="lineNum">      72 </span>            : 
+<span class="lineNum">      73 </span><span class="lineCov">          1 :   if ( t.object()-&gt;options().test != true )</span>
+<span class="lineNum">      74 </span><span class="lineNoCov">          0 :     return 3;</span>
+<span class="lineNum">      75 </span>            : 
+<span class="lineNum">      76 </span>            :   //std::cout &lt;&lt; t.name() &lt;&lt; std::endl;
+<span class="lineNum">      77 </span><span class="lineCov">          1 :   if ( t.object()-&gt;name() != &quot;name&quot; )</span>
+<span class="lineNum">      78 </span><span class="lineNoCov">          0 :     return 5;</span>
+<span class="lineNum">      79 </span>            : 
+<span class="lineNum">      80 </span><span class="lineCov">          1 :   if ( t.object()-&gt;testval != true )</span>
+<span class="lineNum">      81 </span><span class="lineNoCov">          0 :     return 6;</span>
+<span class="lineNum">      82 </span>            : 
+<span class="lineNum">      83 </span><span class="lineCov">          1 :   options opt2;</span>
+<span class="lineNum">      84 </span><span class="lineCov">          1 :   opt2 = t.object()-&gt;generate(&quot;&quot;);</span>
+<span class="lineNum">      85 </span><span class="lineCov">          1 :   if ( opt2.test != false )</span>
+<span class="lineNum">      86 </span><span class="lineNoCov">          0 :     return 7;</span>
+<span class="lineNum">      87 </span>            : 
+<span class="lineNum">      88 </span><span class="lineCov">          1 :   if ( auto wflow = t.object()-&gt;create_workflow(&quot;test&quot;,&quot;{\&quot;control_ms\&quot;:\&quot;1h\&quot;}&quot;) )</span>
+<span class="lineNum">      89 </span>            :   {
+<span class="lineNum">      90 </span><span class="lineCov">          1 :     auto opt3 = wflow-&gt;get_options();</span>
+<span class="lineNum">      91 </span><span class="lineCov">          1 :     if (opt3.id!=&quot;name:workflow.test&quot;)</span>
+<span class="lineNum">      92 </span><span class="lineNoCov">          0 :       return 10;</span>
+<span class="lineNum">      93 </span><span class="lineCov">          1 :     if (opt3.control_ms!=3600*1000)</span>
+<span class="lineNum">      94 </span>            :     {
+<span class="lineNum">      95 </span><span class="lineNoCov">          0 :       std::cout &lt;&lt; opt3.control_ms &lt;&lt; std::endl;</span>
+<span class="lineNum">      96 </span><span class="lineNoCov">          0 :       return 11;</span>
+<span class="lineNum">      97 </span><span class="lineCov">          1 :     }</span>
+<span class="lineNum">      98 </span>            :   }
+<span class="lineNum">      99 </span>            :   else
+<span class="lineNum">     100 </span><span class="lineNoCov">          0 :     return 9;</span>
+<span class="lineNum">     101 </span>            : 
+<span class="lineNum">     102 </span><span class="lineCov">          2 :   std::map&lt;std::string, std::string&gt; args;</span>
+<span class="lineNum">     103 </span><span class="lineCov">          1 :   args[&quot;param1&quot;]=&quot;val1&quot;;</span>
+<span class="lineNum">     104 </span><span class="lineCov">          1 :   args[&quot;param2&quot;]=&quot;100&quot;;</span>
+<span class="lineNum">     105 </span><span class="lineCov">          1 :   args[&quot;param3&quot;]=&quot;&quot;;</span>
+<span class="lineNum">     106 </span><span class="lineCov">          1 :   g-&gt;args.insert(&quot;name&quot;, wfc::instance_args(&quot;name&quot;, args) );</span>
+<span class="lineNum">     107 </span><span class="lineCov">          1 :   if ( auto itst = g-&gt;registry.get_target&lt;itest&gt;(&quot;name&quot;) )</span>
+<span class="lineNum">     108 </span><span class="lineCov">          1 :     return itst-&gt;testtest();</span>
+<a name="109"><span class="lineNum">     109 </span>            :   else</a>
+<span class="lineNum">     110 </span><span class="lineCov">          1 :     return 8;</span>
+<span class="lineNum">     111 </span><span class="lineCov">          3 : }</span>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

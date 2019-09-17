@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - wfc-coverage.info - tests/module/module_test.cpp</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">tests/module</a> - module_test.cpp<span style="font-size: 80%;"> (source / <a href="module_test.cpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">wfc-coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">25</td>
+            <td class="headerCovTableEntry">27</td>
+            <td class="headerCovTableEntryHi">92.6 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2019-09-17</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">29</td>
+            <td class="headerCovTableEntry">78</td>
+            <td class="headerCovTableEntryLo">37.2 %</td>
+          </tr>
+          <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : #define IOW_DISABLE_LOG</a>
+<span class="lineNum">       2 </span>            : #include &lt;iow/logger.hpp&gt;
+<span class="lineNum">       3 </span>            : #include &lt;wfc/domain_object.hpp&gt;
+<span class="lineNum">       4 </span>            : #include &lt;wfc/module/instance.hpp&gt;
+<span class="lineNum">       5 </span>            : #include &lt;wfc/module/singleton.hpp&gt;
+<span class="lineNum">       6 </span>            : #include &lt;wfc/module/package.hpp&gt;
+<span class="lineNum">       7 </span>            : #include &lt;wfc/module/component_list.hpp&gt;
+<span class="lineNum">       8 </span>            : #include &lt;wfc/module/module_list.hpp&gt;
+<span class="lineNum">       9 </span>            : #include &lt;wfc/json.hpp&gt;
+<span class="lineNum">      10 </span>            : 
+<span class="lineNum">      11 </span>            : template&lt;typename Name, bool Singleton&gt;
+<a name="12"><span class="lineNum">      12 </span>            : struct helper</a>
+<span class="lineNum">      13 </span>            : {
+<span class="lineNum">      14 </span><span class="lineCov">          8 :   struct options</span>
+<span class="lineNum">      15 </span>            :   {
+<span class="lineNum">      16 </span>            :     std::string value;
+<a name="17"><span class="lineNum">      17 </span>            :     int test = 33;</a>
+<span class="lineNum">      18 </span>            :     
+<span class="lineNum">      19 </span><span class="lineCov">          8 :     options()</span>
+<span class="lineNum">      20 </span><span class="lineCov">          8 :       : value( Name()() )</span>
+<span class="lineNum">      21 </span><span class="lineCov">          8 :       {}</span>
+<a name="22"><span class="lineNum">      22 </span>            :   };</a>
+<span class="lineNum">      23 </span>            :   
+<span class="lineNum">      24 </span><span class="lineCov">          2 :   struct itest: </span>
+<a name="25"><span class="lineNum">      25 </span>            :     public wfc::iinterface</a>
+<span class="lineNum">      26 </span>            :   {
+<span class="lineNum">      27 </span><span class="lineNoCov">          0 :     ~itest(){}</span>
+<span class="lineNum">      28 </span>            :     virtual void doit() = 0;
+<span class="lineNum">      29 </span>            :   };
+<span class="lineNum">      30 </span>            :   
+<span class="lineNum">      31 </span>            :   
+<a name="32"><span class="lineNum">      32 </span>            :   struct options_json</a>
+<span class="lineNum">      33 </span>            :   {
+<span class="lineNum">      34 </span><span class="lineCov">          2 :     JSON_NAME(test)</span>
+<span class="lineNum">      35 </span>            :     JSON_NAME(value)
+<span class="lineNum">      36 </span>            :     typedef wfc::json::object&lt;
+<span class="lineNum">      37 </span>            :       options,
+<span class="lineNum">      38 </span>            :       typename fas::type_list_n&lt;
+<span class="lineNum">      39 </span>            :         wfc::json::member&lt;n_test, options, int, &amp;options::test&gt;
+<span class="lineNum">      40 </span>            :       &gt;::type
+<span class="lineNum">      41 </span>            :     &gt; type;
+<span class="lineNum">      42 </span>            : 
+<span class="lineNum">      43 </span>            :     typedef typename type::member_list member_list;
+<span class="lineNum">      44 </span>            :     typedef typename type::target target;
+<span class="lineNum">      45 </span>            :     typedef typename type::serializer serializer;
+<span class="lineNum">      46 </span>            : 
+<a name="47"><span class="lineNum">      47 </span>            :   };</a>
+<span class="lineNum">      48 </span>            : 
+<span class="lineNum">      49 </span><span class="lineNoCov">          0 :   class test:</span>
+<span class="lineNum">      50 </span>            :     public wfc::domain_object&lt;itest, options&gt;
+<span class="lineNum">      51 </span>            :   {
+<a name="52"><span class="lineNum">      52 </span>            :   public:</a>
+<span class="lineNum">      53 </span>            :     int doit_count = 0;
+<span class="lineNum">      54 </span><span class="lineCov">          2 :     virtual void doit()  override</span>
+<span class="lineNum">      55 </span>            :     {
+<span class="lineNum">      56 </span><span class="lineCov">          2 :       ++doit_count;</span>
+<a name="57"><span class="lineNum">      57 </span><span class="lineCov">          2 :     }</span></a>
+<span class="lineNum">      58 </span>            :     
+<span class="lineNum">      59 </span><span class="lineCov">          2 :     test() {  this-&gt;doit();  } //cppcheck</span>
+<a name="60"><span class="lineNum">      60 </span>            :   };</a>
+<span class="lineNum">      61 </span>            :   
+<span class="lineNum">      62 </span><span class="lineCov">          4 :   class object: public ::wfc::basic_component&lt; Name, wfc::instance&lt;test&gt;, options_json, Singleton, wfc::nostat_json &gt; {};</span>
+<span class="lineNum">      63 </span>            : };
+<span class="lineNum">      64 </span>            : 
+<a name="65"><span class="lineNum">      65 </span>            : </a>
+<a name="66"><span class="lineNum">      66 </span>            : JSON_NAME(package1)</a>
+<a name="67"><span class="lineNum">      67 </span><span class="lineCov">          1 : JSON_NAME(module1)</span></a>
+<a name="68"><span class="lineNum">      68 </span><span class="lineCov">          8 : JSON_NAME(object1)</span></a>
+<a name="69"><span class="lineNum">      69 </span><span class="lineCov">          8 : JSON_NAME(object2)</span></a>
+<span class="lineNum">      70 </span><span class="lineCov">          1 : JSON_NAME(object3)</span>
+<a name="71"><span class="lineNum">      71 </span><span class="lineCov">          1 : JSON_NAME(object4)</span></a>
+<span class="lineNum">      72 </span>            : 
+<span class="lineNum">      73 </span><span class="lineCov">          1 : class test_module: public ::wfc::component_list&lt;</span>
+<span class="lineNum">      74 </span>            :     n_module1,
+<span class="lineNum">      75 </span>            :     helper&lt;n_object1, true&gt;::object,
+<span class="lineNum">      76 </span>            :     helper&lt;n_object2, true&gt;::object,
+<span class="lineNum">      77 </span>            :     helper&lt;n_object3, false&gt;::object,
+<span class="lineNum">      78 </span>            :     helper&lt;n_object4, false&gt;::object
+<span class="lineNum">      79 </span>            :   &gt;
+<span class="lineNum">      80 </span>            : {
+<a name="81"><span class="lineNum">      81 </span>            : };</a>
+<span class="lineNum">      82 </span>            : 
+<a name="83"><span class="lineNum">      83 </span><span class="lineCov">          2 : class test_package: public wfc::module_list&lt; wfc::build_info&lt; wfc::empty_build_info&gt;, test_module&gt; {};</span></a>
+<span class="lineNum">      84 </span>            : 
+<span class="lineNum">      85 </span><span class="lineCov">          1 : int main()</span>
+<span class="lineNum">      86 </span>            : {
+<span class="lineNum">      87 </span><span class="lineCov">          1 :   auto t = std::make_shared&lt;wfc::package&gt;( std::make_shared&lt;test_package&gt;() ) ;</span>
+<span class="lineNum">      88 </span><span class="lineCov">          2 :   iow::asio::io_service io;</span>
+<span class="lineNum">      89 </span><span class="lineCov">          2 :   auto g = std::make_shared&lt; wfc::wfcglobal&gt;(io);</span>
+<a name="90"><span class="lineNum">      90 </span><span class="lineCov">          1 :   t-&gt;create(g);</span></a>
+<span class="lineNum">      91 </span><span class="lineCov">          2 :   std::cout &lt;&lt; g-&gt;registry.size() &lt;&lt; std::endl;</span>
+<span class="lineNum">      92 </span><span class="lineCov">          4 : }</span>
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

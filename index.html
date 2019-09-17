@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.15"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>wfc: Титульная страница</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+<link href="customdoxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">wfc
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Создано системой Doxygen 1.8.15 -->
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',false,false,'search.php','Поиск');
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div class="PageDoc"><div class="header">
+  <div class="headertitle">
+<div class="title">wfc Документация</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock"><p class="">WFC - это фреймворк для разработки высконагруженных JSON-RPC сервисов (демонов) под различные профили нагрузки. Данный проект является частью этого фреймворка, но не им самим. Если вас интересует как быстро сделать свой первый проект на базе этого фреймворка обратитесь к документации <a href="https://github.com/mambaru/wfcroot">wfcroot</a> или изучите <a href="https://github.com/mambaru/demod">Демо-проект</a>.</p>
+<p class=""><a href="https://travis-ci.com/mambaru/wfc">https://travis-ci.com/mambaru/wfc</a></p>
+<p class=""><a href="https://travis-ci.com/mambaru/wfc"></a> <a href="https://travis-ci.com/mambaru/wfc"></a> <a href="https://coveralls.io/github/mambaru/wfc?branch=master"></a></p>
+<ul>
+<li>Репозитарий на <a href="https://github.com/mambaru/wfc">github.com</a>.</li>
+<li>Документация <a href="https://mambaru.github.io/wfc/index.html">doxygen</a>.</li>
+<li>Отчет <a href="https://mambaru.github.io/wfc/cov-report/index.html">coverage</a></li>
+</ul>
+<h1>Сборка и установка</h1>
+<p class="">Для разработки собственных проектов вам нужен супермодуль <a href="https://github.com/mambaru/wfcroot">wfcroot</a>, который включает все необходимое, непосредственно скачивать и компилировать из этого репозитария нет необходимости. Но это можно сделать:</p>
+<div class="fragment"><div class="line">git clone https://github.com/mambaru/wfc.git</div><div class="line">cd wfc</div><div class="line">mkdir build</div><div class="line">cd build</div><div class="line">cmake -DBUILD_TESTING=ON ..</div><div class="line">cmake --build .</div><div class="line">ctest</div></div><!-- fragment --><p class="">Если система сборки автоматически загрузит в директорию сборки ( если не найдет их в системе или на том же уровне в директории) следующие библиотеки:</p><ul>
+<li><a href="https://github.com/migashko/faslib">faslib</a> - метабиблиотека для работы со списками типов и АОП</li>
+<li><a href="https://github.com/mambaru/wjson">wjson</a> - очень быстрый декларативный JSON-сериализатор на шаблонах</li>
+<li><a href="https://github.com/mambaru/wlog">wlog</a> - логер с большими возможностями по кастомизации</li>
+<li><a href="https://github.com/mambaru/wflow">wflow</a> - очереди и потоки</li>
+<li><a href="https://github.com/mambaru/iow">iow</a> - сетевая библиотека</li>
+<li><a href="https://github.com/mambaru/wjrpc">wjrpc</a> - библиотека поддержки JSON-RPC</li>
+<li><a href="https://github.com/mambaru/wrtstat">wrtstat</a> - для сбора статистики</li>
+</ul>
+<h1>Общая информация</h1>
+<p class="">Фреймворк позволяет за короткое время разработать высокопроизводительный демон, работающий по протоколу JSON-RPC, который может также, в асинхронном режиме, взаимодействовать с другими сервисами. Пропускная способность системы на одном хосте может достигать 100 тысяч JSON-RPC сообщений в секунду. Фреймворк избавляет программиста от необходимости взаимодействовать с сетевой подсистемой, а реализация JSON-RPC происходит на декларативном уровне, что позволяет сконцентрироваться исключительно на прикладной логике. Система конфигурации позволяет настроить демон для работы с различными профилями нагрузки. Например большие тяжелы запросы, очень много мелких запросов с коротким временем ответа или же смесь их, большой поток сообщений по одному каналу.</p>
+<p class="">Большая часть функционала фремворка подключается в виде пакетов модулей. Из "коробки" <a href="https://github.com/mambaru/wfcroot">wfcroot</a> вы получаете:</p><ul>
+<li><a href="https://github.com/mambaru/wfc_core">Модули ядра</a>:<ul>
+<li><em>startup</em></li>
+<li><em>config</em></li>
+<li><em>core</em></li>
+<li><em>logger</em></li>
+<li><em>workflow</em></li>
+</ul>
+</li>
+<li><a href="https://github.com/mambaru/wfc_io">Работа с сетью</a>:<ul>
+<li><em>server-tcp</em></li>
+<li><em>server-udp</em></li>
+<li><em>client-tcp</em></li>
+<li><em>io-queue</em></li>
+</ul>
+</li>
+<li><a href="https://github.com/mambaru/wfc_jsonrpc">Поддержка JSON-RPC</a>:<ul>
+<li>*jsonrpc-queue</li>
+<li>*jsonrpc-broker</li>
+<li>*jsonrpc-repli</li>
+<li>*jsonrpc-hub</li>
+<li>*jsonrpc-batch</li>
+<li>*jsonrpc-backlog </li>
+</ul>
+</li>
+</ul>
+</div></div><!-- PageDoc -->
+</div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+Создано системой &#160;<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/>
+</a> 1.8.15
+</small></address>
+</body>
+</html>

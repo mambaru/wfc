@@ -1,0 +1,457 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - wfc-coverage.info - wfc/module/basic_component.hpp</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">wfc/module</a> - basic_component.hpp<span style="font-size: 80%;"> (source / <a href="basic_component.hpp.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">wfc-coverage.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">95</td>
+            <td class="headerCovTableEntry">150</td>
+            <td class="headerCovTableEntryLo">63.3 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2019-09-17</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">65</td>
+            <td class="headerCovTableEntry">159</td>
+            <td class="headerCovTableEntryLo">40.9 %</td>
+          </tr>
+          <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : //</a>
+<span class="lineNum">       2 </span>            : // Author: Vladimir Migashko &lt;migashko@gmail.com&gt;, (C) 2013-2018
+<span class="lineNum">       3 </span>            : //
+<span class="lineNum">       4 </span>            : // Copyright: See COPYING file that comes with this distribution
+<span class="lineNum">       5 </span>            : //
+<span class="lineNum">       6 </span>            : 
+<span class="lineNum">       7 </span>            : #pragma once
+<span class="lineNum">       8 </span>            : 
+<span class="lineNum">       9 </span>            : #include &lt;wfc/module/domain_config_json.hpp&gt;
+<span class="lineNum">      10 </span>            : #include &lt;wfc/module/icomponent.hpp&gt;
+<span class="lineNum">      11 </span>            : #include &lt;wfc/module/component_features.hpp&gt;
+<span class="lineNum">      12 </span>            : #include &lt;wfc/core/wfcglobal.hpp&gt;
+<span class="lineNum">      13 </span>            : 
+<span class="lineNum">      14 </span>            : #include &lt;wfc/json.hpp&gt;
+<span class="lineNum">      15 </span>            : 
+<span class="lineNum">      16 </span>            : #include &lt;fas/typemanip.hpp&gt;
+<span class="lineNum">      17 </span>            : #include &lt;memory&gt;
+<span class="lineNum">      18 </span>            : #include &lt;string&gt;
+<span class="lineNum">      19 </span>            : #include &lt;stdexcept&gt;
+<span class="lineNum">      20 </span>            : 
+<span class="lineNum">      21 </span>            : namespace wfc{
+<span class="lineNum">      22 </span>            :   
+<span class="lineNum">      23 </span>            : template&lt; 
+<span class="lineNum">      24 </span>            :   typename Name,
+<span class="lineNum">      25 </span>            :   typename Instance,
+<span class="lineNum">      26 </span>            :   typename CustomJson,
+<span class="lineNum">      27 </span>            :   int Features /*= component_features::Multiton*/, 
+<a name="28"><span class="lineNum">      28 </span>            :   typename StatJson /*= defstat_json*/</a>
+<span class="lineNum">      29 </span>            : &gt;
+<span class="lineNum">      30 </span><span class="lineCov">          6 : class basic_component</span>
+<span class="lineNum">      31 </span>            :   : public icomponent
+<span class="lineNum">      32 </span>            : {
+<span class="lineNum">      33 </span>            : public:
+<span class="lineNum">      34 </span>            :    enum 
+<span class="lineNum">      35 </span>            :    {
+<span class="lineNum">      36 </span>            :      is_singleton       = ( Features &amp; int(component_features::Singleton) )!=0,
+<span class="lineNum">      37 </span>            :      ignore_reconfigure = ( Features &amp; int(component_features::IgnoreReconfigure) )!=0
+<span class="lineNum">      38 </span>            :    };
+<span class="lineNum">      39 </span>            : 
+<span class="lineNum">      40 </span>            :   typedef Name        component_name;
+<span class="lineNum">      41 </span>            :   typedef Instance    instance_type;
+<span class="lineNum">      42 </span>            :   
+<span class="lineNum">      43 </span>            :   typedef CustomJson  custom_json;
+<span class="lineNum">      44 </span>            :   typedef typename std::conditional&lt; 
+<span class="lineNum">      45 </span>            :     instance_type::domain_options::statistics_enabled,
+<span class="lineNum">      46 </span>            :     StatJson,
+<span class="lineNum">      47 </span>            :     empty_stat_json_t&lt;typename StatJson::target&gt;
+<span class="lineNum">      48 </span>            :   &gt;::type stat_json;
+<span class="lineNum">      49 </span>            :  
+<span class="lineNum">      50 </span>            :   typedef domain_config_json_t&lt;custom_json, Features, stat_json&gt; domain_config_json;
+<span class="lineNum">      51 </span>            :   typedef typename domain_config_json::domain_options_json domain_options_json;
+<span class="lineNum">      52 </span>            : 
+<span class="lineNum">      53 </span>            :   typedef std::shared_ptr&lt;wfcglobal&gt; global_ptr;
+<span class="lineNum">      54 </span>            :   typedef typename instance_type::domain_config domain_config;
+<span class="lineNum">      55 </span>            :   typedef std::map&lt;std::string, std::string&gt; instance_config_map;
+<span class="lineNum">      56 </span>            :   typedef typename instance_type::domain_interface domain_interface;
+<span class="lineNum">      57 </span>            :   typedef json::dict_map&lt; json::value&lt;std::string&gt; &gt; instance_map_json;
+<span class="lineNum">      58 </span>            :   typedef typename std::conditional&lt;
+<span class="lineNum">      59 </span>            :     is_singleton,
+<span class="lineNum">      60 </span>            :     domain_config,
+<span class="lineNum">      61 </span>            :     std::vector&lt;domain_config&gt;
+<span class="lineNum">      62 </span>            :   &gt;::type component_config;
+<span class="lineNum">      63 </span>            : 
+<span class="lineNum">      64 </span>            :   typedef typename std::conditional&lt;
+<span class="lineNum">      65 </span>            :     is_singleton,
+<span class="lineNum">      66 </span>            :     instance_config_map,
+<span class="lineNum">      67 </span>            :     std::vector&lt;instance_config_map&gt;
+<span class="lineNum">      68 </span>            :   &gt;::type component_map_config;
+<span class="lineNum">      69 </span>            :   
+<span class="lineNum">      70 </span>            :   typedef typename std::conditional&lt;
+<span class="lineNum">      71 </span>            :     is_singleton,
+<span class="lineNum">      72 </span>            :     domain_config_json,
+<span class="lineNum">      73 </span>            :     ::wfc::json::array&lt; std::vector&lt; domain_config_json&gt; &gt;
+<span class="lineNum">      74 </span>            :   &gt;::type component_json;
+<span class="lineNum">      75 </span>            : 
+<span class="lineNum">      76 </span>            :   typedef typename std::conditional&lt;
+<span class="lineNum">      77 </span>            :     is_singleton,
+<span class="lineNum">      78 </span>            :     instance_map_json,
+<span class="lineNum">      79 </span>            :     ::wfc::json::array&lt; instance_map_json &gt;
+<span class="lineNum">      80 </span>            :   &gt;::type component_map_json;
+<span class="lineNum">      81 </span>            :   
+<span class="lineNum">      82 </span>            :   typedef std::shared_ptr&lt;instance_type&gt; instance_ptr;
+<span class="lineNum">      83 </span>            : 
+<span class="lineNum">      84 </span>            :   typedef typename std::conditional&lt;
+<span class="lineNum">      85 </span>            :     is_singleton,
+<span class="lineNum">      86 </span>            :     instance_ptr,
+<span class="lineNum">      87 </span>            :     std::map&lt; std::string, instance_ptr&gt;
+<a name="88"><span class="lineNum">      88 </span>            :   &gt;::type instance_map;</a>
+<span class="lineNum">      89 </span>            : 
+<span class="lineNum">      90 </span><span class="lineCov">         22 :   struct config_pair </span>
+<span class="lineNum">      91 </span>            :   { 
+<span class="lineNum">      92 </span>            :     std::string basic;
+<span class="lineNum">      93 </span>            :     std::string custom;
+<span class="lineNum">      94 </span>            :   };
+<span class="lineNum">      95 </span>            :   
+<span class="lineNum">      96 </span>            :   typedef typename std::conditional&lt;
+<span class="lineNum">      97 </span>            :     is_singleton,
+<span class="lineNum">      98 </span>            :     config_pair,
+<span class="lineNum">      99 </span>            :     std::map&lt; std::string, config_pair&gt;
+<span class="lineNum">     100 </span>            :   &gt;::type config_map;
+<span class="lineNum">     101 </span>            : 
+<span class="lineNum">     102 </span>            :   typedef typename std::conditional&lt;
+<span class="lineNum">     103 </span>            :     is_singleton,
+<span class="lineNum">     104 </span>            :     std::string,
+<span class="lineNum">     105 </span>            :     std::list&lt; std::string&gt;
+<a name="106"><span class="lineNum">     106 </span>            :   &gt;::type start_list;</a>
+<span class="lineNum">     107 </span>            :     
+<span class="lineNum">     108 </span><span class="lineCov">          2 :   virtual ~basic_component()</span>
+<span class="lineNum">     109 </span>            :   {
+<span class="lineNum">     110 </span><span class="lineCov">          4 :     if ( auto g = _global )</span>
+<span class="lineNum">     111 </span><span class="lineNoCov">          0 :       g-&gt;registry.erase( &quot;component&quot;, this-&gt;name() );</span>
+<a name="112"><span class="lineNum">     112 </span><span class="lineCov">          4 :   }</span></a>
+<span class="lineNum">     113 </span>            : 
+<span class="lineNum">     114 </span><span class="lineCov">         16 :   virtual std::string name() const override</span>
+<span class="lineNum">     115 </span>            :   {
+<span class="lineNum">     116 </span><span class="lineCov">         16 :     return component_name()();</span>
+<a name="117"><span class="lineNum">     117 </span>            :   }</a>
+<span class="lineNum">     118 </span>            : 
+<span class="lineNum">     119 </span><span class="lineNoCov">          0 :   virtual std::string description() const override</span>
+<span class="lineNum">     120 </span>            :   {
+<span class="lineNum">     121 </span><span class="lineNoCov">          0 :     return &quot;no description&quot;;</span>
+<a name="122"><span class="lineNum">     122 </span>            :   }</a>
+<span class="lineNum">     123 </span>            : 
+<span class="lineNum">     124 </span><span class="lineNoCov">          0 :   virtual std::string help(const std::string&amp;) const override</span>
+<span class="lineNum">     125 </span>            :   {
+<span class="lineNum">     126 </span><span class="lineNoCov">          0 :     return std::string(&quot;Sorry, no help for '&quot;) + this-&gt;name() + &quot;'.&quot;;</span>
+<a name="127"><span class="lineNum">     127 </span>            :   }</a>
+<span class="lineNum">     128 </span>            : 
+<span class="lineNum">     129 </span><span class="lineCov">          2 :   virtual std::string interface_name() const override</span>
+<span class="lineNum">     130 </span>            :   {
+<span class="lineNum">     131 </span><span class="lineCov">          2 :     return typeid( domain_interface ).name();</span>
+<a name="132"><span class="lineNum">     132 </span>            :   }</a>
+<span class="lineNum">     133 </span>            : 
+<span class="lineNum">     134 </span><span class="lineCov">          2 :   virtual std::string generate(const std::string&amp; type) override</span>
+<span class="lineNum">     135 </span>            :   {
+<span class="lineNum">     136 </span><span class="lineCov">          2 :     component_config opt;</span>
+<span class="lineNum">     137 </span><span class="lineCov">          2 :     this-&gt;generate_config(opt, type);</span>
+<span class="lineNum">     138 </span>            :     typename component_json::serializer serializer;
+<span class="lineNum">     139 </span><span class="lineCov">          2 :     std::string result;</span>
+<span class="lineNum">     140 </span><span class="lineCov">          2 :     serializer( opt, std::back_inserter( result ) );</span>
+<span class="lineNum">     141 </span><span class="lineCov">          2 :     return result;</span>
+<a name="142"><span class="lineNum">     142 </span>            :   }</a>
+<span class="lineNum">     143 </span>            : 
+<span class="lineNum">     144 </span><span class="lineNoCov">          0 :   virtual bool parse(const std::string&amp; stropt, json::json_error* err) override</span>
+<span class="lineNum">     145 </span>            :   {
+<span class="lineNum">     146 </span><span class="lineNoCov">          0 :     component_config opt;</span>
+<span class="lineNum">     147 </span><span class="lineNoCov">          0 :     return this-&gt;unserialize_(opt, stropt, err);</span>
+<a name="148"><span class="lineNum">     148 </span>            :   }</a>
+<span class="lineNum">     149 </span>            : 
+<span class="lineNum">     150 </span><span class="lineCov">          6 :   virtual void create( std::shared_ptr&lt;wfcglobal&gt; g) override</span>
+<span class="lineNum">     151 </span>            :   {
+<span class="lineNum">     152 </span><span class="lineCov">          6 :     _global = g;</span>
+<span class="lineNum">     153 </span><span class="lineCov">          6 :     this-&gt;create_(fas::bool_&lt;is_singleton&gt;());</span>
+<a name="154"><span class="lineNum">     154 </span><span class="lineCov">          6 :   }</span></a>
+<span class="lineNum">     155 </span>            :   
+<span class="lineNum">     156 </span><span class="lineCov">          2 :   virtual bool configure(const std::string&amp; stropt, json::json_error* err) override</span>
+<span class="lineNum">     157 </span>            :   {
+<span class="lineNum">     158 </span><span class="lineCov">          2 :     return this-&gt;configure_(stropt, fas::bool_&lt;is_singleton&gt;(), err );</span>
+<span class="lineNum">     159 </span>            :   }
+<a name="160"><span class="lineNum">     160 </span>            : </a>
+<span class="lineNum">     161 </span>            :   // only for external control
+<span class="lineNum">     162 </span><span class="lineNoCov">          0 :   virtual void start(const std::string&amp; arg) override</span>
+<span class="lineNum">     163 </span>            :   {
+<span class="lineNum">     164 </span><span class="lineNoCov">          0 :     this-&gt;start_(arg, fas::bool_&lt;is_singleton&gt;() );</span>
+<a name="165"><span class="lineNum">     165 </span><span class="lineNoCov">          0 :   }</span></a>
+<span class="lineNum">     166 </span>            : 
+<span class="lineNum">     167 </span><span class="lineNoCov">          0 :   virtual void stop(const std::string&amp; arg) override</span>
+<span class="lineNum">     168 </span>            :   {
+<span class="lineNum">     169 </span><span class="lineNoCov">          0 :     this-&gt;stop_(arg, fas::bool_&lt;is_singleton&gt;() );</span>
+<a name="170"><span class="lineNum">     170 </span><span class="lineNoCov">          0 :   }</span></a>
+<span class="lineNum">     171 </span>            : 
+<span class="lineNum">     172 </span><span class="lineCov">          2 :   virtual void generate_config(component_config&amp; opt, const std::string&amp; type)</span>
+<span class="lineNum">     173 </span>            :   {
+<span class="lineNum">     174 </span><span class="lineCov">          2 :     this-&gt;generate_config_(opt, type, fas::bool_&lt;is_singleton&gt;() );</span>
+<span class="lineNum">     175 </span><span class="lineCov">          2 :   }</span>
+<span class="lineNum">     176 </span>            : 
+<a name="177"><span class="lineNum">     177 </span>            : private:</a>
+<span class="lineNum">     178 </span>            : 
+<span class="lineNum">     179 </span><span class="lineCov">          5 :   std::string serialize_basic_( const domain_config&amp; opt )</span>
+<span class="lineNum">     180 </span>            :   {
+<span class="lineNum">     181 </span>            :     typedef typename domain_options_json::serializer serializer;
+<span class="lineNum">     182 </span><span class="lineCov">          5 :     std::string str;</span>
+<span class="lineNum">     183 </span><span class="lineCov">          5 :     serializer()( opt, std::back_inserter(str) );</span>
+<span class="lineNum">     184 </span><span class="lineCov">          5 :     return str;</span>
+<a name="185"><span class="lineNum">     185 </span>            :   }</a>
+<span class="lineNum">     186 </span>            : 
+<span class="lineNum">     187 </span><span class="lineCov">          5 :   std::string serialize_custom_( const domain_config&amp; opt )</span>
+<span class="lineNum">     188 </span>            :   {
+<span class="lineNum">     189 </span>            :     typedef typename domain_config_json::custom_json::serializer serializer;
+<span class="lineNum">     190 </span><span class="lineCov">          5 :     std::string str;</span>
+<span class="lineNum">     191 </span><span class="lineCov">          5 :     serializer()( opt, std::back_inserter(str) );</span>
+<span class="lineNum">     192 </span><span class="lineCov">          5 :     return str;</span>
+<a name="193"><span class="lineNum">     193 </span>            :   }</a>
+<span class="lineNum">     194 </span>            : 
+<span class="lineNum">     195 </span><span class="lineCov">          5 :   static bool unserialize_( component_config&amp; opt,  const std::string&amp; str, json::json_error* err )</span>
+<span class="lineNum">     196 </span>            :   {
+<span class="lineNum">     197 </span>            :     typename component_json::serializer serializer;
+<span class="lineNum">     198 </span><span class="lineCov">          5 :     auto beg = str.begin();</span>
+<span class="lineNum">     199 </span><span class="lineCov">          5 :     beg = json::parser::parse_space(beg, str.end(), err);</span>
+<span class="lineNum">     200 </span><span class="lineCov">          5 :     serializer( opt, beg, str.end(), err );</span>
+<span class="lineNum">     201 </span><span class="lineCov">          5 :     if ( err == nullptr )</span>
+<span class="lineNum">     202 </span><span class="lineCov">          2 :       return true;</span>
+<span class="lineNum">     203 </span>            :     
+<span class="lineNum">     204 </span><span class="lineCov">          3 :     return !*err;</span>
+<a name="205"><span class="lineNum">     205 </span>            :   }</a>
+<span class="lineNum">     206 </span>            :   
+<span class="lineNum">     207 </span><span class="lineCov">          3 :   void create_(fas::true_)</span>
+<span class="lineNum">     208 </span>            :   {
+<span class="lineNum">     209 </span><span class="lineCov">          3 :     _instances = std::make_shared&lt;instance_type&gt;();</span>
+<span class="lineNum">     210 </span><span class="lineCov">          3 :     domain_config opt;</span>
+<span class="lineNum">     211 </span><span class="lineCov">          3 :     if ( _global != nullptr )</span>
+<span class="lineNum">     212 </span>            :     {
+<span class="lineNum">     213 </span><span class="lineCov">          2 :       _global-&gt;registry.set_object(&quot;instance&quot;, this-&gt;name(), _instances);</span>
+<span class="lineNum">     214 </span>            :     }
+<span class="lineNum">     215 </span><span class="lineCov">          3 :     json::json_error err;</span>
+<span class="lineNum">     216 </span><span class="lineCov">          3 :     _instances-&gt;create(this-&gt;name(), _global);</span>
+<span class="lineNum">     217 </span><span class="lineCov">          3 :     if ( !this-&gt;configure_(&quot;{}&quot;, fas::true_(), &amp;err) )</span>
+<span class="lineNum">     218 </span>            :     {
+<span class="lineNum">     219 </span><span class="lineNoCov">          0 :       SYSTEM_LOG_FATAL(&quot;Singleton '&quot; &lt;&lt; this-&gt;name() &lt;&lt; &quot;' default initialize: &quot; &lt;&lt; json::strerror::message(err) )</span>
+<span class="lineNum">     220 </span><span class="lineCov">          3 :     }</span>
+<a name="221"><span class="lineNum">     221 </span><span class="lineCov">          3 :   }</span></a>
+<span class="lineNum">     222 </span>            : 
+<a name="223"><span class="lineNum">     223 </span><span class="lineCov">          3 :   static void create_(fas::false_) { }</span></a>
+<span class="lineNum">     224 </span>            : 
+<span class="lineNum">     225 </span><span class="lineCov">          4 :   bool configure_(const std::string&amp; stropt, fas::true_, json::json_error* err)</span>
+<span class="lineNum">     226 </span>            :   {
+<span class="lineNum">     227 </span><span class="lineCov">          4 :     component_config opt;</span>
+<span class="lineNum">     228 </span><span class="lineCov">          4 :     if ( !this-&gt;unserialize_(opt, stropt, err ) )</span>
+<span class="lineNum">     229 </span><span class="lineNoCov">          0 :       return false;</span>
+<span class="lineNum">     230 </span><span class="lineCov">          4 :     opt.name = this-&gt;name();</span>
+<span class="lineNum">     231 </span>            :     
+<span class="lineNum">     232 </span><span class="lineCov">          8 :     config_pair op;</span>
+<span class="lineNum">     233 </span><span class="lineCov">          4 :     op.basic = this-&gt;serialize_basic_(opt);</span>
+<span class="lineNum">     234 </span><span class="lineCov">          4 :     op.custom = this-&gt;serialize_custom_(opt);</span>
+<span class="lineNum">     235 </span>            :     
+<span class="lineNum">     236 </span><span class="lineCov">          4 :     if ( _config.basic.empty() )</span>
+<span class="lineNum">     237 </span>            :     {
+<span class="lineNum">     238 </span>            :       // Это дефолтная конфигурация синглетона при создании объекта
+<span class="lineNum">     239 </span><span class="lineCov">          3 :       _instances-&gt;configure(opt);</span>
+<span class="lineNum">     240 </span>            :     }
+<span class="lineNum">     241 </span><span class="lineCov">          1 :     else if ( _config.custom != op.custom )        </span>
+<span class="lineNum">     242 </span>            :     {
+<span class="lineNum">     243 </span><span class="lineNoCov">          0 :       _instances-&gt;reconfigure(opt);</span>
+<span class="lineNum">     244 </span><span class="lineNoCov">          0 :       SYSTEM_LOG_MESSAGE(&quot;Singleton '&quot; &lt;&lt; opt.name &lt;&lt; &quot;' is reconfigured (fully)&quot;)</span>
+<span class="lineNum">     245 </span>            :     }
+<span class="lineNum">     246 </span><span class="lineCov">          1 :     else if ( _config.basic != op.basic ) </span>
+<span class="lineNum">     247 </span>            :     {
+<span class="lineNum">     248 </span><span class="lineNoCov">          0 :       _instances-&gt;reconfigure_basic(opt);</span>
+<span class="lineNum">     249 </span><span class="lineNoCov">          0 :       SYSTEM_LOG_MESSAGE(&quot;Singleton '&quot; &lt;&lt; opt.name &lt;&lt; &quot;' is reconfigured (basic)&quot;)</span>
+<span class="lineNum">     250 </span>            :     }
+<span class="lineNum">     251 </span>            :     else
+<span class="lineNum">     252 </span>            :     {
+<span class="lineNum">     253 </span><span class="lineCov">          1 :       SYSTEM_LOG_MESSAGE(&quot;Singleton '&quot; &lt;&lt; opt.name &lt;&lt; &quot;' without reconfiguration&quot;)</span>
+<span class="lineNum">     254 </span>            :     }
+<span class="lineNum">     255 </span><span class="lineCov">          4 :     _config = op;</span>
+<span class="lineNum">     256 </span><span class="lineCov">          8 :     return true;</span>
+<a name="257"><span class="lineNum">     257 </span>            :   }</a>
+<span class="lineNum">     258 </span>            : 
+<span class="lineNum">     259 </span><span class="lineNoCov">          0 :   void reconfigure_fully_(instance_ptr obj, const domain_config&amp; opt, fas::false_)</span>
+<span class="lineNum">     260 </span>            :   {
+<span class="lineNum">     261 </span><span class="lineNoCov">          0 :     obj-&gt;reconfigure(opt);</span>
+<span class="lineNum">     262 </span><span class="lineNoCov">          0 :     SYSTEM_LOG_MESSAGE(&quot;Instance '&quot; &lt;&lt; opt.name &lt;&lt; &quot;' is reconfigured (fully)&quot;)</span>
+<span class="lineNum">     263 </span><span class="lineNoCov">          0 :   }</span>
+<span class="lineNum">     264 </span>            : 
+<span class="lineNum">     265 </span>            :   void reconfigure_fully_(instance_ptr , const domain_config&amp; opt, fas::true_)
+<span class="lineNum">     266 </span>            :   {
+<span class="lineNum">     267 </span>            :     SYSTEM_LOG_WARNING(&quot;Instance '&quot; &lt;&lt; opt.name &lt;&lt; &quot;' not reconfigured (is forbidden by the developer)&quot;)
+<a name="268"><span class="lineNum">     268 </span>            :   }</a>
+<span class="lineNum">     269 </span>            : 
+<span class="lineNum">     270 </span><span class="lineCov">          1 :   bool configure_(const std::string&amp; stropt, fas::false_, json::json_error* err)</span>
+<span class="lineNum">     271 </span>            :   {
+<span class="lineNum">     272 </span><span class="lineCov">          1 :     std::set&lt;std::string&gt; stop_list;</span>
+<span class="lineNum">     273 </span><span class="lineCov">          1 :     for (const auto&amp; item : _instances )</span>
+<span class="lineNum">     274 </span><span class="lineNoCov">          0 :       stop_list.insert(item.first);</span>
+<span class="lineNum">     275 </span>            :     
+<span class="lineNum">     276 </span><span class="lineCov">          2 :     component_config optlist;</span>
+<span class="lineNum">     277 </span><span class="lineCov">          1 :     if ( !this-&gt;unserialize_( optlist, stropt, err ) )</span>
+<span class="lineNum">     278 </span><span class="lineNoCov">          0 :       return false;</span>
+<span class="lineNum">     279 </span>            : 
+<span class="lineNum">     280 </span><span class="lineCov">          2 :     for (const auto&amp; opt : optlist )</span>
+<span class="lineNum">     281 </span>            :     {
+<span class="lineNum">     282 </span><span class="lineCov">          1 :       stop_list.erase(opt.name);</span>
+<span class="lineNum">     283 </span><span class="lineCov">          1 :       config_pair op;</span>
+<span class="lineNum">     284 </span><span class="lineCov">          1 :       op.basic = this-&gt;serialize_basic_(opt);</span>
+<span class="lineNum">     285 </span><span class="lineCov">          1 :       op.custom = this-&gt;serialize_custom_(opt);</span>
+<span class="lineNum">     286 </span>            :       
+<span class="lineNum">     287 </span><span class="lineCov">          1 :       auto itr = _instances.find(opt.name);</span>
+<span class="lineNum">     288 </span><span class="lineCov">          1 :       if ( itr == _instances.end() )</span>
+<span class="lineNum">     289 </span>            :       {
+<span class="lineNum">     290 </span><span class="lineCov">          1 :         auto inst =  std::make_shared&lt;instance_type&gt;();</span>
+<span class="lineNum">     291 </span><span class="lineCov">          1 :         itr = _instances.insert( std::make_pair( opt.name, inst) ).first;</span>
+<span class="lineNum">     292 </span><span class="lineCov">          1 :         if ( _global ) _global-&gt;registry.set_object(&quot;instance&quot;, opt.name, inst);</span>
+<span class="lineNum">     293 </span><span class="lineCov">          1 :         inst-&gt;create( _global );</span>
+<span class="lineNum">     294 </span><span class="lineCov">          1 :         itr-&gt;second-&gt;configure(opt);</span>
+<span class="lineNum">     295 </span><span class="lineCov">          1 :         SYSTEM_LOG_MESSAGE(&quot;Instance '&quot; &lt;&lt; opt.name &lt;&lt; &quot;' is initial configured&quot;)</span>
+<span class="lineNum">     296 </span><span class="lineCov">          1 :         _config.insert(std::make_pair(opt.name, op) );</span>
+<span class="lineNum">     297 </span>            :       }
+<span class="lineNum">     298 </span>            :       else
+<span class="lineNum">     299 </span>            :       {
+<span class="lineNum">     300 </span><span class="lineNoCov">          0 :         auto oitr = _config.find(opt.name);</span>
+<span class="lineNum">     301 </span><span class="lineNoCov">          0 :         if ( oitr == _config.end() ) abort();</span>
+<span class="lineNum">     302 </span>            :       
+<span class="lineNum">     303 </span><span class="lineNoCov">          0 :         if ( oitr-&gt;second.custom != op.custom )</span>
+<span class="lineNum">     304 </span>            :         {
+<span class="lineNum">     305 </span><span class="lineNoCov">          0 :           reconfigure_fully_(itr-&gt;second, opt, fas::bool_&lt;ignore_reconfigure!=0&gt;() );</span>
+<span class="lineNum">     306 </span>            :         }
+<span class="lineNum">     307 </span><span class="lineNoCov">          0 :         else if ( oitr-&gt;second.basic != op.basic )</span>
+<span class="lineNum">     308 </span>            :         {
+<span class="lineNum">     309 </span><span class="lineNoCov">          0 :           itr-&gt;second-&gt;reconfigure_basic(opt);</span>
+<span class="lineNum">     310 </span><span class="lineNoCov">          0 :           SYSTEM_LOG_MESSAGE(&quot;Instance '&quot; &lt;&lt; opt.name &lt;&lt; &quot;' is reconfigured (basic)&quot;)</span>
+<span class="lineNum">     311 </span>            :         }
+<span class="lineNum">     312 </span>            :         else
+<span class="lineNum">     313 </span>            :         {
+<span class="lineNum">     314 </span><span class="lineNoCov">          0 :           SYSTEM_LOG_MESSAGE(&quot;Instance '&quot; &lt;&lt; opt.name &lt;&lt; &quot;' without reconfiguration&quot;)</span>
+<span class="lineNum">     315 </span>            :         }
+<span class="lineNum">     316 </span><span class="lineNoCov">          0 :         oitr-&gt;second = op;</span>
+<span class="lineNum">     317 </span>            :       }
+<span class="lineNum">     318 </span>            :     } // for optlist
+<span class="lineNum">     319 </span>            : 
+<span class="lineNum">     320 </span><span class="lineCov">          1 :     for ( const auto&amp; n: stop_list )</span>
+<span class="lineNum">     321 </span>            :     {
+<span class="lineNum">     322 </span><span class="lineNoCov">          0 :       auto itr = _instances.find(n);</span>
+<span class="lineNum">     323 </span><span class="lineNoCov">          0 :       if ( itr == _instances.end() )</span>
+<span class="lineNum">     324 </span>            :       {
+<span class="lineNum">     325 </span><span class="lineNoCov">          0 :         if ( _global ) _global-&gt;registry.erase(&quot;instance&quot;, n);</span>
+<span class="lineNum">     326 </span><span class="lineNoCov">          0 :         itr-&gt;second-&gt;stop(&quot;&quot;);</span>
+<span class="lineNum">     327 </span><span class="lineNoCov">          0 :         _instances.erase(itr);</span>
+<span class="lineNum">     328 </span><span class="lineNoCov">          0 :         SYSTEM_LOG_MESSAGE(&quot;Instance '&quot; &lt;&lt; n &lt;&lt; &quot;' is deleted&quot;)</span>
+<span class="lineNum">     329 </span>            :       }
+<span class="lineNum">     330 </span>            :     }
+<span class="lineNum">     331 </span><span class="lineCov">          2 :     return true;</span>
+<a name="332"><span class="lineNum">     332 </span>            :   }</a>
+<span class="lineNum">     333 </span>            : 
+<span class="lineNum">     334 </span><span class="lineNoCov">          0 :   void start_(const std::string&amp; arg, fas::true_)</span>
+<span class="lineNum">     335 </span>            :   {
+<span class="lineNum">     336 </span><span class="lineNoCov">          0 :     _instances-&gt;start(arg);</span>
+<a name="337"><span class="lineNum">     337 </span><span class="lineNoCov">          0 :   }</span></a>
+<span class="lineNum">     338 </span>            : 
+<span class="lineNum">     339 </span><span class="lineNoCov">          0 :   void start_(const std::string&amp; arg, fas::false_)</span>
+<span class="lineNum">     340 </span>            :   {
+<span class="lineNum">     341 </span><span class="lineNoCov">          0 :     for ( auto&amp; p : _instances )</span>
+<span class="lineNum">     342 </span>            :     {
+<span class="lineNum">     343 </span><span class="lineNoCov">          0 :       p.second-&gt;start(arg);</span>
+<span class="lineNum">     344 </span>            :     }
+<a name="345"><span class="lineNum">     345 </span><span class="lineNoCov">          0 :   }</span></a>
+<span class="lineNum">     346 </span>            : 
+<span class="lineNum">     347 </span><span class="lineNoCov">          0 :   void stop_(const std::string&amp; arg, fas::true_)</span>
+<span class="lineNum">     348 </span>            :   {
+<span class="lineNum">     349 </span><span class="lineNoCov">          0 :     _instances-&gt;stop(arg);</span>
+<a name="350"><span class="lineNum">     350 </span><span class="lineNoCov">          0 :   }</span></a>
+<span class="lineNum">     351 </span>            : 
+<span class="lineNum">     352 </span><span class="lineNoCov">          0 :   void stop_(const std::string&amp; arg, fas::false_)</span>
+<span class="lineNum">     353 </span>            :   {
+<span class="lineNum">     354 </span><span class="lineNoCov">          0 :     for ( auto&amp; p : _instances )</span>
+<span class="lineNum">     355 </span>            :     {
+<span class="lineNum">     356 </span><span class="lineNoCov">          0 :       p.second-&gt;stop(arg);</span>
+<span class="lineNum">     357 </span>            :     }
+<a name="358"><span class="lineNum">     358 </span><span class="lineNoCov">          0 :   }</span></a>
+<span class="lineNum">     359 </span>            :   
+<span class="lineNum">     360 </span><span class="lineCov">          1 :   static void generate_config_(component_config&amp; opt, const std::string&amp; type, fas::true_) </span>
+<span class="lineNum">     361 </span>            :   {
+<span class="lineNum">     362 </span><span class="lineCov">          1 :     instance_type().generate( opt, type);</span>
+<a name="363"><span class="lineNum">     363 </span><span class="lineCov">          1 :   }</span></a>
+<span class="lineNum">     364 </span>            : 
+<span class="lineNum">     365 </span><span class="lineCov">          1 :   void generate_config_(component_config&amp; opt, const std::string&amp; type, fas::false_) </span>
+<span class="lineNum">     366 </span>            :   {
+<span class="lineNum">     367 </span><span class="lineCov">          1 :     domain_config inst;</span>
+<span class="lineNum">     368 </span><span class="lineCov">          1 :     instance_type().generate( inst, type);</span>
+<span class="lineNum">     369 </span><span class="lineCov">          1 :     if ( inst.name.empty() )</span>
+<span class="lineNum">     370 </span><span class="lineCov">          1 :       inst.name = this-&gt;name() + &quot;1&quot;;</span>
+<span class="lineNum">     371 </span><span class="lineCov">          1 :     opt.push_back(inst);</span>
+<span class="lineNum">     372 </span><span class="lineCov">          1 :   }</span>
+<span class="lineNum">     373 </span>            : 
+<span class="lineNum">     374 </span>            : private:
+<span class="lineNum">     375 </span>            :   
+<span class="lineNum">     376 </span>            :   global_ptr   _global;
+<span class="lineNum">     377 </span>            :   instance_map _instances;
+<span class="lineNum">     378 </span>            :   config_map  _config;
+<span class="lineNum">     379 </span>            : };
+<span class="lineNum">     380 </span>            : 
+<span class="lineNum">     381 </span>            : }
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>
