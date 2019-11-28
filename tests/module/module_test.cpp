@@ -89,4 +89,10 @@ int main()
   auto g = std::make_shared< wfc::wfcglobal>(io);
   t->create(g);
   std::cout << g->registry.size() << std::endl;
+  t->stop("");
+  t.reset();
+  std::cout << "g.use_cout(): " << g.use_count() << std::endl;
+  g->clear();
+  std::cout << "g.use_cout(): " << g.use_count() << std::endl;
+  g.reset();
 }

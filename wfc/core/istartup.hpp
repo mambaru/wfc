@@ -18,6 +18,7 @@ struct istartup: iinterface
   virtual ~istartup() {}
   virtual int startup(int argc, char* argv[], std::string helpstring) = 0;
   virtual bool ready_for_run() = 0;
+  virtual void clean_finalize() = 0;
 };
 
 }

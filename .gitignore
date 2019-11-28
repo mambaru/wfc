@@ -1,3 +1,5 @@
+*_build.counter
+*build_info.h
 *~
 *.kdev4
 *.pyc
@@ -17,7 +19,4 @@ CMakeCache.txt
 *.kate-swp
 *build_info.h
 config.h
-*_build.counter
 docs
-Testing
-

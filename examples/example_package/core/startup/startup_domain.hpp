@@ -12,6 +12,7 @@ public:
   
   virtual bool ready_for_run() override;
   
+  virtual void clean_finalize() override;
 private:
   bool _ready = false;
 

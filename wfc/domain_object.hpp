@@ -695,7 +695,7 @@ public:
     if ( this->suspended(cb) )
       return true;
 
-    if ( this->system_is_stopped() )
+    if ( this->global_stop_flag() )
       return true;
 
     if ( req!=nullptr )
@@ -826,16 +826,19 @@ public:
   }
 
   /**
-   * @brief Проверка системы на сигнал останова
-   * @return true если получен сигнал прекращения работы
+   * @brief Возвращает ссылку на глобальный флаг прекращения работы
+   * @return ссылка на глобальный флаг прекращения работы
    * @details Может быть использования при длительных процедурах инициализации (например загрузка БД),
-   * чтобы завершить работу, а не дожидаться завершения инициализации
+   * чтобы завершить работу, а не дожидаться завершения инициализации. Так же можно передавать в качестве параметра 
+   * другим длительным процедурам, чтобы ускорить завершение работы
    */
-  bool system_is_stopped() const
+  const std::atomic_bool& global_stop_flag() const
   {
     if (auto g = this->global() )
       return g->stop_signal_flag;
-    return false;
+    
+    static std::atomic_bool _fake_flag;
+    return _fake_flag;
   }
 
   /**

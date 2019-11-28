@@ -31,7 +31,7 @@ public:
   cpu_set get_cpu(pid_t pid) const;
   std::string get_name(pid_t pid) const;
   bool clean_dirty();
-
+  void clear();
 private:
   void del_thread_(pid_t pid);
   static pid_t get_thread_pid_();
