@@ -1,3 +1,31 @@
 [submodule "external/cmake-ci"]
 	path = external/cmake-ci
 	url = https://github.com/mambaru/cmake-ci.git
+[submodule "external/faslib"]
+	path = external/faslib
+	url = https://github.com/migashko/faslib.git
+	branch = master
+[submodule "external/wjson"]
+	path = external/wjson
+	url = https://github.com/mambaru/wjson.git
+	branch = master
+[submodule "external/wlog"]
+	path = external/wlog
+	url = https://github.com/mambaru/wlog.git
+	branch = master
+[submodule "external/wflow"]
+	path = external/wflow
+	url = https://github.com/mambaru/wflow.git
+	branch = master
+[submodule "external/iow"]
+	path = external/iow
+	url = https://github.com/mambaru/iow.git
+	branch = master
+[submodule "external/wjrpc"]
+	path = external/wjrpc
+	url = https://github.com/mambaru/wjrpc.git
+	branch = master
+[submodule "external/wrtstat"]
+	path = external/wrtstat
+	url = https://github.com/mambaru/wrtstat.git
+	branch = master
