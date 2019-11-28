@@ -4,7 +4,7 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 
-#pragma once 
+#pragma once
 
 #include <wfc/jsonrpc/interface_implementation.hpp>
 #include <wfc/jsonrpc/basic_engine.hpp>
@@ -25,30 +25,30 @@ class service_base
   typedef typename engine_type::io_id_t io_id_t;
   typedef ::wjrpc::output_handler_t output_handler_t;
 public:
-  
+
   virtual void reconfigure() override
   {
     super::reconfigure();
     _allow_non_jsonrpc = this->options().allow_non_jsonrpc;
   }
-  
+
   virtual void initialize() override
   {
     auto dopt = this->options();
     typedef typename engine_type::target_type target_type;
-    typedef typename target_type::element_type interface_type;
-    target_type target = this->template get_target< interface_type >(dopt.target_name);
+    typedef typename target_type::element_type element_type;
+    target_type target = this->template get_target< element_type >(dopt.target_name);
     dopt.target = target;
     dopt.peeper = target;
     _raw_target = target;
     this->initialize_engine(dopt);
   }
-  
+
   virtual void perform_io(data_ptr d, io_id_t io_id, output_handler_t handler) override
   {
     if ( this->_engine == nullptr )
       return;
-    
+
     if ( _allow_non_jsonrpc )
     {
       auto beg = ::wjson::parser::parse_space( d->begin(), d->end(), nullptr );
@@ -75,12 +75,12 @@ class service
 {
   typedef service_base< ijsonrpc, ::wjrpc::handler< Impl<MethodList> > > super;
 public:
-  
+
   virtual void perform_incoming( ijsonrpc::incoming_holder holder, ijsonrpc::io_id_t io_id, ijsonrpc::outgoing_handler_t handler) override
   {
     if ( this->suspended() )
       handler( ijsonrpc::outgoing_holder() );
-    
+
     if ( auto e = this->engine())
     {
       e->perform_jsonrpc( std::move(holder), io_id, handler );
@@ -106,7 +106,7 @@ public:
     }
   }
 private:
-  
+
 };
 
 }}

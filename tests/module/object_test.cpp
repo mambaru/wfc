@@ -4,6 +4,7 @@
 #include <wfc/module/instance.hpp>
 #include <wfc/module/singleton.hpp>
 #include <wfc/module/multiton.hpp>
+#include <fas/utility/ignore_args.hpp>
 
 struct itest: 
   public wfc::iinterface
@@ -67,7 +68,7 @@ int main()
 {
   options opt;
   opt.test=0;
-  
+  fas::ignore_arg(opt);
   int res = test_gen<test_singleton>();
   res += test_gen<test_multiton>();
   return res;

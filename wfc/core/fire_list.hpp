@@ -32,11 +32,17 @@ public:
     _fire_list.insert( std::make_pair(_counter, f));
     return _counter++;
   }
-
   
   void erase(handler_id_t id)
   {
+    std::lock_guard<mutex_type> lk(_mutex);
     _fire_list.erase(id);
+  }
+  
+  void clear()
+  {
+    std::lock_guard<mutex_type> lk(_mutex);
+    _fire_list.clear();
   }
 
   void size() const

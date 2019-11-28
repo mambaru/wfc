@@ -21,12 +21,12 @@ class test
   : public domain_object<itest, options>
 {
 public:
- 
+
   virtual void reconfigure() override
   {
     testval = true;
   }
-  
+
   virtual int testtest() override
   {
     if ( !this->has_arg("param1") ) return 1001;
@@ -37,16 +37,16 @@ public:
     if ( this->get_arg("param2")!="100" ) return 1006;
     if ( this->get_arg("param3")!="" ) return 1007;
     if ( this->get_arg("param4")!="" ) return 1008;
-    
+
     if ( this->get_arg_t<int>("param2")!=100 ) return 1007;
     if ( this->get_arg_t<int>("param1")!=0 ) return 1008;
     std::string err;
     if ( this->get_arg_t<int>("param1", &err)!=0 ) return 1008;
     if ( err!="Invalid Number" ) return 1009;
-    
+
     return 0;
   }
-  
+
   bool testval = false;
 };
 
@@ -56,14 +56,14 @@ int main()
   auto g = std::make_shared<wfc::wfcglobal>(ios);
   wfc::wfcglobal::static_global = g;
   wfc::instance<test> t;
-    
+
   if ( t.object()!=nullptr )
     return 1;
 
   test::domain_config opt;
   opt.test = true;
   opt.name = "name";
-  
+
   t.create("name", g);
   t.start("");
   t.configure(opt);
@@ -79,12 +79,26 @@ int main()
 
   if ( t.object()->testval != true )
     return 6;
-  
-  options opt2; 
+
+  options opt2;
   opt2 = t.object()->generate("");
   if ( opt2.test != false )
     return 7;
-  
+
+  if ( auto wflow = t.object()->create_workflow("test","{\"control_ms\":\"1h\"}") )
+  {
+    auto opt3 = wflow->get_options();
+    if (opt3.id!="name:workflow.test")
+      return 10;
+    if (opt3.control_ms!=3600*1000)
+    {
+      std::cout << opt3.control_ms << std::endl;
+      return 11;
+    }
+  }
+  else
+    return 9;
+
   std::map<std::string, std::string> args;
   args["param1"]="val1";
   args["param2"]="100";

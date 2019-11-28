@@ -4,33 +4,14 @@ add_executable(instance_test  instance_test.cpp)
 add_executable(object_test  object_test.cpp)
 add_executable(module_test  module_test.cpp)
 
-target_link_libraries(registry_test wfc )
-target_link_libraries(domain_test wfc)
-target_link_libraries(instance_test wfc)
-target_link_libraries(object_test wfc)
-target_link_libraries(module_test wfc)
+target_link_libraries(registry_test PUBLIC wfc )
+target_link_libraries(domain_test PUBLIC wfc)
+target_link_libraries(instance_test PUBLIC wfc)
+target_link_libraries(object_test PUBLIC wfc)
+target_link_libraries(module_test PUBLIC wfc)
 
-add_test(
-  NAME registry_test 
-  COMMAND registry_test 
-)
-
-add_test(
-  NAME domain_test 
-  COMMAND domain_test 
-)
-
-add_test(
-  NAME instance_test 
-  COMMAND instance_test
-)
-
-add_test(
-  NAME object_test 
-  COMMAND object_test
-)
-
-add_test(
-  NAME module_test 
-  COMMAND module_test
-)
+wci_test(TARGET registry_test COMMAND registry_test )
+wci_test(TARGET domain_test  COMMAND domain_test )
+wci_test(TARGET instance_test COMMAND instance_test)
+wci_test(TARGET object_test COMMAND object_test)
+wci_test(TARGET module_test COMMAND module_test)

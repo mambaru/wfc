@@ -17,3 +17,8 @@ bool startup_domain::ready_for_run()
 {
   return _ready;
 }
+
+void startup_domain::clean_finalize() 
+{
+  
+}

@@ -31,6 +31,7 @@ public:
 
   bool has(const std::string& name) const;
   
+  void clear();
 private:
   extended_args_map _extended_args;
   mutable std::mutex _mutex;

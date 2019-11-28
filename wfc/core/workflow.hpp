@@ -10,6 +10,7 @@
 #include <wfc/core/workflow_options.hpp>
 #include <wfc/core/workflow_options_json.hpp>
 
+// TODO: УБРАТЬ
 namespace wfc{
 
 /** 
@@ -25,8 +26,8 @@ public:
     : super(io)
   {}
 
-  workflow(io_service_type& io, const workflow_options& opt )
-    : super(io, opt)
+  workflow(io_service_type& io, const workflow_options& opt, const wflow::workflow_handlers& handlers = wflow::workflow_handlers() )
+    : super(io, opt, handlers)
   {}
 };
 

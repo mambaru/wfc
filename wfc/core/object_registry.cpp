@@ -53,6 +53,8 @@ void object_registry::erase(const std::string& prefix, const std::string& name)
       ++_dirty;
     }
   }
+  // выносим из под мьютекса т.к. удаление может быть тяжелым
+  ptr.reset();
 }
 
 void object_registry::erase(const std::string& name)

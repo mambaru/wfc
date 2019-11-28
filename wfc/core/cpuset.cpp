@@ -81,4 +81,10 @@ pid_t cpuset::get_thread_pid_()
   return static_cast<pid_t>(syscall(SYS_gettid));
 }
 
+void cpuset::clear()
+{
+  std::lock_guard<mutex_type> lk(_mutex);
+  _cpu_map.clear();
+}
+
 }

@@ -15,5 +15,7 @@ add_library(
   example/domain/example_domain.cpp
   example/domain/example_multiton.cpp
 )
+target_link_libraries(example_package PUBLIC wfc)
+wci_utils(example_package)
 
 build_info(example_package example)

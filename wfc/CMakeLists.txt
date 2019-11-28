@@ -18,25 +18,24 @@ SET(
   module/package.cpp
 )
 
-add_library(
-  wfc
-  ${wfc_source_list}
-)
-
+add_library(wfc ${wfc_source_list})
+wci_targets(wfc)
 build_info(wfc wfc)
 
-if ( STANDALONE )
+include(FindThreads)
+find_package(Boost COMPONENTS system program_options filesystem date_time regex REQUIRED)
 
-  include(FindThreads)
-  find_package(Boost COMPONENTS system program_options filesystem date_time regex REQUIRED)
-
-  target_link_libraries(
-    wfc 
+target_link_libraries(
+  wfc
+    PUBLIC
+      faslib
+      wjson
+      iow
       wrtstat
       wlog
       wflow
       wjrpc
-      ${Boost_LIBRARIES} 
+      ${Boost_LIBRARIES}
       ${CMAKE_THREAD_LIBS_INIT}
-  )
-endif()
+)
+

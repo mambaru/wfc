@@ -51,6 +51,8 @@ struct wfcglobal
   std::atomic_bool stop_signal_flag;
 
   explicit wfcglobal( io_service_type& io_service);
+  virtual ~wfcglobal();
+  virtual void clear();
 };
 
 }

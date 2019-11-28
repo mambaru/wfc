@@ -83,6 +83,8 @@ public:
     return _ready;
   }
   
+  virtual void clean_finalize() override {}
+  
 private:
   bool _ready = false;
 };

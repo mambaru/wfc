@@ -63,5 +63,10 @@ bool extended_args::has(const std::string& name) const
   return _extended_args.count(name) != 0;
 }
 
+void extended_args::clear()
+{
+  std::lock_guard<std::mutex> lk(_mutex);
+  return _extended_args.clear();
+}
   
 }
