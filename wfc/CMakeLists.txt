@@ -1,5 +1,3 @@
-include(BuildInfo)
-
 SET(
   wfc_source_list
   wfc.cpp
