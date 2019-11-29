@@ -1,16 +1,15 @@
 GET_FILENAME_COMPONENT(CURRENT_SCRIPT_DIRECTORY ${CMAKE_CURRENT_LIST_FILE} PATH)
+set(ENV{BUILD_INFO_SCRIPT} ${CURRENT_SCRIPT_DIRECTORY}/../build_info.sh)
 
 MACRO(build_info target_name display_name)
-
   set(build_dir ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}Info)
   set(build_prefix ${build_dir}/${display_name}_build_info)
   string(TOUPPER "CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}" cxx_build_type_flags_name)
   set(cxx_build_type_flags "${CMAKE_CXX_FLAGS} ${${cxx_build_type_flags_name}}")
-  #set(cxx_build_type_flags "${CMAKE_CXX_FLAGS}")
   add_custom_target(
     ${display_name}_build_info
     COMMAND
-      /bin/bash ${CURRENT_SCRIPT_DIRECTORY}/../build_info.sh
+      /bin/bash $ENV{BUILD_INFO_SCRIPT}
         ${display_name}
         ${build_dir}
         ${CMAKE_BUILD_TYPE}
