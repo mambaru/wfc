@@ -1,14 +1,19 @@
+
+[![tag](https://img.shields.io/github/v/tag/mambaru/wfc.svg?sort=semver)](https://github.com/mambaru/wfc/tree/master)
 [![Build Status](https://github.com/mambaru/wfc/workflows/C++%20CI/badge.svg?branch=master)](https://github.com/mambaru/wfc/tree/master)
 [![Build Status](https://github.com/mambaru/wfc/workflows/C++%20CI/badge.svg?branch=mambaru)](https://github.com/mambaru/wfc/tree/mambaru)
-[![Coverage Report](http://github.lan/cpp/wfc/badges/pre-release/coverage.svg)](http://github.lan/cpp/wfc/commits/pre-release)
-
-WFC - это фреймворк для разработки высконагруженных JSON-RPC сервисов (демонов) под различные профили нагрузки. Данный проект является частью этого фреймворка, но не им самим.
-Если вас интересует как быстро сделать свой первый проект на базе этого фреймворка обратитесь к документации [wfcroot](https://github.com/mambaru/wfcroot) или изучите
-[Демо-проект](https://github.com/mambaru/demod).
+[![Build Status](https://travis-ci.com/mambaru/wfc.svg?branch=master)](https://travis-ci.com/mambaru/wfc)
+[![Build Status](https://travis-ci.com/mambaru/wfc.svg?branch=mambaru)](https://travis-ci.com/mambaru/wfc)
+[![codecov](https://codecov.io/gh/mambaru/wfc/branch/master/graph/badge.svg)](https://codecov.io/gh/mambaru/wfc)
 
 * Репозитарий на [github.com](https://github.com/mambaru/wfc).
 * Документация [doxygen](https://mambaru.github.io/wfc/index.html).
 * Отчет [coverage](https://mambaru.github.io/wfc/cov-report/index.html)
+
+
+WFC - это фреймворк для разработки высконагруженных JSON-RPC сервисов (демонов) под различные профили нагрузки. Данный проект является частью этого фреймворка, но не им самим.
+Если вас интересует как быстро сделать свой первый проект на базе этого фреймворка обратитесь к документации [wfcroot](https://github.com/mambaru/wfcroot) или изучите
+[Демо-проект](https://github.com/mambaru/demod).
 
 # Сборка и установка
 
