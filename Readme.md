@@ -6,13 +6,14 @@
 [![Build Status](https://travis-ci.com/mambaru/wfc.svg?branch=mambaru)](https://travis-ci.com/mambaru/wfc)
 [![codecov](https://codecov.io/gh/mambaru/wfc/branch/master/graph/badge.svg)](https://codecov.io/gh/mambaru/wfc)
 
-WFC - это фреймворк для разработки высконагруженных JSON-RPC сервисов (демонов) под различные профили нагрузки. Данный проект является частью этого фреймворка, но не им самим.
-Если вас интересует как быстро сделать свой первый проект на базе этого фреймворка обратитесь к документации [wfcroot](https://github.com/mambaru/wfcroot) или изучите
-[Демо-проект](https://github.com/mambaru/demod).
-
 * Репозитарий на [github.com](https://github.com/mambaru/wfc).
 * Документация [doxygen](https://mambaru.github.io/wfc/index.html).
 * Отчет [coverage](https://mambaru.github.io/wfc/cov-report/index.html)
+
+
+WFC - это фреймворк для разработки высконагруженных JSON-RPC сервисов (демонов) под различные профили нагрузки. Данный проект является частью этого фреймворка, но не им самим.
+Если вас интересует как быстро сделать свой первый проект на базе этого фреймворка обратитесь к документации [wfcroot](https://github.com/mambaru/wfcroot) или изучите
+[Демо-проект](https://github.com/mambaru/demod).
 
 # Сборка и установка
 
