@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <ctime>
 #include <string>
+#include <unistd.h>
 
 namespace wfc{
 
@@ -27,10 +28,10 @@ bool change_user(std::string username, std::string* err);
 
 bool change_working_directory(std::string working_directory, std::string* err);
 
-void autoup(
+bool autoup(
   time_t timeout,
-  bool success_autoup = false, 
-  std::function<bool(int, int, time_t)> before = nullptr,
+  bool success_autoup = false,
+  std::function<bool(pid_t pid, int, int, time_t)> before = nullptr,
   std::function<void(int, int, time_t)> after = nullptr
 );
 

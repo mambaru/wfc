@@ -26,14 +26,15 @@ find_package(Boost COMPONENTS system program_options filesystem date_time regex 
 target_link_libraries(
   wfc
     PUBLIC
-      faslib
-      wjson
       iow
-      wrtstat
-      wlog
       wflow
       wjrpc
+      wrtstat
+      wlog
+      wjson
+      faslib
       ${Boost_LIBRARIES}
       ${CMAKE_THREAD_LIBS_INIT}
 )
+
 

@@ -11,5 +11,6 @@
 namespace wfc{
 
 using wflow::workflow_options;
+using wflow::workflow_handlers;
 
 }

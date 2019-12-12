@@ -42,7 +42,7 @@ int basic_wfc::run(int argc, char* argv[], std::string helpstring)
   {
     if ( int err = startup->startup(argc, argv, helpstring) )
       return err;
-    
+
     if ( !startup->ready_for_run() )
       return 0;
   }
