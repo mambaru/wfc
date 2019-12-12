@@ -10,9 +10,10 @@
 #include <ctime>
 #include <cstring>
 #include <iostream>
+#include <atomic>
 
 namespace wfc{
-  
+
 template<typename Args>
 inline void unused_params(const Args& ...) {}
 
@@ -91,7 +92,7 @@ std::function<void()> daemonize(bool wait)
     if (wait) ::wait(&status);
     ::exit(status);
   }
-  
+
   pid_t ppid = ::getppid();
   return [ppid, wait]()
   {
@@ -100,10 +101,32 @@ std::function<void()> daemonize(bool wait)
   };
 }
 
-void autoup(time_t timeout, bool success_autoup, 
-            std::function<bool(int, int, time_t)> before, 
+namespace
+{
+  std::atomic_bool autoup_flag(false);
+  std::atomic<pid_t> child_pid(0);
+
+  static void kill_child_and_maybe_exit(int sig)
+  {
+    kill(child_pid, sig);
+    if ( sig!=SIGHUP )
+    {
+      autoup_flag = false;
+      ::waitpid(child_pid, nullptr, 0);
+    }
+  }
+}
+
+bool autoup(time_t timeout, bool success_autoup,
+            std::function<bool(pid_t pid, int, int, time_t)> before,
             std::function<void(int, int, time_t)> after )
 {
+  if ( autoup_flag == true )
+    return false;
+
+  autoup_flag = true;
+  child_pid = 0;
+
   int status = 0;
   time_t worktime = 0;
   for ( int i=0; true ; ++i )
@@ -122,23 +145,37 @@ void autoup(time_t timeout, bool success_autoup,
         ::dup2(null, 1);
         ::dup2(null, 2);
       }
-      
+
       if ( i!=0 && after!=nullptr )
         after(i, status, worktime);
-      break;
+      return false;
     }
-    
+
     status = 0;
+
+    if ( child_pid == 0)
+    {
+      signal(SIGHUP,  kill_child_and_maybe_exit);
+      signal(SIGINT,  kill_child_and_maybe_exit);
+      signal(SIGTERM, kill_child_and_maybe_exit);
+    }
+    child_pid = pid;
+
     ::waitpid(pid, &status, 0);
+
+    if ( autoup_flag == false )
+      break;
+
     worktime = std::time(nullptr) - t;
     bool restart = ( status!=0 || success_autoup) && ( worktime >= timeout );
     if ( restart && before!=nullptr )
-      restart = before(i, status, worktime);
-    
+      restart = before(pid, i+1, status, worktime);
+
     kill(pid, SIGKILL);
     if ( !restart )
-      exit(0);
+      break;
   }
+  return true;
 }
 
 int dumpable()
@@ -159,14 +196,14 @@ bool change_user(std::string username, std::string* err)
     //std::cerr << strerror(errno) << std::endl;
     if (err!=nullptr)
       *err = strerror(errno);
-    return false; 
+    return false;
   }
   uid_t uid = pwd->pw_uid;
   std::clog << "new uid=" << uid << std::endl;
   if ( 0 != ::setuid(uid) )
   {
     std::cerr << strerror(errno) << std::endl;
-    return false; 
+    return false;
   };
   return true;
 }
@@ -178,7 +215,7 @@ bool change_working_directory(std::string working_directory, std::string* err)
     //std::cerr << strerror(errno) << std::endl;
     if (err!=nullptr)
       *err = strerror(errno);
-    return false; 
+    return false;
   }
   return true;
 }

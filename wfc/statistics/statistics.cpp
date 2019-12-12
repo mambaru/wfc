@@ -51,7 +51,6 @@ statistics::aggregated_ptr statistics::pop(size_t i)
   return _impl->pop(i);
 }
 
-
 value_meter statistics::create_value_meter(const std::string& name)
 {
   return _impl->create_value_multi_meter(name);
