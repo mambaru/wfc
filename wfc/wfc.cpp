@@ -11,9 +11,17 @@
 #include <wfc/core/build_info.hpp>
 #include <wfc/core/wfcglobal.hpp>
 #include <iostream>
-#include "wfc_build_info.h"
 
+#include "wfc_build_info.h"
 namespace wfc{
+  
+basic_wfc::~basic_wfc()
+{
+  if ( _global != nullptr )
+    _global->registry.clear();
+  _packages.clear();
+  _global.reset();
+}
 
 basic_wfc::basic_wfc(std::shared_ptr<ibuild_info> bi, const package_list& packages )
   : _packages(packages)
@@ -31,7 +39,6 @@ basic_wfc::basic_wfc(std::shared_ptr<ibuild_info> bi, const package_list& packag
   {
     p->create(_global);
   }
-
 }
 
 int basic_wfc::run(int argc, char* argv[], std::string helpstring)
@@ -40,6 +47,7 @@ int basic_wfc::run(int argc, char* argv[], std::string helpstring)
 
   if ( auto startup = _global->registry.get_target<istartup>("startup", true) )
   {
+
     if ( int err = startup->startup(argc, argv, helpstring) )
       return err;
 

@@ -4,7 +4,7 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 
-#pragma once 
+#pragma once
 
 #include <wfc/jsonrpc/interface_implementation.hpp>
 #include <wfc/jsonrpc/basic_engine.hpp>
@@ -40,17 +40,16 @@ public:
     dopt.target = target;
     dopt.peeper = target;
     this->initialize_engine( dopt);
-    
   }
-  
+
   virtual void start() override
   {
     auto dopt = this->options();
-    
+
     typedef typename engine_type::target_type target_type;
     typedef typename target_type::element_type target_interface;
     target_type target = this->template get_target<target_interface>(dopt.incoming_target_name);
-    
+
     if ( target!=nullptr && dopt.incoming_reg)
       target->reg_io( this->engine()->get_id(), this->shared_from_this()  );
 
@@ -60,7 +59,7 @@ public:
       _no_outgoing_target = false;
       if ( dopt.outgoing_reg )
         pitf->reg_io( this->engine()->get_id(), this->shared_from_this() );
-      
+
       std::weak_ptr<ijsonrpc> witf = pitf;
       io_id_t io_id = _target_id;
       this->engine()->reg_jsonrpc( _target_id, [witf, io_id]( ::wjrpc::outgoing_holder holder)
@@ -75,8 +74,8 @@ public:
     {
       _no_outgoing_target = false;
       if ( dopt.outgoing_reg )
-        pitf2->reg_io( this->engine()->get_id(), this->shared_from_this() );
-      
+        pitf2->reg_io( _target_id /*this->engine()->get_id()*/, this->shared_from_this() );
+
       std::weak_ptr<iinterface> witf2 = pitf2;
       io_id_t io_id = _target_id;
       this->engine()->reg_io( _target_id, [witf2, io_id]( data_ptr d, io_id_t /*io_id*/, ::wjrpc::output_handler_t handler )

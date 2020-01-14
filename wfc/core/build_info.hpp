@@ -34,7 +34,7 @@ public:
   {
     return _bi.version_tag();
   }
-  
+
   virtual std::string version() override
   {
     std::stringstream ss;
@@ -44,12 +44,12 @@ public:
     ss << "-" << this->build_count();
     return ss.str();
   }
-  
+
   virtual std::string compiler_version() override
   {
     return _bi.compiler_version();
   }
-  
+
   virtual std::string version_ex() override
   {
     return _bi.version_ex();
@@ -114,7 +114,7 @@ private:
 };
 
 template<typename BuildInfo>
-inline std::shared_ptr<ibuild_info> 
+inline std::shared_ptr<ibuild_info>
 make_build_info()
 {
   return std::make_shared< build_info<BuildInfo> >();
@@ -127,86 +127,94 @@ struct empty_build_info
     return true;
   }
 
-  static std::string name() 
+  static std::string name()
   {
     return std::string();
   }
 
-  static std::string version_tag() 
-  {
-    return std::string();
-  }
-  
-  static std::string version() 
+  static std::string version_tag()
   {
     return std::string();
   }
 
-  static std::string compiler_version() 
-  {
-    return std::string();
-  }
-  
-  static std::string version_ex() 
+  static std::string version()
   {
     return std::string();
   }
 
-  static std::string build_type() 
+  static std::string compiler_version()
   {
     return std::string();
   }
 
-  static std::string build_date() 
+  static std::string version_ex()
   {
     return std::string();
   }
 
-  static std::string build_flags() 
+  static std::string build_type()
   {
     return std::string();
   }
 
-  static std::string build_count() 
+  static std::string build_date()
   {
     return std::string();
   }
 
-  static std::string branch() 
+  static std::string build_flags()
   {
     return std::string();
   }
 
-  static std::string commit() 
+  static std::string build_count()
   {
     return std::string();
   }
 
-  static std::string commit_date() 
+  static std::string branch()
   {
     return std::string();
   }
 
-  static std::string commit_author() 
+  static std::string commit()
   {
     return std::string();
   }
 
-  static std::string initial_author() 
+  static std::string commit_date()
   {
     return std::string();
   }
 
-  static std::string commit_message() 
+  static std::string commit_author()
   {
     return std::string();
   }
 
-  static std::string all_authors() 
+  static std::string initial_author()
+  {
+    return std::string();
+  }
+
+  static std::string commit_message()
+  {
+    return std::string();
+  }
+
+  static std::string all_authors()
   {
     return std::string();
   }
 };
 
+template<typename N>
+struct named_build_info: empty_build_info
+{
+  static std::string name()
+  {
+    return N()();
+  }
+};
 
 }

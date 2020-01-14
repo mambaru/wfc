@@ -23,6 +23,7 @@ public:
   typedef std::shared_ptr<ipackage> package_ptr;
   typedef std::list<package_ptr> package_list;
 
+  virtual ~basic_wfc();
   basic_wfc(std::shared_ptr<ibuild_info> bi, const package_list& packages);
   int run(int argc, char* argv[], std::string helpstring = std::string() );
 private:

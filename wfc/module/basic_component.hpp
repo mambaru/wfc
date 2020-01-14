@@ -17,6 +17,7 @@
 #include <memory>
 #include <string>
 #include <stdexcept>
+#include <iostream>
 
 namespace wfc{
   
@@ -206,14 +207,19 @@ private:
   
   void create_(fas::true_)
   {
-    _instances = std::make_shared<instance_type>();
-    domain_config opt;
-    if ( _global != nullptr )
+    if ( _instances==nullptr )
     {
-      _global->registry.set_object("instance", this->name(), _instances);
+      _instances = std::make_shared<instance_type>();
+      if ( _global != nullptr )
+      {
+        _global->registry.set_object("instance", this->name(), _instances);
+      }
+      _instances->create(this->name(), _global);
     }
+    
+    domain_config opt;
     json::json_error err;
-    _instances->create(this->name(), _global);
+    
     if ( !this->configure_("{}", fas::true_(), &err) )
     {
       SYSTEM_LOG_FATAL("Singleton '" << this->name() << "' default initialize: " << json::strerror::message(err) )
@@ -357,9 +363,11 @@ private:
     }
   }
   
-  static void generate_config_(component_config& opt, const std::string& type, fas::true_) 
+  void generate_config_(component_config& opt, const std::string& type, fas::true_) 
   {
-    instance_type().generate( opt, type);
+    //instance_type().generate( opt, type);
+    if ( _instances != nullptr )
+      _instances->generate( opt, type);
   }
 
   void generate_config_(component_config& opt, const std::string& type, fas::false_) 
