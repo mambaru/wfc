@@ -55,7 +55,7 @@ void sleep( int millisec )
 #endif
 }
 
-std::function<void()> daemonize(bool wait)
+std::function<void()> daemonize(bool wait_flag)
 {
   int null = ::open("/dev/null", O_RDWR);
   if(-1 == null)
@@ -64,13 +64,13 @@ std::function<void()> daemonize(bool wait)
     ::exit(EXIT_FAILURE);
   }
 
-  if (wait)
+  if (wait_flag)
     ::signal(SIGTERM, [](int){ ::exit(EXIT_SUCCESS); });
   pid_t pid = ::fork();
   switch(pid)
   {
   case 0:
-    if (wait)
+    if (wait_flag)
       ::signal(SIGTERM, SIG_DFL);
     ::setsid();
     ::umask(0);
@@ -89,14 +89,15 @@ std::function<void()> daemonize(bool wait)
   default:
     // Wait SIGTERM from children for exit
     int status = EXIT_SUCCESS;
-    if (wait) ::wait(&status);
+    if ( wait_flag )
+      ::wait(&status);
     ::exit(status);
   }
 
   pid_t ppid = ::getppid();
-  return [ppid, wait]()
+  return [ppid, wait_flag]()
   {
-    if ( wait )
+    if ( wait_flag )
       ::kill( ppid, SIGTERM);
   };
 }

@@ -35,6 +35,7 @@ public:
 
   virtual ~instance() 
   {
+    _object = nullptr;
     _global = nullptr;
   }
 
@@ -148,7 +149,9 @@ public:
 
   void generate(domain_config& opt, const std::string& type) const 
   {
-    auto obj = std::make_shared<object_type>();
+    auto obj = _object;
+    if ( obj == nullptr )
+      obj = std::make_shared<object_type>();
     get_(obj)->domain_generate( opt, type );
   }
 

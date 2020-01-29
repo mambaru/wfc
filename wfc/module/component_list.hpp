@@ -25,6 +25,12 @@ class component_list
   typedef std::shared_ptr<icomponent> component_ptr;
   typedef std::list< component_ptr > component_map;
 public:
+  
+  virtual ~component_list()
+  {
+    _components.clear();
+  }
+  
   virtual std::string name() const override
   {
     return Name()();

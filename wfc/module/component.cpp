@@ -10,6 +10,7 @@ namespace wfc{
 
 component::~component()
 {
+  _impl = nullptr;
 }
 
 component::component(const std::shared_ptr<icomponent>& p)

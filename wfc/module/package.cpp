@@ -11,7 +11,7 @@ namespace wfc{
 
 package::~package()
 {
-  
+  _impl = nullptr;
 }
   
 package::package(const std::shared_ptr<ipackage>& p)

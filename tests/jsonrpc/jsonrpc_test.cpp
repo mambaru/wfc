@@ -64,45 +64,54 @@ class test_service
 int main()
 {
   wfc::asio::io_service ios;
-  auto g = std::make_shared<wfc::wfcglobal>(ios);
-  wfc::wfcglobal::static_global = g;
-  wfc::instance<test> t;
+  {
     
-  if ( t.object()!=nullptr )
-    return 1;
+    auto g = std::make_shared<wfc::wfcglobal>(ios);
+    wfc::wfcglobal::static_global = g;
+    auto t = std::make_shared< wfc::instance<test> >();
+      
+    if ( t->object()!=nullptr )
+      return 1;
 
-  test::domain_config opt;
-  opt.test = true;
-  opt.name = "name";
-  
-  t.create("name", g);
-  t.start("");
-  t.configure(opt);
-  t.initialize();
-  t.reconfigure(opt);
+    test::domain_config opt;
+    opt.test = true;
+    opt.name = "name";
+    
+    t->create("name", g);
+    t->start("");
+    t->configure(opt);
+    t->initialize();
+    t->reconfigure(opt);
 
-  if ( t.object()->options().test != true )
-    return 3;
+    if ( t->object()->options().test != true )
+      return 3;
 
-  //std::cout << t.name() << std::endl;
-  if ( t.object()->name() != "name" )
-    return 5;
+    //std::cout << t.name() << std::endl;
+    if ( t->object()->name() != "name" )
+      return 5;
 
-  if ( t.object()->testval != true )
-    return 6;
-  
-  options opt2; 
-  opt2 = t.object()->generate("");
-  if ( opt2.test != false )
-    return 7;
-  
-  std::map<std::string, std::string> args;
-  args["param1"]="val1";
-  args["param2"]="100";
-  args["param3"]="";
-  g->args.insert("name", wfc::instance_args("name", args) );
-  if ( auto itst = g->registry.get_target<ijsonrpc>("name") )
-    return 0;
-  else
-    return 8;
+    if ( t->object()->testval != true )
+      return 6;
+    
+    options opt2; 
+    opt2 = t->object()->generate("");
+    if ( opt2.test != false )
+      return 7;
+    
+    std::map<std::string, std::string> args;
+    args["param1"]="val1";
+    args["param2"]="100";
+    args["param3"]="";
+    g->args.insert("name", wfc::instance_args("name", args) );
+    if ( auto itst = g->registry.get_target<ijsonrpc>("name") )
+      return 0;
+    else
+      return 8;
+    t->stop("");
+    g->args.clear();
+    g->registry.clear();
+    t.reset();
+    g.reset();
+  }
+  return 0;
 }
