@@ -14,10 +14,13 @@ SET(
   module/component.cpp
   module/module.cpp
   module/package.cpp
+  testing/testing_domain.cpp
+  testing/testing_wfc.cpp
 )
 
 add_library(wfc ${wfc_source_list})
 wci_targets(wfc)
+target_compile_definitions(wfc PRIVATE -DBOOST_ASIO_NO_DEPRECATED)
 build_info(wfc wfc)
 
 include(FindThreads)
@@ -36,5 +39,3 @@ target_link_libraries(
       ${Boost_LIBRARIES}
       ${CMAKE_THREAD_LIBS_INIT}
 )
-
-

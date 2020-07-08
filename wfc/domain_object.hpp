@@ -123,16 +123,16 @@ public:
   typedef std::shared_ptr<wfcglobal> global_ptr;
 
   /** @brief Создает обертки для callback обработчиков */
-  typedef ::iow::owner owner_type;
+  typedef iow::owner owner_type;
 
   /** @brief Ошибка JSON-десериализации  */
-  typedef ::wfc::json::json_error json_error;
+  typedef wjson::json_error json_error;
 
   /** @brief Уникальный идентификатор объекта */
   typedef typename domain_interface::io_id_t   io_id_t;
 
   /** @brief Очередь задач*/
-  typedef ::wfc::workflow workflow_type;
+  typedef wflow::workflow workflow_type;
 
   typedef workflow_type::timer_id_t timer_id_t;
 
@@ -470,7 +470,7 @@ public:
    */
   std::shared_ptr<workflow_type> create_workflow(const wflow::workflow_options& opt) const
   {
-    auto wflow = std::make_shared<workflow_type>(this->global()->io_service,  opt);
+    auto wflow = std::make_shared<workflow_type>(this->global()->io_context,  opt);
     wflow->start();
     return wflow;
   }
@@ -829,14 +829,14 @@ public:
    * @brief Возвращает ссылку на глобальный флаг прекращения работы
    * @return ссылка на глобальный флаг прекращения работы
    * @details Может быть использования при длительных процедурах инициализации (например загрузка БД),
-   * чтобы завершить работу, а не дожидаться завершения инициализации. Так же можно передавать в качестве параметра 
+   * чтобы завершить работу, а не дожидаться завершения инициализации. Так же можно передавать в качестве параметра
    * другим длительным процедурам, чтобы ускорить завершение работы
    */
   const std::atomic_bool& global_stop_flag() const
   {
     if (auto g = this->global() )
       return g->stop_signal_flag;
-    
+
     static std::atomic_bool _fake_flag;
     return _fake_flag;
   }
@@ -1036,7 +1036,7 @@ void domain_object<Itf, Opt, StatOpt>::initialize_domain()
 
     _workflow = _config.workflow.empty()
                 ? this->global()->common_workflow
-                : this->global()->registry.template get_object<workflow >("workflow", _config.workflow, false)
+                : this->global()->registry.template get_object<wflow::workflow>("workflow", _config.workflow, false)
                 ;
 
     _statistics = ! _config.statistics.disabled

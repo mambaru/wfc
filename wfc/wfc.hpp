@@ -26,8 +26,12 @@ public:
   virtual ~basic_wfc();
   basic_wfc(std::shared_ptr<ibuild_info> bi, const package_list& packages);
   int run(int argc, char* argv[], std::string helpstring = std::string() );
+
+  void add_package(package_ptr ppack);
+  void add_packages(const package_list& packages);
+
 private:
-  ::wfc::asio::io_service _io_service;
+  boost::asio::io_context _io_context;
   std::shared_ptr<wfcglobal> _global;
   package_list _packages;
 };

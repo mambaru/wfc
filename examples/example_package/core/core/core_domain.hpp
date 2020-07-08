@@ -9,11 +9,11 @@ class core_domain
 {
 public:
   virtual int run( ) override;
-  
+
   virtual void core_reconfigure() override;
-  
+
   virtual void core_stop() override;
-  
-  virtual void core_abort( std::string ) override ;
+
+  virtual void core_abort( const std::string& ) override ;
 };
 

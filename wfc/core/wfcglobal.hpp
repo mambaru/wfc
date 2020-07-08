@@ -22,9 +22,9 @@ struct wfcglobal
   typedef std::shared_ptr<wfcglobal> ptr;
   typedef std::function<bool()> fire_handler;
   typedef fire_list< fire_handler > fakir;
-  typedef asio::io_service io_service_type;
+  typedef boost::asio::io_context io_context_type;
   typedef std::function<void(const std::string&)> callback_handler_t;
- 
+
   std::string program_name;
   std::string instance_name;
   std::shared_ptr<ibuild_info> program_build_info;
@@ -36,21 +36,21 @@ struct wfcglobal
   fakir after_start;
   fakir before_stop;
   fakir after_stop;
-  
+
   std::atomic_bool disable_statistics;
-  
+
   callback_handler_t nocall_handler;
   callback_handler_t doublecall_handler;
- 
+
   cpuset cpu;
   object_registry registry;
-  
-  io_service_type& io_service;
-  std::shared_ptr< workflow > common_workflow;
+
+  io_context_type& io_context;
+  std::shared_ptr< wflow::workflow > common_workflow;
   static ptr static_global;
   std::atomic_bool stop_signal_flag;
 
-  explicit wfcglobal( io_service_type& io_service);
+  explicit wfcglobal( io_context_type& io_context);
   virtual ~wfcglobal();
   virtual void clear();
 };

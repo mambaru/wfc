@@ -16,31 +16,31 @@
 #include <iostream>
 
 struct core_options{};
-struct core_options_json                                                                                                                                                          
-{                                                                                                                                                                                 
+struct core_options_json
+{
   typedef wfc::json::object<
     core_options,
     wfc::json::member_list<
     >
-  > type;                                                                                                                                                                         
+  > type;
 
-  typedef typename type::target      target;                                                                                                                                      
-  typedef typename type::member_list member_list;                                                                                                                                 
-  typedef typename type::serializer  serializer;                                                                                                                                  
+  typedef typename type::target      target;
+  typedef typename type::member_list member_list;
+  typedef typename type::serializer  serializer;
 };
 
 struct startup_options{};
-struct startup_options_json                                                                                                                                                          
-{                                                                                                                                                                                 
+struct startup_options_json
+{
   typedef wfc::json::object<
     startup_options,
     wfc::json::member_list<
     >
-  > type;                                                                                                                                                                         
+  > type;
 
-  typedef typename type::target      target;                                                                                                                                      
-  typedef typename type::member_list member_list;                                                                                                                                 
-  typedef typename type::serializer  serializer;                                                                                                                                  
+  typedef typename type::target      target;
+  typedef typename type::member_list member_list;
+  typedef typename type::serializer  serializer;
 };
 
 
@@ -49,7 +49,7 @@ class example_core
 {
 public:
   typedef wfc::domain_object< wfc::icore, core_options >::domain_config config_type;
-  
+
   virtual int run( ) override
   {
     std::cout << "example_core::run()!" << std::endl;
@@ -57,7 +57,7 @@ public:
   }
   virtual void core_reconfigure() override{ }
   virtual void core_stop() override{}
-  virtual void core_abort( std::string ) override {}
+  virtual void core_abort( const std::string& ) override {}
 };
 
 
@@ -77,14 +77,14 @@ public:
     }
     return 0;
   }
-  
+
   virtual bool ready_for_run() override
   {
     return _ready;
   }
-  
+
   virtual void clean_finalize() override {}
-  
+
 private:
   bool _ready = false;
 };
@@ -126,7 +126,7 @@ public:
 
 WFC_NAME2(module_name, "example-module")
 
-struct example_module::impl: 
+struct example_module::impl:
   wfc::component_list<
     module_name,
     core_singleton,
@@ -137,7 +137,7 @@ struct example_module::impl:
 example_module::example_module()
   : wfc::module(std::make_shared<impl>())
 {
-  
+
 }
 
 
@@ -148,7 +148,7 @@ public:
   example_package();
 };
 
-struct example_package::impl: 
+struct example_package::impl:
   wfc::module_list<
     wfc::empty_build_info,
     example_module
@@ -163,7 +163,7 @@ struct example_package::impl:
 example_package::example_package()
   : wfc::package(std::make_shared<impl>())
 {
-  
+
 }
 
 int main(int argc, char* argv[])

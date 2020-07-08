@@ -21,7 +21,7 @@ public:
   virtual std::shared_ptr<ibuild_info> build_info()  override;
   virtual std::string name() const override;
   virtual std::string description() const override;
-  virtual int order() const override;
+  virtual int show_order() const override;
   virtual std::vector< std::shared_ptr<imodule> > modules()  override;
   virtual void create( std::shared_ptr<wfcglobal> ) override;
   virtual void start(const std::string& arg) override;

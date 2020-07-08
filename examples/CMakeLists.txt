@@ -1,3 +1,5 @@
+add_definitions(-DBOOST_ASIO_NO_DEPRECATED)
+
 include(BuildInfo)
 
 add_executable(example01 example01.cpp)

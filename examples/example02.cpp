@@ -13,42 +13,42 @@ public:
     std::cout << "example_package::build_info()" << std::endl;
     return nullptr;
   }
-  
+
   virtual std::string name() const override
   {
     std::cout << "example_package::name()" << std::endl;
     return "example_package";
   }
-  
+
   virtual std::string description() const override
   {
     std::cout << "example_package::description()" << std::endl;
     return "empty package";
   }
-  
-  virtual int order() const override
+
+  virtual int show_order() const override
   {
-    std::cout << "example_package::order()" << std::endl;
+    std::cout << "example_package::show_order()" << std::endl;
     return 0;
   }
-  
+
   virtual std::vector< std::shared_ptr<wfc::imodule> > modules() override
   {
     std::cout << "example_package::modules()" << std::endl;
     return std::vector< std::shared_ptr<wfc::imodule> >();
   }
-  
+
   virtual void create( std::shared_ptr<wfc::wfcglobal> ) override
   {
     std::cout << "example_package::create()" << std::endl;
   }
-  
+
   // only for external control
   virtual void start(const std::string&) override
   {
     std::cout << "example_package::start()" << std::endl;
   }
-  
+
   virtual void stop(const std::string&) override
   {
     std::cout << "example_package::stop()" << std::endl;

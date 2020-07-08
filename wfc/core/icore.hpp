@@ -13,14 +13,14 @@
 namespace wfc{
 
 struct wfcglobal;
-  
+
 struct icore: iinterface
 {
   virtual ~icore() {}
   virtual int run() = 0;
   virtual void core_reconfigure() = 0;
   virtual void core_stop() = 0;
-  virtual void core_abort( std::string message ) = 0;
+  virtual void core_abort( const std::string& ) = 0;
 };
 
 }
