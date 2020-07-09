@@ -9,13 +9,13 @@
 
 namespace wfc{
 
-
 testing_wfc::testing_wfc(const package_list& packages )
   : _wfc(nullptr)
   , _core(std::make_shared<core_package_for_testing>())
 {
-  package_list pl = packages;
+  package_list pl;
   pl.push_back(_core);
+  std::copy(packages.begin(), packages.end(), std::back_inserter(pl));
   _wfc = std::make_shared<basic_wfc>( make_build_info<wfc_build_info>(), pl );
 
   wlog::logger_options opt;

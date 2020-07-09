@@ -9,6 +9,7 @@ std::shared_ptr<wfcglobal> wfcglobal::static_global;
 wfcglobal::wfcglobal( io_context_type& ios)
   : io_context(ios)
 {
+  disable_statistics = true;
   stop_signal_flag = false;
 }
 
