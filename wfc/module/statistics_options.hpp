@@ -18,7 +18,7 @@ struct statistics_options_t;
 template<>
 struct statistics_options_t<nostat>: nostat
 {
-  static constexpr bool enabled = false; 
+  static constexpr bool enabled = false;
   bool disabled = true;
   std::string target;
 };
