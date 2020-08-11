@@ -9,10 +9,9 @@ class startup_domain
 {
 public:
   virtual int startup(int argc, char* argv[], std::string helpstring) override;
-  
+
   virtual bool ready_for_run() override;
-  
-  virtual void clean_finalize() override;
+
 private:
   bool _ready = false;
 

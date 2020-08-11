@@ -85,10 +85,6 @@ public:
     return true;
   }
 
-  virtual void clean_finalize() override
-  {
-  }
-
   // icore
   virtual int run() override
   {

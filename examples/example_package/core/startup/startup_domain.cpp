@@ -1,6 +1,6 @@
 #include "startup_domain.hpp"
 
-int startup_domain::startup(int argc, char* argv[], std::string helpstring) 
+int startup_domain::startup(int argc, char* argv[], std::string helpstring)
 {
   std::cout << "example_startup::startup: " << helpstring << std::endl;
   if ( argc > 1 )
@@ -12,13 +12,9 @@ int startup_domain::startup(int argc, char* argv[], std::string helpstring)
   }
   return 0;
 }
-  
+
 bool startup_domain::ready_for_run()
 {
   return _ready;
 }
 
-void startup_domain::clean_finalize() 
-{
-  
-}
