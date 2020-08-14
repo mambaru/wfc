@@ -21,6 +21,8 @@ struct icore: iinterface
   virtual void core_reconfigure() = 0;
   virtual void core_stop() = 0;
   virtual void core_abort( const std::string& ) = 0;
+  virtual void core_restart() = 0;
+
 };
 
 }

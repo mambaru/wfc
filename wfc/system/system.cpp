@@ -148,7 +148,13 @@ bool autoup(time_t timeout, bool success_autoup,
       }
 
       if ( i!=0 && after!=nullptr )
-        after(i, status, worktime);
+      {
+        int code = 0;
+        if ( WIFEXITED(status) )
+          code = WEXITSTATUS(status);
+
+        after(i, code, worktime);
+      }
       return false;
     }
 
@@ -170,7 +176,12 @@ bool autoup(time_t timeout, bool success_autoup,
     worktime = std::time(nullptr) - t;
     bool restart = ( status!=0 || success_autoup) && ( worktime >= timeout );
     if ( restart && before!=nullptr )
-      restart = before(pid, i+1, status, worktime);
+    {
+      int code = 0;
+      if ( WIFEXITED(status) )
+        code = WEXITSTATUS(status);
+      restart = before(pid, i+1, code, worktime);
+    }
 
     kill(pid, SIGKILL);
     if ( !restart )

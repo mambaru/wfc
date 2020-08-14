@@ -108,6 +108,11 @@ public:
 
   }
 
+  virtual void core_restart() override
+  {
+
+  }
+
   void set_poll_count(int poll_count)
   {
     _poll_count = poll_count;
