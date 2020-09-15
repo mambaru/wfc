@@ -7,8 +7,6 @@
 #pragma once
 
 #include <wfc/core/wfcglobal.hpp>
-#include <iow/owner/owner.hpp>
-#include <iow/io/io_id.hpp>
 #include <wfc/json.hpp>
 #include <wfc/statistics/statistics.hpp>
 #include <wfc/iinterface.hpp>
@@ -17,6 +15,14 @@
 #include <wfc/module/basic_domain.hpp>
 #include <wfc/module/instance_handler_.hpp>
 #include <wfc/wfc_exit.hpp>
+
+#include <iow/owner/owner.hpp>
+#include <iow/io/io_id.hpp>
+
+#include <wjson/schema.hpp>
+
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 #include <memory>
 #include <string>
@@ -853,14 +859,11 @@ public:
    */
   virtual domain_config generate(const std::string& arg)
   {
-    domain_config conf = domain_config();
-    if ( arg=="example" )
-    {
-      conf.cpu.insert(0);
-      conf.cpu.insert(1);
-      conf.cpu.insert(2);
-    }
-    return conf;
+    std::vector<std::string> schema_list;
+    boost::split( schema_list, arg, boost::is_any_of(",") );
+    domain_config cnfg;
+    wjson::schema::create_schema<domain_config>(cnfg, schema_list);
+    return cnfg;
   }
 
   typedef instance_handler_<Opt, StatOpt> instance_handler_t;

@@ -4,6 +4,7 @@ project(wfc)
 
 include(cmake/ci.cmake)
 include(cmake/BuildInfo.cmake)
+include(cmake/EnableStat.cmake)
 add_subdirectory(config)
 
 add_subdirectory(wfc)

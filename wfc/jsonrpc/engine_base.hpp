@@ -4,13 +4,16 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 
-#pragma once 
+#pragma once
 
 #include <wfc/domain_object.hpp>
 #include <wfc/iinterface.hpp>
 #include <wfc/memory.hpp>
 #include <wjrpc/outgoing/outgoing_holder.hpp>
 #include <wfc/jsonrpc/statistics_options.hpp>
+
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 namespace wfc{ namespace jsonrpc{
 
@@ -21,15 +24,15 @@ class engine_base
 public:
   typedef engine_base<Interface, EngineType, OptionsType> self;
   typedef domain_object< Interface, OptionsType, statistics_options> super;
-  
+
   typedef Interface interface_type;
   typedef EngineType engine_type;
   typedef OptionsType options_type;
-  
+
   typedef std::shared_ptr<engine_type> engine_ptr;
 
   typedef typename options_type::engine_options engine_options;
-  
+
   typedef typename super::io_id_t io_id_t;
   typedef typename super::data_ptr data_ptr;
   typedef typename super::data_type data_type;
@@ -47,7 +50,7 @@ public:
 
   virtual void stop() final override
   {
-    if ( _engine != nullptr ) 
+    if ( _engine != nullptr )
     {
       if ( auto wf = this->get_workflow() )
       {
@@ -95,7 +98,7 @@ public:
         handler(std::move(d) );
       return;
     }
-    
+
     if ( _engine == nullptr )
       return;
 
@@ -104,36 +107,78 @@ public:
 
   engine_ptr engine() const { return _engine; }
 
-  static std::list<std::string> get_method_list()
+  typedef std::map<std::string, std::vector<std::string> > schema_map_t;
+
+  static std::list<std::string> get_method_list(schema_map_t& schema_map)
   {
     std::list<std::string> result;
     typedef typename engine_type::handler_type::aspect::template select_group< wjrpc::_method_ >::type tag_list;
-    self::get_method_list_(result, tag_list() );
+    self::get_method_list_(result, schema_map, tag_list() );
     return result;
   }
 
-  static std::string schema_help(const std::string& component_name, const std::string& args)
+  static std::string schema_help(const std::string& component_name, const std::string& args, const std::string& base_help )
   {
     typedef typename engine_type::handler_type handler_type;
     std::stringstream ss;
-    std::list<std::string> method_list = get_method_list();
+    schema_map_t schema_map;
+    std::list<std::string> method_list = get_method_list(schema_map);
     if ( args.empty() )
     {
-      ss << "Allowed methods for '" << component_name << "':" << std::endl;
+      ss << base_help << std::endl;
+      std::string method_ws_schema;
+      ss << "Allowed methods for '" << component_name << "' [allowed schemas]:" << std::endl;
       for (auto n : method_list)
       {
-        ss << "  " << n << std::endl;
+        ss << "  " << n;
+        auto method_schemas = schema_map[n];
+        if ( !method_schemas.empty() )
+        {
+          std::stringstream ss1;
+          bool has_schema_help = !method_ws_schema.empty();
+          if ( !has_schema_help )
+          {
+            ss1 << "\t--help " << component_name << ":schema:"   << n << "=";
+          }
+
+          ss << " [";
+          for (size_t i = 0; i < method_schemas.size() ; ++i)
+          {
+            ss << method_schemas[i];
+            ss1 << method_schemas[i];
+            if ( i == method_schemas.size() - 1)
+            {
+              ss << "]";
+            }
+            else
+            {
+              ss << ",";
+              ss1 << ",";
+            }
+          }
+          method_ws_schema = ss1.str();
+        }
+        ss << std::endl;
       }
-      
+
       if ( !method_list.empty() )
       {
-        ss << "Get the JSON-RPC schema:"<< std::endl;
+        ss << "Get the JSON-RPC default schema:"<< std::endl;
         ss << "\t--help " << component_name << ":schema"    << std::endl;
+        ss << "\tExamples for method "<< method_list.front() << ":" << std::endl;
         ss << "\t--help " << component_name << ":schema:"   << method_list.front() << std::endl;
         ss << "\t--help " << component_name << ":params:"   << method_list.front() << std::endl;
         ss << "\t--help " << component_name << ":result:"   << method_list.front() << std::endl;
         ss << "\t--help " << component_name << ":request:"  << method_list.front() << std::endl;
-        ss << "\t--help " << component_name << ":response:" << method_list.front() << std::endl;
+        ss << "\t--help " << component_name << ":response:" << method_list.front();
+
+        if ( !method_ws_schema.empty() )
+        {
+          ss << std::endl;
+          ss << "All allowed schemas: " << method_ws_schema << std::endl;
+          ss << "Get the JSON-RPC named schema example:"<< std::endl;
+          ss << "\t--help " << component_name << ":schema:"   << method_list.front() << "=" << method_ws_schema;
+        }
       }
     }
     else
@@ -142,41 +187,44 @@ public:
       typedef typename schema_list_t::value_type schema_type;
       typedef typename schema_type::json schema_json;
       typedef typename schema_json::list schema_list_json;
-        
-      size_t schpos = args.find(':');
-      std::string schema_name = args.substr(0, schpos);
-      std::string method_name = schpos!=std::string::npos 
-                             ? args.substr(schpos+1) 
-                             : std::string();
-        
-      schema_list_t schema = handler_type::create_schema();
-      if ( schema_name=="schema" && method_name.empty() )
+
+      size_t eqpos=args.find('=');
+      std::string argname = args.substr(0, eqpos);
+      std::string argval = ((eqpos!=std::string::npos) ? args.substr(eqpos+1) : std::string());
+      std::vector<std::string> schema_list;
+      boost::split( schema_list, argval, boost::is_any_of(",") );
+      size_t schpos = argname.find(':');
+      std::string schema_tname = argname.substr(0, schpos);
+      std::string method_name = schpos!=std::string::npos ? argname.substr(schpos+1) : std::string();
+
+      schema_list_t schema = handler_type::create_schema(schema_list);
+      if ( schema_tname=="schema" && method_name.empty() )
       {
         typename schema_list_json::serializer()(schema, std::ostreambuf_iterator<char>(ss) );
       }
       else
       {
-        auto itr = std::find_if(schema.begin(), schema.end(), 
+        auto itr = std::find_if(schema.begin(), schema.end(),
           [method_name](const schema_type& sch)->bool{
             return sch.name == method_name;
           }
         );
-        
+
         if ( itr!=schema.end() )
         {
           using namespace wjson::literals;
-          if ( schema_name=="schema" )
+          if ( schema_tname=="schema" )
             typename schema_json::serializer()(*itr, std::ostreambuf_iterator<char>(ss) );
-          else if ( schema_name=="params" )
+          else if ( schema_tname=="params" )
             ss << itr->params;
-          else if ( schema_name=="result" )
+          else if ( schema_tname=="result" )
             ss << itr->result;
-          else if ( schema_name=="request" )
+          else if ( schema_tname=="request" )
             ss << "{'jsonrpc':'2.0','method':'"_json << method_name << "','params':"_json << itr->params << ",'id':1}"_json;
-          else if ( schema_name=="response" )
+          else if ( schema_tname=="response" )
             ss << "{'jsonrpc':'2.0','result':"_json << itr->result << ",'id':1}"_json;
           else
-            ss << "Error: Invalid argument '" << schema_name << "'";
+            ss << "Error: Invalid argument '" << schema_tname << "'";
         }
         else
           ss << "ERROR: procedure '"<<  method_name<<"' not found";
@@ -185,23 +233,25 @@ public:
     return ss.str();
   }
 protected:
-  
-  static void get_method_list_(std::list<std::string>& , fas::empty_list) 
+
+  static void get_method_list_(std::list<std::string>& , schema_map_t&, fas::empty_list)
   {
   }
- 
+
   template<typename L>
-  static void get_method_list_(std::list<std::string>& res, L)
+  static void get_method_list_(std::list<std::string>& res, schema_map_t& schema_map, L)
   {
     typedef typename fas::head<L>::type tag;
     res.push_back( tag()() );
-    self::get_method_list_( res, typename fas::tail<L>::type() );
+    typedef typename engine_type::handler_type::aspect::template advice_cast< tag >::type method_t;
+    method_t::get_schema_list(schema_map[tag()()]);
+    self::get_method_list_( res, schema_map, typename fas::tail<L>::type() );
   }
 
 
   void initialize_engine(options_type eopt)
   {
-    if ( _engine == nullptr ) 
+    if ( _engine == nullptr )
     {
       _engine = std::make_shared<engine_type>();
       _engine->start(eopt, ::iow::io::create_id<size_t>() );
@@ -219,7 +269,7 @@ protected:
         auto pengine = this->_engine;
         _timer_id = wf->create_timer(
           std::chrono::milliseconds(eopt.remove_outdated_ms),
-          [pengine]() -> bool 
+          [pengine]() -> bool
           {
             JSONRPC_LOG_DEBUG( " JSON-RPC remove outdated...");
             if ( size_t count = pengine->remove_outdated() )
@@ -235,7 +285,7 @@ protected:
   }
 
 private:
-  void initialize_statistics_() 
+  void initialize_statistics_()
   {
     if ( auto stat = this->get_statistics() )
     {
@@ -249,8 +299,8 @@ private:
           auto handler_map  = stat->create_value_meter(sname + sopt.handler_map);
           auto result_map   = stat->create_value_meter(sname + sopt.result_map);
           auto result_queue = stat->create_value_meter(sname + sopt.result_queue);
-          _stat_timer_id = wf->create_timer( 
-            std::chrono::milliseconds(sopt.interval_ms), 
+          _stat_timer_id = wf->create_timer(
+            std::chrono::milliseconds(sopt.interval_ms),
             [handler_map, result_map, result_queue, this]()->bool
             {
               if ( nullptr != this->get_statistics() )
@@ -269,7 +319,7 @@ private:
     }
   }
 
-  
+
 private:
   timer_id_t _timer_id = 0;
   timer_id_t _stat_timer_id = 0;

@@ -13,6 +13,7 @@
 
 #include <wfc/json.hpp>
 
+#include <wjson/schema.hpp>
 #include <fas/typemanip.hpp>
 #include <memory>
 #include <string>
@@ -20,19 +21,19 @@
 #include <iostream>
 
 namespace wfc{
-  
-template< 
+
+template<
   typename Name,
   typename Instance,
   typename CustomJson,
-  int Features /*= component_features::Multiton*/, 
+  int Features /*= component_features::Multiton*/,
   typename StatJson /*= defstat_json*/
 >
 class basic_component
   : public icomponent
 {
 public:
-   enum 
+   enum
    {
      is_singleton       = ( Features & int(component_features::Singleton) )!=0,
      ignore_reconfigure = ( Features & int(component_features::IgnoreReconfigure) )!=0
@@ -40,14 +41,14 @@ public:
 
   typedef Name        component_name;
   typedef Instance    instance_type;
-  
+
   typedef CustomJson  custom_json;
-  typedef typename std::conditional< 
+  typedef typename std::conditional<
     instance_type::domain_options::statistics_enabled,
     StatJson,
     empty_stat_json_t<typename StatJson::target>
   >::type stat_json;
- 
+
   typedef domain_config_json_t<custom_json, Features, stat_json> domain_config_json;
   typedef typename domain_config_json::domain_options_json domain_options_json;
 
@@ -67,7 +68,7 @@ public:
     instance_config_map,
     std::vector<instance_config_map>
   >::type component_map_config;
-  
+
   typedef typename std::conditional<
     is_singleton,
     domain_config_json,
@@ -79,7 +80,7 @@ public:
     instance_map_json,
     ::wfc::json::array< instance_map_json >
   >::type component_map_json;
-  
+
   typedef std::shared_ptr<instance_type> instance_ptr;
 
   typedef typename std::conditional<
@@ -88,12 +89,12 @@ public:
     std::map< std::string, instance_ptr>
   >::type instance_map;
 
-  struct config_pair 
-  { 
+  struct config_pair
+  {
     std::string basic;
     std::string custom;
   };
-  
+
   typedef typename std::conditional<
     is_singleton,
     config_pair,
@@ -105,7 +106,7 @@ public:
     std::string,
     std::list< std::string>
   >::type start_list;
-    
+
   virtual ~basic_component()
   {
     if ( auto g = _global )
@@ -124,7 +125,22 @@ public:
 
   virtual std::string help(const std::string&) const override
   {
-    return std::string("Sorry, no help for '") + this->name() + "'.";
+    std::vector<std::string> schemas;
+    wjson::schema::get_schema_list<domain_config>(schemas);
+    if ( schemas.empty() )
+    {
+      return std::string("Sorry, no help for '") + this->name() + "'.";
+    }
+    else
+    {
+      std::stringstream ss;
+      ss << "Allowed schema list (for configuration generation '" << this->name() << "'):";
+      for (const auto& sn : schemas)
+        ss << sn << ",";
+      ss.seekp(-1, std::ios_base::end);
+      ss << " ";
+      return ss.str();
+    }
   }
 
   virtual std::string interface_name() const override
@@ -153,7 +169,7 @@ public:
     _global = g;
     this->create_(fas::bool_<is_singleton>());
   }
-  
+
   virtual bool configure(const std::string& stropt, json::json_error* err) override
   {
     return this->configure_(stropt, fas::bool_<is_singleton>(), err );
@@ -201,10 +217,10 @@ private:
     serializer( opt, beg, str.end(), err );
     if ( err == nullptr )
       return true;
-    
+
     return !*err;
   }
-  
+
   void create_(fas::true_)
   {
     if ( _instances==nullptr )
@@ -216,10 +232,10 @@ private:
       }
       _instances->create(this->name(), _global);
     }
-    
+
     domain_config opt;
     json::json_error err;
-    
+
     if ( !this->configure_("{}", fas::true_(), &err) )
     {
       SYSTEM_LOG_FATAL("Singleton '" << this->name() << "' default initialize: " << json::strerror::message(err) )
@@ -234,22 +250,22 @@ private:
     if ( !this->unserialize_(opt, stropt, err ) )
       return false;
     opt.name = this->name();
-    
+
     config_pair op;
     op.basic = this->serialize_basic_(opt);
     op.custom = this->serialize_custom_(opt);
-    
+
     if ( _config.basic.empty() )
     {
       // Это дефолтная конфигурация синглетона при создании объекта
       _instances->configure(opt);
     }
-    else if ( _config.custom != op.custom )        
+    else if ( _config.custom != op.custom )
     {
       _instances->reconfigure(opt);
       SYSTEM_LOG_MESSAGE("Singleton '" << opt.name << "' is reconfigured (fully)")
     }
-    else if ( _config.basic != op.basic ) 
+    else if ( _config.basic != op.basic )
     {
       _instances->reconfigure_basic(opt);
       SYSTEM_LOG_MESSAGE("Singleton '" << opt.name << "' is reconfigured (basic)")
@@ -278,7 +294,7 @@ private:
     std::set<std::string> stop_list;
     for (const auto& item : _instances )
       stop_list.insert(item.first);
-    
+
     component_config optlist;
     if ( !this->unserialize_( optlist, stropt, err ) )
       return false;
@@ -289,7 +305,7 @@ private:
       config_pair op;
       op.basic = this->serialize_basic_(opt);
       op.custom = this->serialize_custom_(opt);
-      
+
       auto itr = _instances.find(opt.name);
       if ( itr == _instances.end() )
       {
@@ -305,7 +321,7 @@ private:
       {
         auto oitr = _config.find(opt.name);
         if ( oitr == _config.end() ) abort();
-      
+
         if ( oitr->second.custom != op.custom )
         {
           reconfigure_fully_(itr->second, opt, fas::bool_<ignore_reconfigure!=0>() );
@@ -362,15 +378,15 @@ private:
       p.second->stop(arg);
     }
   }
-  
-  void generate_config_(component_config& opt, const std::string& type, fas::true_) 
+
+  void generate_config_(component_config& opt, const std::string& type, fas::true_)
   {
     //instance_type().generate( opt, type);
     if ( _instances != nullptr )
       _instances->generate( opt, type);
   }
 
-  void generate_config_(component_config& opt, const std::string& type, fas::false_) 
+  void generate_config_(component_config& opt, const std::string& type, fas::false_)
   {
     domain_config inst;
     instance_type().generate( inst, type);
@@ -380,7 +396,7 @@ private:
   }
 
 private:
-  
+
   global_ptr   _global;
   instance_map _instances;
   config_map  _config;

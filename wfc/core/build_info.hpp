@@ -129,87 +129,87 @@ struct empty_build_info
 
   static std::string name()
   {
-    return std::string();
+    return std::string("empty");
   }
 
   static std::string version_tag()
   {
-    return std::string();
+    return std::string("");
   }
 
   static std::string version()
   {
-    return std::string();
-  }
-
-  static std::string compiler_version()
-  {
-    return std::string();
+    return std::string("");
   }
 
   static std::string version_ex()
   {
-    return std::string();
-  }
-
-  static std::string build_type()
-  {
-    return std::string();
-  }
-
-  static std::string build_date()
-  {
-    return std::string();
-  }
-
-  static std::string build_flags()
-  {
-    return std::string();
+    return std::string("");
   }
 
   static std::string build_count()
   {
-    return std::string();
+    return std::string("");
+  }
+
+  static std::string compiler_version()
+  {
+    return std::string("empty");
+  }
+
+  static std::string build_type()
+  {
+    return std::string("empty");
+  }
+
+  static std::string build_date()
+  {
+    return std::string("empty");
+  }
+
+  static std::string build_flags()
+  {
+    return std::string("empty");
   }
 
   static std::string branch()
   {
-    return std::string();
+    return std::string("empty");
   }
 
   static std::string commit()
   {
-    return std::string();
+    return std::string("empty");
   }
 
   static std::string commit_date()
   {
-    return std::string();
+    return std::string("empty");
   }
 
   static std::string commit_author()
   {
-    return std::string();
+    return std::string("empty");
   }
 
   static std::string initial_author()
   {
-    return std::string();
+    return std::string("empty");
   }
 
   static std::string commit_message()
   {
-    return std::string();
+    return std::string("empty");
   }
 
   static std::string all_authors()
   {
-    return std::string();
+    return std::string("empty");
   }
 };
 
-template<typename N>
-struct named_build_info: empty_build_info
+template<typename N, typename BaseBuildInfo /*= empty_build_info*/>
+struct build_info_t: BaseBuildInfo
 {
   static std::string name()
   {
