@@ -3,13 +3,24 @@ set(ENV{BUILD_INFO_SCRIPT} ${CURRENT_SCRIPT_DIRECTORY}/build_info.sh)
 
 MACRO(build_info)
 
-  set(target_name ${ARGV0})
+  cmake_parse_arguments(args "" "TARGET;PREFIX" "" ${ARGN})
 
-  if ( "${ARGV1}" STREQUAL "" )
-    set(display_name ${target_name})
-  else()
-    set(display_name ${ARGV1})
+  if ( NOT args_TARGET)
+    set(args_TARGET "${ARGV0}")
   endif()
+
+  if ( NOT args_PREFIX  )
+    set(args_PREFIX "${ARGV1}")
+  endif()
+
+  set(target_name ${args_TARGET})
+  set(display_name "${args_PREFIX}")
+
+  message(STATUS "*****************************")
+  message(STATUS "******* ${target_name} *****")
+  message(STATUS "******* ${display_name} ******")
+  message(STATUS "*****************************")
+
 
   set(build_dir ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}Info)
   set(build_prefix ${build_dir}/${display_name}_build_info)
