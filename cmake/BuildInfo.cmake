@@ -3,8 +3,8 @@ set(ENV{BUILD_INFO_SCRIPT} ${CURRENT_SCRIPT_DIRECTORY}/build_info.sh)
 
 MACRO(build_info target_name)
 
-  if ( ARGV1 )
-    set(display_name ${ARGV1})
+  if ( ARGV2 )
+    set(display_name ${ARGV2})
   else()
     set(display_name ${target_name})
   endif()
