@@ -49,6 +49,8 @@ class example_core
   virtual void core_stop() override{}
 
   virtual void core_abort( const std::string& ) override {}
+
+  virtual void core_restart() override {};
 };
 
 

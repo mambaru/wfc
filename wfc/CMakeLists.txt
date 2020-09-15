@@ -20,6 +20,7 @@ SET(
 
 add_library(wfc ${wfc_source_list})
 wci_targets(wfc)
+enable_stat(wfc)
 target_compile_definitions(wfc PRIVATE -DBOOST_ASIO_NO_DEPRECATED)
 build_info(TARGET wfc)
 

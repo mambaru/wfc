@@ -19,3 +19,8 @@ void core_domain::core_abort( const std::string& )
 {
 
 }
+
+void core_domain::core_restart()
+{
+
+}

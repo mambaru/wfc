@@ -24,5 +24,5 @@ add_subdirectory(example_package)
 add_executable(example07 example07.cpp)
 target_link_libraries(example07 PUBLIC example_package wfc)
 
-build_info(example07 example07)
+build_info(TARGET example07)
 wci_targets(example01 example02 example03 example04 example05 example06 example07 )

@@ -16,12 +16,6 @@ MACRO(build_info)
   set(target_name ${args_TARGET})
   set(display_name "${args_PREFIX}")
 
-  message(STATUS "*****************************")
-  message(STATUS "******* ${target_name} *****")
-  message(STATUS "******* ${display_name} ******")
-  message(STATUS "*****************************")
-
-
   set(build_dir ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}Info)
   set(build_prefix ${build_dir}/${display_name}_build_info)
 
