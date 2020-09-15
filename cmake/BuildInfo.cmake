@@ -1,12 +1,14 @@
 GET_FILENAME_COMPONENT(CURRENT_SCRIPT_DIRECTORY ${CMAKE_CURRENT_LIST_FILE} PATH)
 set(ENV{BUILD_INFO_SCRIPT} ${CURRENT_SCRIPT_DIRECTORY}/build_info.sh)
 
-MACRO(build_info target_name)
+MACRO(build_info)
 
-  if ( ARGV2 )
-    set(display_name ${ARGV2})
-  else()
+  set(target_name ${ARGV0})
+
+  if ( "${ARGV1}" STREQUAL "" )
     set(display_name ${target_name})
+  else()
+    set(display_name ${ARGV1})
   endif()
 
   set(build_dir ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}Info)

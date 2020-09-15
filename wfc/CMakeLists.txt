@@ -21,7 +21,7 @@ SET(
 add_library(wfc ${wfc_source_list})
 wci_targets(wfc)
 target_compile_definitions(wfc PRIVATE -DBOOST_ASIO_NO_DEPRECATED)
-build_info(wfc wfc)
+build_info(wfc)
 
 include(FindThreads)
 find_package(Boost COMPONENTS system program_options filesystem date_time regex REQUIRED)
