@@ -203,9 +203,8 @@ int dumpable()
 bool change_user(std::string username, std::string* err)
 {
   struct passwd *pwd = ::getpwnam(username.c_str() ); /* don't free, see getpwnam() for details */
-  if( pwd == NULL )
+  if( pwd == nullptr )
   {
-    //std::cerr << strerror(errno) << std::endl;
     if (err!=nullptr)
       *err = strerror(errno);
     return false;
