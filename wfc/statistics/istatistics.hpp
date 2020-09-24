@@ -8,6 +8,7 @@
 
 #include <wfc/iinterface.hpp>
 #include <wfc/statistics/api/push.hpp>
+#include <wfc/statistics/api/multi_push.hpp>
 #include <wfc/statistics/api/del.hpp>
 
 namespace wfc{
@@ -16,6 +17,7 @@ struct istatistics: iinterface
 {
   virtual ~istatistics() = default;
   virtual void push( statistics::request::push::ptr req, statistics::response::push::handler cb) = 0;
+  virtual void multi_push( statistics::request::multi_push::ptr req, statistics::response::multi_push::handler cb) = 0;
   virtual void del( statistics::request::del::ptr req, statistics::response::del::handler cb) = 0;
 };
 
