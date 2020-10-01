@@ -2,6 +2,7 @@
 #include <iow/logger.hpp>
 #include <wfc/domain_object.hpp>
 #include <wfc/module/instance.hpp>
+#include <iostream>
 
 struct options1
 {

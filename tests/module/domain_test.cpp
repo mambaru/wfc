@@ -3,6 +3,7 @@
 #include <wfc/domain_object.hpp>
 #include <wfc/module/instance.hpp>
 #include <wfc/asio.hpp>
+#include <iostream>
 
 using namespace wfc;
 
