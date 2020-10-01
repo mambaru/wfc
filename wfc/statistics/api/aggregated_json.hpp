@@ -7,7 +7,8 @@
 #pragma once
 
 #include <wfc/json.hpp>
-#include <wrtstat/aggregated_data.hpp>
+#include <wrtstat/aggregator/api/aggregated_data.hpp>
+#include <wrtstat/aggregator/api/aggregated_info.hpp>
 #include <wfc/statistics/api/reduced_json.hpp>  
 
 namespace wfc { namespace statistics{

@@ -6,7 +6,7 @@
 
 #pragma once
 #include <wfc/json.hpp>
-#include <wrtstat/reduced_data.hpp>
+#include <wrtstat/aggregator/api/reduced_data.hpp>
   
 namespace wfc { namespace statistics{
 
