@@ -3,6 +3,7 @@ help:
 	@echo "	make help"
 	@echo "	make shared"
 	@echo "	make static"
+	@echo "	make release"
 	@echo "	make tests"
 	@echo "	make doc"
 	@echo "	make cppcheck"
@@ -30,6 +31,9 @@ init: runup
 	cmake -B ./build
 cppcheck: runup
 	./external/cmake-ci/scripts/cppcheck-ci.sh
+release: runup
+	cd build && cmake .. -DDISABLE_WARNINGS=ON
+	cmake --build ./build -- $(or ${ARGS},-j4)
 static: runup
 	cd build && cmake .. -DBUILD_SHARED_LIBS=OFF -DDISABLE_WARNINGS=ON
 	cmake --build ./build -- $(or ${ARGS},-j4)

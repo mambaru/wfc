@@ -7,7 +7,7 @@
 #pragma once
 
 #include <wfc/iinterface.hpp>
-#include <wfc/statistics/stat_options.hpp>
+#include <wrtstat/wrtstat_options.hpp>
 #include <wfc/statistics/meters.hpp>
 #include <wrtstat/wrtstat.hpp>
 #include <memory>
