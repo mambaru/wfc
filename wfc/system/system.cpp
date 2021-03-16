@@ -11,6 +11,7 @@
 #include <cstring>
 #include <iostream>
 #include <atomic>
+//#include <sys/prctl.h>
 
 namespace wfc{
 
@@ -190,13 +191,20 @@ bool autoup(time_t timeout, bool success_autoup,
   return true;
 }
 
-int dumpable()
+int dumpable(bool enable)
 {
 #ifdef HAVE_SYS_PRCTL_H
-  rlimit core = { RLIM_INFINITY, RLIM_INFINITY };
-  return ::prctl(PR_SET_DUMPABLE, 1) || ::setrlimit(RLIMIT_CORE, &core) ? -1 : 0;
+    if ( enable )
+    {
+      rlimit core = { RLIM_INFINITY, RLIM_INFINITY };
+      return ::prctl(PR_SET_DUMPABLE, 1) || ::setrlimit(RLIMIT_CORE, &core) ? -1 : 0;
+    }
+    else
+    {
+      return ::prctl(PR_SET_DUMPABLE, 0);
+    }
 #else
-  return -1;
+  return -2;
 #endif
 }
 

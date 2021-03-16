@@ -34,6 +34,18 @@ public:
     * @brief create
     * @details create
     */
+  virtual void reconfigure() { }
+
+  /**
+    * @brief create
+    * @details create
+    */
+  virtual void reconfigure_basic() {}
+
+  /**
+    * @brief create
+    * @details create
+    */
   virtual void initialize() {}
 
   /**
@@ -54,17 +66,6 @@ public:
     */
   virtual void stop( )  {}
 
-  /**
-    * @brief create
-    * @details create
-    */
-  virtual void reconfigure() { }
-
-  /**
-    * @brief create
-    * @details create
-    */
-  virtual void reconfigure_basic() {}
 };
 
 

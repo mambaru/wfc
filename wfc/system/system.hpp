@@ -35,6 +35,6 @@ bool autoup(
   std::function<void(int, int, time_t)> after = nullptr
 );
 
-int dumpable();
+int dumpable(bool enable);
 
 }
