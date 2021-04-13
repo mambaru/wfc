@@ -16,7 +16,7 @@
 #include <wfc/module/instance_handler_.hpp>
 #include <wfc/wfc_exit.hpp>
 
-#include <iow/owner/owner.hpp>
+#include <wflow/owner.hpp>
 #include <iow/io/io_id.hpp>
 
 #include <wjson/schema.hpp>
@@ -129,7 +129,7 @@ public:
   typedef std::shared_ptr<wfcglobal> global_ptr;
 
   /** @brief Создает обертки для callback обработчиков */
-  typedef iow::owner owner_type;
+  typedef wflow::owner owner_type;
 
   /** @brief Ошибка JSON-десериализации  */
   typedef wjson::json_error json_error;
