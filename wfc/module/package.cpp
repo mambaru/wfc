@@ -13,14 +13,14 @@ package::~package()
 {
   _impl = nullptr;
 }
-  
+
 package::package(const std::shared_ptr<ipackage>& p)
   : _impl(p)
 {
-  
+
 }
 
-std::shared_ptr<ibuild_info> package::build_info() 
+std::shared_ptr<ibuild_info> package::build_info()
 {
   return _impl->build_info();
 }
@@ -35,12 +35,12 @@ std::string package::description() const
   return _impl->description();
 }
 
-int package::order() const
+int package::show_order() const
 {
-  return _impl->order();
+  return _impl->show_order();
 }
 
-std::vector< std::shared_ptr<imodule> > package::modules() 
+std::vector< std::shared_ptr<imodule> > package::modules()
 {
   return _impl->modules();
 }

@@ -3,6 +3,7 @@
 #include <wfc/domain_object.hpp>
 #include <wfc/module/instance.hpp>
 #include <wfc/asio.hpp>
+#include <iostream>
 
 using namespace wfc;
 
@@ -52,7 +53,7 @@ public:
 
 int main()
 {
-  wfc::asio::io_service ios;
+  boost::asio::io_context ios;
   auto g = std::make_shared<wfc::wfcglobal>(ios);
   wfc::wfcglobal::static_global = g;
   wfc::instance<test> t;

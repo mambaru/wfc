@@ -12,17 +12,17 @@
 #include <iostream>
 
 struct empty_conf{};
-struct empty_conf_json                                                                                                                                                          
-{                                                                                                                                                                                 
+struct empty_conf_json
+{
   typedef wfc::json::object<
     empty_conf,
     wfc::json::member_list<
     >
-  > type;                                                                                                                                                                         
+  > type;
 
-  typedef typename type::target      target;                                                                                                                                      
-  typedef typename type::member_list member_list;                                                                                                                                 
-  typedef typename type::serializer  serializer;                                                                                                                                  
+  typedef typename type::target      target;
+  typedef typename type::member_list member_list;
+  typedef typename type::serializer  serializer;
 };
 
 
@@ -31,7 +31,7 @@ class example_core
 {
 public:
   typedef wfc::domain_object< wfc::icore, empty_conf >::domain_config config_type;
-  
+
   virtual int run( ) override
   {
     std::cout << "example_core::run()!" << std::endl;
@@ -39,7 +39,8 @@ public:
   }
   virtual void core_reconfigure() override{ }
   virtual void core_stop() override{}
-  virtual void core_abort( std::string ) override {}
+  virtual void core_abort( const std::string& ) override {}
+  virtual void core_restart() override {}
 };
 
 
@@ -59,13 +60,12 @@ public:
     }
     return 0;
   }
-  
+
   virtual bool ready_for_run() override
   {
     return _ready;
   }
-  
-  virtual void clean_finalize() override {}
+
 private:
   bool _ready = false;
 };
@@ -75,7 +75,7 @@ WFC_NAME2(module_name, "example-module")
 WFC_NAME2(core_name, "core")
 WFC_NAME2(startup_name, "startup")
 
-struct example_package: 
+struct example_package:
   wfc::module_list<
     wfc::empty_build_info,
     wfc::component_list<

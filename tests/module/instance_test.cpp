@@ -2,6 +2,7 @@
 #include <iow/logger.hpp>
 #include <wfc/domain_object.hpp>
 #include <wfc/module/instance.hpp>
+#include <iostream>
 
 struct options1
 {
@@ -24,19 +25,19 @@ public:
   {
     testval = true;
   }
-  
+
   virtual bool testtest() override
   {
-    return testval; 
+    return testval;
   }
-  
+
   virtual config_type generate(const std::string&) override
   {
     config_type opt;
     opt.test = true;
     return opt;
   }
-  
+
   // restart
   virtual void restart() override
   {
@@ -57,20 +58,20 @@ typedef ::wfc::instance<test> test_impl;
 int main()
 {
   test_impl t;
-  ::iow::asio::io_service io;
+  boost::asio::io_context io;
   auto g = std::make_shared<wfc::wfcglobal>(io);
   t.create(g);
   test_impl::domain_config opt;
   t.generate(opt, "true");
-  
-  if ( !opt.test || !opt.enabled || !opt.name.empty() 
+
+  if ( !opt.test || !opt.enabled || !opt.name.empty()
         || opt.startup_priority!=0 || opt.shutdown_priority!=0)
     return 1;
 
   opt.name = "test";
   t.configure(opt);
   auto tmp1 = g->registry.get_target<itest>("test");
-  
+
   if ( tmp1 == nullptr )
     return 2;
   if ( tmp1->testtest() != false )
@@ -82,6 +83,6 @@ int main()
   t.configure(opt);
   t.initialize();
   t.stop("");
-  
+
   return 0;
 }

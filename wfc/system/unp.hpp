@@ -54,9 +54,12 @@
 #include <sys/wait.h>
 #endif
 
+#ifdef HAVE_SYS_PRCTL_H
+#include <sys/prctl.h>
+#endif
+
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 
 #include <pwd.h>
-

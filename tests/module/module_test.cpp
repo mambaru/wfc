@@ -15,20 +15,20 @@ struct helper
   {
     std::string value;
     int test = 33;
-    
+
     options()
       : value( Name()() )
       {}
   };
-  
-  struct itest: 
+
+  struct itest:
     public wfc::iinterface
   {
     ~itest(){}
     virtual void doit() = 0;
   };
-  
-  
+
+
   struct options_json
   {
     JSON_NAME(test)
@@ -55,10 +55,10 @@ struct helper
     {
       ++doit_count;
     }
-    
+
     test() {  this->doit();  } //cppcheck
   };
-  
+
   class object: public ::wfc::basic_component< Name, wfc::instance<test>, options_json, Singleton, wfc::nostat_json > {};
 };
 
@@ -85,7 +85,7 @@ class test_package: public wfc::module_list< wfc::build_info< wfc::empty_build_i
 int main()
 {
   auto t = std::make_shared<wfc::package>( std::make_shared<test_package>() ) ;
-  iow::asio::io_service io;
+  boost::asio::io_context io;
   auto g = std::make_shared< wfc::wfcglobal>(io);
   t->create(g);
   std::cout << g->registry.size() << std::endl;

@@ -5,8 +5,8 @@
 //
 
 #pragma once
-#include <wrtstat/aggregated_data.hpp>
-#include <wrtstat/types.hpp>
+#include <wrtstat/aggregator/api/aggregated_data.hpp>
+#include <wrtstat/aggregator/api/types.hpp>
 
 namespace wfc{ namespace statistics{
 

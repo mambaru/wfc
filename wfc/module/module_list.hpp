@@ -18,7 +18,7 @@
 
 namespace wfc{
 
-template<typename BuildInfo, typename... Args>  
+template<typename BuildInfo, typename... Args>
 class module_list
   : public ipackage
 {
@@ -44,7 +44,7 @@ public:
     return "no description";
   }
 
-  virtual int order() const override
+  virtual int show_order() const override
   {
     return 1000;
   }
@@ -86,7 +86,7 @@ private:
   static void create_(global_ptr, fas::empty_list) {}
 
   template<typename H, typename L>
-  void create_(global_ptr g, fas::type_list< H, L > ) 
+  void create_(global_ptr g, fas::type_list< H, L > )
   {
     auto obj = std::make_shared<H>();
     _modules.push_back( obj );

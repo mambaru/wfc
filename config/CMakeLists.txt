@@ -12,6 +12,7 @@ check_include_file("unistd.h" HAVE_UNISTD_H)
 check_include_file("sys/stat.h" HAVE_SYS_STAT_H)
 check_include_file("sys/wait.h" HAVE_SYS_WAIT_H)
 check_include_file("fcntl.h" HAVE_FCNTL_H)
+check_include_file("sys/prctl.h" HAVE_SYS_PRCTL_H)
 
 
 set(
@@ -22,6 +23,7 @@ set(
   "sys/timeb.h"
   "sys/stat.h"
   "sys/wait.h"
+  "sys/prctl.h"
   "unistd.h"
   "fcntl.h"
 )

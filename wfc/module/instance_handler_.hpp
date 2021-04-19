@@ -7,8 +7,7 @@
 #pragma once
 
 #include <string>
-#include <iow/owner/owner_handler.hpp>
-#include <iow/owner/callback_handler.hpp>
+#include <wflow/owner.hpp>
 
 namespace wfc{
 
@@ -32,7 +31,7 @@ struct instance_handler_
 template<typename H, typename H2>
 struct wrap_result_
 {
-  using type = ::iow::owner_handler<
+  using type = wflow::owner_handler<
     typename std::remove_reference<H>::type, 
     typename std::remove_reference<H2>::type
   >;
@@ -41,7 +40,7 @@ struct wrap_result_
 template<typename H>
 struct callback_result_
 {
-  using type = ::iow::callback_handler<typename std::remove_reference<H>::type>;
+  using type = wflow::callback_handler<typename std::remove_reference<H>::type>;
 };
 
 }

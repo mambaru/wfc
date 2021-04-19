@@ -6,16 +6,21 @@ int core_domain::run( )
   return 0;
 }
 
-void core_domain::core_reconfigure() 
+void core_domain::core_reconfigure()
 {
 }
 
-void core_domain::core_stop() 
+void core_domain::core_stop()
 {
-  
+
 }
-  
-void core_domain::core_abort( std::string ) 
+
+void core_domain::core_abort( const std::string& )
 {
-  
+
+}
+
+void core_domain::core_restart()
+{
+
 }

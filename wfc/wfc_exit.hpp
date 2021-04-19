@@ -1,5 +1,5 @@
 //
-// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2016
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2016, 2020
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -9,8 +9,6 @@
 #include <string>
 
 void wfc_exit();
-void wfc_exit_with_error(const std::string& message);
-
+void wfc_abort(const std::string& message);
 void wfc_restart();
-void wfc_restart_with_error(const std::string& message);
 

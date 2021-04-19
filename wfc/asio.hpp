@@ -9,18 +9,3 @@
 #include <iow/asio.hpp>
 #include <iow/system.hpp>
 
-namespace wfc{ 
-
-namespace asio{
-
-using namespace ::iow::asio;
-
-}
-
-namespace system{
-
-using namespace ::iow::system;
-
-}
-
-}

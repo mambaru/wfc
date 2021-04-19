@@ -9,9 +9,9 @@
 #include <sstream>
 
 namespace wfc{
-    
+
 extended_args::extended_args(){}
-  
+
 extended_args::extended_args(const extended_args_map& po)
   : _extended_args(po)
 {}
@@ -23,11 +23,11 @@ void extended_args::insert( std::map<std::string, std::map<std::string, std::str
     this->insert(ins.first, instance_args(ins.first, std::move(ins.second)) );
   }
 }
-  
+
 void extended_args::insert(const std::string& name, instance_args args)
 {
   std::lock_guard<std::mutex> lk(_mutex);
-  
+
   auto itr = _extended_args.find(name);
   if ( itr == _extended_args.end() )
   {
@@ -38,21 +38,21 @@ void extended_args::insert(const std::string& name, instance_args args)
     itr->second.insert( args.args() );
   }
 }
-  
+
 instance_args extended_args::get(const std::string& name, bool required ) const
 {
   std::lock_guard<std::mutex> lk(_mutex);
 
   auto itr = _extended_args.find(name);
-    
+
   if ( itr != _extended_args.end() )
     return itr->second;
-    
+
   if ( required )
   {
     std::stringstream ss;
     ss << "instance '" << name << "' required args ";
-    ::wfc_exit_with_error( ss.str() );
+    ::wfc_abort( ss.str() );
   }
   return instance_args(name);
 }
@@ -68,5 +68,5 @@ void extended_args::clear()
   std::lock_guard<std::mutex> lk(_mutex);
   return _extended_args.clear();
 }
-  
+
 }

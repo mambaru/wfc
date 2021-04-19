@@ -7,16 +7,26 @@
 #pragma once
 
 #include <wfc/iinterface.hpp>
-#include <wfc/statistics/api/push.hpp>
-#include <wfc/statistics/api/del.hpp>
+#include <wrtstat/api/push.hpp>
+#include <wrtstat/api/multi_push.hpp>
+#include <wrtstat/api/del.hpp>
 
 namespace wfc{
 
 struct istatistics: iinterface
 {
+  typedef wrtstat::request::push::ptr push_ptr;
+  typedef wrtstat::request::multi_push::ptr multi_push_ptr;
+  typedef wrtstat::request::del::ptr del_ptr;
+  
+  typedef wrtstat::response::push::handler push_handler;
+  typedef wrtstat::response::multi_push::handler multi_push_handler;
+  typedef wrtstat::response::del::handler del_handler;
+
   virtual ~istatistics() = default;
-  virtual void push( statistics::request::push::ptr req, statistics::response::push::handler cb) = 0;
-  virtual void del( statistics::request::del::ptr req, statistics::response::del::handler cb) = 0;
+  virtual void push( push_ptr req, push_handler cb) = 0;
+  virtual void multi_push( multi_push_ptr req, multi_push_handler cb) = 0;
+  virtual void del( del_ptr req, del_handler cb) = 0;
 };
 
 }

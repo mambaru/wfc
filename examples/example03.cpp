@@ -23,14 +23,13 @@ public:
     }
     return 0;
   }
-  
+
   virtual bool ready_for_run() override
   {
     return _ready;
   }
-  
-  virtual void clean_finalize() override {}
-  
+
+
 private:
   bool _ready = false;
 };
@@ -44,12 +43,14 @@ class example_core
     this->core_reconfigure();
     return 0;
   }
-  
+
   virtual void core_reconfigure() override{ }
-  
+
   virtual void core_stop() override{}
-  
-  virtual void core_abort( std::string ) override {}
+
+  virtual void core_abort( const std::string& ) override {}
+
+  virtual void core_restart() override {}
 };
 
 
@@ -59,22 +60,22 @@ class example_package
 {
 public:
   virtual std::shared_ptr<wfc::ibuild_info> build_info() override { return nullptr; }
-  
+
   virtual std::string name() const override
   {
     std::cout << "example_package::name()" << std::endl;
     return "example_package";
   }
-  
+
   virtual std::string description() const override { return std::string(); }
-  
-  virtual int order() const override { return 0; }
-  
+
+  virtual int show_order() const override { return 0; }
+
   virtual std::vector< std::shared_ptr<wfc::imodule> > modules() override
   {
     return std::vector< std::shared_ptr<wfc::imodule> >();
   }
-  
+
   virtual void create( std::shared_ptr<wfc::wfcglobal> g) override
   {
     g->registry.set_target("core", std::make_shared<example_core>());
@@ -84,7 +85,7 @@ public:
 
   // only for external control
   virtual void start(const std::string&) override { }
-  
+
   virtual void stop(const std::string&) override  { }
 };
 

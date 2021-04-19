@@ -22,6 +22,21 @@ public:
   typedef typename super::data_type data_type;
   typedef typename super::data_ptr  data_ptr;
   typedef typename super::outgoing_handler_t outgoing_handler_t;
+
+public:
+  method_list() = default;
+  method_list(const method_list& ) = default;
+  method_list(method_list&& ) = default;
+  method_list& operator=(const method_list& other) 
+  {
+    static_cast<super&>(*this) = static_cast<const super&>(other);
+    return *this;
+   }
+  method_list& operator=(method_list&& other) 
+  {
+    static_cast<super&>(*this) = std::move(static_cast<super&>(other));
+    return *this;
+  }
 };
 
 }}

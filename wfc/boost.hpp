@@ -7,13 +7,3 @@
 #pragma once
 
 #include <iow/boost.hpp>
-
-namespace wfc{ 
-
-namespace boost{
-
-using namespace ::wfc::boost;
-
-}
-
-}

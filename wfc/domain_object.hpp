@@ -7,8 +7,6 @@
 #pragma once
 
 #include <wfc/core/wfcglobal.hpp>
-#include <iow/owner/owner.hpp>
-#include <iow/io/io_id.hpp>
 #include <wfc/json.hpp>
 #include <wfc/statistics/statistics.hpp>
 #include <wfc/iinterface.hpp>
@@ -17,6 +15,14 @@
 #include <wfc/module/basic_domain.hpp>
 #include <wfc/module/instance_handler_.hpp>
 #include <wfc/wfc_exit.hpp>
+
+#include <wflow/owner.hpp>
+#include <iow/io/io_id.hpp>
+
+#include <wjson/schema.hpp>
+
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 #include <memory>
 #include <string>
@@ -123,16 +129,16 @@ public:
   typedef std::shared_ptr<wfcglobal> global_ptr;
 
   /** @brief Создает обертки для callback обработчиков */
-  typedef ::iow::owner owner_type;
+  typedef wflow::owner owner_type;
 
   /** @brief Ошибка JSON-десериализации  */
-  typedef ::wfc::json::json_error json_error;
+  typedef wjson::json_error json_error;
 
   /** @brief Уникальный идентификатор объекта */
   typedef typename domain_interface::io_id_t   io_id_t;
 
   /** @brief Очередь задач*/
-  typedef ::wfc::workflow workflow_type;
+  typedef wflow::workflow workflow_type;
 
   typedef workflow_type::timer_id_t timer_id_t;
 
@@ -470,7 +476,7 @@ public:
    */
   std::shared_ptr<workflow_type> create_workflow(const wflow::workflow_options& opt) const
   {
-    auto wflow = std::make_shared<workflow_type>(this->global()->io_service,  opt);
+    auto wflow = std::make_shared<workflow_type>(this->global()->io_context,  opt);
     wflow->start();
     return wflow;
   }
@@ -829,14 +835,14 @@ public:
    * @brief Возвращает ссылку на глобальный флаг прекращения работы
    * @return ссылка на глобальный флаг прекращения работы
    * @details Может быть использования при длительных процедурах инициализации (например загрузка БД),
-   * чтобы завершить работу, а не дожидаться завершения инициализации. Так же можно передавать в качестве параметра 
+   * чтобы завершить работу, а не дожидаться завершения инициализации. Так же можно передавать в качестве параметра
    * другим длительным процедурам, чтобы ускорить завершение работы
    */
   const std::atomic_bool& global_stop_flag() const
   {
     if (auto g = this->global() )
       return g->stop_signal_flag;
-    
+
     static std::atomic_bool _fake_flag;
     return _fake_flag;
   }
@@ -853,14 +859,11 @@ public:
    */
   virtual domain_config generate(const std::string& arg)
   {
-    domain_config conf = domain_config();
-    if ( arg=="example" )
-    {
-      conf.cpu.insert(0);
-      conf.cpu.insert(1);
-      conf.cpu.insert(2);
-    }
-    return conf;
+    std::vector<std::string> schema_list;
+    boost::split( schema_list, arg, boost::is_any_of(",") );
+    domain_config cnfg;
+    wjson::schema::create_schema<domain_config>(cnfg, schema_list);
+    return cnfg;
   }
 
   typedef instance_handler_<Opt, StatOpt> instance_handler_t;
@@ -1036,7 +1039,7 @@ void domain_object<Itf, Opt, StatOpt>::initialize_domain()
 
     _workflow = _config.workflow.empty()
                 ? this->global()->common_workflow
-                : this->global()->registry.template get_object<workflow >("workflow", _config.workflow, false)
+                : this->global()->registry.template get_object<wflow::workflow>("workflow", _config.workflow, false)
                 ;
 
     _statistics = ! _config.statistics.disabled

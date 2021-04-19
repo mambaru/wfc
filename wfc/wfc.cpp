@@ -14,7 +14,7 @@
 
 #include "wfc_build_info.h"
 namespace wfc{
-  
+
 basic_wfc::~basic_wfc()
 {
   if ( _global != nullptr )
@@ -24,22 +24,26 @@ basic_wfc::~basic_wfc()
 }
 
 basic_wfc::basic_wfc(std::shared_ptr<ibuild_info> bi, const package_list& packages )
-  : _packages(packages)
 {
-  _global = std::make_shared<wfcglobal>(_io_service);
+  _global = std::make_shared<wfcglobal>(_io_context);
   _global->program_build_info = bi;
   _global->wfc_build_info = make_build_info<wfc_build_info>();
-
-  for (const auto& p: packages)
-  {
-    _global->registry.set_object("package", p->name(), p);
-  }
-
-  for (const auto& p: packages)
-  {
-    p->create(_global);
-  }
+  this->add_packages(packages);
 }
+
+void basic_wfc::add_package(package_ptr ppack)
+{
+  _packages.push_back(ppack);
+  _global->registry.set_object("package", ppack->name(), ppack);
+  ppack->create(_global);
+}
+
+void basic_wfc::add_packages(const package_list& packages)
+{
+  for (const auto& p: packages)
+    this->add_package(p);
+}
+
 
 int basic_wfc::run(int argc, char* argv[], std::string helpstring)
 {

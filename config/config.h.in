@@ -34,4 +34,5 @@
 
 #cmakedefine HAVE_SYS_STAT_H
 #cmakedefine HAVE_FCNTL_H
+#cmakedefine HAVE_SYS_PRCTL_H
 #cmakedefine HAVE_SYS_WAIT_H
