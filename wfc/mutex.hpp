@@ -6,10 +6,15 @@
 
 #pragma once
 
-#include <iow/mutex.hpp>
+#include <wflow/mutex.hpp>
 
 namespace wfc{ 
 
-using namespace iow;
+using wflow::empty_mutex;
+using wflow::rwlock;
+using wflow::read_lock;
+using wflow::spinlock;
+using wflow::longspinlock;
+using wflow::spinlock_n;
 
 }
