@@ -210,7 +210,7 @@ int dumpable(bool enable)
 
 bool change_user(std::string username, std::string* err)
 {
-  struct passwd *pwd = ::getpwnam(username.c_str() ); /* don't free, see getpwnam() for details */
+  passwd *pwd = ::getpwnam(username.c_str() ); /* don't free, see getpwnam() for details */
   if( pwd == nullptr )
   {
     if (err!=nullptr)
@@ -231,7 +231,6 @@ bool change_working_directory(std::string working_directory, std::string* err)
 {
   if ( 0 != ::chdir( working_directory.c_str() ) )
   {
-    //std::cerr << strerror(errno) << std::endl;
     if (err!=nullptr)
       *err = strerror(errno);
     return false;
