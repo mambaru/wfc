@@ -1,9 +1,9 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<meta name="generator" content="Doxygen 1.8.15"/>
+<meta name="generator" content="Doxygen 1.8.17"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>wfc: Структура wfc::component_features</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
@@ -27,7 +27,7 @@
 </table>
 </div>
 <!-- end header part -->
-<!-- Создано системой Doxygen 1.8.15 -->
+<!-- Создано системой Doxygen 1.8.17 -->
 <script type="text/javascript" src="menudata.js"></script>
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript">
@@ -76,13 +76,13 @@ $(function() {
 <tr class="separator:a79979738fa1b8ba442150cfeee7ba20c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Подробное описание</h2>
-<div class="textblock"><p class="">с помощью этого набора флагов можно определять некоторые особенности компонента:</p><ul>
+<div class="textblock"><p>с помощью этого набора флагов можно определять некоторые особенности компонента:</p><ul>
 <li>скрыть поля enabled, startup_priority, shutdown_priority, suspend и workflow в json-конфигурации wfc::basic_instance_options</li>
 <li>включить поле в json-конфигурации wfc::basic_instance_options</li>
 <li>заставить игнорировать реконфигурацию компонента</li>
 </ul>
-<p class="">Включение/отключение полей работает только в json-конфигурации, но пользователю доступны значения по умолчанию. Это имеет смысл если какие-то поля ни на что не влияют, например если не важен приоритет запуска или не поддерживается режим suspend(имитации). <a href="https://mambaru.github.io/wflow/">workflow</a> прикладному объекту доступен всегда, и если он не используется или используется для простых заданий, то его тоже можно отключить, чтобы не вводить в заблуждение пользователя (при наличии этого поля возможно настроить отдельный <a href="https://mambaru.github.io/wflow/">workflow</a> для объекта, но на слабых нагрузках это бессмысленная трата времени)</p>
-<p class="">Поле cpu по умолчанию отключено из предположения, что в большинстве случаев <a href="https://mambaru.github.io/wflow/">workflow</a> будет достаточно, его можно более гибко настраивать, но если в хотите запускать свои потоки и получить возможность распределять их по ядрам CPU то помимо EnableCPU вам необходимо зарегистрировать потоки с помощью <a class="el" href="classwfc_1_1domain__object.html#af65aab7ac9b6d13c31bdcca36cc52f4c" title="Регистрация пользовательского потока (thread) ">domain_object::reg_thread</a> </p>
+<p>Включение/отключение полей работает только в json-конфигурации, но пользователю доступны значения по умолчанию. Это имеет смысл если какие-то поля ни на что не влияют, например если не важен приоритет запуска или не поддерживается режим suspend(имитации). <a href="https://mambaru.github.io/wflow/">workflow</a> прикладному объекту доступен всегда, и если он не используется или используется для простых заданий, то его тоже можно отключить, чтобы не вводить в заблуждение пользователя (при наличии этого поля возможно настроить отдельный <a href="https://mambaru.github.io/wflow/">workflow</a> для объекта, но на слабых нагрузках это бессмысленная трата времени)</p>
+<p>Поле cpu по умолчанию отключено из предположения, что в большинстве случаев <a href="https://mambaru.github.io/wflow/">workflow</a> будет достаточно, его можно более гибко настраивать, но если в хотите запускать свои потоки и получить возможность распределять их по ядрам CPU то помимо EnableCPU вам необходимо зарегистрировать потоки с помощью <a class="el" href="classwfc_1_1domain__object.html#af65aab7ac9b6d13c31bdcca36cc52f4c" title="Регистрация пользовательского потока (thread)">domain_object::reg_thread</a> </p>
 </div><h2 class="groupheader">Перечисления</h2>
 <a id="a79979738fa1b8ba442150cfeee7ba20c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a79979738fa1b8ba442150cfeee7ba20c">&#9670;&nbsp;</a></span>anonymous enum</h2>
@@ -96,25 +96,25 @@ $(function() {
       </table>
 </div><div class="memdoc">
 <table class="fieldtable">
-<tr><th colspan="2">Элементы перечислений</th></tr><tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20ca81c3316750bca1a328d559ed331c1a7e"></a>Defaults&#160;</td><td class="fielddoc"><p class="">По умолчанию </p>
+<tr><th colspan="2">Элементы перечислений</th></tr><tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20ca81c3316750bca1a328d559ed331c1a7e"></a>Defaults&#160;</td><td class="fielddoc"><p>По умолчанию </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20ca97e66bc6f499083053a82537bae4400b"></a>Multiton&#160;</td><td class="fielddoc"><p class="">Выставляетяся в <a class="el" href="classwfc_1_1multiton.html" title="multiton ">wfc::multiton</a>. </p>
+<tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20ca97e66bc6f499083053a82537bae4400b"></a>Multiton&#160;</td><td class="fielddoc"><p>Выставляетяся в <a class="el" href="classwfc_1_1multiton.html" title="multiton">wfc::multiton</a>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20cace9b965be66504e0d135e138140d2bd5"></a>Singleton&#160;</td><td class="fielddoc"><p class="">Выставляетяся в <a class="el" href="classwfc_1_1singleton.html" title="singleton ">wfc::singleton</a>. </p>
+<tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20cace9b965be66504e0d135e138140d2bd5"></a>Singleton&#160;</td><td class="fielddoc"><p>Выставляетяся в <a class="el" href="classwfc_1_1singleton.html" title="singleton">wfc::singleton</a>. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20ca22304e08ef8843f4b676f63af726cefb"></a>DisabledEnabled&#160;</td><td class="fielddoc"><p class="">Скрыть поле enabled в json-конфигурации </p>
+<tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20ca22304e08ef8843f4b676f63af726cefb"></a>DisabledEnabled&#160;</td><td class="fielddoc"><p>Скрыть поле enabled в json-конфигурации </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20cac103a20a938bc386968e146d509835dd"></a>DisabledPriority&#160;</td><td class="fielddoc"><p class="">Скрыть поля startup_priority и shutdown_priority в json-конфигурации </p>
+<tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20cac103a20a938bc386968e146d509835dd"></a>DisabledPriority&#160;</td><td class="fielddoc"><p>Скрыть поля startup_priority и shutdown_priority в json-конфигурации </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20ca7c70a511b0ad91ac9da3a633ea60669b"></a>DisabledSuspend&#160;</td><td class="fielddoc"><p class="">Скрыть поле suspend в json-конфигурации </p>
+<tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20ca7c70a511b0ad91ac9da3a633ea60669b"></a>DisabledSuspend&#160;</td><td class="fielddoc"><p>Скрыть поле suspend в json-конфигурации </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20cae8cfa77a38365dcc1ff7c818c9d43028"></a>DisabledWorkflow&#160;</td><td class="fielddoc"><p class="">Скрыть поле workflow в json-конфигурации </p>
+<tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20cae8cfa77a38365dcc1ff7c818c9d43028"></a>DisabledWorkflow&#160;</td><td class="fielddoc"><p>Скрыть поле workflow в json-конфигурации </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20ca31022f6179a2566be6bed20af7e43596"></a>EnableCPU&#160;</td><td class="fielddoc"><p class="">Включить поле cpu в json-конфигурации </p>
+<tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20ca31022f6179a2566be6bed20af7e43596"></a>EnableCPU&#160;</td><td class="fielddoc"><p>Включить поле cpu в json-конфигурации </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20ca652ec4acfb51f24331b1ef01153c7fd6"></a>IgnoreReconfigure&#160;</td><td class="fielddoc"><p class="">Игнорировать сигналы реконфигурацию </p>
+<tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20ca652ec4acfb51f24331b1ef01153c7fd6"></a>IgnoreReconfigure&#160;</td><td class="fielddoc"><p>Игнорировать сигналы реконфигурацию </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20cad94f8409ca80baa2b3193ebc8c326e1e"></a>EnableTracking&#160;</td><td class="fielddoc"><p class="">Включить дефолтную реализацию обертки iinterface для отслеживания источника </p>
+<tr><td class="fieldname"><a id="a79979738fa1b8ba442150cfeee7ba20cad94f8409ca80baa2b3193ebc8c326e1e"></a>EnableTracking&#160;</td><td class="fielddoc"><p>Включить дефолтную реализацию обертки iinterface для отслеживания источника </p>
 </td></tr>
 </table>
 
@@ -128,7 +128,7 @@ $(function() {
 <hr class="footer"/><address class="footer"><small>
 Создано системой &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.15
+</a> 1.8.17
 </small></address>
 </body>
 </html>
