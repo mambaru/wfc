@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import sys
+import sys, traceback
 sys.path.insert(0, '.')
 
 import signal 
@@ -112,7 +112,7 @@ class JsonrpcRequester:
   def __init__(self, cli, stat, args):
     self.check = args.check
     self.pconn = args.pconn
-    self.async = args.async
+    self.async_req = args.async_req
     self.async_count = 0
     self.jrp = jsonrpc( cli, stat=stat, trace=args.trace )
     self.multi_count = 0
@@ -126,7 +126,7 @@ class JsonrpcRequester:
 
   def request_once(self, query):
     try:
-      if not self.async:
+      if not self.async_req:
         result = self.jrp.request(query['method'], query['params'])
       else:
         self.jrp.async_request(query['method'], query['params'])
@@ -226,7 +226,7 @@ class SpeedLimiter:
       delta = now - self.start
       if delta.seconds == 0:
         microseconds = delta.seconds*1000000 + delta.microseconds
-        time.sleep( (1000000.0 - microseconds)/1000000.0)
+        time.sleep( (1000000.0 - microseconds)//1000000.0)
       self.start = datetime.datetime.now()
 
   def wait_(self):
@@ -237,7 +237,7 @@ class SpeedLimiter:
     if delta.seconds == 0:
       microseconds = delta.seconds*1000000 + delta.microseconds
       if self.ratetime > microseconds:
-        time.sleep( (self.ratetime - microseconds)/1000000.0 )
+        time.sleep( (self.ratetime - microseconds)//1000000.0 )
     self.start = datetime.datetime.now()
    
 
@@ -285,15 +285,15 @@ def work_thread(args, stat):
         delta = now - start
         if delta.seconds == 0:
           microseconds = delta.seconds*1000000 + delta.microseconds
-          time.sleep( (1000000.0 - microseconds)/1000000.0)
+          time.sleep( (1000000.0 - microseconds)//1000000.0)
         start = datetime.datetime.now()
       '''
     req.read_all()
   except IOError as e:
-    print "I/O error({0}): {1}".format(e.errno, e.strerror)
+    print("I/O error({0}): {1}".format(e.errno, e.strerror))
     raise
   except:
-    print "Unexpected error:", sys.exc_info()[0]
+    print("Unexpected error:", sys.exc_info()[0])
     raise
   if is_working!=0:
     is_working-=1
@@ -357,7 +357,7 @@ def do_list(args):
   #e.next()
   if len(e.lists):
     print("Список доступных последовательностей:")
-    for k, v in e.lists.iteritems():
+    for k, v in e.lists.items():
       if k != "import":
         print(u"\t{0} - {1}".format(k, v[-1]))
   else:
@@ -367,7 +367,7 @@ def do_list(args):
 
 def do_probe(args):
   print("Текуще настройки:")
-  for k, v in options.iteritems():
+  for k, v in options.items():
     if not k in ['modules', 'config', 'file']:
       print("\t{0:10}{1}".format(k,v) )
   f = args.file
@@ -417,6 +417,10 @@ def do_test(args):
   except Exception as e:
     print("Exception: {0}".format(e.args))
     result_code=3
+    print("-"*60)
+    traceback.print_exc(file=sys.stdout)
+    print("-"*60)
+
     return
   
 
@@ -439,6 +443,10 @@ def do_ping(args):
     result_code = 3
     print("Ping FAIL")
     print(e.args)
+    print("-"*60)
+    traceback.print_exc(file=sys.stdout)
+    print("-"*60)
+
   print("Ping FAIL")
 
 # ------------------------------------
@@ -481,21 +489,26 @@ def main(args):
   
   signal.signal(signal.SIGINT, signal_handler)
   test_type = args.mode
-
-  if test_type == "list":
-    do_list(args)
-  elif test_type == "probe":
-    do_probe(args)
-  elif test_type == "ping":
-    do_ping(args)
-  elif test_type == "test":
-    do_test(args)
-  elif test_type == "init":
-    do_init(args)
-  elif test_type == "bench":
-    do_bench(args)
-  elif test_type == "stress":
-    do_stress(args)
+  try:
+    if test_type == "list":
+      do_list(args)
+    elif test_type == "probe":
+      do_probe(args)
+    elif test_type == "ping":
+      do_ping(args)
+    elif test_type == "test":
+      do_test(args)
+    elif test_type == "init":
+      do_init(args)
+    elif test_type == "bench":
+      do_bench(args)
+    elif test_type == "stress":
+      do_stress(args)
+  except Exception:
+    print("Exception in user code:")
+    print("-"*60)
+    traceback.print_exc(file=sys.stdout)
+    print("-"*60)
     
   
 
@@ -518,7 +531,7 @@ if __name__ == '__main__':
   #parser.add_argument('-P', '--pconn',    help="Постоянное подключение", action='store_true')
   #parser.add_argument('-P', '--pconn',    nargs='?', help="Постоянное подключение. Число запросов >1 - асинхронныq ", type=int, default=1)
   parser.add_argument('-P', '--pconn',    help="Постоянное подключение", action='store_true')
-  parser.add_argument('-A', '--async',    help="Постоянное подключение", action='store_true')
+  parser.add_argument('-A', '--async-req',    help="", action='store_true')
 
   # криво работает
   parser.add_argument('-t', '--threads', help="Число потоков", type=int,  default=options['threads'])
@@ -544,7 +557,7 @@ if __name__ == '__main__':
   options['port']     = args.port
   options['udp']      = args.udp
   options['pconn']    = args.pconn
-  options['async']    = args.async
+  options['async-req']    = args.async_req
 
   options['threads']  = args.threads
   options['rate']     = args.rate

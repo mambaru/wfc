@@ -38,7 +38,7 @@ class Client:
       self.connect()
     while True:
       try:
-        self.cli.send(req+"\r\n")
+        self.cli.send((req+"\r\n").encode())
         break
       except Exception as e:
         if e.errno==11:

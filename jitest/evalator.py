@@ -60,11 +60,11 @@ class Evalator:
     self.flat = {}
     # тестовые последовательности в формате [type, int, type, int, ..., "описание"]
     self.lists = {}
-    for k1, v1 in orig.iteritems():
+    for k1, v1 in orig.items():
       if k1=="import":
         continue
       if isinstance(v1, dict):
-        for k2, v2 in v1.iteritems():
+        for k2, v2 in v1.items():
           self.flat[k2]=v2
       elif isinstance(v1, list):
         self.lists[k1]=v1
@@ -112,7 +112,7 @@ class Evalator:
       # all объединение 
       all=[]
       names=[]
-      for k, v in self.lists.iteritems():
+      for k, v in self.lists.items():
         if isinstance(v, list):
           if len(v) > 2 :
             names += [k]
@@ -155,7 +155,7 @@ class Evalator:
 #-------------------------------------------------------------------------------
 
   def is_str(self, obj):
-    return isinstance(obj, str) or isinstance(obj, unicode)
+    return isinstance(obj, str) or isinstance(obj, str)
   
   def prepare_(self, obj, dct ):
     is_str =  self.is_str(obj)
@@ -224,7 +224,7 @@ class Evalator:
     if beg==0 and end==len(arg):
       return obj
     if self.is_str(obj) or isPy:
-      return arg[:beg] + unicode(obj) + arg[end:]
+      return arg[:beg] + str(obj) + arg[end:]
     return arg[:beg] + json.dumps(obj)+arg[end:]
       
   # Поиск {% code %} в строке

@@ -104,7 +104,7 @@ class jsonrpc:
         
       if not has_result:
         if count_read > 10:
-          time.sleep( count_read/10.0)
+          time.sleep( count_read//10.0)
         continue
       id = self.id_list[0]
       info = self.req_by_id[id]
