@@ -25,7 +25,7 @@ target_compile_definitions(wfc PRIVATE -DBOOST_ASIO_NO_DEPRECATED)
 build_info(TARGET wfc)
 
 include(FindThreads)
-find_package(Boost COMPONENTS system program_options filesystem date_time regex REQUIRED)
+get_boost(system program_options filesystem date_time regex)
 
 target_link_libraries(
   wfc
