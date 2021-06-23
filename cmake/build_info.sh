@@ -37,6 +37,8 @@ fi
 
 buildflags="$compiler $flags"
 
+git pull --tags --force origin HEAD 
+
 #
 # make version
 #

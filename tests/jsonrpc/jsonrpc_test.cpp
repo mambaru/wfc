@@ -107,11 +107,11 @@ int main()
       return 0;
     else
       return 8;
-    t->stop("");
+    /*t->stop("");
     g->args.clear();
     g->registry.clear();
     t.reset();
-    g.reset();
+    g.reset();*/
   }
   return 0;
 }

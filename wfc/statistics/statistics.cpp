@@ -71,6 +71,6 @@ composite_meter statistics::create_composite_meter(const std::string& time, cons
 {
   return _impl->create_composite_multi_meter<statistics_duration>(time, read, write, summary_size);
 }
-  
+
 
 }}
