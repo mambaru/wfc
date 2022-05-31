@@ -13,6 +13,7 @@
 #include <wfc/core/workflow.hpp>
 #include <wfc/core/cpuset.hpp>
 #include <wfc/asio.hpp>
+#include <vector>
 #include <atomic>
 
 namespace wfc{
@@ -31,6 +32,7 @@ struct wfcglobal
   std::shared_ptr<ibuild_info> wfc_build_info;
 
   extended_args args;
+  std::vector<std::string> ini;
 
   fakir idle;
   fakir after_start;
