@@ -47,7 +47,6 @@ public:
     _engine=nullptr;
   }
 
-
   virtual void stop() final override
   {
     if ( _engine != nullptr )
@@ -251,6 +250,11 @@ protected:
 
   void initialize_engine(options_type eopt)
   {
+    eopt.domain_name = this->name();
+    eopt.powner = &(this->owner());
+    eopt.tracking_id = this->get_id();
+    eopt.disable_tracking_log = false;
+    
     if ( _engine == nullptr )
     {
       _engine = std::make_shared<engine_type>();

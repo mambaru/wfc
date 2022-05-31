@@ -33,7 +33,6 @@ public:
   {
     _target_id = ::iow::io::create_id<size_t>();
     auto dopt = this->options();
-    //engine_options& eopt = static_cast<engine_options&>(dopt);
     typedef typename engine_type::target_type target_type;
     typedef typename target_type::element_type target_interface;
     target_type target = this->template get_target<target_interface>(dopt.incoming_target_name);

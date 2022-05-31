@@ -74,7 +74,7 @@ public:
       else 
       {
         outgoing_handler_t error_handler = nullptr;
-        if ( holder.has_id() )
+        if ( holder.has_id() || e )
         {
           error_handler = [handler](outgoing_holder oholder)
           {
@@ -86,15 +86,14 @@ public:
         
         if ( e )
         {
-          JSONRPC_LOG_ERROR( "domain_proxy: Parse error: " << holder.error_message(e) );
-          if ( error_handler != nullptr )
-            this->send_error< wjrpc::parse_error >( std::move(holder), error_handler);
+          JSONRPC_LOG_ERROR( "domain_proxy: Parse error: " << holder.error_message(e) 
+                << " error_handler: "<< (error_handler != nullptr) );
+          this->send_error< wjrpc::parse_error >( std::move(holder), error_handler);
         }
         else
         {
           JSONRPC_LOG_ERROR( "domain_proxy: Invalid JSON-RPC: " << holder.str() );
-          if ( error_handler != nullptr )
-            this->send_error< wjrpc::invalid_request >( std::move(holder), error_handler);
+          this->send_error< wjrpc::invalid_request >( std::move(holder), error_handler);
         }
       }
     }
@@ -114,8 +113,7 @@ public:
   template<typename Err>
   static void send_error(incoming_holder holder, outgoing_handler_t handler)
   {
-    if ( handler != nullptr )
-      wjrpc::aux::send_error(std::move(holder), std::make_unique< Err > (), std::move(handler));
+    wjrpc::aux::send_error(std::move(holder), std::make_unique< Err > (), std::move(handler));
   }
   
   using super::get_target;

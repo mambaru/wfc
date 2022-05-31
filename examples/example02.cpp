@@ -4,10 +4,13 @@
 #include <memory>
 #include <iostream>
 
+namespace {
 class example_package
   : public wfc::ipackage
 {
 public:
+  example_package() {}
+
   virtual std::shared_ptr<wfc::ibuild_info> build_info() override
   {
     std::cout << "example_package::build_info()" << std::endl;
@@ -54,6 +57,7 @@ public:
     std::cout << "example_package::stop()" << std::endl;
   }
 };
+}
 
 int main(int argc, char* argv[])
 {

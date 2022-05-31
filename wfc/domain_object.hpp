@@ -137,6 +137,10 @@ public:
   /** @brief Уникальный идентификатор объекта */
   typedef typename domain_interface::io_id_t   io_id_t;
 
+  typedef typename domain_interface::data_type data_type; 
+  typedef typename domain_interface::data_ptr data_ptr; 
+  typedef typename domain_interface::output_handler_t output_handler_t; 
+  
   /** @brief Очередь задач*/
   typedef wflow::workflow workflow_type;
 
@@ -230,7 +234,7 @@ public:
    * @return уникальный идентификатор объекта
    * @details уникален для любого объекта в рамках процесса
    */
-  constexpr io_id_t get_id() const
+  virtual io_id_t get_id() const override final
   {
     return _io_id;
   }
@@ -307,6 +311,41 @@ public:
     _owner.release_tracking(io_id);
   }
 
+  bool perform_status(data_ptr& d, output_handler_t& handler)
+  {
+    if ( handler == nullptr )
+      return false;
+    
+    if ( d == nullptr )
+    {
+      handler(nullptr);
+      return true;
+    }
+    
+    if ( this->suspended() )
+    {
+      handler( iow::io::make("SUSPENDED") );
+      return true;
+    }
+    
+    if ( d->size() != 7 )
+      return false;
+    
+    if ( std::string( d->begin(), d->end()) != "@STATUS" )
+      return false;
+    
+    handler( iow::io::make("OK") );
+    return true;
+  }
+
+  virtual void perform_io(data_ptr d, io_id_t id, output_handler_t handler) override
+  {
+    if ( this->perform_status(d, handler) )
+      return;
+   
+    domain_interface::perform_io(std::move(d), id, handler);
+  }
+  
   /**
    * @brief Возвращает ссылку на объект owner
    * @return ссылка на объект owner
@@ -428,7 +467,7 @@ public:
    * можно использовать только имя.
    * @see wflow::workflow
    */
-  std::shared_ptr<workflow_type> get_workflow(const std::string& target, bool disabort = false) const
+  std::shared_ptr<workflow_type> get_workflow(const std::string& target, bool disabort = false, bool* created = nullptr) const
   {
     if (!is_configured_())
       return nullptr;
@@ -436,21 +475,9 @@ public:
     if ( target.empty() )
       return _workflow;
 
-    auto beg = target.begin();
-    auto end = target.end();
-
-    if ( wjson::parser::is_object(beg, end) )
-      return this->create_workflow("", target);
-
-    std::string starget;
-
-    if ( wjson::parser::is_string(beg, end) )
-      wjson::string<>::serializer()(starget, beg, end, nullptr);
-    else
-      starget=target;
-
-    return this->global()->registry.template get_object<workflow_type>("workflow", starget, disabort);
+    return this->get_workflow_(target, disabort, created);
   }
+
 
   /**
    * @brief Возвращает указатель на общий [workflow](https://mambaru.github.io/wflow/) системы
@@ -987,9 +1014,43 @@ private:
     return opt;
   }
 
+  std::shared_ptr<workflow_type> get_workflow_(const std::string& target, bool disabort, bool* created) const
+  {
+    if ( created!=nullptr ) 
+      *created = false;
+    
+    if ( target.empty() )
+      return nullptr;
+
+    auto beg = target.begin();
+    auto end = target.end();
+    
+    if ( wjson::parser::is_null(beg, end) )
+      return nullptr;
+
+    if ( wjson::parser::is_object(beg, end) )
+    {
+      if ( created!=nullptr ) *created = true;
+      return this->create_workflow("", target);
+    }
+
+    std::string starget;
+
+    if ( wjson::parser::is_string(beg, end) )
+      wjson::string<>::serializer()(starget, beg, end, nullptr);
+    else
+      starget=target;
+    
+    if ( starget.empty() )
+      return nullptr;
+    
+    return this->global()->registry.template get_object<workflow_type>("workflow", starget, disabort);
+  }
+
 private:
   bool _conf_flag = false;
   bool _idle_flag = false;
+  bool _my_workflow = false;
   const io_id_t  _io_id;
   std::string    _name;
   global_ptr     _global;
@@ -1037,9 +1098,12 @@ void domain_object<Itf, Opt, StatOpt>::initialize_domain()
     _owner.set_double_call_handler(std::bind(g->doublecall_handler, this->name()));
     _owner.set_no_call_handler(std::bind(g->nocall_handler, this->name()));
 
-    _workflow = _config.workflow.empty()
-                ? this->global()->common_workflow
-                : this->global()->registry.template get_object<wflow::workflow>("workflow", _config.workflow, false)
+    _workflow = this->get_workflow_(_config.workflow, false, &_my_workflow);
+    if ( _workflow == nullptr ) _workflow = this->global()->common_workflow;
+   // _workflow = _config.workflow.empty()
+   //             ? this->global()->common_workflow
+   //                : this->get_workflow_(_config.workflow, false, &_my_workflow) 
+                //this->global()->registry.template get_object<wflow::workflow>("workflow", _config.workflow, false)
                 ;
 
     _statistics = ! _config.statistics.disabled
@@ -1093,6 +1157,8 @@ void domain_object<Itf, Opt, StatOpt>::start_domain()
 template<typename Itf, typename Opt, typename StatOpt>
 void domain_object<Itf, Opt, StatOpt>::stop_domain()
 {
+  if ( _my_workflow )
+    _workflow->stop();
   this->stop();
 }
 

@@ -15,6 +15,8 @@
 #include <memory>
 #include <iostream>
 
+namespace {
+
 struct core_options{};
 struct core_options_json
 {
@@ -164,6 +166,8 @@ example_package::example_package()
 {
 
 }
+
+} // namespace
 
 int main(int argc, char* argv[])
 {

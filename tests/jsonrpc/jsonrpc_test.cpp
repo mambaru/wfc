@@ -7,7 +7,10 @@
 #include <wfc/asio.hpp>
 #include <wfc/name.hpp>
 
+
 using namespace wfc;
+
+namespace {
 
 struct options
 {
@@ -60,6 +63,8 @@ WFC_NAME2(test_service_name, "test-service")
 class test_service
   : public wfc::jsonrpc::service_multiton< test_service_name, service_method_list>
 {};
+
+}
 
 int main()
 {

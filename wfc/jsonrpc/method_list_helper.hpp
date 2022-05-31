@@ -14,6 +14,9 @@
 #include <wjrpc/handler/aspect/peeper.hpp>
 #include <wjrpc/method/mem_fun/connect_method.hpp>
 #include <wjrpc/method/mem_fun/disconnect_method.hpp>
+#include <wfc/jsonrpc/ad_callback.hpp>
+#include <wjrpc/handler/aspect/tags.hpp>
+
 
 namespace wfc{ namespace jsonrpc{
 
@@ -26,7 +29,8 @@ struct method_list_helper
       wjrpc::target<iinterface>,
       wjrpc::peeper<iinterface>,
       wjrpc::connect_method<iinterface, iinterface, &iinterface::reg_io >,
-      wjrpc::disconnect_method<iinterface, &iinterface::unreg_io>
+      wjrpc::disconnect_method<iinterface, &iinterface::unreg_io>, 
+      fas::advice<wjrpc::_callback_, ad_callback>
   > base;
   
   typedef typename base::interface_type interface_type;

@@ -25,11 +25,12 @@ struct iinterface
   typedef ::iow::io::io_id_t   io_id_t;
   /** Обработчик обратного вызова, для отправки ответа */
   typedef ::iow::io::output_handler_t output_handler_t;
-  /** Входящий обработчик (аналогичен iinterface::perform_io) */
-  typedef ::iow::io::input_handler_t input_handler_t;
 
+  static constexpr const io_id_t bad_id = static_cast<io_id_t>(-1);
   virtual ~iinterface() = default;
 
+  virtual io_id_t get_id() const { return bad_id;};
+  
   /**
    * @brief Регистрация объекта
    * @param io_id Идентификатор объекта, который вызвал этот метод

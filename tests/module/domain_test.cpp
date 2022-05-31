@@ -7,6 +7,7 @@
 
 using namespace wfc;
 
+namespace {
 struct options
 {
   bool test = false;
@@ -50,6 +51,8 @@ public:
 
   bool testval = false;
 };
+
+}
 
 int main()
 {

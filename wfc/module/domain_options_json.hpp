@@ -110,7 +110,8 @@ struct domain_options_json_t
         n_workflow,
         domain_options_type,
         std::string,
-        &domain_options_type::workflow
+        &domain_options_type::workflow,
+        json::raw_value<>
       >::type,
       typename optional_member<
         has_cpu,

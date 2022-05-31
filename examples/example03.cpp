@@ -7,6 +7,8 @@
 #include <memory>
 #include <iostream>
 
+namespace {
+
 class example_startup
   : public wfc::istartup
 {
@@ -88,6 +90,8 @@ public:
 
   virtual void stop(const std::string&) override  { }
 };
+
+}
 
 int main(int argc, char* argv[])
 {

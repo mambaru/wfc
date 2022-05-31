@@ -11,6 +11,7 @@
 #include <memory>
 #include <iostream>
 
+namespace {
 struct empty_conf{};
 struct empty_conf_json
 {
@@ -90,6 +91,8 @@ struct example_package:
     return "example_package";
   }
 };
+
+}
 
 int main(int argc, char* argv[])
 {

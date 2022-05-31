@@ -7,6 +7,7 @@
 #include <memory>
 #include <iostream>
 
+namespace {
 struct example_package: 
   wfc::module_list<
     wfc::empty_build_info
@@ -17,6 +18,7 @@ struct example_package:
     return "example_package";
   }
 };
+}
 
 int main(int argc, char* argv[])
 {

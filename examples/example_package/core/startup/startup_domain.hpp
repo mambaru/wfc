@@ -1,3 +1,5 @@
+#pragma once
+
 #include <wfc/domain_object.hpp>
 #include <wfc/core/istartup.hpp>
 #include <iostream>

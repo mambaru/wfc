@@ -16,37 +16,38 @@ WFC - это фреймворк для разработки высконагру
 
 # Сборка и зависимости
 
-Зависимости:
+## Зависимости:
 
 * g++ 4.9 и выше или clang++
-* boost-1.73 и выше
+* boost-1.76 и выше
 * cmake
 * git
-* valgrind (опционально)
-* cppcheck (опционально)
+* lcov     (опционально) для отчетов coverage о покрытии тестами (make tests)
+* valgrind (опционально) для запуска дополнительных тестов на утечки памяти (make coverage)
+* cppcheck (опционально) для make cppcheck
 
-Установить свежий boost:
-
-```bash
-wget https://dl.bintray.com/boostorg/release/1.63.0/source/boost_1_73_0.tar.gz
-tar -xvf boost_1_73_0.tar.gz
-cd boost_1_73_0
-./bootstrap.sh --prefix=/usr/local/boost-1.73
-sudo ./b2 install --prefix=/usr/local/boost-1.73
-```
-
-Пропишите в систему BOOST_ROOT или устанавливайте перед запуском, например:
-```bash
-BOOST_ROOT=/usr/local/boost-1.73 cmake ..
-```
+## Сборка
 
 WFC подключается к проекту как субмодуль, но можно его собрать независимо, чтобы убедиться что нет проблем со сборкой:
 
 ```bash
 git clone https://github.com/mambaru/wfc.git
 cd wfc
-make tests
+BOOST_ROOT=/path/to/boost make tests
 ```
+
+Если скрипт сборки не обнаружит в стсеме boost, но он загрузит boost и установит необходимые модули в ./build
+
+## Установить boost:
+
+```bash
+wget https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.gz
+tar -xvf boost_1_76_0.tar.gz
+cd boost_1_76_0
+./bootstrap.sh --prefix=/path/to/boost
+sudo ./b2 install --prefix=/path/to/boost
+```
+## Субмодули
 
 При сборке автоматически инициализируются и загружаются следующие субмодули wfc:
 - [cmake-ci](https://github.com/mambaru/cmake-ci) - вспомогательные скрипты для cmake и CI
@@ -58,38 +59,30 @@ make tests
 - [wjrpc](https://github.com/mambaru/wjrpc) - библиотека поддержки JSON-RPC
 - [wrtstat](https://github.com/mambaru/wrtstat) - для сбора статистики
 
+## Инициализация проекта (пакет модулей )
 
-# Разработка демонов, пакетов и библиотек на WFC
+```bash
+mkdir wfc_demo
+cd wfc_demo/
+git init
+# git remote add origin https://github.com/my-account/wfc_demo.git
+git submodule add https://github.com/mambaru/cmake-ci external/cmake-ci
+vim CMakeLists.txt
+```
+Файл CMakeLists.txt
+```cmake
+cmake_minimum_required(VERSION 3.1)
+project(wfc_demo)
+include(cmake/ci.cmake)
+wci_submodule(NAME wfc SUPERMODULE)
+```
+Убедитесь, что папки ../wfc не существует (например, осталась после пробной сборки wfc) иначе не сработает. Проблема может возникнуть только для локальных репозитариев и только на этапе инициализации проекта.
+```bash
+git add .
+git commit -m "Initial commnit"
+./external/cmake-ci/scripts/upgrade.sh auto
+BOOST_ROOT=/path/to/boost make init
+```
+После апгрейда (`./external/cmake-ci/scripts/upgrade.sh auto`) в корневой папке появится папка **cmake/ci.cmake** и **Makefile** (тривиальная обертка запуска **cmake**) для упрощения сборки проекта. При первой сборке **wci_submodule** автоматически подключит **wfc** как субмодуль в **external/wfc**. Если он уже был подключен, то при необходимости инициализирует и обновит его, а так же все субмодули самой **wfc**.
 
-Можно выделить три вида проектов:
-* Библиотеки ( Пример: [wlog](https://github.com/mambaru/wlog) )
-* WFC-пакеты ( Пример: [wfc_demo](https://github.com/mambaru/wfc_demo) )
-* Демоны ( Пример: [demod](https://github.com/mambaru/demod) )
-
-## Разработка приложений (демонов) на базе WFC
-
-[wfcroot](https://github.com/mambaru/wrtstat)
-
-## Разработка WFC-пакетов
-
-Для того чтобы легче визуально отличать пакеты от библиотек, пакетам дают префикс `wfc_ `, например `wfc_demo `. Для облегчения подключения wfc и написания cmake скриптов будем использовать [cmake-ci](https://github.com/mambaru/cmake-ci). Изначально это была папка со скриптами в WFC проекте, но потом эволюционировала в отдельный, независимый проект.
-
-### Иницализация cmake-ci
-
-### Подключение WFC
-
-### Пакет
-
-### Модуль
-
-### Компонент
-
-### Прикладной объект
-
-### Прикладная логика
-
-### Сервис
-
-### Шлюз
-
-
+Можно приступать к разработке. Пример пакета модулей для демона [demod](https://github.com/mambaru/demod) смотри [wfc_demo](https://github.com/mambaru/wfc_demo). Инструкции по инициализации пректа демона смотри [wfcroot](https://github.com/mambaru/wfcroot). Информация по **wci_submodule** и все что связано со сборкой и субмодулями в [cmake-ci](https://github.com/mambaru/cmake-ci)

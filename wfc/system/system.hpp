@@ -24,9 +24,9 @@ void sleep( int millisec );
 
 std::function<void()> daemonize(bool wait = false);
 
-bool change_user(std::string username, std::string* err);
+bool change_user(const std::string& username, std::string* err);
 
-bool change_working_directory(std::string working_directory, std::string* err);
+bool change_working_directory(const std::string& working_directory, std::string* err);
 
 bool autoup(
   time_t timeout,

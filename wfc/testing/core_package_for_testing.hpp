@@ -117,6 +117,7 @@ public:
   {
     _poll_count = poll_count;
   }
+  
 
 private:
   std::shared_ptr<wfcglobal> _global;

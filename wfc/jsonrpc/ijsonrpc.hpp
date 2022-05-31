@@ -18,7 +18,6 @@ struct ijsonrpc
   typedef ::wjrpc::outgoing_holder outgoing_holder;
 
   typedef iinterface::output_handler_t output_handler_t;
-  typedef iinterface::input_handler_t input_handler_t;
 
   typedef ::wjrpc::outgoing_handler_t outgoing_handler_t;
   typedef ::wjrpc::incoming_handler_t incoming_handler_t;

@@ -40,8 +40,8 @@ private:
 
 private:
 
-  bool initialized = false;
-  bool started = false;
+  bool _initialized = false;
+  bool _started = false;
   boost::asio::io_context _io;
   std::shared_ptr<wfcglobal> _g;
   std::list<instance_ptr> _inst_list;

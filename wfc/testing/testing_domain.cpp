@@ -27,16 +27,16 @@ testing_domain::testing_domain()
 void testing_domain::initialize()
 {
   auto li = startup_sorted_();
-  initialized = true;
+  _initialized = true;
   for (auto pobj: li)
     pobj->initialize();
 }
 
 void testing_domain::start(const std::string& args )
 {
-  if (!initialized)
+  if (!_initialized)
     this->initialize();
-  started = true;
+  _started = true;
   auto li = startup_sorted_();
   for (auto pobj: li)
     pobj->start(args);
@@ -48,8 +48,8 @@ void testing_domain::stop(const std::string& args )
   for (auto pobj: li)
     pobj->stop(args);
   _g->common_workflow->stop();
-  started = false;
-  initialized = false;
+  _started = false;
+  _initialized = false;
 }
 
 std::shared_ptr<wfcglobal> testing_domain::global() const

@@ -7,11 +7,12 @@
 #pragma once 
 
 #include <string>
+#include <wfc/jsonrpc/basic_options.hpp>
 
 namespace wfc{ namespace jsonrpc{
 
 template<typename EngineOptions>
-struct gateway_options: EngineOptions
+struct gateway_options: basic_options<EngineOptions>
 {
   typedef EngineOptions engine_options;
   std::string incoming_target_name;
