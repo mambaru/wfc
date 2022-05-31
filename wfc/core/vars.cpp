@@ -37,6 +37,11 @@ const vars::ini_map_t& vars::ini_map() const
   return _ini_map;
 }
 
+const vars::include_map_t& vars::include_map() const
+{
+  return _include_map;
+}
+
 const std::string& vars::result() const
 {
   return _result;
@@ -101,7 +106,6 @@ bool vars::parse_file(const std::string& file) noexcept
 {
   return this->parse_file(file, &_result);
 }
-
 
 bool vars::parse_file( const std::string& file, std::string* text) noexcept
 try
@@ -194,7 +198,6 @@ catch(const std::exception& e)
   return false;
 }
 
-
 bool vars::apply_INCLUDE(std::string* text)
 {
   apply_handler_f handler = [this](const var_info& vi)
@@ -247,6 +250,7 @@ bool vars::search_vars( vars_list_t* vars_list ) const noexcept
   return this->search_vars(_result, vars_list);
 }
 
+
 bool vars::search_vars( const std::string& text, vars_list_t* vars_list) const noexcept
 {
   std::vector<std::string> raw_vars_list;
@@ -255,7 +259,6 @@ bool vars::search_vars( const std::string& text, vars_list_t* vars_list) const n
     return false;
   for ( const std::string& raw_var : raw_vars_list)
   {
-    //std::string pref, name, raw_params, defval;
     var_info var;
     if ( !vars::match_var(raw_var, &var, nullptr) )
       return false;

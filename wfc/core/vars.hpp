@@ -106,6 +106,7 @@ public:
   std::string error_message() const;
   const std::string& result() const;
   const ini_map_t& ini_map() const;
+  const include_map_t& include_map() const;
 
   static bool set_env(const std::string& name, const std::string& val, bool overwrite = false);
   static bool get_env(const std::string& name, std::string* val);
