@@ -98,8 +98,6 @@ public:
     if (_is_abort)
       return;
     this->perform_check_<>( 
-      std::make_shared<iinterface::data_type>(_options.request.begin(), _options.request.end() ),
-      std::make_shared<iinterface::data_type>(_options.response.begin(), _options.response.end() ),
       std::move(d), 
       fas::bool_< fas::same_type<response_type, iinterface::data_type>::value >()
     );
@@ -210,17 +208,16 @@ private:
   }
 
   template<typename = void>
-  void perform_check_(std::shared_ptr<iinterface::data_type> req, 
-                      std::shared_ptr<iinterface::data_type> res1,
-                      iinterface::data_ptr res2,
-                      fas::true_)
+  void perform_check_(iinterface::data_ptr res2, fas::true_)
   {
-    
-    io_check_(req, res1, std::move(res2));
+    io_check_(
+      std::make_shared<iinterface::data_type>(_options.request.begin(), _options.request.end() ),
+      std::make_shared<iinterface::data_type>(_options.response.begin(), _options.response.end() ),
+      std::move(res2));
   }
 
   template<typename = void>
-  void perform_check_(std::shared_ptr<iinterface::data_type>, std::shared_ptr<iinterface::data_type>,  iinterface::data_ptr, fas::false_)
+  void perform_check_(iinterface::data_ptr, fas::false_)
   {
   }
 
