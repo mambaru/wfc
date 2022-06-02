@@ -11,10 +11,9 @@ namespace wfc{
 
 testing_domain::~testing_domain()
 {
-  _inst_list.clear();
-  _g->common_workflow->stop();
   _g->common_workflow = nullptr;
   _g = nullptr;
+  _inst_list.clear();
 }
 
 testing_domain::testing_domain()

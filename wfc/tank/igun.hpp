@@ -23,6 +23,8 @@ struct igun: public ibang
   typedef typename options_type::response_type response_type;
   typedef typename options_type::user_options user_options;
   virtual void initialize( interface_ptr target, const options_type&) = 0;
+  virtual void stop() = 0;
+
 };
 
 }

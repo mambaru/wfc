@@ -48,12 +48,14 @@ public:
 
   virtual void configure() override
   {
+    std::lock_guard<mutex_type> lk(_mutex);
     _options = this->options();
     _gunfire_counter = _options.gunfire_total;
   }
 
   virtual void initialize() override
   {
+    std::lock_guard<mutex_type> lk(_mutex);
     _gun =  this->template get_object<gun_interface>("wonderwaffel", this->name() );
     _target = this->template get_target<I>(_options.target);
     if ( _gun != nullptr )
@@ -72,6 +74,11 @@ public:
 
   virtual void stop() override
   {
+    this->get_workflow()->release_timer(_gunfire_timer);
+    this->get_workflow()->release_timer(_statlog_timer);
+    if (_gun!=nullptr)
+      _gun->stop();
+
     if ( _total_stat.finish_time == time_point_t() )
       _total_stat.finish_time = std::chrono::high_resolution_clock::now();
     _total_stat.wait_counter = _bang_stat.wait_counter;
@@ -86,8 +93,8 @@ public:
     _total_stat.start_time = std::chrono::high_resolution_clock::now();
     if ( gunfire() )
     {
-      this->get_workflow()->create_timer(std::chrono::microseconds(_options.gunfire_mks), std::bind(&self::gunfire, this) );
-      this->get_workflow()->create_timer(std::chrono::milliseconds(_options.statistics_log_ms), std::bind(&self::show_stat, this) );
+      _gunfire_timer = this->get_workflow()->create_timer(std::chrono::microseconds(_options.gunfire_mks), std::bind(&self::gunfire, this) );
+      _statlog_timer = this->get_workflow()->create_timer(std::chrono::milliseconds(_options.statistics_log_ms), std::bind(&self::show_stat, this) );
     }
     else{
       show_stat();
@@ -182,7 +189,8 @@ private:
   std::shared_ptr<gun_interface> _gun;
   std::shared_ptr<I> _target;
   options_type _options;
-  timer_id_t _timer = -1;
+  timer_id_t _gunfire_timer = -1;
+  timer_id_t _statlog_timer = -1;
   size_t _gunfire_counter = 0;
   bang_stat _bang_stat;
   bang_stat _total_stat;

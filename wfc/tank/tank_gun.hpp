@@ -78,6 +78,12 @@ public:
     _is_abort = false;
   }
 
+  virtual void stop( ) override
+  {
+    if ( _options.reg_io && _target!=nullptr)
+      _target->unreg_io(_id);
+  }
+
   virtual void initialize( target_ptr target, const options_type& opt) override
   {
     _target = target;
