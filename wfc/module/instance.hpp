@@ -88,23 +88,42 @@ public:
   {
     std::lock_guard<mutex_type> lk(_mutex);
     static_cast<domain_options&>( _config ) = opt;
+    /*if ( _object == nullptr )
+    {
+      this->configure(_config);
+      return;
+    }*/
     _startup = _startup && !( _object==nullptr && _config.enabled );
     if ( auto obj = this->create_or_stop_if_() ) 
-      get_(obj)->reconfigure_domain_basic( _config );
+    {
+      if ( _was_disabled )
+        get_(obj)->configure_domain(_config);
+      else
+        get_(obj)->reconfigure_domain_basic( _config );
+    }
   }
 
   virtual void reconfigure(const domain_config& opt)  
   {
     std::lock_guard<mutex_type> lk(_mutex);
-    _instance_reconfigured = true;
     _config = opt;
 
+    /*if ( _object == nullptr )
+    {
+      this->configure(_config);
+      return;
+    }*/
+
+    _instance_reconfigured = true;
     // Reset ready flag for enable startup
     _startup = _startup && !( _object==nullptr && _config.enabled );
 
     if ( auto obj = this->create_or_stop_if_() ) 
     {
-      get_(obj)->reconfigure_domain(_config);
+      if ( _was_disabled )
+        get_(obj)->configure_domain(_config);
+      else
+        get_(obj)->reconfigure_domain(_config);
     }
   }
 
@@ -127,7 +146,7 @@ public:
   {
     std::lock_guard<mutex_type> lk(_mutex);
 
-    if ( _instance_reconfigured )
+    if ( _instance_reconfigured || _was_disabled)
     {
       this->start_(arg);
     }
@@ -180,6 +199,7 @@ private:
       
       if ( _object == nullptr )
       {
+        _was_disabled = true;
         _object = std::make_shared<object_type>();
         get_(_object)->create_domain(_config.name, _global);
       }
@@ -225,7 +245,7 @@ private:
 
   void start_(const std::string& arg) 
   {
-    if ( !_startup )
+    if ( !_startup || _was_disabled)
     {
       this->startup_(arg);
     }
@@ -237,6 +257,7 @@ private:
     {
       this->forced_start_(arg);
     }
+    _was_disabled = false;
   }
 
   void stop_(const std::string& /*arg*/)
@@ -249,6 +270,7 @@ private:
       }
       _global->registry.erase(_config.name);
       _object = nullptr;
+      _was_disabled = true;
     }
     _ready_for_stop = false;
   }
@@ -271,6 +293,7 @@ private:
   bool         _ready_for_stop = false;
   // Объект запущен (вызван метод старт)
   bool         _startup = false;
+  bool         _was_disabled = true;
   global_ptr   _global;
   domain_config  _config;
   object_ptr   _object;
