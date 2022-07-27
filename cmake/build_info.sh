@@ -37,7 +37,7 @@ fi
 
 buildflags="$compiler $flags"
 
-git pull --tags --force origin HEAD 2>/dev/null
+git fetch --tags --force origin HEAD 2>/dev/null
 
 #
 # make version
