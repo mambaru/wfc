@@ -16,6 +16,8 @@ public:
   
   winterface(std::weak_ptr<iinterface> target, bool suspend);
 
+  winterface(const winterface&) = delete;
+
   virtual void unreg_io(io_id_t id) override;
 
   virtual void reg_io(io_id_t id, std::weak_ptr<iinterface> itf) override;

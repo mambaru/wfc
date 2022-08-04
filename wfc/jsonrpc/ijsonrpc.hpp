@@ -23,6 +23,10 @@ struct ijsonrpc
   typedef ::wjrpc::incoming_handler_t incoming_handler_t;
 
   virtual ~ijsonrpc() = default;
+  ijsonrpc() = default;
+  ijsonrpc(const ijsonrpc&) = delete;
+  ijsonrpc& operator=(const ijsonrpc&) = delete;
+
   virtual void perform_incoming(incoming_holder, io_id_t, outgoing_handler_t handler) = 0;
   virtual void perform_outgoing(outgoing_holder, io_id_t /*id*/) = 0;
 };

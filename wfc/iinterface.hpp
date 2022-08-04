@@ -29,6 +29,10 @@ struct iinterface
   static constexpr const io_id_t bad_id = static_cast<io_id_t>(-1);
   virtual ~iinterface() = default;
 
+  iinterface() = default;
+  iinterface(const iinterface&) = delete;
+  iinterface& operator=(const iinterface&) = delete;
+
   virtual io_id_t get_id() const { return bad_id;};
   
   /**

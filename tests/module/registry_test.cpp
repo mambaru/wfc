@@ -9,8 +9,19 @@ using namespace ::wfc;
 
 struct number: iinterface {
   int count = 0;
+  virtual ~number() = default;
   number() = default;
   explicit number(int c) noexcept: count(c) {}
+
+  number(const number& n)
+    : iinterface() , count(n.count)
+  {}
+
+  number& operator=(const number& n)
+  {
+    count = n.count;
+    return *this;
+  }
 };
 
 struct number_greater

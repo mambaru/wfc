@@ -31,6 +31,19 @@ struct target_adapter: ijsonrpc
     : _itf(itf), _jsonrpc(jsonrpc)
   {}
 
+  target_adapter(const target_adapter& other)
+    : ijsonrpc() 
+    , _itf(other._itf)
+    , _jsonrpc(other._jsonrpc)
+  {}
+
+  target_adapter& operator=(const target_adapter& other)
+  {
+    _itf = other._itf;
+    _jsonrpc = other._jsonrpc;
+    return *this;
+  }
+
   operator bool () const
   {
     return _itf.lock()!=nullptr || _jsonrpc.lock()!=nullptr;

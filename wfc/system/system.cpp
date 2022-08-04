@@ -96,7 +96,7 @@ std::function<void()> daemonize(bool wait_flag)
   }
 
   pid_t ppid = ::getppid();
-  return [ppid, wait_flag]()
+  return [ppid, wait_flag]() noexcept
   {
     if ( wait_flag )
       ::kill( ppid, SIGTERM);

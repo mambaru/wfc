@@ -32,6 +32,8 @@ public:
   
   domain_proxy() {}
 
+  domain_proxy(const domain_proxy&) = delete;
+
   virtual void initialize() override
   {
     _adapter = this->get_adapter( this->options().target );
