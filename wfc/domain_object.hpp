@@ -554,7 +554,7 @@ public:
    * @param fun обработчик
    * @details Может вызываться только в методе start и работает до завершения работы приложения.
    */
-  void idle(std::function<void()> fun)
+  void idle(std::function<bool()> fun)
   {
     this->idle(std::chrono::seconds(1), fun);
   }
@@ -565,11 +565,11 @@ public:
    * @param fun обработчик
    * @details Может вызываться только в методе start и работает до завершения работы приложения.
    */
-  void idle(workflow_type::duration_t duration, std::function<void()> fun)
+  void idle(workflow_type::duration_t duration, std::function<bool()> fun)
   {
     if ( _idle_flag )
     {
-      this->common_workflow()->create_timer(duration, fun);
+      this->get_common_workflow()->create_timer(duration, fun);
     }
     else
     {
