@@ -1,8 +1,11 @@
-if(DEFINED ENV{ENABLE_STAT})
-  option(WFC_ENABLE_STAT "Enable statistics components" ON)
+if(DEFINED ENV{ENABLE_STAT} )
+  option(WFC_ENABLE_STAT "Enable statistics components" $ENV{ENABLE_STAT})
+elseif(DEFINED ENABLE_STAT)
+  option(WFC_ENABLE_STAT "Enable statistics components" ${ENABLE_STAT})
 else()
   option(WFC_ENABLE_STAT "Enable statistics components" OFF)
 endif()
+message(STATUS "Enable WFC statistics components ${WFC_ENABLE_STAT}")
 
 MACRO(enable_stat)
   if ( WFC_ENABLE_STAT )
