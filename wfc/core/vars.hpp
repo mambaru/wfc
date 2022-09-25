@@ -27,8 +27,10 @@ namespace wfc{
  * Следующие переменные обрабатываются при загрузке файла:
  *    - $**ENV**{VAR:defval} - подстановка переменных окружения
  *    - $**INI**{sections.VAR:defval} - подстановка переменных из предварительно загруженных ini-файлов
- *    - $**INCLUDE**{**FILE**[**path**="/path/to/file.txt"]} - подстановка содержимого файла с предварительной заменой в нем описанных здесь переменных,
- *      включая INCLUDE.
+ *    - $**INCLUDE**{**FILE**[**path**="/path/to/file.txt"]} - подстановка содержимого файла с предварительной заменой в нем
+ *      описанных здесь переменных, включая INCLUDE.
+ *    - $**INCLUDE**{**SUBCONF**[**path**="/path/to/file.txt"]} субконфиг json массив объектов для подстановки,
+ *    - просто убираем первую и последюю квадратные скобки
  *
  * @code
  *    wfc::vars _vars;
@@ -78,6 +80,9 @@ public:
   typedef std::function<std::string(const var_info&)> apply_handler_f;
 public:
 
+  typedef std::function< std::string(const std::string&) > find_file_f;
+
+  explicit vars(find_file_f fff);
   bool add_ini(const std::vector<std::string>& ini_files);
   bool read_ini( const std::string& file);
   bool parse_ini( const std::string& text);
@@ -132,11 +137,13 @@ public:
 private:
   bool set_error_(error_codes ec, const std::string& msg = "");
 private:
+  find_file_f find_file_;
   mutable error_codes _error_code = error_codes::SUCCESS;
   mutable std::string _error_message;
   include_map_t _include_map;
   ini_map_t _ini_map;
   std::string _result;
+
 };
 
 }

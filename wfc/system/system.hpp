@@ -28,6 +28,8 @@ bool change_user(const std::string& username, std::string* err);
 
 bool change_working_directory(const std::string& working_directory, std::string* err);
 
+std::string get_working_directory();
+
 bool autoup(
   time_t timeout,
   bool success_autoup = false,

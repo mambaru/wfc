@@ -23,7 +23,7 @@ UNIT(vars1, "")
  // "Привет ${ X-.z: Y_k } $TANK{ COUNT } $ENV{ VLAUE [ opt1 , opt2 = val_2 ] : DEFAULT }    $ENV2{VLAUE2[opt21, opt22=\"val2_2-&*\"]:DEF2AULT}";
   wfc::vars::vars_list_t vars_list;
   std::string err;
-  wfc::vars _vars;
+  wfc::vars _vars([](const std::string& f) noexcept { return f; } );
   bool parse_status = _vars.search_vars(text, &vars_list);
   t << is_true<expect>(parse_status) << err << FAS_FL;
   t << equal<assert,size_t>(vars_list.size(), 12) << FAS_FL;
@@ -113,7 +113,7 @@ UNIT(ini1, "")
   "[section2 ]\n"
   "six =     sex\n"
   ;
-  wfc::vars _vars;
+  wfc::vars _vars([](const std::string& f) noexcept { return f; } );
   _vars.parse_ini(text);
   for ( auto v : _vars.ini_map() )
     t << message("ENV") << "\t"<< v.first << "=" << v.second;
@@ -140,7 +140,7 @@ UNIT(create_tests_files, "")
 UNIT(parse_tests_files, "")
 {
   using namespace fas::testing;
-  wfc::vars _vars;
+  wfc::vars _vars([](const std::string& f) noexcept { return f; } );
   _vars.add_ini({"test-ini2.ini"});
   bool res = _vars.parse_file("test-conf2.conf");
   t << message("Config file after parsing:\n") << _vars.result() << _vars.error_message();

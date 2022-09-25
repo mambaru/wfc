@@ -11,6 +11,13 @@
 
 namespace wfc{
 
+vars::vars(find_file_f fff)
+  : find_file_(fff)
+{
+  if ( find_file_ == nullptr)
+    find_file_ = [](const std::string& file) noexcept -> std::string  { return file;};
+}
+
 bool vars::status() const
 {
   return _error_code == error_codes::SUCCESS;
@@ -60,12 +67,14 @@ bool vars::add_ini(const std::vector<std::string>& ini_files)
 
 bool vars::read_ini( const std::string& file)
 {
-
+  std::string fullname = find_file_(file);
+  if ( fullname.empty() )
+    return false;
   std::string ini_text;
-  if ( !this->parse_file(file, &ini_text) )
+  if ( !this->parse_file(fullname, &ini_text) )
     return false;
 
-  _include_map[file]++;
+  _include_map[fullname]++;
 
   return this->parse_ini(ini_text);
 }
@@ -110,13 +119,16 @@ bool vars::parse_file(const std::string& file) noexcept
 bool vars::parse_file( const std::string& file, std::string* text) noexcept
 try
 {
-  std::ifstream ifs(file);
+  auto filename = find_file_(file);
+
+  std::ifstream ifs(filename);
   if ( !ifs )
   {
     _error_code = error_codes::BAD_FILE;
-    _error_message = file;
+    _error_message = "Bad file: '" + filename + "'";
     return false;
   }
+
 
   std::string in_text;
   std::copy(
@@ -209,8 +221,43 @@ bool vars::apply_INCLUDE(std::string* text)
       {
         if ( opt.first == "path" )
         {
-          if ( this->parse_file(opt.second, &newval) )
-          _include_map[opt.second]++;
+          std::string fullname = find_file_(opt.second);
+          if ( this->parse_file(fullname, &newval) )
+          _include_map[fullname]++;
+        }
+      }
+    }
+    else if ( vi.name=="SUBCONF" )
+    {
+      for (auto opt: vi.options)
+      {
+        if ( opt.first == "path" )
+        {
+          std::string fullname = find_file_(opt.second);
+          if ( this->parse_file(fullname, &newval) )
+            _include_map[fullname]++;
+
+          wjson::json_error je;
+          auto beg = wjson::parser::parse_space(newval.begin(), newval.end(), &je);
+          if ( !je )
+          {
+            auto end = wjson::parser::parse_object(beg, newval.end(), &je);
+            if ( !je )
+            {
+              std::string tmp;
+              if ( newval.begin() != beg) tmp.append(newval.begin(), beg);
+              ++beg; --end;
+              if ( beg != end )           tmp.append(beg, end);
+              ++end;
+              if ( end != newval.end() )  tmp.append(end, newval.end());
+              newval.swap(tmp);
+            }
+          }
+
+          if ( je )
+          {
+            newval = "/*" + wjson::strerror::message_trace(je, newval.begin(), newval.end() ) + "*/";
+          }
         }
       }
     }

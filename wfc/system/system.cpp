@@ -11,6 +11,7 @@
 #include <cstring>
 #include <iostream>
 #include <atomic>
+#include <boost/filesystem.hpp>
 //#include <sys/prctl.h>
 
 namespace wfc{
@@ -236,6 +237,11 @@ bool change_working_directory(const std::string& working_directory, std::string*
     return false;
   }
   return true;
+}
+
+std::string get_working_directory()
+{
+  return boost::filesystem::current_path().native();
 }
 
 
