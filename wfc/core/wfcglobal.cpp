@@ -42,6 +42,7 @@ std::string wfcglobal::find_config(const std::string& filename) const
   auto curpath = system_complete(filename).lexically_normal();
   if ( exists(curpath) )
     return curpath.native();
+
   if ( !this->config_path.empty() )
   {
     curpath = this->config_path;
@@ -57,6 +58,7 @@ std::string wfcglobal::find_working(const std::string& filename) const
 {
   using namespace boost::filesystem;
   auto curpath = system_complete(filename).lexically_normal();
+
   if ( exists(curpath) )
     return curpath.native();
 

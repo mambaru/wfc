@@ -119,6 +119,13 @@ bool vars::parse_file(const std::string& file) noexcept
 bool vars::parse_file( const std::string& file, std::string* text) noexcept
 try
 {
+  if ( file.empty() )
+  {
+    _error_code = error_codes::BAD_FILE;
+    _error_message = "Empty file name(vars::parse_file)";
+    return false;
+  }
+
   auto filename = find_file_(file);
 
   std::ifstream ifs(filename);
@@ -141,7 +148,7 @@ try
 catch(const std::exception& e)
 {
   _error_code = error_codes::EXCEPTION;
-  _error_message = e.what();
+  _error_message = "Bad file '" + file + "': " + e.what();
   return false;
 }
 
