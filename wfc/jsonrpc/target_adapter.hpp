@@ -1,5 +1,5 @@
 //
-// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2018
+// Author: Vladimir Migashko <migashko@gmail.com>, (C) 2013-2022
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -17,7 +17,6 @@
 #include <wjson/json.hpp>
 #include <memory>
 
-
 namespace wfc{ namespace jsonrpc{
 
 struct target_adapter: ijsonrpc
@@ -27,6 +26,14 @@ struct target_adapter: ijsonrpc
   typedef ::wjrpc::call_id_t call_id_t;
 
   target_adapter() = default;
+
+  explicit target_adapter(itf_ptr_t itf)
+    : _itf(itf), _jsonrpc()
+  {
+    if (auto pitf = itf.lock())
+      _jsonrpc = std::dynamic_pointer_cast<ijsonrpc>(pitf);
+  }
+
   target_adapter(itf_ptr_t itf, jsonrpc_ptr_t jsonrpc)
     : _itf(itf), _jsonrpc(jsonrpc)
   {}
@@ -66,14 +73,7 @@ struct target_adapter: ijsonrpc
 
   virtual void perform_io(data_ptr d, io_id_t io_id, output_handler_t handler) override
   {
-    if ( auto p = _itf.lock() )
-    {
-      p->perform_io( std::move(d), io_id, std::move(handler) );
-    }
-    else if ( handler != nullptr)
-    {
-      handler(nullptr);
-    }
+    this->perform_io_( std::move(d), io_id, std::move(handler) );
   }
 
   virtual void perform_incoming(incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) override
@@ -86,14 +86,13 @@ struct target_adapter: ijsonrpc
     {
       if ( handler!=nullptr )
       {
-        this->perform_io( holder.detach(), io_id, [handler](data_ptr d)
+        this->perform_io_( holder.detach(), io_id, [handler](data_ptr d)
         {
-          //outgoing_holder holder;
           handler( outgoing_holder( std::move(d) ) );
         });
       }
       else
-        this->perform_io( holder.detach(), io_id, nullptr );
+        this->perform_io_( holder.detach(), io_id, nullptr );
     }
     else if ( handler != nullptr )
     {
@@ -102,22 +101,6 @@ struct target_adapter: ijsonrpc
     else
     {
     }
-  }
-
-  template<typename Error>
-  incoming_holder create_error_holder_(call_id_t call_id)
-  {
-    wjrpc::outgoing_error< wjrpc::error > err;
-    err.error = std::make_unique<Error>();
-    err.id = std::make_unique<data_type>();
-    wjson::value<call_id_t>::serializer()( call_id,  std::back_inserter(*(err.id)) );
-
-    auto d = std::make_unique<data_type>();
-    d->reserve(100);
-    wjrpc::outgoing_error_json< wjrpc::error_json >::serializer()(err, std::back_inserter(*d));
-    incoming_holder holder( std::move(d) );
-    holder.parse(nullptr);
-    return holder;
   }
 
   virtual void perform_outgoing(outgoing_holder holder, io_id_t io_id) override
@@ -168,7 +151,34 @@ struct target_adapter: ijsonrpc
       }
     }
   }
+private:
+  void perform_io_(data_ptr d, io_id_t io_id, output_handler_t handler)
+  {
+    if ( auto p = _itf.lock() )
+    {
+      p->perform_io( std::move(d), io_id, std::move(handler) );
+    }
+    else if ( handler != nullptr)
+    {
+      handler(nullptr);
+    }
+  }
 
+  template<typename Error>
+  incoming_holder create_error_holder_(call_id_t call_id)
+  {
+    wjrpc::outgoing_error< wjrpc::error > err;
+    err.error = std::make_unique<Error>();
+    err.id = std::make_unique<data_type>();
+    wjson::value<call_id_t>::serializer()( call_id,  std::back_inserter(*(err.id)) );
+
+    auto d = std::make_unique<data_type>();
+    d->reserve(100);
+    wjrpc::outgoing_error_json< wjrpc::error_json >::serializer()(err, std::back_inserter(*d));
+    incoming_holder holder( std::move(d) );
+    holder.parse(nullptr);
+    return holder;
+  }
 private:
 
   itf_ptr_t _itf;
