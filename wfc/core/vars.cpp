@@ -160,6 +160,7 @@ try
 
   std::string err;
   bool status = true;
+  status &= this->apply_VAR(text);
   status &= this->apply_ENV(text);
   status &= this->apply_INI(text);
   status &= this->apply_INCLUDE( text );
@@ -221,55 +222,59 @@ bool vars::apply_INCLUDE(std::string* text)
 {
   apply_handler_f handler = [this](const var_info& vi)
   {
+    ini_map_t cur_var;
+    cur_var=_var_map;
     std::string newval = vi.defval;
-    if ( vi.name=="FILE"  )
+    std::string path;
+    for (auto opt: vi.options)
     {
-      for (auto opt: vi.options)
-      {
-        if ( opt.first == "path" )
-        {
-          std::string fullname = find_file_(opt.second);
-          if ( this->parse_file(fullname, &newval) )
-          _include_map[fullname]++;
-        }
-      }
+      if ( opt.first == "path" )
+        path=opt.second;
+      else
+        _var_map[opt.first] = opt.second;
     }
-    else if ( vi.name=="SUBCONF" )
-    {
-      for (auto opt: vi.options)
-      {
-        if ( opt.first == "path" )
-        {
-          std::string fullname = find_file_(opt.second);
-          if ( this->parse_file(fullname, &newval) )
-            _include_map[fullname]++;
 
-          wjson::json_error je;
-          auto beg = wjson::parser::parse_space(newval.begin(), newval.end(), &je);
+    if ( !path.empty() )
+    {
+      if ( vi.name=="FILE" || vi.name=="SUBCONF"  )
+      {
+        std::string fullname = find_file_(path);
+        if ( this->parse_file(fullname, &newval) )
+          _include_map[fullname]++;
+      }
+
+      if ( vi.name=="SUBCONF" )
+      {
+        wjson::json_error je;
+        auto beg = wjson::parser::parse_space(newval.begin(), newval.end(), &je);
+        if ( !je )
+        {
+          auto end = wjson::parser::parse_object(beg, newval.end(), &je);
           if ( !je )
           {
-            auto end = wjson::parser::parse_object(beg, newval.end(), &je);
-            if ( !je )
-            {
-              std::string tmp;
-              if ( newval.begin() != beg) tmp.append(newval.begin(), beg);
-              ++beg; --end;
-              if ( beg != end )           tmp.append(beg, end);
-              ++end;
-              if ( end != newval.end() )  tmp.append(end, newval.end());
-              newval.swap(tmp);
-            }
+            beg = wjson::parser::parse_space(beg+1, end, &je);
+            end = wjson::parser::parse_space(
+              std::reverse_iterator(end)+1,
+              std::reverse_iterator(beg),
+              &je
+            ).base();
+            newval.assign(beg, end);
           }
+        }
 
-          if ( je )
-          {
-            newval = "/*" + wjson::strerror::message_trace(je, newval.begin(), newval.end() ) + "*/";
-          }
+        if ( je )
+        {
+          //newval = "/*" + wjson::strerror::message_trace(je, newval.begin(), newval.end() ) + "*/";
+
+          std::cerr << wjson::strerror::message_trace(je, newval.begin(), newval.end() ) << std::endl;
+          newval.clear();
         }
       }
     }
+    cur_var.swap(_var_map);
     return newval;
   };
+
   return vars::apply("INCLUDE", handler, text);
 }
 
@@ -299,6 +304,19 @@ bool vars::apply_INI( std::string* text)
   return vars::apply("INI", handler, text);
 }
 
+bool vars::apply_VAR( std::string* text)
+{
+  apply_handler_f handler = [this](const var_info& vi)
+  {
+    std::string newval = vi.defval;
+    auto itr = _var_map.find(vi.name);
+    if ( itr !=  _var_map.end() )
+      newval = itr->second;
+    return newval;
+  };
+
+  return vars::apply("VAR", handler, text);
+}
 bool vars::search_vars( vars_list_t* vars_list ) const noexcept
 {
   return this->search_vars(_result, vars_list);
@@ -328,7 +346,7 @@ try
   auto beg = text.begin();
   auto end = text.end();
   boost::match_results<std::string::const_iterator> results;
-  boost::regex reg("\\$[\\w]*?\\{.+?\\}");
+  boost::regex reg("\\$[\\w]*?\\{[^$]+?\\}");
   boost::match_flag_type flags = boost::match_default;
 
   while ( boost::regex_search(beg, end, results,  reg, flags ) )
@@ -336,7 +354,9 @@ try
     for ( auto& res: results )
     {
       if ( vars_list!=nullptr)
+      {
         vars_list->push_back(res.str());
+      }
     }
     beg = results[0].second;
     flags |= boost::match_prev_avail;
@@ -372,7 +392,7 @@ bool vars::replace_vars(const replace_list_t& replace_list, std::string* text, r
   std::string::const_iterator end = text->cend();
   replace_list_t cur_list =  replace_list;
 
-  boost::regex any_reg("\\$[\\w]*?\\{.+?\\}");
+  boost::regex any_reg("\\$[\\w]*?\\{[^$]+?\\}");
   boost::match_results<std::string::const_iterator> results;
   while ( boost::regex_search(beg, end, results,  any_reg ) )
   {

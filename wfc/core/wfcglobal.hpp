@@ -32,6 +32,7 @@ struct wfcglobal
   std::string config_path;
   std::string instance_name;
   std::string working_directory;
+  bool despace = false;
 
   std::shared_ptr<ibuild_info> program_build_info;
   std::shared_ptr<ibuild_info> wfc_build_info;

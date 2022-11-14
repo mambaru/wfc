@@ -104,6 +104,7 @@ public:
   bool apply_INCLUDE( std::string* text);
   bool apply_ENV( std::string* text);
   bool apply_INI( std::string* text);
+  bool apply_VAR( std::string* text);
 
   void reset_status();
   bool status() const;
@@ -142,6 +143,7 @@ private:
   mutable std::string _error_message;
   include_map_t _include_map;
   ini_map_t _ini_map;
+  ini_map_t _var_map;
   std::string _result;
 
 };
