@@ -68,10 +68,10 @@ public:
       d = holder.parse(&e);
       if ( holder.is_valid() )
       {
-        outgoing_handler_t jsonrpc_handler = nullptr;
-        if ( holder.is_request() )
-          jsonrpc_handler = [handler](outgoing_holder holder2) { handler( holder2.detach() ); };
-        this->perform_incoming( std::move(holder), io_id,  jsonrpc_handler);
+        this->perform_incoming( std::move(holder), io_id,  [handler](outgoing_holder oholder)
+        {
+          handler( oholder.detach() );
+        });
       }
       else 
       {

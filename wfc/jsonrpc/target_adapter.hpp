@@ -78,6 +78,14 @@ struct target_adapter: ijsonrpc
 
   virtual void perform_incoming(incoming_holder holder, io_id_t io_id, outgoing_handler_t handler) override
   {
+    if ( handler == nullptr )
+    {
+      handler = [](outgoing_holder oholder)
+      {
+        JSONRPC_LOG_WARNING( "target_adapter::perform_incoming stub:" << oholder.detach() )
+      };
+    }
+
     if ( auto p1 = _jsonrpc.lock() )
     {
       p1->perform_incoming( std::move(holder), io_id, handler);
