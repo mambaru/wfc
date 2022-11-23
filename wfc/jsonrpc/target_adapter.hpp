@@ -100,7 +100,9 @@ struct target_adapter: ijsonrpc
         });
       }
       else
-        this->perform_io_( holder.detach(), io_id, nullptr );
+        this->perform_io_( holder.detach(), io_id, [handler](data_ptr d){
+          JSONRPC_LOG_WARNING( "target_adapter::perform_incoming->perform_io_ stub:" << d )
+        } );
     }
     else if ( handler != nullptr )
     {
