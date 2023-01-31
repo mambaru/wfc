@@ -55,7 +55,6 @@ public:
     this->engine()->unreg_io(_target_id); // видимо какой-то грязный хак
     if ( auto pitf = this->template get_target<ijsonrpc>(dopt.outgoing_target_name, true) )
     {
-      _no_outgoing_target = false;
       if ( dopt.outgoing_reg )
         pitf->reg_io( this->engine()->get_id(), this->shared_from_this() );
 
@@ -68,10 +67,10 @@ public:
           pitf1->perform_outgoing( std::move(holder), io_id );
         }
       });
+      _no_outgoing_target = false;
     }
     else if ( auto pitf2 = this->template get_target<iinterface>(dopt.outgoing_target_name, false) )
     {
-      _no_outgoing_target = false;
       if ( dopt.outgoing_reg )
         pitf2->reg_io( _target_id /*this->engine()->get_id()*/, this->shared_from_this() );
 
@@ -85,10 +84,7 @@ public:
         }
 
       });
-    }
-    else
-    {
-      _no_outgoing_target = true;
+      _no_outgoing_target = false;
     }
   }
 
@@ -107,7 +103,7 @@ public:
   }
 
 private:
-  bool _no_outgoing_target = false;
+  bool _no_outgoing_target = true;
   std::atomic<io_id_t> _target_id;
 };
 

@@ -19,7 +19,7 @@ struct gateway_options: basic_options<EngineOptions>
   std::string outgoing_target_name;
   bool incoming_reg = false;
   bool outgoing_reg = true;
-  time_t remove_outdated_ms = 0;
+  time_t remove_outdated_ms = 15000;
 };
 
 }}
