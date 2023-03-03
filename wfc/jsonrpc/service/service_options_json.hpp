@@ -27,7 +27,7 @@ struct service_options_json
       json::member< n_target, options_type, std::string, &options_type::target_name>,
       json::member< n_allow_non_jsonrpc, options_type, bool, &options_type::allow_non_jsonrpc>,
       json::base< ::wjrpc::engine_options_json<engine_options> >,
-      json::member< n_remove_outdated_ms, options_type, time_t, &options_type::remove_outdated_ms>
+      json::member< n_remove_outdated_ms, options_type, time_t, &options_type::remove_outdated_ms, wjson::time_interval_ms<> >
     >,
     json::strict_mode
   > type;
