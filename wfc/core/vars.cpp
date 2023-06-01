@@ -254,8 +254,8 @@ bool vars::apply_INCLUDE(std::string* text)
           {
             beg = wjson::parser::parse_space(beg+1, end, &je);
             end = wjson::parser::parse_space(
-              std::reverse_iterator(end)+1,
-              std::reverse_iterator(beg),
+              std::reverse_iterator<std::string::iterator>(end)+1,
+              std::reverse_iterator<std::string::iterator>(beg),
               &je
             ).base();
             newval.assign(beg, end);
@@ -264,8 +264,6 @@ bool vars::apply_INCLUDE(std::string* text)
 
         if ( je )
         {
-          //newval = "/*" + wjson::strerror::message_trace(je, newval.begin(), newval.end() ) + "*/";
-
           std::cerr << wjson::strerror::message_trace(je, newval.begin(), newval.end() ) << std::endl;
           newval.clear();
         }

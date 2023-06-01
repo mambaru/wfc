@@ -13,7 +13,7 @@ struct number: iinterface {
   number() = default;
   explicit number(int c) noexcept: count(c) {}
 
-  number(const number& n)
+  number(const number& n) noexcept
     : iinterface() , count(n.count)
   {}
 

@@ -9,7 +9,7 @@ class example_package
   : public wfc::ipackage
 {
 public:
-  example_package() {}
+  example_package() noexcept {}
 
   virtual std::shared_ptr<wfc::ibuild_info> build_info() override
   {
