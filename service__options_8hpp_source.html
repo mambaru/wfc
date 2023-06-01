@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<meta name="generator" content="Doxygen 1.8.17"/>
+<meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>wfc: Исходный файл wfc/jsonrpc/service/service_options.hpp</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
@@ -27,7 +27,7 @@
 </table>
 </div>
 <!-- end header part -->
-<!-- Создано системой Doxygen 1.8.17 -->
+<!-- Создано системой Doxygen 1.9.1 -->
 <script type="text/javascript" src="menudata.js"></script>
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript">
@@ -57,27 +57,27 @@ $(function() {
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160; </div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160; </div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keyword">namespace </span>wfc{ <span class="keyword">namespace </span>jsonrpc{</div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &lt;wfc/jsonrpc/basic_options.hpp&gt;</span></div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160; </div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keyword">template</span>&lt;<span class="keyword">typename</span> EngineOptions&gt;</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">struct </span>service_options: EngineOptions</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;{</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;  <span class="keyword">typedef</span> EngineOptions engine_options;</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;  std::string target_name;</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;  time_t remove_outdated_ms = 0;</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;  <span class="keywordtype">bool</span> allow_non_jsonrpc = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160; </div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;  <span class="comment">// TODO: сделать саму конфигурацию</span></div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;  <span class="keyword">static</span> std::vector&lt;std::string&gt; get_schema_list() { <span class="keywordflow">return</span> {<span class="stringliteral">&quot;example&quot;</span>}; }</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;};</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160; </div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;}}</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keyword">namespace </span>wfc{ <span class="keyword">namespace </span>jsonrpc{</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160; </div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="keyword">template</span>&lt;<span class="keyword">typename</span> EngineOptions&gt;</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keyword">struct </span>service_options: basic_options&lt;EngineOptions&gt;</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;{</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;  <span class="keyword">typedef</span> EngineOptions engine_options;</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;  std::string target_name;</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;  time_t remove_outdated_ms = 0;</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;  <span class="keywordtype">bool</span> allow_non_jsonrpc = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160; </div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;  <span class="comment">// TODO: сделать саму конфигурацию</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;  <span class="keyword">static</span> std::vector&lt;std::string&gt; get_schema_list() { <span class="keywordflow">return</span> {<span class="stringliteral">&quot;example&quot;</span>}; }</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;};</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;}}</div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Создано системой &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.17
+Создано системой&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

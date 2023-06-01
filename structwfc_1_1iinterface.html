@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<meta name="generator" content="Doxygen 1.8.17"/>
+<meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>wfc: Структура wfc::iinterface</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
@@ -27,7 +27,7 @@
 </table>
 </div>
 <!-- end header part -->
-<!-- Создано системой Doxygen 1.8.17 -->
+<!-- Создано системой Doxygen 1.9.1 -->
 <script type="text/javascript" src="menudata.js"></script>
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript">
@@ -57,7 +57,7 @@ $(function() {
 
 <p><code>#include &lt;<a class="el" href="iinterface_8hpp_source.html">iinterface.hpp</a>&gt;</code></p>
 
-<p>Производные классы:wfc::icomponent, wfc::iconfig, wfc::icore, wfc::iinstance, wfc::ijsonrpc, wfc::ilogger, wfc::imodule, wfc::ipackage, wfc::istartup, wfc::istatistics и wfc::winterface.</p>
+<p>Производные классы:<a class="el" href="classwfc_1_1domain__object.html">wfc::domain_object&lt; iinterface, tank_config&lt;&gt;, stat_tank_config &gt;</a>, wfc::ibang, wfc::icomponent, wfc::iconfig, wfc::icore, wfc::iinstance, wfc::ijsonrpc, wfc::ilogger, wfc::imodule, wfc::ipackage, wfc::istartup, wfc::istatistics и wfc::winterface.</p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Открытые типы</h2></td></tr>
@@ -69,8 +69,6 @@ $(function() {
 <tr class="separator:ac6b38f684b9ff98bc44551fdf5bd758b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd4e7b2e1574c04b6472d22677b767f5"><td class="memItemLeft" align="right" valign="top">typedef ::iow::io::output_handler_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structwfc_1_1iinterface.html#abd4e7b2e1574c04b6472d22677b767f5">output_handler_t</a></td></tr>
 <tr class="separator:abd4e7b2e1574c04b6472d22677b767f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7e1187131554cbe172617e8ba2b6c2a2"><td class="memItemLeft" align="right" valign="top">typedef ::iow::io::input_handler_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structwfc_1_1iinterface.html#a7e1187131554cbe172617e8ba2b6c2a2">input_handler_t</a></td></tr>
-<tr class="separator:a7e1187131554cbe172617e8ba2b6c2a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Открытые члены</h2></td></tr>
@@ -144,21 +142,6 @@ $(function() {
       </table>
 </div><div class="memdoc">
 <p>Обработчик обратного вызова, для отправки ответа </p>
-
-</div>
-</div>
-<a id="a7e1187131554cbe172617e8ba2b6c2a2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7e1187131554cbe172617e8ba2b6c2a2">&#9670;&nbsp;</a></span>input_handler_t</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef ::iow::io::input_handler_t <a class="el" href="structwfc_1_1iinterface.html#a7e1187131554cbe172617e8ba2b6c2a2">wfc::iinterface::input_handler_t</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Входящий обработчик (аналогичен <a class="el" href="structwfc_1_1iinterface.html#ab8389408dcac23ba025ed5a4a739a159" title="Обработка сырых данных">iinterface::perform_io</a>) </p>
 
 </div>
 </div>
@@ -238,7 +221,7 @@ $(function() {
 </dl>
 <p>Может вызываться, когда объект io_id перестает использовать этот объект. </p>
 
-<p>Переопределяется в <a class="el" href="classwfc_1_1domain__object.html#ae9bb7c83eb375546d3307b50cce8962a">wfc::domain_object&lt; ijsonrpc, Config, StatConfig &gt;</a> и <a class="el" href="classwfc_1_1domain__object.html#ae9bb7c83eb375546d3307b50cce8962a">wfc::domain_object&lt; ijsonrpc, service_options&lt; ::wjrpc::engine&lt; ::wjrpc::handler&lt; interface_implementation&lt; MethodList &gt; &gt; &gt;::options_type &gt;, statistics_options &gt;</a>.</p>
+<p>Переопределяется в <a class="el" href="classwfc_1_1domain__object.html#ae9bb7c83eb375546d3307b50cce8962a">wfc::domain_object&lt; ijsonrpc, Config, StatConfig &gt;</a> и <a class="el" href="classwfc_1_1domain__object.html#ae9bb7c83eb375546d3307b50cce8962a">wfc::domain_object&lt; iinterface, tank_config&lt;&gt;, stat_tank_config &gt;</a>.</p>
 
 </div>
 </div>
@@ -300,9 +283,7 @@ $(function() {
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Создано системой &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.17
+Создано системой&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

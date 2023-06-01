@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<meta name="generator" content="Doxygen 1.8.17"/>
+<meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>wfc: Титульная страница</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
@@ -27,7 +27,7 @@
 </table>
 </div>
 <!-- end header part -->
-<!-- Создано системой Doxygen 1.8.17 -->
+<!-- Создано системой Doxygen 1.9.1 -->
 <script type="text/javascript" src="menudata.js"></script>
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript">
@@ -43,7 +43,7 @@ $(function() {
 <div class="title">wfc Документация</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a href="https://github.com/mambaru/wfc/tree/master"><object type="image/svg+xml" data="https://img.shields.io/github/v/tag/mambaru/wfc.svg?sort=semver" style="pointer-events: none;">tag</object></a> <a href="https://github.com/mambaru/wfc/tree/master"><object type="image/svg+xml" data="https://github.com/mambaru/wfc/workflows/C++%20CI/badge.svg?branch=master" style="pointer-events: none;">Build Status</object></a> <a href="https://github.com/mambaru/wfc/tree/mambaru"><object type="image/svg+xml" data="https://github.com/mambaru/wfc/workflows/C++%20CI/badge.svg?branch=mambaru" style="pointer-events: none;">Build Status</object></a> <a href="https://travis-ci.com/mambaru/wfc"><object type="image/svg+xml" data="https://travis-ci.com/mambaru/wfc.svg?branch=master" style="pointer-events: none;">Build Status</object></a> <a href="https://travis-ci.com/mambaru/wfc"><object type="image/svg+xml" data="https://travis-ci.com/mambaru/wfc.svg?branch=mambaru" style="pointer-events: none;">Build Status</object></a> <a href="https://codecov.io/gh/mambaru/wfc"><object type="image/svg+xml" data="https://codecov.io/gh/mambaru/wfc/branch/master/graph/badge.svg" style="pointer-events: none;">codecov</object></a></p>
+<div class="textblock"><p><a class="anchor" id="md_Readme"></a><a href="https://github.com/mambaru/wfc/tree/master"><img src="https://img.shields.io/github/v/tag/mambaru/wfc.svg?sort=semver" alt="tag" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/mambaru/wfc/tree/master"><img src="https://github.com/mambaru/wfc/workflows/C++%20CI/badge.svg?branch=master" alt="Build Status" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/mambaru/wfc/tree/mambaru"><img src="https://github.com/mambaru/wfc/workflows/C++%20CI/badge.svg?branch=mambaru" alt="Build Status" style="pointer-events: none;" class="inline"/></a> <a href="https://travis-ci.com/mambaru/wfc"><img src="https://travis-ci.com/mambaru/wfc.svg?branch=master" alt="Build Status" style="pointer-events: none;" class="inline"/></a> <a href="https://travis-ci.com/mambaru/wfc"><img src="https://travis-ci.com/mambaru/wfc.svg?branch=mambaru" alt="Build Status" style="pointer-events: none;" class="inline"/></a> <a href="https://codecov.io/gh/mambaru/wfc"><img src="https://codecov.io/gh/mambaru/wfc/branch/master/graph/badge.svg" alt="codecov" style="pointer-events: none;" class="inline"/></a></p>
 <ul>
 <li>Репозитарий на <a href="https://github.com/mambaru/wfc">github.com</a>.</li>
 <li>Документация <a href="https://mambaru.github.io/wfc/index.html">doxygen</a>.</li>
@@ -52,27 +52,34 @@ $(function() {
 <p>WFC - это фреймворк для разработки высконагруженных JSON-RPC сервисов (демонов) под различные профили нагрузки. Эта документация по разработке пакетов модулей на WFC. Как подключить разработанный пакет к проекту выполняемого демона описано здесь <a href="https://github.com/mambaru/wfcroot">wfcroot</a> или изучите <a href="https://github.com/mambaru/demod">Демо-проект</a>.</p>
 <h1><a class="anchor" id="autotoc_md9"></a>
 Сборка и зависимости</h1>
-<p>Зависимости:</p>
+<h2><a class="anchor" id="autotoc_md10"></a>
+Зависимости:</h2>
 <ul>
 <li>g++ 4.9 и выше или clang++</li>
-<li>boost-1.73 и выше</li>
+<li>boost-1.76 и выше</li>
 <li>cmake</li>
 <li>git</li>
-<li>valgrind (опционально)</li>
-<li>cppcheck (опционально)</li>
+<li>lcov (опционально) для отчетов coverage о покрытии тестами (make tests)</li>
+<li>valgrind (опционально) для запуска дополнительных тестов на утечки памяти (make coverage)</li>
+<li>cppcheck (опционально) для make cppcheck</li>
 </ul>
-<p>Установить свежий boost:</p>
-<div class="fragment"><div class="line">wget https://dl.bintray.com/boostorg/release/1.63.0/source/boost_1_73_0.tar.gz</div>
-<div class="line">tar -xvf boost_1_73_0.tar.gz</div>
-<div class="line">cd boost_1_73_0</div>
-<div class="line">./bootstrap.sh --prefix=/usr/local/boost-1.73</div>
-<div class="line">sudo ./b2 install --prefix=/usr/local/boost-1.73</div>
-</div><!-- fragment --><p>Пропишите в систему BOOST_ROOT или устанавливайте перед запуском, например: </p><div class="fragment"><div class="line">BOOST_ROOT=/usr/local/boost-1.73 cmake ..</div>
-</div><!-- fragment --><p>WFC подключается к проекту как субмодуль, но можно его собрать независимо, чтобы убедиться что нет проблем со сборкой:</p>
+<h2><a class="anchor" id="autotoc_md11"></a>
+Сборка</h2>
+<p>WFC подключается к проекту как субмодуль, но можно его собрать независимо, чтобы убедиться что нет проблем со сборкой:</p>
 <div class="fragment"><div class="line">git clone https://github.com/mambaru/wfc.git</div>
 <div class="line">cd wfc</div>
-<div class="line">make tests</div>
-</div><!-- fragment --><p>При сборке автоматически инициализируются и загружаются следующие субмодули wfc:</p><ul>
+<div class="line">BOOST_ROOT=/path/to/boost make tests</div>
+</div><!-- fragment --><p>Если скрипт сборки не обнаружит в стсеме boost, но он загрузит boost и установит необходимые модули в ./build</p>
+<h2><a class="anchor" id="autotoc_md12"></a>
+Установить boost:</h2>
+<div class="fragment"><div class="line">wget https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.gz</div>
+<div class="line">tar -xvf boost_1_76_0.tar.gz</div>
+<div class="line">cd boost_1_76_0</div>
+<div class="line">./bootstrap.sh --prefix=/path/to/boost</div>
+<div class="line">sudo ./b2 install --prefix=/path/to/boost</div>
+</div><!-- fragment --> <h2><a class="anchor" id="autotoc_md13"></a>
+Субмодули</h2>
+<p>При сборке автоматически инициализируются и загружаются следующие субмодули wfc:</p><ul>
 <li><a href="https://github.com/mambaru/cmake-ci">cmake-ci</a> - вспомогательные скрипты для cmake и CI</li>
 <li><a href="https://github.com/migashko/faslib">faslib</a> - метабиблиотека для работы со списками типов и АОП</li>
 <li><a href="https://github.com/mambaru/wjson">wjson</a> - очень быстрый декларативный JSON-сериализатор на шаблонах</li>
@@ -82,44 +89,29 @@ $(function() {
 <li><a href="https://github.com/mambaru/wjrpc">wjrpc</a> - библиотека поддержки JSON-RPC</li>
 <li><a href="https://github.com/mambaru/wrtstat">wrtstat</a> - для сбора статистики</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md10"></a>
-Разработка демонов, пакетов и библиотек на WFC</h1>
-<p>Можно выделить три вида проектов:</p><ul>
-<li>Библиотеки ( Пример: <a href="https://github.com/mambaru/wlog">wlog</a> )</li>
-<li>WFC-пакеты ( Пример: <a href="https://github.com/mambaru/wfc_demo">wfc_demo</a> )</li>
-<li>Демоны ( Пример: <a href="https://github.com/mambaru/demod">demod</a> )</li>
-</ul>
-<h2><a class="anchor" id="autotoc_md11"></a>
-Разработка приложений (демонов) на базе WFC</h2>
-<p><a href="https://github.com/mambaru/wrtstat">wfcroot</a></p>
-<h2><a class="anchor" id="autotoc_md12"></a>
-Разработка WFC-пакетов</h2>
-<p>Для того чтобы легче визуально отличать пакеты от библиотек, пакетам дают префикс <code>wfc_</code>, например <code>wfc_demo</code>. Для облегчения подключения wfc и написания cmake скриптов будем использовать <a href="https://github.com/mambaru/cmake-ci">cmake-ci</a>. Изначально это была папка со скриптами в WFC проекте, но потом эволюционировала в отдельный, независимый проект.</p>
-<h3><a class="anchor" id="autotoc_md13"></a>
-Иницализация cmake-ci</h3>
-<h3><a class="anchor" id="autotoc_md14"></a>
-Подключение WFC</h3>
-<h3><a class="anchor" id="autotoc_md15"></a>
-Пакет</h3>
-<h3><a class="anchor" id="autotoc_md16"></a>
-Модуль</h3>
-<h3><a class="anchor" id="autotoc_md17"></a>
-Компонент</h3>
-<h3><a class="anchor" id="autotoc_md18"></a>
-Прикладной объект</h3>
-<h3><a class="anchor" id="autotoc_md19"></a>
-Прикладная логика</h3>
-<h3><a class="anchor" id="autotoc_md20"></a>
-Сервис</h3>
-<h3><a class="anchor" id="autotoc_md21"></a>
-Шлюз</h3>
+<h2><a class="anchor" id="autotoc_md14"></a>
+Инициализация проекта (пакет модулей )</h2>
+<div class="fragment"><div class="line">mkdir wfc_demo</div>
+<div class="line">cd wfc_demo/</div>
+<div class="line">git init</div>
+<div class="line"># git remote add origin https://github.com/my-account/wfc_demo.git</div>
+<div class="line">git submodule add https://github.com/mambaru/cmake-ci external/cmake-ci</div>
+<div class="line">vim CMakeLists.txt</div>
+</div><!-- fragment --><p> Файл CMakeLists.txt </p><div class="fragment"><div class="line">cmake_minimum_required(VERSION 3.1)</div>
+<div class="line">project(wfc_demo)</div>
+<div class="line">include(cmake/ci.cmake)</div>
+<div class="line">wci_submodule(NAME wfc SUPERMODULE)</div>
+</div><!-- fragment --><p> Убедитесь, что папки ../wfc не существует (например, осталась после пробной сборки wfc) иначе не сработает. Проблема может возникнуть только для локальных репозитариев и только на этапе инициализации проекта. </p><div class="fragment"><div class="line">git add .</div>
+<div class="line">git commit -m &quot;Initial commnit&quot;</div>
+<div class="line">./external/cmake-ci/scripts/upgrade.sh auto</div>
+<div class="line">BOOST_ROOT=/path/to/boost make init</div>
+</div><!-- fragment --><p> После апгрейда (<code>./external/cmake-ci/scripts/upgrade.sh auto</code>) в корневой папке появится папка <b>cmake/ci.cmake</b> и <b>Makefile</b> (тривиальная обертка запуска <b>cmake</b>) для упрощения сборки проекта. При первой сборке <b>wci_submodule</b> автоматически подключит <b>wfc</b> как субмодуль в <b>external/wfc</b>. Если он уже был подключен, то при необходимости инициализирует и обновит его, а так же все субмодули самой <b>wfc</b>.</p>
+<p>Можно приступать к разработке. Пример пакета модулей для демона <a href="https://github.com/mambaru/demod">demod</a> смотри <a href="https://github.com/mambaru/wfc_demo">wfc_demo</a>. Инструкции по инициализации пректа демона смотри <a href="https://github.com/mambaru/wfcroot">wfcroot</a>. Информация по <b>wci_submodule</b> и все что связано со сборкой и субмодулями в <a href="https://github.com/mambaru/cmake-ci">cmake-ci</a> </p>
 </div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Создано системой &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.17
+Создано системой&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<meta name="generator" content="Doxygen 1.8.17"/>
+<meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>wfc: Класс wfc::vars</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
@@ -27,7 +27,7 @@
 </table>
 </div>
 <!-- end header part -->
-<!-- Создано системой Doxygen 1.8.17 -->
+<!-- Создано системой Doxygen 1.9.1 -->
 <script type="text/javascript" src="menudata.js"></script>
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript">
@@ -60,6 +60,8 @@ $(function() {
 <li>$**ENV**{VAR:defval} - подстановка переменных окружения</li>
 <li>$**INI**{sections.VAR:defval} - подстановка переменных из предварительно загруженных ini-файлов</li>
 <li>$**INCLUDE**{<b>FILE</b>[<b>path</b>="/path/to/file.txt"]} - подстановка содержимого файла с предварительной заменой в нем описанных здесь переменных, включая INCLUDE.</li>
+<li>$**INCLUDE**{<b>SUBCONF</b>[<b>path</b>="/path/to/file.txt"]} субконфиг json массив объектов для подстановки,</li>
+<li>просто убираем первую и последюю квадратные скобки</li>
 </ul>
 <div class="fragment"><div class="line"><a class="code" href="classwfc_1_1vars.html">wfc::vars</a> _vars;</div>
 <div class="line">_vars.add_ini({<span class="stringliteral">&quot;ini1.ini&quot;</span>,<span class="stringliteral">&quot;ini2.ini&quot;</span>});</div>
@@ -67,17 +69,15 @@ $(function() {
 <div class="line">  std::cout &lt;&lt; _vars.result() &lt;&lt; endl;</div>
 <div class="line"><span class="keywordflow">else</span></div>
 <div class="line">  std::cout &lt;&lt; _vars.error_message() &lt;&lt; std::endl;</div>
+<div class="ttc" id="aclasswfc_1_1vars_html"><div class="ttname"><a href="classwfc_1_1vars.html">wfc::vars</a></div><div class="ttdoc">Класс для подстановки в конфигурационные и прочие файлы переменных из среды окружения,...</div><div class="ttdef"><b>Definition:</b> vars.hpp:46</div></div>
 </div><!-- fragment --> </div><hr/>Объявления и описания членов классов находятся в файлах:<ul>
 <li>wfc/core/<a class="el" href="vars_8hpp_source.html">vars.hpp</a></li>
 <li>wfc/core/vars.cpp</li>
 </ul>
 </div><!-- contents -->
-<div class="ttc" id="aclasswfc_1_1vars_html"><div class="ttname"><a href="classwfc_1_1vars.html">wfc::vars</a></div><div class="ttdoc">Класс для подстановки в конфигурационные и прочие файлы переменных из среды окружения,...</div><div class="ttdef"><b>Definition:</b> vars.hpp:43</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Создано системой &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.17
+Создано системой&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>

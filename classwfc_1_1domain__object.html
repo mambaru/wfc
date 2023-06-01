@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<meta name="generator" content="Doxygen 1.8.17"/>
+<meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>wfc: Шаблон класса wfc::domain_object&lt; Itf, Opt, StatOpt &gt;</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
@@ -27,7 +27,7 @@
 </table>
 </div>
 <!-- end header part -->
-<!-- Создано системой Doxygen 1.8.17 -->
+<!-- Создано системой Doxygen 1.9.1 -->
 <script type="text/javascript" src="menudata.js"></script>
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript">
@@ -59,6 +59,8 @@ $(function() {
 <p><code>#include &lt;<a class="el" href="domain__object_8hpp_source.html">domain_object.hpp</a>&gt;</code></p>
 
 <p>Базовые классы:wfc::instance_handler_&lt; Opt, StatOpt &gt;, <a class="el" href="classwfc_1_1basic__domain.html">wfc::basic_domain</a> и Itf.</p>
+
+<p>Производные классы:wfc::jsonrpc::engine_base&lt; Interface, ::wjrpc::engine&lt; JsonrpcHandler &gt;, Opt&lt; ::wjrpc::engine&lt; JsonrpcHandler &gt;::options_type &gt; &gt;.</p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Открытые типы</h2></td></tr>
@@ -145,9 +147,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:a0148cb1cb9081b87d746d875a88e9739"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classwfc_1_1domain__object.html#a43ab820e2c3cae1c33d2e749c821a958">domain_config</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classwfc_1_1domain__object.html#a0148cb1cb9081b87d746d875a88e9739">config</a> () const</td></tr>
 <tr class="memdesc:a0148cb1cb9081b87d746d875a88e9739"><td class="mdescLeft">&#160;</td><td class="mdescRight">Общая конфигурация объекта  <a href="classwfc_1_1domain__object.html#a0148cb1cb9081b87d746d875a88e9739">Подробнее...</a><br /></td></tr>
 <tr class="separator:a0148cb1cb9081b87d746d875a88e9739"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af7dd5ebfe1c57bc7019715a3ae3a8958"><td class="memItemLeft" align="right" valign="top">constexpr <a class="el" href="classwfc_1_1domain__object.html#a02f8165d66d2e1d46e1ec62885ab2825">io_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classwfc_1_1domain__object.html#af7dd5ebfe1c57bc7019715a3ae3a8958">get_id</a> () const</td></tr>
-<tr class="memdesc:af7dd5ebfe1c57bc7019715a3ae3a8958"><td class="mdescLeft">&#160;</td><td class="mdescRight">Возвращает уникальный идентификатор объекта  <a href="classwfc_1_1domain__object.html#af7dd5ebfe1c57bc7019715a3ae3a8958">Подробнее...</a><br /></td></tr>
-<tr class="separator:af7dd5ebfe1c57bc7019715a3ae3a8958"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92aacc658c6361a9a560babdcf445067"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classwfc_1_1domain__object.html#a02f8165d66d2e1d46e1ec62885ab2825">io_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classwfc_1_1domain__object.html#a92aacc658c6361a9a560babdcf445067">get_id</a> () const override final</td></tr>
+<tr class="memdesc:a92aacc658c6361a9a560babdcf445067"><td class="mdescLeft">&#160;</td><td class="mdescRight">Возвращает уникальный идентификатор объекта  <a href="classwfc_1_1domain__object.html#a92aacc658c6361a9a560babdcf445067">Подробнее...</a><br /></td></tr>
+<tr class="separator:a92aacc658c6361a9a560babdcf445067"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8dba1b45f02298c365786ece251c5e9f"><td class="memTemplParams" colspan="2">template&lt;typename H1 , typename H2 &gt; </td></tr>
 <tr class="memitem:a8dba1b45f02298c365786ece251c5e9f"><td class="memTemplItemLeft" align="right" valign="top">auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classwfc_1_1domain__object.html#a8dba1b45f02298c365786ece251c5e9f">wrap</a> (H1 &amp;&amp;h1, H2 &amp;&amp;h2) const -&gt; typename wrap_result_&lt; H1, H2 &gt;::type</td></tr>
 <tr class="memdesc:a8dba1b45f02298c365786ece251c5e9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Создает обертку над обработчиком обратного вызова  <a href="classwfc_1_1domain__object.html#a8dba1b45f02298c365786ece251c5e9f">Подробнее...</a><br /></td></tr>
@@ -186,9 +188,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:a39b8299985d015ef661aaa0b0a0c3f21"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="classwfc_1_1domain__object.html#ad0240f192a03626d3e738af3763a2cf9">workflow_type</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classwfc_1_1domain__object.html#a39b8299985d015ef661aaa0b0a0c3f21">get_workflow</a> () const</td></tr>
 <tr class="memdesc:a39b8299985d015ef661aaa0b0a0c3f21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Возвращает указатель на <a href="https://mambaru.github.io/wflow/">workflow</a>  <a href="classwfc_1_1domain__object.html#a39b8299985d015ef661aaa0b0a0c3f21">Подробнее...</a><br /></td></tr>
 <tr class="separator:a39b8299985d015ef661aaa0b0a0c3f21"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af32798f79fbee82835984e386cfe3967"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="classwfc_1_1domain__object.html#ad0240f192a03626d3e738af3763a2cf9">workflow_type</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classwfc_1_1domain__object.html#af32798f79fbee82835984e386cfe3967">get_workflow</a> (const std::string &amp;target, bool disabort=false) const</td></tr>
-<tr class="memdesc:af32798f79fbee82835984e386cfe3967"><td class="mdescLeft">&#160;</td><td class="mdescRight">Возвращает указатель на <a href="https://mambaru.github.io/wflow/">workflow</a>  <a href="classwfc_1_1domain__object.html#af32798f79fbee82835984e386cfe3967">Подробнее...</a><br /></td></tr>
-<tr class="separator:af32798f79fbee82835984e386cfe3967"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa839909a3af5eb17cbbffff875a3266f"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="classwfc_1_1domain__object.html#ad0240f192a03626d3e738af3763a2cf9">workflow_type</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classwfc_1_1domain__object.html#aa839909a3af5eb17cbbffff875a3266f">get_workflow</a> (const std::string &amp;target, bool disabort=false, bool *created=nullptr) const</td></tr>
+<tr class="memdesc:aa839909a3af5eb17cbbffff875a3266f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Возвращает указатель на <a href="https://mambaru.github.io/wflow/">workflow</a>  <a href="classwfc_1_1domain__object.html#aa839909a3af5eb17cbbffff875a3266f">Подробнее...</a><br /></td></tr>
+<tr class="separator:aa839909a3af5eb17cbbffff875a3266f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac1fc4ed9d063e7d0e7353eb58f2827fc"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="classwfc_1_1domain__object.html#ad0240f192a03626d3e738af3763a2cf9">workflow_type</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classwfc_1_1domain__object.html#ac1fc4ed9d063e7d0e7353eb58f2827fc">get_common_workflow</a> () const</td></tr>
 <tr class="memdesc:ac1fc4ed9d063e7d0e7353eb58f2827fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Возвращает указатель на общий <a href="https://mambaru.github.io/wflow/">workflow</a> системы  <a href="classwfc_1_1domain__object.html#ac1fc4ed9d063e7d0e7353eb58f2827fc">Подробнее...</a><br /></td></tr>
 <tr class="separator:ac1fc4ed9d063e7d0e7353eb58f2827fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -204,12 +206,12 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:ad6f83c74d2c8fb2141b58a85a84f1de8"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="classwfc_1_1domain__object.html#ad0240f192a03626d3e738af3763a2cf9">workflow_type</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classwfc_1_1domain__object.html#ad6f83c74d2c8fb2141b58a85a84f1de8">create_workflow</a> ()</td></tr>
 <tr class="memdesc:ad6f83c74d2c8fb2141b58a85a84f1de8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Создает и запускает новый workflow на основе конфигурации workflow по умолчанию ( workflow::workflow )  <a href="classwfc_1_1domain__object.html#ad6f83c74d2c8fb2141b58a85a84f1de8">Подробнее...</a><br /></td></tr>
 <tr class="separator:ad6f83c74d2c8fb2141b58a85a84f1de8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7ba2b55f1fb01f2a9d934b79d5fd3d1e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classwfc_1_1domain__object.html#a7ba2b55f1fb01f2a9d934b79d5fd3d1e">idle</a> (std::function&lt; void()&gt; fun)</td></tr>
-<tr class="memdesc:a7ba2b55f1fb01f2a9d934b79d5fd3d1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Добавляет фоновый обработчик с периодичностью один раз в секунду  <a href="classwfc_1_1domain__object.html#a7ba2b55f1fb01f2a9d934b79d5fd3d1e">Подробнее...</a><br /></td></tr>
-<tr class="separator:a7ba2b55f1fb01f2a9d934b79d5fd3d1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaadaa44b60e69988a2324e4f404963e8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classwfc_1_1domain__object.html#aaadaa44b60e69988a2324e4f404963e8">idle</a> (workflow_type::duration_t duration, std::function&lt; void()&gt; fun)</td></tr>
-<tr class="memdesc:aaadaa44b60e69988a2324e4f404963e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Добавляет фоновый обработчик с заданной периодичностью  <a href="classwfc_1_1domain__object.html#aaadaa44b60e69988a2324e4f404963e8">Подробнее...</a><br /></td></tr>
-<tr class="separator:aaadaa44b60e69988a2324e4f404963e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a942a3ba192deb4589d4877876b6eaf62"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classwfc_1_1domain__object.html#a942a3ba192deb4589d4877876b6eaf62">idle</a> (std::function&lt; bool()&gt; fun)</td></tr>
+<tr class="memdesc:a942a3ba192deb4589d4877876b6eaf62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Добавляет фоновый обработчик с периодичностью один раз в секунду  <a href="classwfc_1_1domain__object.html#a942a3ba192deb4589d4877876b6eaf62">Подробнее...</a><br /></td></tr>
+<tr class="separator:a942a3ba192deb4589d4877876b6eaf62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5599e1a3d1c38ccf5386a4926a3b4d00"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classwfc_1_1domain__object.html#a5599e1a3d1c38ccf5386a4926a3b4d00">idle</a> (workflow_type::duration_t duration, std::function&lt; bool()&gt; fun)</td></tr>
+<tr class="memdesc:a5599e1a3d1c38ccf5386a4926a3b4d00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Добавляет фоновый обработчик с заданной периодичностью  <a href="classwfc_1_1domain__object.html#a5599e1a3d1c38ccf5386a4926a3b4d00">Подробнее...</a><br /></td></tr>
+<tr class="separator:a5599e1a3d1c38ccf5386a4926a3b4d00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4ad6adeb906fa031c01390e5d9420e66"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classwfc_1_1domain__object.html#a4ad6adeb906fa031c01390e5d9420e66">has_arg</a> (const std::string &amp;arg) const</td></tr>
 <tr class="memdesc:a4ad6adeb906fa031c01390e5d9420e66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Определяет наличие дополнительного аргумента переданного этому объекту через командную строку  <a href="classwfc_1_1domain__object.html#a4ad6adeb906fa031c01390e5d9420e66">Подробнее...</a><br /></td></tr>
 <tr class="separator:a4ad6adeb906fa031c01390e5d9420e66"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -325,9 +327,9 @@ API и асинхронные методы</h2>
 <li>Структура с входящими параметрами передается как std::unique_ptr<ul>
 <li>Это гарантирует перемещаемость объекта и запрещает случайное копирование</li>
 <li>Избавляет от необходимости накладывать ограничения на подобные структуры и/или использовать классы-обертки</li>
-<li></li>
 </ul>
 </li>
+<li></li>
 <li>Все методы должны быть асинхронными, т.е. возврат результата осуществляется через callback-функцию которая передается при вызове.<ul>
 <li>Однако это не означает, что реализация метода не может быть синхронный (вызов callback-функции сразу же после обработки запроса )</li>
 </ul>
@@ -339,7 +341,7 @@ API и асинхронные методы</h2>
 Конфигурация и запуск</h2>
 <h2><a class="anchor" id="autotoc_md4"></a>
 Взаимодействие прикладных объектов (цели)</h2>
-<p><a class="el" href="classwfc_1_1domain__object.html#af7dd5ebfe1c57bc7019715a3ae3a8958" title="Возвращает уникальный идентификатор объекта">get_id()</a> <a class="el" href="classwfc_1_1domain__object.html#a059b83104114956c1d260f84a79edb5a" title="Создает обертку над обработчиком обратного вызова RPC.">callback()</a> рекурсивные мутексы</p>
+<p><a class="el" href="classwfc_1_1domain__object.html#a92aacc658c6361a9a560babdcf445067" title="Возвращает уникальный идентификатор объекта">get_id()</a> <a class="el" href="classwfc_1_1domain__object.html#a059b83104114956c1d260f84a79edb5a" title="Создает обертку над обработчиком обратного вызова RPC.">callback()</a> рекурсивные мутексы</p>
 <h2><a class="anchor" id="autotoc_md5"></a>
 Потоки и очереди (workflow)</h2>
 <p><a class="el" href="classwfc_1_1domain__object.html#a8dba1b45f02298c365786ece251c5e9f" title="Создает обертку над обработчиком обратного вызова">wrap()</a></p>
@@ -495,8 +497,8 @@ template&lt;typename Itf , typename Opt , typename StatOpt  = nostat&gt; </div>
 
 </div>
 </div>
-<a id="af7dd5ebfe1c57bc7019715a3ae3a8958"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af7dd5ebfe1c57bc7019715a3ae3a8958">&#9670;&nbsp;</a></span>get_id()</h2>
+<a id="a92aacc658c6361a9a560babdcf445067"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92aacc658c6361a9a560babdcf445067">&#9670;&nbsp;</a></span>get_id()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -507,7 +509,7 @@ template&lt;typename Itf , typename Opt , typename StatOpt  = nostat&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">constexpr <a class="el" href="classwfc_1_1domain__object.html#a02f8165d66d2e1d46e1ec62885ab2825">io_id_t</a> <a class="el" href="classwfc_1_1domain__object.html">wfc::domain_object</a>&lt; Itf, Opt, StatOpt &gt;::get_id </td>
+          <td class="memname">virtual <a class="el" href="classwfc_1_1domain__object.html#a02f8165d66d2e1d46e1ec62885ab2825">io_id_t</a> <a class="el" href="classwfc_1_1domain__object.html">wfc::domain_object</a>&lt; Itf, Opt, StatOpt &gt;::get_id </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -515,7 +517,7 @@ template&lt;typename Itf , typename Opt , typename StatOpt  = nostat&gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">final</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -1025,8 +1027,8 @@ template&lt;typename Itf , typename Opt , typename StatOpt  = nostat&gt; </div>
 
 </div>
 </div>
-<a id="af32798f79fbee82835984e386cfe3967"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af32798f79fbee82835984e386cfe3967">&#9670;&nbsp;</a></span>get_workflow() <span class="overload">[2/2]</span></h2>
+<a id="aa839909a3af5eb17cbbffff875a3266f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa839909a3af5eb17cbbffff875a3266f">&#9670;&nbsp;</a></span>get_workflow() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1046,7 +1048,13 @@ template&lt;typename Itf , typename Opt , typename StatOpt  = nostat&gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>disabort</em> = <code>false</code>&#160;</td>
+          <td class="paramname"><em>disabort</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool *&#160;</td>
+          <td class="paramname"><em>created</em> = <code>nullptr</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1247,8 +1255,8 @@ template&lt;typename Itf , typename Opt , typename StatOpt  = nostat&gt; </div>
 
 </div>
 </div>
-<a id="a7ba2b55f1fb01f2a9d934b79d5fd3d1e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7ba2b55f1fb01f2a9d934b79d5fd3d1e">&#9670;&nbsp;</a></span>idle() <span class="overload">[1/2]</span></h2>
+<a id="a942a3ba192deb4589d4877876b6eaf62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a942a3ba192deb4589d4877876b6eaf62">&#9670;&nbsp;</a></span>idle() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1261,7 +1269,7 @@ template&lt;typename Itf , typename Opt , typename StatOpt  = nostat&gt; </div>
         <tr>
           <td class="memname">void <a class="el" href="classwfc_1_1domain__object.html">wfc::domain_object</a>&lt; Itf, Opt, StatOpt &gt;::idle </td>
           <td>(</td>
-          <td class="paramtype">std::function&lt; void()&gt;&#160;</td>
+          <td class="paramtype">std::function&lt; bool()&gt;&#160;</td>
           <td class="paramname"><em>fun</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1282,8 +1290,8 @@ template&lt;typename Itf , typename Opt , typename StatOpt  = nostat&gt; </div>
 
 </div>
 </div>
-<a id="aaadaa44b60e69988a2324e4f404963e8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaadaa44b60e69988a2324e4f404963e8">&#9670;&nbsp;</a></span>idle() <span class="overload">[2/2]</span></h2>
+<a id="a5599e1a3d1c38ccf5386a4926a3b4d00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5599e1a3d1c38ccf5386a4926a3b4d00">&#9670;&nbsp;</a></span>idle() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1302,7 +1310,7 @@ template&lt;typename Itf , typename Opt , typename StatOpt  = nostat&gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::function&lt; void()&gt;&#160;</td>
+          <td class="paramtype">std::function&lt; bool()&gt;&#160;</td>
           <td class="paramname"><em>fun</em>&#160;</td>
         </tr>
         <tr>
@@ -1686,6 +1694,7 @@ template&lt;typename Req , typename Res &gt; </div>
 <div class="line">    <span class="keywordflow">return</span>;</div>
 <div class="line">  ... обработка запроса или уведомления ...</div>
 <div class="line">}</div>
+<div class="ttc" id="aclasswfc_1_1domain__object_html_ac6932df2abcddf16aa8733b383961583"><div class="ttname"><a href="classwfc_1_1domain__object.html#ac6932df2abcddf16aa8733b383961583">wfc::domain_object::bad_request</a></div><div class="ttdeci">bool bad_request(const std::unique_ptr&lt; Req &gt; &amp;req, const std::function&lt; void(std::unique_ptr&lt; Res &gt;) &gt; &amp;cb) const</div><div class="ttdoc">Проверяет на валидность входящий запрос, а также на режим suspend.</div><div class="ttdef"><b>Definition:</b> domain_object.hpp:726</div></div>
 </div><!-- fragment --> </li>
 </ul>
 
@@ -1855,6 +1864,7 @@ template&lt;typename Res &gt; </div>
 <div class="line">     cb( std::move(res) )</div>
 <div class="line">  }</div>
 <div class="line">}</div>
+<div class="ttc" id="aclasswfc_1_1domain__object_html_a97c1a74364b6f52d03c03781bb971b4f"><div class="ttname"><a href="classwfc_1_1domain__object.html#a97c1a74364b6f52d03c03781bb971b4f">wfc::domain_object::create_response</a></div><div class="ttdeci">static std::unique_ptr&lt; Res &gt; create_response(const std::function&lt; void(std::unique_ptr&lt; Res &gt;)&gt; &amp;cb)</div><div class="ttdoc">вспомогательная функция для обработчиков, которые можут обрабатывать как запросы так и уведомления</div><div class="ttdef"><b>Definition:</b> domain_object.hpp:806</div></div>
 </div><!-- fragment --> </dd></dl>
 
 </div>
@@ -1919,6 +1929,7 @@ template&lt;typename Res &gt; </div>
 <div class="line">  <span class="keyword">auto</span> res = this-&gt;<a class="code" href="classwfc_1_1domain__object.html#a97c1a74364b6f52d03c03781bb971b4f">create_response</a>(cb);</div>
 <div class="line">  this-&gt;<a class="code" href="classwfc_1_1domain__object.html#a25b3b9507b94b147d83c6992d4361705">send_response</a>( std::move(res), cb)</div>
 <div class="line">}</div>
+<div class="ttc" id="aclasswfc_1_1domain__object_html_a25b3b9507b94b147d83c6992d4361705"><div class="ttname"><a href="classwfc_1_1domain__object.html#a25b3b9507b94b147d83c6992d4361705">wfc::domain_object::send_response</a></div><div class="ttdeci">static void send_response(std::unique_ptr&lt; Res &gt; &amp;&amp;res, const std::function&lt; void(std::unique_ptr&lt; Res &gt;) &gt; &amp;cb)</div><div class="ttdoc">вспомогательная функция для обработчиков, которые можут обрабатывать как запросы так и уведомления</div><div class="ttdef"><b>Definition:</b> domain_object.hpp:835</div></div>
 </div><!-- fragment --> 
 </div>
 </div>
@@ -2020,14 +2031,9 @@ template&lt;typename Itf , typename Opt , typename StatOpt  = nostat&gt; </div>
 <li>wfc/<a class="el" href="domain__object_8hpp_source.html">domain_object.hpp</a></li>
 </ul>
 </div><!-- contents -->
-<div class="ttc" id="aclasswfc_1_1domain__object_html_a97c1a74364b6f52d03c03781bb971b4f"><div class="ttname"><a href="classwfc_1_1domain__object.html#a97c1a74364b6f52d03c03781bb971b4f">wfc::domain_object::create_response</a></div><div class="ttdeci">static std::unique_ptr&lt; Res &gt; create_response(const std::function&lt; void(std::unique_ptr&lt; Res &gt;)&gt; &amp;cb)</div><div class="ttdoc">вспомогательная функция для обработчиков, которые можут обрабатывать как запросы так и уведомления</div><div class="ttdef"><b>Definition:</b> domain_object.hpp:779</div></div>
-<div class="ttc" id="aclasswfc_1_1domain__object_html_a25b3b9507b94b147d83c6992d4361705"><div class="ttname"><a href="classwfc_1_1domain__object.html#a25b3b9507b94b147d83c6992d4361705">wfc::domain_object::send_response</a></div><div class="ttdeci">static void send_response(std::unique_ptr&lt; Res &gt; &amp;&amp;res, const std::function&lt; void(std::unique_ptr&lt; Res &gt;) &gt; &amp;cb)</div><div class="ttdoc">вспомогательная функция для обработчиков, которые можут обрабатывать как запросы так и уведомления</div><div class="ttdef"><b>Definition:</b> domain_object.hpp:808</div></div>
-<div class="ttc" id="aclasswfc_1_1domain__object_html_ac6932df2abcddf16aa8733b383961583"><div class="ttname"><a href="classwfc_1_1domain__object.html#ac6932df2abcddf16aa8733b383961583">wfc::domain_object::bad_request</a></div><div class="ttdeci">bool bad_request(const std::unique_ptr&lt; Req &gt; &amp;req, const std::function&lt; void(std::unique_ptr&lt; Res &gt;) &gt; &amp;cb) const</div><div class="ttdoc">Проверяет на валидность входящий запрос, а также на режим suspend.</div><div class="ttdef"><b>Definition:</b> domain_object.hpp:699</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Создано системой &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.17
+Создано системой&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
 </small></address>
 </body>
 </html>
