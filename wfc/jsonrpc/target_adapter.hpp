@@ -27,18 +27,18 @@ struct target_adapter: ijsonrpc
 
   target_adapter() = default;
 
-  explicit target_adapter(itf_ptr_t itf)
+  explicit target_adapter(itf_ptr_t itf) noexcept
     : _itf(itf), _jsonrpc()
   {
     if (auto pitf = itf.lock())
       _jsonrpc = std::dynamic_pointer_cast<ijsonrpc>(pitf);
   }
 
-  target_adapter(itf_ptr_t itf, jsonrpc_ptr_t jsonrpc)
+  target_adapter(itf_ptr_t itf, jsonrpc_ptr_t jsonrpc) noexcept
     : _itf(itf), _jsonrpc(jsonrpc)
   {}
 
-  target_adapter(const target_adapter& other)
+  target_adapter(const target_adapter& other) noexcept
     : ijsonrpc() 
     , _itf(other._itf)
     , _jsonrpc(other._jsonrpc)
