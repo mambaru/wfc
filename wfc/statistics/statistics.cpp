@@ -35,6 +35,15 @@ void statistics::enable(bool val)
   _impl->enable(val);
 }
 
+bool statistics::add(const std::string& name, const wrtstat::reduced_data& v)
+{
+  return _impl->add(name, v);
+}
+
+bool statistics::del(const std::string& name)
+{
+  return _impl->del(name);
+}
 
 size_t statistics::aggregators_count() const
 {

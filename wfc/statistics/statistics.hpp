@@ -28,6 +28,9 @@ public:
   std::string get_name(size_t i) const;
   aggregated_ptr pop(size_t i);
   
+  bool add(const std::string& name, const wrtstat::reduced_data& v);
+  bool del(const std::string& name);
+
   value_meter create_value_meter(const std::string& name);
   size_meter create_size_meter(const std::string& name);
   time_meter create_time_meter(const std::string& name);
