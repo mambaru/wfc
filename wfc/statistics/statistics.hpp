@@ -7,7 +7,7 @@
 #pragma once
 
 #include <wfc/iinterface.hpp>
-#include <wrtstat/wrtstat_options.hpp>
+#include <wfc/statistics/statistics_options.hpp>
 #include <wfc/statistics/meters.hpp>
 #include <wrtstat/wrtstat.hpp>
 #include <memory>
@@ -18,11 +18,11 @@ class statistics
 {
   class impl;
 public:
-  typedef wrtstat::wrtstat_options options_type;
+  typedef statistics_options options_type;
   typedef wrtstat::aggregated_data::ptr aggregated_ptr;
 
   virtual ~statistics();
-  explicit statistics(options_type opt);
+  explicit statistics(const options_type& opt);
   void enable(bool val);
   size_t aggregators_count() const;
   std::string get_name(size_t i) const;
@@ -37,6 +37,7 @@ public:
   composite_meter create_composite_meter(const std::string& time, const 
     std::string& read, const std::string& write, bool summary_size);
 private:
+  std::vector<std::string> _prefixes;
   std::shared_ptr<impl> _impl;
 };
 

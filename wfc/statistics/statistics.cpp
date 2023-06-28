@@ -25,7 +25,9 @@ statistics::~statistics()
 {
   _impl = nullptr;
 }
-statistics::statistics(options_type opt)
+
+statistics::statistics(const options_type& opt)
+  : _prefixes(opt.prefixes)
 {
   _impl = std::make_shared<impl>(opt);
 }
@@ -62,23 +64,23 @@ statistics::aggregated_ptr statistics::pop(size_t i)
 
 value_meter statistics::create_value_meter(const std::string& name)
 {
-  return _impl->create_value_multi_meter(name);
+  return _impl->create_value_multi_meter(_prefixes, name);
 }
 
 size_meter statistics::create_size_meter(const std::string& name)
 {
-  return _impl->create_size_multi_meter(name);
+  return _impl->create_size_multi_meter(_prefixes, name);
 }
 
 time_meter statistics::create_time_meter(const std::string& name)
 {
-  return _impl->create_time_multi_meter<statistics_duration>(name);
+  return _impl->create_time_multi_meter<statistics_duration>(_prefixes, name);
 }
 
 
 composite_meter statistics::create_composite_meter(const std::string& time, const std::string& read, const std::string& write, bool summary_size)
 {
-  return _impl->create_composite_multi_meter<statistics_duration>(time, read, write, summary_size);
+  return _impl->create_composite_multi_meter<statistics_duration>(_prefixes, time, read, write, summary_size);
 }
 
 
