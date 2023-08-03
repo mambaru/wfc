@@ -56,7 +56,7 @@ public:
     if ( auto pitf = this->template get_target<ijsonrpc>(dopt.outgoing_target_name, true) )
     {
       if ( dopt.outgoing_reg )
-        pitf->reg_io( this->engine()->get_id(), this->shared_from_this() );
+        pitf->reg_io( /*this->engine()->get_id()*/_target_id, this->shared_from_this() );
 
       std::weak_ptr<ijsonrpc> witf = pitf;
       io_id_t io_id = _target_id;

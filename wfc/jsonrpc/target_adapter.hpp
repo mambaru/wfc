@@ -15,6 +15,7 @@
 #include <wjrpc/errors/error_json.hpp>
 #include <wjrpc/types.hpp>
 #include <wjson/json.hpp>
+#include <iostream>
 #include <memory>
 
 namespace wfc{ namespace jsonrpc{
@@ -110,6 +111,7 @@ struct target_adapter: ijsonrpc
     }
     else
     {
+      JSONRPC_LOG_WARNING("target_adapter::perform_incoming: service_unavailable (handler==nullptr)")
     }
   }
 
