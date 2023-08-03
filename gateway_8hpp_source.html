@@ -105,7 +105,7 @@ $(function() {
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keywordflow">if</span> ( <span class="keyword">auto</span> pitf = this-&gt;<span class="keyword">template</span> get_target&lt;ijsonrpc&gt;(dopt.outgoing_target_name, <span class="keyword">true</span>) )</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    {</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;      <span class="keywordflow">if</span> ( dopt.outgoing_reg )</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        pitf-&gt;reg_io( this-&gt;engine()-&gt;<a class="code" href="classwfc_1_1domain__object.html#a92aacc658c6361a9a560babdcf445067">get_id</a>(), this-&gt;shared_from_this() );</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        pitf-&gt;reg_io( <span class="comment">/*this-&gt;engine()-&gt;get_id()*/</span>_target_id, this-&gt;shared_from_this() );</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;      std::weak_ptr&lt;ijsonrpc&gt; witf = pitf;</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;      io_id_t io_id = _target_id;</div>
