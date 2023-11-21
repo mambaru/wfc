@@ -31,7 +31,7 @@ struct gateway_options_json
       json::member< n_incoming_reg, options_type, bool, &options_type::incoming_reg>,
       json::member< n_outgoing_reg, options_type, bool, &options_type::outgoing_reg>,
       json::base< ::wjrpc::engine_options_json<engine_options> >,
-      json::member< n_remove_outdated_ms, options_type, time_t, &options_type::remove_outdated_ms>
+      json::member< n_remove_outdated_ms, options_type, time_t, &options_type::remove_outdated_ms, wjson::time_interval_ms<> >
     >,
     json::strict_mode
   > type;
