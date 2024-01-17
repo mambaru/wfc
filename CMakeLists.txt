@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(wfc CXX)
+project(wfc VERSION "0.9.8")
 
 include(cmake/ci.cmake)
 include(cmake/BuildInfo.cmake)
@@ -17,7 +17,7 @@ wci_submodule(NAME iow     )
 wci_submodule(NAME wjrpc   )
 wci_submodule(NAME wrtstat )
 
-target_include_directories(wfc PUBLIC "${wfc_SOURCE_DIR}")
+target_include_directories(wfc PUBLIC "$<BUILD_INTERFACE:${wfc_SOURCE_DIR}>")
 
 
 if ( BUILD_TESTING )
@@ -27,3 +27,5 @@ if ( BUILD_TESTING )
     add_subdirectory(examples)
   endif()
 endif()
+
+include(cmake/install.cmake)
