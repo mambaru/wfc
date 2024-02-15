@@ -19,6 +19,8 @@ public:
   typedef basic_wfc::package_list package_list;
   typedef basic_wfc::package_ptr package_ptr;
 
+  virtual ~testing_wfc();
+
   explicit testing_wfc(const package_list& packages = {});
 
   bool add_configs(const std::string& json, wjson::json_error* er = nullptr, std::string* err_json = nullptr);

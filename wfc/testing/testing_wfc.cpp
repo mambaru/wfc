@@ -47,6 +47,14 @@ testing_wfc::testing_wfc(const package_list& packages )
   wlog::init(opt, dlh);
 }
 
+testing_wfc::~testing_wfc()
+{
+  _wfc = nullptr;
+  _core = nullptr;
+  wlog::release();
+}
+
+
 bool testing_wfc::add_configs(const std::string& json, wjson::json_error* er, std::string* err_json)
 {
   std::map<std::string, std::string> comp_configs;
