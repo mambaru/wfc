@@ -53,6 +53,21 @@ class example_core
   virtual void core_abort( const std::string& ) override {}
 
   virtual void core_restart() override {}
+
+  virtual void set_status(wfc::core_status, const std::string&) override{}
+
+  virtual void set_stage(wfc::core_stage) override{}
+
+  virtual wfc::core_status get_status(wfc::core_stage*, std::vector<std::pair<wfc::core_status, std::string>>* ) override
+  {
+    return wfc::core_status::OK;
+  }
+
+  virtual std::string get_status_text(size_t, size_t) override
+  {
+    return "OK";
+  }
+
 };
 
 

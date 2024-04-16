@@ -118,6 +118,26 @@ public:
     _poll_count = poll_count;
   }
   
+  virtual void set_status(core_status, const std::string&) override
+  {
+
+  }
+
+  virtual void set_stage(core_stage) override
+  {
+
+  }
+
+  virtual core_status get_status(core_stage*, std::vector<std::pair<core_status, std::string>>* ) override
+  {
+    return core_status::OK;
+  }
+
+  virtual std::string get_status_text(size_t, size_t) override
+  {
+    return "OK";
+  }
+
 
 private:
   std::shared_ptr<wfcglobal> _global;

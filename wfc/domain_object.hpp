@@ -10,6 +10,7 @@
 #include <wfc/json.hpp>
 #include <wfc/statistics/statistics.hpp>
 #include <wfc/iinterface.hpp>
+#include <wfc/core/icore.hpp>
 #include <wfc/workflow.hpp>
 #include <wfc/module/domain_config.hpp>
 #include <wfc/module/basic_domain.hpp>
@@ -328,13 +329,30 @@ public:
       return true;
     }
     
-    if ( d->size() != 7 )
+    if ( d->size() < 7 )
       return false;
-    
-    if ( std::string( d->begin(), d->end()) != "@STATUS" )
+
+    std::istringstream iss( std::string( d->begin(), d->end()) );
+
+    std::string command;
+    iss >> command;
+
+    if ( command != "@STATUS" )
       return false;
-    
-    handler( iow::io::make("OK") );
+
+    size_t errors = 0, warnings = 0;
+
+    if ( iss >> errors )
+      iss >> warnings;
+
+    //  Модуль ядра всегда есть, отключаем abort  для тестирования
+    if ( auto pcore = this->get_target<icore>("core", true) )
+    {
+      std::string statustext = pcore->get_status_text(errors, warnings);
+      handler( iow::io::make(statustext) );
+    }
+    else
+      handler( iow::io::make("OK") );
     return true;
   }
 
@@ -465,6 +483,8 @@ public:
    * или начальной загрузки из БД или файла. Для этого в json-конфигурации объекта для имени вместо string следует использовать raw_value.
    * После этого в конфиге можно использовать как имя так и сразу сконфигурировать workflow. Для основного workflow все по прежнему,
    * можно использовать только имя.
+   * @warning незарегистрированный workflow не собирает статистику, на него нельзя назначить ядра CPU,
+   * и фреймворк не отслеживает зависания потоков таких workflow
    * @see wflow::workflow
    */
   std::shared_ptr<workflow_type> get_workflow(const std::string& target, bool disabort = false, bool* created = nullptr) const
@@ -503,7 +523,17 @@ public:
    */
   std::shared_ptr<workflow_type> create_workflow(const wflow::workflow_options& opt) const
   {
-    auto wflow = std::make_shared<workflow_type>(this->global()->io_context,  opt);
+    wflow::workflow_handlers wrkh;
+    if (auto g = this->global() )
+    {
+      pid_t pid = 0;
+      wrkh.status_handler = [g, pid](std::thread::id) mutable
+      {
+        pid = g->cpu.thread_active(pid);
+      };
+    }
+
+    auto wflow = std::make_shared<workflow_type>(this->global()->io_context, opt, wrkh);
     wflow->start();
     return wflow;
   }
@@ -893,6 +923,12 @@ public:
     return cnfg;
   }
 
+  bool is_configured() const
+  {
+     return _workflow!=nullptr;
+  }
+
+
   typedef instance_handler_<Opt, StatOpt> instance_handler_t;
   instance_handler_t* inst_handler_()
   { return static_cast<instance_handler_<Opt, StatOpt>*>(this); }
@@ -1099,12 +1135,8 @@ void domain_object<Itf, Opt, StatOpt>::initialize_domain()
     _owner.set_no_call_handler(std::bind(g->nocall_handler, this->name()));
 
     _workflow = this->get_workflow_(_config.workflow, false, &_my_workflow);
-    if ( _workflow == nullptr ) _workflow = this->global()->common_workflow;
-   // _workflow = _config.workflow.empty()
-   //             ? this->global()->common_workflow
-   //                : this->get_workflow_(_config.workflow, false, &_my_workflow) 
-                //this->global()->registry.template get_object<wflow::workflow>("workflow", _config.workflow, false)
-                ;
+    if ( _workflow == nullptr )
+      _workflow = this->global()->common_workflow;
 
     _statistics = ! _config.statistics.disabled
                   ? this->global()->registry.template get_object<statistics::statistics>("statistics", _config.statistics.target, false)

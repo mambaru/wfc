@@ -8,8 +8,40 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 #include <thread>
+#include <iostream>
 
 namespace wfc{
+
+pid_t cpuset::thread_active(pid_t pid)
+{
+  std::lock_guard<mutex_type> lk(_mutex);
+
+  if ( pid == 0 )
+    pid = cpuset::get_thread_pid();
+
+  auto& ap = _active_map[pid];
+  ap.pid = pid;
+  ap.last_active = std::chrono::system_clock::now();
+  return pid;
+}
+
+void cpuset::get_active(std::vector<active_thread>* active_list)
+{
+  std::lock_guard<mutex_type> lk(_mutex);
+  if (active_list!=nullptr)
+  {
+    active_list->reserve( _active_map.size() );
+    for (const auto& item : _active_map)
+    {
+      if ( item.second.pid != 0 )
+      {
+        active_list->push_back(item.second);
+        active_list->back().name = item.second.name + "." + std::to_string(item.first);
+      }
+    }
+  }
+}
+
 
 bool cpuset::clean_dirty()
 {
@@ -30,16 +62,19 @@ void cpuset::set_current_thread(std::string group)
 {
   std::lock_guard<mutex_type> lk(_mutex);
   _dirty = true;
-  pid_t pid = this->get_thread_pid_();
+  pid_t pid = cpuset::get_thread_pid();
   this->del_thread_(pid);
   _cpu_map[group].pids.insert(pid);
+  _active_map[pid].name = group;
+  _active_map[pid].last_active = std::chrono::system_clock::now();
 }
 
 void cpuset::del_current_thread()
 {
   std::lock_guard<mutex_type> lk(_mutex);
   _dirty = true;
-  pid_t pid = this->get_thread_pid_();
+  pid_t pid = cpuset::get_thread_pid();
+  _active_map.erase(pid);
   this->del_thread_(pid);
 }
 
@@ -76,7 +111,7 @@ void cpuset::del_thread_(pid_t pid)
     s.second.pids.erase(pid);
 }
 
-pid_t cpuset::get_thread_pid_()
+pid_t cpuset::get_thread_pid()
 {
   return static_cast<pid_t>(syscall(SYS_gettid));
 }

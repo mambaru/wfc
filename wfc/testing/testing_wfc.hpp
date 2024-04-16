@@ -3,10 +3,7 @@
 #include <wfc/wfc.hpp>
 #include <wjson/error.hpp>
 #include <memory>
-
-// TODO: удалить после перенесения структур в спп
-#include <wjson/wjson.hpp>
-
+#include <map>
 
 namespace wfc{
 
