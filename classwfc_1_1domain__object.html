@@ -1076,7 +1076,9 @@ template&lt;typename Itf , typename Opt , typename StatOpt  = nostat&gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Возвращает</dt><dd>указатель на <a href="https://mambaru.github.io/wflow/">workflow</a> или nullptr</dd></dl>
-<p>в базовой конфигурации для прикладного объекта всегда доступен <a href="https://mambaru.github.io/wflow/">workflow</a>, используйте этот метод если вам нужно более одного <a href="https://mambaru.github.io/wflow/">workflow</a>. Задайте disabort=true если допустимо отсутствие объекта в реестре </p><dl class="section warning"><dt>Предупреждения</dt><dd>последнее обновление. В таргет можно передавать JSON-объект с конфигурацией workflow, тогда будет создан незарегистрированный workflow, который можно удалить после использования. Может использоваться для многопоточной инициализации или начальной загрузки из БД или файла. Для этого в json-конфигурации объекта для имени вместо string следует использовать raw_value. После этого в конфиге можно использовать как имя так и сразу сконфигурировать workflow. Для основного workflow все по прежнему, можно использовать только имя. </dd></dl>
+<p>в базовой конфигурации для прикладного объекта всегда доступен <a href="https://mambaru.github.io/wflow/">workflow</a>, используйте этот метод если вам нужно более одного <a href="https://mambaru.github.io/wflow/">workflow</a>. Задайте disabort=true если допустимо отсутствие объекта в реестре </p><dl class="section warning"><dt>Предупреждения</dt><dd>последнее обновление. В таргет можно передавать JSON-объект с конфигурацией workflow, тогда будет создан незарегистрированный workflow, который можно удалить после использования. Может использоваться для многопоточной инициализации или начальной загрузки из БД или файла. Для этого в json-конфигурации объекта для имени вместо string следует использовать raw_value. После этого в конфиге можно использовать как имя так и сразу сконфигурировать workflow. Для основного workflow все по прежнему, можно использовать только имя. </dd>
+<dd>
+незарегистрированный workflow не собирает статистику, на него нельзя назначить ядра CPU, и фреймворк не отслеживает зависания потоков таких workflow </dd></dl>
 <dl class="section see"><dt>См. также</dt><dd>wflow::workflow </dd></dl>
 
 </div>
@@ -1694,7 +1696,7 @@ template&lt;typename Req , typename Res &gt; </div>
 <div class="line">    <span class="keywordflow">return</span>;</div>
 <div class="line">  ... обработка запроса или уведомления ...</div>
 <div class="line">}</div>
-<div class="ttc" id="aclasswfc_1_1domain__object_html_ac6932df2abcddf16aa8733b383961583"><div class="ttname"><a href="classwfc_1_1domain__object.html#ac6932df2abcddf16aa8733b383961583">wfc::domain_object::bad_request</a></div><div class="ttdeci">bool bad_request(const std::unique_ptr&lt; Req &gt; &amp;req, const std::function&lt; void(std::unique_ptr&lt; Res &gt;) &gt; &amp;cb) const</div><div class="ttdoc">Проверяет на валидность входящий запрос, а также на режим suspend.</div><div class="ttdef"><b>Definition:</b> domain_object.hpp:726</div></div>
+<div class="ttc" id="aclasswfc_1_1domain__object_html_ac6932df2abcddf16aa8733b383961583"><div class="ttname"><a href="classwfc_1_1domain__object.html#ac6932df2abcddf16aa8733b383961583">wfc::domain_object::bad_request</a></div><div class="ttdeci">bool bad_request(const std::unique_ptr&lt; Req &gt; &amp;req, const std::function&lt; void(std::unique_ptr&lt; Res &gt;) &gt; &amp;cb) const</div><div class="ttdoc">Проверяет на валидность входящий запрос, а также на режим suspend.</div><div class="ttdef"><b>Definition:</b> domain_object.hpp:756</div></div>
 </div><!-- fragment --> </li>
 </ul>
 
@@ -1864,7 +1866,7 @@ template&lt;typename Res &gt; </div>
 <div class="line">     cb( std::move(res) )</div>
 <div class="line">  }</div>
 <div class="line">}</div>
-<div class="ttc" id="aclasswfc_1_1domain__object_html_a97c1a74364b6f52d03c03781bb971b4f"><div class="ttname"><a href="classwfc_1_1domain__object.html#a97c1a74364b6f52d03c03781bb971b4f">wfc::domain_object::create_response</a></div><div class="ttdeci">static std::unique_ptr&lt; Res &gt; create_response(const std::function&lt; void(std::unique_ptr&lt; Res &gt;)&gt; &amp;cb)</div><div class="ttdoc">вспомогательная функция для обработчиков, которые можут обрабатывать как запросы так и уведомления</div><div class="ttdef"><b>Definition:</b> domain_object.hpp:806</div></div>
+<div class="ttc" id="aclasswfc_1_1domain__object_html_a97c1a74364b6f52d03c03781bb971b4f"><div class="ttname"><a href="classwfc_1_1domain__object.html#a97c1a74364b6f52d03c03781bb971b4f">wfc::domain_object::create_response</a></div><div class="ttdeci">static std::unique_ptr&lt; Res &gt; create_response(const std::function&lt; void(std::unique_ptr&lt; Res &gt;)&gt; &amp;cb)</div><div class="ttdoc">вспомогательная функция для обработчиков, которые можут обрабатывать как запросы так и уведомления</div><div class="ttdef"><b>Definition:</b> domain_object.hpp:836</div></div>
 </div><!-- fragment --> </dd></dl>
 
 </div>
@@ -1929,7 +1931,7 @@ template&lt;typename Res &gt; </div>
 <div class="line">  <span class="keyword">auto</span> res = this-&gt;<a class="code" href="classwfc_1_1domain__object.html#a97c1a74364b6f52d03c03781bb971b4f">create_response</a>(cb);</div>
 <div class="line">  this-&gt;<a class="code" href="classwfc_1_1domain__object.html#a25b3b9507b94b147d83c6992d4361705">send_response</a>( std::move(res), cb)</div>
 <div class="line">}</div>
-<div class="ttc" id="aclasswfc_1_1domain__object_html_a25b3b9507b94b147d83c6992d4361705"><div class="ttname"><a href="classwfc_1_1domain__object.html#a25b3b9507b94b147d83c6992d4361705">wfc::domain_object::send_response</a></div><div class="ttdeci">static void send_response(std::unique_ptr&lt; Res &gt; &amp;&amp;res, const std::function&lt; void(std::unique_ptr&lt; Res &gt;) &gt; &amp;cb)</div><div class="ttdoc">вспомогательная функция для обработчиков, которые можут обрабатывать как запросы так и уведомления</div><div class="ttdef"><b>Definition:</b> domain_object.hpp:835</div></div>
+<div class="ttc" id="aclasswfc_1_1domain__object_html_a25b3b9507b94b147d83c6992d4361705"><div class="ttname"><a href="classwfc_1_1domain__object.html#a25b3b9507b94b147d83c6992d4361705">wfc::domain_object::send_response</a></div><div class="ttdeci">static void send_response(std::unique_ptr&lt; Res &gt; &amp;&amp;res, const std::function&lt; void(std::unique_ptr&lt; Res &gt;) &gt; &amp;cb)</div><div class="ttdoc">вспомогательная функция для обработчиков, которые можут обрабатывать как запросы так и уведомления</div><div class="ttdef"><b>Definition:</b> domain_object.hpp:865</div></div>
 </div><!-- fragment --> 
 </div>
 </div>
