@@ -88,11 +88,6 @@ public:
   {
     std::lock_guard<mutex_type> lk(_mutex);
     static_cast<domain_options&>( _config ) = opt;
-    /*if ( _object == nullptr )
-    {
-      this->configure(_config);
-      return;
-    }*/
     _startup = _startup && !( _object==nullptr && _config.enabled );
     if ( auto obj = this->create_or_stop_if_() ) 
     {
@@ -107,12 +102,6 @@ public:
   {
     std::lock_guard<mutex_type> lk(_mutex);
     _config = opt;
-
-    /*if ( _object == nullptr )
-    {
-      this->configure(_config);
-      return;
-    }*/
 
     _instance_reconfigured = true;
     // Reset ready flag for enable startup
@@ -196,7 +185,6 @@ private:
     // Создание объекта
     if ( _config.enabled )
     {
-      
       if ( _object == nullptr )
       {
         _was_disabled = true;
