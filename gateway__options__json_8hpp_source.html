@@ -80,7 +80,7 @@ $(function() {
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;      json::member&lt; n_incoming_reg, options_type, bool, &amp;options_type::incoming_reg&gt;,</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;      json::member&lt; n_outgoing_reg, options_type, bool, &amp;options_type::outgoing_reg&gt;,</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;      json::base&lt; ::wjrpc::engine_options_json&lt;engine_options&gt; &gt;,</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;      json::member&lt; n_remove_outdated_ms, options_type, time_t, &amp;options_type::remove_outdated_ms&gt;</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;      json::member&lt; n_remove_outdated_ms, options_type, time_t, &amp;options_type::remove_outdated_ms, wjson::time_interval_ms&lt;&gt; &gt;</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    &gt;,</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    json::strict_mode</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;  &gt; type;</div>
