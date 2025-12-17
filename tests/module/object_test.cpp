@@ -57,7 +57,7 @@ int test_gen()
   std::cout << "[" << t.interface_name() << "]" << std::endl;
   std::string genstr = t.generate("");
   std::cout << genstr << std::endl;
-  t.configure(genstr, nullptr);
+  t.configure(genstr, nullptr, nullptr);
   if (t.name()!="test")
     return 1;
   

@@ -1,13 +1,5 @@
-#add_library(
-#  wfc_core_vars
-#  OBJECT
-#    core/vars.cpp
-#    core/detail/private_vars.cpp
-#)
 
-#update_ogenc(TARGETS wfc_core_vars WARNINGS -Wnull-dereference OFF)
-
-#target_link_libraries(wfc_core_vars PRIVATE iow wjson Boost::regex)
+update_ogenc(TARGETS wfc WARNINGS -Wnull-dereference OFF)
 
 add_library(wfc
   wfc.cpp
@@ -30,15 +22,17 @@ add_library(wfc
   testing/testing_wfc.cpp
 )
 
-#wci_targets(wfc wfc_core_vars)
 wci_targets(wfc)
+
 enable_stat(wfc)
 
 target_compile_definitions(wfc PRIVATE -DBOOST_ASIO_NO_DEPRECATED)
+
 build_info(TARGET wfc)
 
-get_boost(system program_options filesystem date_time regex)
+get_boost(system asio program_options filesystem date_time regex)
 
+target_include_directories(wfc PUBLIC $<BUILD_INTERFACE:${wfc_SOURCE_DIR}> )
 
 target_link_libraries(
   wfc
@@ -50,8 +44,11 @@ target_link_libraries(
       wlog
       wjson
       faslib
-      ${Boost_LIBRARIES}
-#      wfc_core_vars
+    PUBLIC
+      Boost::system
+      Boost::asio
+      Boost::program_options
+      Boost::filesystem
+      Boost::date_time
+      Boost::regex
 )
-
-#add_dependencies(wfc wfc_core_vars)

@@ -30,7 +30,7 @@ struct icomponent: iinterface
   virtual bool parse(const std::string& conf, json::json_error* err) = 0;
 
   virtual void create( std::shared_ptr<wfcglobal>) = 0;
-  virtual bool configure(const std::string& conf, json::json_error* err)  = 0;
+  virtual bool configure(const std::string& conf, json::json_error* err, std::vector<std::string>* names)  = 0;
 
 // only for external control
   virtual void start(const std::string& arg) = 0;
