@@ -11,7 +11,7 @@ namespace wfc{
 
 struct ibuild_info
 {
-  virtual ~ibuild_info(){}
+  virtual ~ibuild_info() noexcept = default;
   virtual bool enabled() = 0;
   virtual std::string name() = 0;
   virtual std::string version_tag() = 0;

@@ -18,7 +18,7 @@ namespace wfc{
 
 struct imodule: iinterface
 {
-  virtual ~imodule(){}
+  virtual ~imodule() noexcept = default;
   virtual std::string name() const = 0;
   virtual std::string description() const = 0;
   virtual std::vector< std::shared_ptr<icomponent> > components() const = 0;

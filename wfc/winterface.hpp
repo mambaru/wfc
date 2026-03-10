@@ -30,7 +30,7 @@ public:
   
 private:
   std::weak_ptr<iinterface> _target;
-  std::atomic<bool> _suspend;
+  std::atomic_bool _suspend;
 };
 
 }

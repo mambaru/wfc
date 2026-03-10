@@ -74,8 +74,8 @@ public:
     , _target_method(tm)
     , _req_gen(req_gen)
     , _res_check(res_check)
+    , _is_abort(false)
   {
-    _is_abort = false;
   }
 
   virtual void stop( ) override

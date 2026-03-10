@@ -59,7 +59,7 @@ struct wfcglobal
   std::atomic_bool stop_signal_flag;
 
   explicit wfcglobal( io_context_type& io_context);
-  virtual ~wfcglobal();
+  virtual ~wfcglobal() noexcept;
   virtual void clear();
 
   /**

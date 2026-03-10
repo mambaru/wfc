@@ -42,7 +42,7 @@ public:
 
 public:
 
-  virtual ~engine_base()
+  virtual ~engine_base() noexcept
   {
     _engine=nullptr;
   }

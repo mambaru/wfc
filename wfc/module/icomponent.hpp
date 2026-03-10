@@ -19,7 +19,7 @@ struct wfcglobal;
 // 
 struct icomponent: iinterface
 {
-  virtual ~icomponent(){}
+  virtual ~icomponent() noexcept = default;
 
   virtual std::string name() const  = 0;
   virtual std::string description() const = 0;

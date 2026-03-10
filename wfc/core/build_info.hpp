@@ -18,7 +18,7 @@ class build_info
   : public ibuild_info
 {
 public:
-  virtual ~build_info(){}
+  virtual ~build_info() noexcept = default;
 
   virtual bool enabled() override
   {

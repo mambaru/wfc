@@ -14,7 +14,7 @@ namespace wfc{
 
 struct iconfig: iinterface
 {
-  virtual ~iconfig() {}
+  virtual ~iconfig() noexcept = default;
   virtual bool reload_and_reconfigure() = 0;
   virtual bool load_and_configure(std::string path) = 0;
   virtual bool load_and_check(std::string path) = 0;

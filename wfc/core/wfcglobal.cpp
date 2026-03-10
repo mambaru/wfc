@@ -31,7 +31,7 @@ void wfcglobal::clear()
   common_workflow = nullptr;
 }
 
-wfcglobal::~wfcglobal()
+wfcglobal::~wfcglobal() noexcept
 {
   this->clear();
 }

@@ -17,7 +17,7 @@ struct wfcglobal;
 
 struct icore: iinterface
 {
-  virtual ~icore() {}
+  virtual ~icore() noexcept = default;
   virtual int run() = 0;
   virtual void core_reconfigure() = 0;
   virtual void core_stop() = 0;

@@ -19,7 +19,7 @@ struct wfcglobal;
 
 struct ipackage: iinterface
 {
-  virtual ~ipackage() {}
+  virtual ~ipackage() noexcept = default;
   virtual std::shared_ptr<ibuild_info> build_info() = 0;
   virtual std::string name() const = 0;
   virtual std::string description() const = 0;

@@ -16,7 +16,7 @@ namespace wfc{
 class basic_domain
 {
 public:
-  virtual ~basic_domain() {}
+  virtual ~basic_domain() noexcept = default;
   
   /**
     * @brief create

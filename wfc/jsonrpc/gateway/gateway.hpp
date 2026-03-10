@@ -27,7 +27,7 @@ public:
   typedef typename super::io_id_t io_id_t;
   typedef typename super::data_ptr data_ptr;
 
-  virtual ~gateway_impl() {}
+  virtual ~gateway_impl() noexcept = default;
 
   virtual void initialize() override
   {

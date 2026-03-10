@@ -113,7 +113,13 @@ void cpuset::del_thread_(pid_t pid)
 
 pid_t cpuset::get_thread_pid()
 {
-  return static_cast<pid_t>(syscall(SYS_gettid));
+  long tid = syscall(SYS_gettid);
+  if (tid == -1)
+  {
+    // В случае ошибки возвращаем PID процесса
+    return ::getpid();
+  }
+  return static_cast<pid_t>(tid);
 }
 
 void cpuset::clear()
