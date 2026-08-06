@@ -1,3 +1,10 @@
+update_ogenc(TARGETS registry_test WARNINGS -Wnull-dereference OFF)
+update_ogenc(TARGETS domain_test WARNINGS -Wnull-dereference OFF)
+update_ogenc(TARGETS instance_test WARNINGS -Wnull-dereference OFF)
+update_ogenc(TARGETS object_test WARNINGS -Wnull-dereference OFF)
+update_ogenc(TARGETS module_test WARNINGS -Wnull-dereference OFF)
+
+
 add_executable(registry_test registry_test.cpp)
 add_executable(domain_test  domain_test.cpp)
 add_executable(instance_test  instance_test.cpp)
@@ -15,3 +22,4 @@ wci_test(TARGET domain_test  COMMAND domain_test )
 wci_test(TARGET instance_test COMMAND instance_test)
 wci_test(TARGET object_test COMMAND object_test)
 wci_test(TARGET module_test COMMAND module_test)
+

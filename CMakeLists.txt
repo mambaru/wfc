@@ -17,8 +17,6 @@ wci_submodule(NAME iow     )
 wci_submodule(NAME wjrpc   )
 wci_submodule(NAME wrtstat )
 
-target_include_directories(wfc PUBLIC "$<BUILD_INTERFACE:${wfc_SOURCE_DIR}>")
-
 
 if ( BUILD_TESTING )
   enable_testing()
