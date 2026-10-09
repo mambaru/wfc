@@ -108,7 +108,7 @@ bool testing_wfc::configure(std::function<void(const std::string&, const std::st
       std::string comp_json;
       wjson::vector_of< wjson::raw_value<> >::serializer()(obj_list, std::back_inserter(comp_json) );
       wjson::json_error er;
-      obj->configure(comp_json, &er);
+      obj->configure(comp_json, &er, nullptr);
       if ( er && error_handler!=nullptr )
       {
         res = false;

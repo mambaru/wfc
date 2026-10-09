@@ -59,7 +59,7 @@ struct wfcglobal
   std::atomic_bool stop_signal_flag;
 
   explicit wfcglobal( io_context_type& io_context);
-  virtual ~wfcglobal() noexcept;
+  virtual ~wfcglobal();
   virtual void clear();
 
   /**
@@ -69,7 +69,7 @@ struct wfcglobal
    * директоии и директории запуска.Возвращает полный путь или пустую строку,
    * если файл или директория не существуют.
    */
-  std::string find_config(const std::string& filename) const;
+  std::string find_config(const std::string& filename, std::list<std::string>* fail_probe = nullptr) const;
 
   /**
    * @brief находит файл или директорию по рабочим путям
@@ -77,7 +77,7 @@ struct wfcglobal
    * @return  Для относительных путей ищет сначала в рабочей директоии и директории запускf.
    * Возвращает полный путь или пустую строку, если файл или директория не существуют.
    */
-  std::string find_working(const std::string& filename) const;
+  std::string find_working(const std::string& filename, std::list<std::string>* fail_probe = nullptr) const;
 
   std::string make_directory(const std::string& pathname, std::string* err ) const;
 

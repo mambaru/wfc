@@ -48,9 +48,9 @@ bool component::parse(const std::string& strjson, json::json_error* err)
   return _impl->parse(strjson, err);
 }
 
-bool component::configure(const std::string& strjson, json::json_error* err)
+bool component::configure(const std::string& strjson, json::json_error* err, std::vector<std::string>* names)
 {
-  return _impl->configure(strjson, err);
+  return _impl->configure(strjson, err, names);
 }
 
 void component::create( std::shared_ptr<wfcglobal> g)

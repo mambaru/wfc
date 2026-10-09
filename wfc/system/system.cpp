@@ -111,15 +111,11 @@ namespace
 
   static void kill_child_and_maybe_exit(int sig)
   {
-    pid_t pid = child_pid.load();
-    if (pid > 0)
+    kill(child_pid, sig);
+    if ( sig!=SIGHUP )
     {
-      kill(pid, sig);
-      if ( sig!=SIGHUP )
-      {
-        autoup_flag.store(false);
-        ::waitpid(pid, nullptr, 0);
-      }
+      autoup_flag = false;
+      ::waitpid(child_pid, nullptr, 0);
     }
   }
 }
@@ -128,11 +124,11 @@ bool autoup(time_t timeout, bool success_autoup,
             std::function<bool(pid_t pid, int, int, time_t)> before,
             std::function<void(int, int, time_t)> after )
 {
-  bool expected = false;
-  if ( !autoup_flag.compare_exchange_strong(expected, true) )
+  if ( autoup_flag == true )
     return false;
 
-  child_pid.store(0);
+  autoup_flag = true;
+  child_pid = 0;
 
   int status = 0;
   time_t worktime = 0;
@@ -166,17 +162,17 @@ bool autoup(time_t timeout, bool success_autoup,
 
     status = 0;
 
-    if ( child_pid.load() == 0)
+    if ( child_pid == 0)
     {
       signal(SIGHUP,  kill_child_and_maybe_exit);
       signal(SIGINT,  kill_child_and_maybe_exit);
       signal(SIGTERM, kill_child_and_maybe_exit);
     }
-    child_pid.store(pid);
+    child_pid = pid;
 
     ::waitpid(pid, &status, 0);
 
-    if ( autoup_flag.load() == false )
+    if ( autoup_flag == false )
       break;
 
     worktime = std::time(nullptr) - t;

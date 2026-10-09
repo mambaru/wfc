@@ -170,9 +170,9 @@ public:
     this->create_(fas::bool_<is_singleton>());
   }
 
-  virtual bool configure(const std::string& stropt, json::json_error* err) override
+  virtual bool configure(const std::string& stropt, json::json_error* err, std::vector<std::string>* names) override
   {
-    return this->configure_(stropt, fas::bool_<is_singleton>(), err );
+    return this->configure_(stropt, fas::bool_<is_singleton>(), err, names );
   }
 
   // only for external control
@@ -236,7 +236,7 @@ private:
     domain_config opt;
     json::json_error err;
 
-    if ( !this->configure_("{}", fas::true_(), &err) )
+    if ( !this->configure_("{}", fas::true_(), &err, nullptr) )
     {
       SYSTEM_LOG_FATAL("Singleton '" << this->name() << "' default initialize: " << json::strerror::message(err) )
     }
@@ -244,12 +244,15 @@ private:
 
   static void create_(fas::false_) { }
 
-  bool configure_(const std::string& stropt, fas::true_, json::json_error* err)
+  bool configure_(const std::string& stropt, fas::true_, json::json_error* err, std::vector<std::string>* names)
   {
     component_config opt;
     if ( !this->unserialize_(opt, stropt, err ) )
       return false;
     opt.name = this->name();
+
+    if (names!=nullptr)
+      names->push_back(opt.name);
 
     config_pair op;
     op.basic = this->serialize_basic_(opt);
@@ -289,7 +292,7 @@ private:
     SYSTEM_LOG_WARNING("Instance '" << opt.name << "' not reconfigured (is forbidden by the developer)")
   }
 
-  bool configure_(const std::string& stropt, fas::false_, json::json_error* err)
+  bool configure_(const std::string& stropt, fas::false_, json::json_error* err, std::vector<std::string>* names)
   {
     std::set<std::string> stop_list;
     for (const auto& item : _instances )
@@ -301,6 +304,9 @@ private:
 
     for (const auto& opt : optlist )
     {
+      if (names!=nullptr)
+        names->push_back(opt.name);
+
       stop_list.erase(opt.name);
       config_pair op;
       op.basic = this->serialize_basic_(opt);
