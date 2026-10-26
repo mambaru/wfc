@@ -157,7 +157,7 @@ public:
   typedef std::shared_ptr<statistics_type> statistics_ptr;
 
   /** @brief Деструктор */
-  virtual ~domain_object() noexcept
+  virtual ~domain_object()
   {
     _global = nullptr;
   }

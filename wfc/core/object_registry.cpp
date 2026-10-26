@@ -95,11 +95,12 @@ int object_registry::reset_dirty()
 
 std::shared_ptr<iinterface> object_registry::get_(const std::string& prefix, const std::string& name, bool disabort) const
 {
+  std::shared_ptr<iinterface> result = nullptr;
+
   if ( name.empty() )
-    return nullptr;
+    return result;
 
   bool not_found = false;
-  std::shared_ptr<iinterface> result = nullptr;
   registry_map::const_iterator itr;
   {
     std::lock_guard<mutex_type> lk(_mutex);
@@ -118,14 +119,11 @@ std::shared_ptr<iinterface> object_registry::get_(const std::string& prefix, con
   if ( not_found )
   {
     DOMAIN_LOG_FATAL("object_registry::get: object '" << preff << name << "' not found" )
-    return nullptr;
   }
-   
-  if ( !disabort && result == nullptr)
+  else if ( !disabort && result == nullptr)
   {
     DOMAIN_LOG_FATAL("object_registry::get: invalid interface for " << preff << name <<
                      " (cannot convert from " << typeid(itr->second.get()).name() << " to " << typeid(result.get()).name() << ")" )
-    return nullptr;
   }
   return result;
 }

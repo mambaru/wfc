@@ -16,7 +16,7 @@ struct global;
 
 struct iinstance: iinterface
 {
-  virtual ~iinstance() noexcept = default;
+  virtual ~iinstance(){}
   
   virtual std::string name() const = 0;
   virtual int startup_priority() const = 0;

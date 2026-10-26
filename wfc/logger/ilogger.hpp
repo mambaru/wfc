@@ -16,7 +16,7 @@ namespace wfc{
   
 struct ilogger: iinterface
 {
-  virtual ~ilogger() noexcept = default;
+  virtual ~ilogger(){}
   typedef wlog::formatter_fun formatter_fun;
   typedef wlog::writer_fun writer_fun;
   typedef wlog::basic_logger_options options_type;

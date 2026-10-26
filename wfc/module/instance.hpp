@@ -33,7 +33,7 @@ public:
   typedef std::shared_ptr<object_type> object_ptr;
   typedef std::shared_ptr<wfcglobal> global_ptr;
 
-  virtual ~instance() noexcept
+  virtual ~instance() 
   {
     _object = nullptr;
     _global = nullptr;

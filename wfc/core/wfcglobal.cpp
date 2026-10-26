@@ -31,17 +31,20 @@ void wfcglobal::clear()
   common_workflow = nullptr;
 }
 
-wfcglobal::~wfcglobal() noexcept
+wfcglobal::~wfcglobal()
 {
   this->clear();
 }
 
-std::string wfcglobal::find_config(const std::string& filename) const
+std::string wfcglobal::find_config(const std::string& filename, std::list<std::string>* fail_probe) const
 {
   using namespace boost::filesystem;
   auto curpath = system_complete(filename).lexically_normal();
   if ( exists(curpath) )
     return curpath.native();
+
+  if ( fail_probe!=nullptr )
+    fail_probe->push_back(curpath.lexically_normal().native());
 
   if ( !this->config_path.empty() )
   {
@@ -49,12 +52,15 @@ std::string wfcglobal::find_config(const std::string& filename) const
     curpath /= filename;
     if ( exists(curpath) )
       return curpath.lexically_normal().native();
+
+    if ( fail_probe!=nullptr )
+      fail_probe->push_back(curpath.lexically_normal().native());
   }
 
-  return this->find_working(filename);
+  return this->find_working(filename, fail_probe);
 }
 
-std::string wfcglobal::find_working(const std::string& filename) const
+std::string wfcglobal::find_working(const std::string& filename, std::list<std::string>* fail_probe) const
 {
   using namespace boost::filesystem;
   auto curpath = system_complete(filename).lexically_normal();
@@ -62,20 +68,29 @@ std::string wfcglobal::find_working(const std::string& filename) const
   if ( exists(curpath) )
     return curpath.native();
 
+  if ( fail_probe!=nullptr && fail_probe->empty() )
+    fail_probe->push_back(curpath.lexically_normal().native());
+
   if ( !this->working_directory.empty() )
   {
     curpath = this->working_directory;
     curpath /= filename;
     if ( exists(curpath) )
       return curpath.lexically_normal().native();
+
+    if ( fail_probe!=nullptr )
+      fail_probe->push_back(curpath.lexically_normal().native());
   }
 
-  if ( !this->program_path.empty() )
+  if ( !this->program_path.empty())
   {
     curpath = this->program_path;
     curpath /= filename;
     if ( exists(curpath) )
       return curpath.lexically_normal().native();
+
+    if ( fail_probe!=nullptr )
+      fail_probe->push_back(curpath.lexically_normal().native());
   }
 
   return std::string();
